@@ -1,0 +1,231 @@
+@using AutoGestao.Enumerador
+@using AutoGestao.Enumerador.Veiculo
+@using AutoGestao.Models
+@model VeiculosIndexViewModel
+
+<!-- Visualização em Tabela -->
+<div id="tableView" class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+    <table class="table table-hover mb-0" id="veiculosTable">
+        <thead class="table-dark sticky-top">
+            <tr>
+                <th style="width: 60px;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-image me-2"></i>
+                    </div>
+                </th>
+                <th style="width: 100px; cursor: pointer;" onclick="sortColumn('Codigo')">
+                    <div class="d-flex align-items-center">
+                        Código
+                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Codigo" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
+                    </div>
+                </th>
+                <th style="cursor: pointer;" onclick="sortColumn('Marca')">
+                    <div class="d-flex align-items-center">
+                        Veículo
+                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Marca" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
+                    </div>
+                </th>
+                <th style="width: 120px; cursor: pointer;" onclick="sortColumn('Ano')">
+                    <div class="d-flex align-items-center">
+                        Ano
+                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Ano" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
+                    </div>
+                </th>
+                <th style="width: 120px;">Placa</th>
+                <th style="width: 130px; cursor: pointer;" onclick="sortColumn('Situacao')">
+                    <div class="d-flex align-items-center">
+                        Situação
+                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Situacao" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
+                    </div>
+                </th>
+                <th style="width: 150px; cursor: pointer;" onclick="sortColumn('Preco')">
+                    <div class="d-flex align-items-center">
+                        Preço
+                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Preco" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
+                    </div>
+                </th>
+                <th style="width: 120px;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Veiculos != null && Model.Veiculos.Any())
+            {
+                @foreach (var item in Model.Veiculos)
+                {
+                    <tr class="veiculo-row">
+                        <td>
+                            <div class="vehicle-thumb">
+                                <i class="fas fa-car fa-2x text-muted"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="fw-bold">@item.Codigo</span>
+                        </td>
+                        <td>
+                            <div>
+                                <div class="fw-semibold">@item.Marca @item.Modelo</div>
+                                <small class="text-muted">@item.Cor • @item.Combustivel</small>
+                            </div>
+                        </td>
+                        <td>@item.AnoFabricacao/@item.AnoModelo</td>
+                        <td>
+                            <span class="badge bg-light text-dark">@item.Placa</span>
+                        </td>
+                        <td>
+                            @switch (item.Situacao)
+                            {
+                                case EnumSituacaoVeiculo.Estoque:
+                                    <span class="badge-modern badge-success">📦 Estoque</span>
+                                    break;
+                                case EnumSituacaoVeiculo.Vendido:
+                                    <span class="badge-modern badge-primary">✅ Vendido</span>
+                                    break;
+                                case EnumSituacaoVeiculo.Reservado:
+                                    <span class="badge-modern badge-warning">🔒 Reservado</span>
+                                    break;
+                                case EnumSituacaoVeiculo.Manutencao:
+                                    <span class="badge-modern badge-danger">🔧 Manutenção</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success">@(item.PrecoVenda?.ToString("C") ?? "N/A")</div>
+                            @if (item.PrecoCompra.HasValue)
+                            {
+                                <small class="text-muted">Compra: @item.PrecoCompra.Value.ToString("C")</small>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger" onclick="confirmarExclusao(@item.Id)" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <div class="text-muted">
+                            <i class="fas fa-car fa-3x mb-3"></i>
+                            <p class="mb-3">Nenhum veículo encontrado com os filtros aplicados.</p>
+                            <button class="btn-modern btn-outline-modern" onclick="limparFiltros()">
+                                <i class="fas fa-times"></i>
+                                Limpar Filtros
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Visualização em Grid (Cards) -->
+<div id="gridView" class="d-none p-3" style="max-height: 600px; overflow-y: auto;">
+    <div class="grid-3">
+        @if (Model.Veiculos != null && Model.Veiculos.Any())
+        {
+            @foreach (var item in Model.Veiculos)
+            {
+                <div class="vehicle-card">
+                    <div class="card-modern">
+                        <div class="vehicle-card-header">
+                            <div class="vehicle-image">
+                                <i class="fas fa-car fa-3x text-muted"></i>
+                            </div>
+                            <div class="vehicle-status">
+                                @switch (item.Situacao)
+                                {
+                                    case EnumSituacaoVeiculo.Estoque:
+                                        <span class="badge-modern badge-success">📦 Estoque</span>
+                                        break;
+                                    case EnumSituacaoVeiculo.Vendido:
+                                        <span class="badge-modern badge-primary">✅ Vendido</span>
+                                        break;
+                                    case EnumSituacaoVeiculo.Reservado:
+                                        <span class="badge-modern badge-warning">🔒 Reservado</span>
+                                        break;
+                                    case EnumSituacaoVeiculo.Manutencao:
+                                        <span class="badge-modern badge-danger">🔧 Manutenção</span>
+                                        break;
+                                }
+                            </div>
+                        </div>
+                        <div class="card-body-modern">
+                            <h5 class="mb-2">@item.Marca @item.Modelo</h5>
+                            <div class="vehicle-details mb-3">
+                                <div class="detail-item">
+                                    <i class="fas fa-barcode me-1"></i>
+                                    @item.Codigo
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    @item.AnoFabricacao/@item.AnoModelo
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-id-card me-1"></i>
+                                    @item.Placa
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-palette me-1"></i>
+                                    @item.Cor
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-gas-pump me-1"></i>
+                                    @item.Combustivel
+                                </div>
+                                @if (item.Quilometragem.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <i class="fas fa-road me-1"></i>
+                                        @item.Quilometragem.Value.ToString("N0") km
+                                    </div>
+                                }
+                            </div>
+                            <div class="vehicle-price mb-3">
+                                <div class="price-main">@(item.PrecoVenda?.ToString("C") ?? "Consulte")</div>
+                                @if (item.PrecoCompra.HasValue)
+                                {
+                                    <div class="price-sub">Compra: @item.PrecoCompra.Value.ToString("C")</div>
+                                }
+                            </div>
+                            <div class="vehicle-actions">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-modern btn-outline-modern btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                    Detalhes
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-modern btn-primary-modern btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                    Editar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <div class="text-muted">
+                    <i class="fas fa-car fa-3x mb-3"></i>
+                    <p class="mb-3">Nenhum veículo encontrado com os filtros aplicados.</p>
+                    <button class="btn-modern btn-outline-modern" onclick="limparFiltros()">
+                        <i class="fas fa-times"></i>
+                        Limpar Filtros
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>

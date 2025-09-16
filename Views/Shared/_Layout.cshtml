@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AUTO-GESTÃO</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="layout-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Recolher Menu">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <a href="@Url.Action("Index", "Home")" class="brand-logo">
+                    <i class="fas fa-car"></i>
+                    <div class="brand-text-content">
+                        <span>Auto Gestão</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">Principal</div>
+                    <div class="menu-item">
+                        <a href="@Url.Action("Index", "Home")" class="menu-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span class="menu-link-text">Dashboard</span>
+                            <div class="menu-tooltip">Dashboard</div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <div class="menu-section-title">Cadastros</div>
+                    <div class="menu-item">
+                        <a href="@Url.Action("Index", "Veiculos")" class="menu-link">
+                            <i class="fas fa-car"></i>
+                            <span class="menu-link-text">Veículos</span>
+                            <div class="menu-tooltip">Veículos</div>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="@Url.Action("Index", "Clientes")" class="menu-link">
+                            <i class="fas fa-users"></i>
+                            <span class="menu-link-text">Clientes</span>
+                            <div class="menu-tooltip">Clientes</div>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="@Url.Action("Index", "Vendedores")" class="menu-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span class="menu-link-text">Vendedores</span>
+                            <div class="menu-tooltip">Vendedores</div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <div class="menu-section-title">Operações</div>
+                    <div class="menu-item">
+                        <a href="@Url.Action("Index", "Vendas")" class="menu-link">
+                            <i class="fas fa-handshake"></i>
+                            <span class="menu-link-text">Vendas</span>
+                            <div class="menu-tooltip">Vendas</div>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span class="menu-link-text">Avaliações</span>
+                            <div class="menu-tooltip">Avaliações</div>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fas fa-coins"></i>
+                            <span class="menu-link-text">Financeiro</span>
+                            <div class="menu-tooltip">Financeiro</div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <div class="menu-section-title">Relatórios</div>
+                    <div class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span class="menu-link-text">Vendas</span>
+                            <div class="menu-tooltip">Relatórios de Vendas</div>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span class="menu-link-text">Estoque</span>
+                            <div class="menu-tooltip">Relatórios de Estoque</div>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Overlay para mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Área Principal -->
+        <div class="main-area">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <nav class="breadcrumb breadcrumb-custom">
+                        <span class="breadcrumb-item">Sistema</span>
+                        <span class="breadcrumb-item active">@ViewData["Title"]</span>
+                    </nav>
+                </div>
+                <div class="topbar-right">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="text-muted">Bem-vindo, Admin</span>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configurações</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Conteúdo Principal -->
+            <main class="main-content fade-in">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            // Variável para controlar se estamos processando um clique
+            let isProcessingClick = false;
+
+            // Recuperar estado salvo do localStorage
+            const savedCollapsedState = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (savedCollapsedState) {
+                sidebar.classList.add('collapsed');
+                updateCollapseIcon(true);
+            }
+
+            // CORREÇÃO: Botão de colapsar/expandir com debounce
+            sidebarCollapseBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                // Prevenir cliques múltiplos
+                if (isProcessingClick) return;
+                isProcessingClick = true;
+
+                const isCollapsed = sidebar.classList.contains('collapsed');
+
+                if (isCollapsed) {
+                    sidebar.classList.remove('collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                    updateCollapseIcon(false);
+                } else {
+                    sidebar.classList.add('collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                    updateCollapseIcon(true);
+                }
+
+                // Liberar após a transição
+                setTimeout(() => {
+                    isProcessingClick = false;
+                }, 400);
+            });
+
+            // CORREÇÃO: Toggle sidebar para mobile
+            sidebarToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.toggle('open');
+                    sidebarOverlay.classList.toggle('show');
+                }
+            });
+
+            // Fechar sidebar ao clicar no overlay (mobile)
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('show');
+            });
+
+            // CORREÇÃO PRINCIPAL: Prevenir propagação de eventos nos links do menu
+            document.querySelectorAll('.menu-link').forEach(link => {
+                // Remover qualquer listener anterior
+                link.removeEventListener('click', handleMenuClick);
+
+                // Adicionar novo listener controlado
+                link.addEventListener('click', handleMenuClick, true);
+            });
+
+            function handleMenuClick(e) {
+                // Se estivermos processando um clique do botão collapse, ignore
+                if (isProcessingClick) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+
+                // Para navegação normal, apenas pare a propagação (não previna a navegação)
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                // Permitir navegação normal
+                return true;
+            }
+
+            // CORREÇÃO: Prevenir propagação em toda a área do sidebar no modo colapsado
+            sidebar.addEventListener('click', function(e) {
+                if (sidebar.classList.contains('collapsed')) {
+                    // Se o clique foi no botão de collapse, deixar passar
+                    if (e.target === sidebarCollapseBtn || sidebarCollapseBtn.contains(e.target)) {
+                        return;
+                    }
+
+                    // Se o clique foi em um link de menu, permitir navegação mas parar propagação
+                    const menuLink = e.target.closest('.menu-link');
+                    if (menuLink) {
+                        e.stopPropagation();
+                        return;
+                    }
+
+                    // Para outros cliques, parar propagação
+                    e.stopPropagation();
+                }
+            });
+
+            // Função para atualizar o ícone do botão de colapsar
+            function updateCollapseIcon(isCollapsed) {
+                const icon = sidebarCollapseBtn.querySelector('i');
+                if (isCollapsed) {
+                    icon.className = 'fas fa-chevron-right';
+                    sidebarCollapseBtn.title = 'Expandir Menu';
+                } else {
+                    icon.className = 'fas fa-chevron-left';
+                    sidebarCollapseBtn.title = 'Recolher Menu';
+                }
+            }
+
+            // Marcar item ativo no menu
+            const currentPath = window.location.pathname;
+            const menuLinks = document.querySelectorAll('.menu-link');
+
+            menuLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Redimensionamento da janela
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 1024) {
+                    sidebar.classList.remove('open');
+                    sidebarOverlay.classList.remove('show');
+                } else {
+                    if (sidebar.classList.contains('open')) {
+                        sidebar.classList.remove('collapsed');
+                    }
+                }
+            });
+
+            // CORREÇÃO: Detectar tecla de atalho com debounce
+            let keyProcessing = false;
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                    e.preventDefault();
+
+                    if (keyProcessing) return;
+                    keyProcessing = true;
+
+                    if (window.innerWidth > 1024) {
+                        sidebarCollapseBtn.click();
+                    }
+
+                    setTimeout(() => {
+                        keyProcessing = false;
+                    }, 400);
+                }
+            });
+
+            // Debug: Mostrar largura disponível no console
+            function logAvailableWidth() {
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                const sidebarWidth = isCollapsed ? 80 : 280;
+                const availableWidth = window.innerWidth - sidebarWidth;
+                console.log(`🖥️ Largura total: ${window.innerWidth}px | Sidebar: ${sidebarWidth}px | Disponível: ${availableWidth}px`);
+            }
+
+            logAvailableWidth();
+            let resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(logAvailableWidth, 300);
+            });
+
+            // ADICIONAL: Desabilitar transições durante redimensionamento
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                document.body.classList.add('resize-in-progress');
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    document.body.classList.remove('resize-in-progress');
+                }, 400);
+            });
+        });
+
+        // Sistema de Notificações Toast (mantido igual)
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = getToastContainer();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-modern';
+
+            const iconMap = {
+                success: 'fas fa-check',
+                error: 'fas fa-times',
+                warning: 'fas fa-exclamation',
+                info: 'fas fa-info'
+            };
+
+            const titleMap = {
+                success: 'Sucesso',
+                error: 'Erro',
+                warning: 'Atenção',
+                info: 'Informação'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-header-modern">
+                    <div class="toast-icon ${type}">
+                        <i class="${iconMap[type]}"></i>
+                    </div>
+                    <div class="toast-title">${titleMap[type]}</div>
+                    <button class="toast-close" onclick="hideToast(this.closest('.toast-modern'))">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="toast-body-modern">${message}</div>
+                <div class="toast-progress">
+                    <div class="toast-progress-bar"></div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => hideToast(toast), duration);
+        }
+
+        function getToastContainer() {
+            let container = document.querySelector('.toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'toast-container';
+                document.body.appendChild(container);
+            }
+            return container;
+        }
+
+        function hideToast(toast) {
+            toast.classList.add('hide');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 400);
+        }
+
+        // Sistema de Modo Escuro (mantido igual)
+        function initThemeToggle() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            if (!document.querySelector('.theme-toggle')) {
+                const themeButton = document.createElement('button');
+                themeButton.className = 'theme-toggle';
+                themeButton.innerHTML = '<i class="fas fa-moon"></i>';
+                themeButton.title = 'Alternar modo escuro';
+                themeButton.onclick = toggleTheme;
+
+                const topbarRight = document.querySelector('.topbar-right');
+                if (topbarRight) {
+                    topbarRight.insertBefore(themeButton, topbarRight.firstChild);
+                }
+            }
+
+            updateThemeIcon();
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
+
+            showToast(`Modo ${newTheme === 'dark' ? 'escuro' : 'claro'} ativado!`, 'info', 2000);
+        }
+
+        function updateThemeIcon() {
+            const themeButton = document.querySelector('.theme-toggle i');
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+
+            if (themeButton) {
+                themeButton.className = currentTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            initThemeToggle();
+
+            setTimeout(() => {
+                if (window.innerWidth > 1024 && !localStorage.getItem('sidebarTipShown')) {
+                    localStorage.setItem('sidebarTipShown', 'true');
+                }
+            }, 2000);
+        });
+
+        // Animações de entrada em elementos
+        function observeElements() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('slide-in-up');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.card-modern').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', observeElements);
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,512 @@
+@using AutoGestao.Models
+@model ClientesIndexViewModel
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<div class="dashboard-container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">
+                <i class="fas fa-users"></i>
+                Clientes
+            </h1>
+            <p class="page-subtitle mb-0">Gerencie a base de clientes</p>
+        </div>
+        <div class="d-flex gap-3">
+            <button class="btn-modern btn-outline-modern" onclick="exportarExcel()">
+                <i class="fas fa-file-excel"></i>
+                Exportar
+            </button>
+            <button class="btn-modern btn-outline-modern" onclick="importarContatos()">
+                <i class="fas fa-upload"></i>
+                Importar
+            </button>
+            <a asp-action="Create" class="btn-modern btn-primary-modern">
+                <i class="fas fa-user-plus"></i>
+                Novo Cliente
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card-modern mb-4">
+        <div class="card-header-modern">
+            <i class="fas fa-search"></i>
+            Filtros de Busca
+        </div>
+        <div class="card-body-modern">
+            <form id="filtrosForm">
+                <div class="grid-3 mb-3">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Nome ou Documento</label>
+                        <input type="text" name="search" id="searchClientes" class="form-control-modern" 
+                               placeholder="Digite o nome, CPF ou CNPJ..." 
+                               value="@Model.Search" />
+                    </div>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Tipo</label>
+                        <select name="tipoCliente" id="filterTipo" class="form-select-modern">
+                            <option value="">Todos</option>
+                            <option value="PessoaFisica" selected="@(Model.TipoCliente == "PessoaFisica")">👤 Pessoa Física</option>
+                            <option value="PessoaJuridica" selected="@(Model.TipoCliente == "PessoaJuridica")">🏢 Pessoa Jurídica</option>
+                        </select>
+                    </div>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">Status</label>
+                        <select name="status" id="filterStatus" class="form-select-modern">
+                            <option value="">Todos</option>
+                            <option value="Ativo" selected="@(Model.Status == "Ativo")">✅ Ativo</option>
+                            <option value="Inativo" selected="@(Model.Status == "Inativo")">❌ Inativo</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Controles da Grid -->
+    <div class="card-modern">
+        <div class="card-header-modern">
+            <i class="fas fa-list"></i>
+            Lista de Clientes
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <!-- Informações de registros -->
+                <span class="text-muted">
+                    Mostrando @Model.StartRecord-@Model.EndRecord de @Model.TotalRecords registros
+                </span>
+                
+                <!-- Seletor de quantidade por página -->
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted">Exibir:</span>
+                    <select id="pageSizeSelector" class="form-select form-select-sm" style="width: auto;">
+                        @foreach (var size in Model.PageSizeOptions)
+                        {
+                            <option value="@size" selected="@(Model.PageSize == size)">
+                                @Model.GetPageSizeText(size)
+                            </option>
+                        }
+                    </select>
+                </div>
+                
+                <!-- Badge com total -->
+                <span class="badge bg-primary">@Model.TotalRecords clientes</span>
+            </div>
+        </div>
+        
+        <!-- Container da Grid com Loading -->
+        <div class="card-body-modern p-0 position-relative">
+            <div id="loadingOverlay" class="position-absolute w-100 h-100 d-none" 
+                 style="background: rgba(255,255,255,0.8); z-index: 10;">
+                <div class="d-flex justify-content-center align-items-center h-100">
+                    <div class="loading-spinner me-2"></div>
+                    Carregando...
+                </div>
+            </div>
+            
+            <div id="gridContainer">
+                @await Html.PartialAsync("_ClientesGrid", Model)
+            </div>
+        </div>
+        
+        <!-- Paginação -->
+        @if (Model.TotalPages > 1 && Model.PageSize != -1)
+        {
+            <div class="card-footer bg-light">
+                <nav aria-label="Navegação de páginas">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                            <button class="page-link" onclick="changePage(1)" disabled="@(!Model.HasPreviousPage)">
+                                <i class="fas fa-angle-double-left"></i>
+                            </button>
+                        </li>
+                        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                            <button class="page-link" onclick="changePage(@(Model.CurrentPage - 1))" disabled="@(!Model.HasPreviousPage)">
+                                <i class="fas fa-angle-left"></i>
+                            </button>
+                        </li>
+                        
+                        @{
+                            var startPage = Math.Max(1, Model.CurrentPage - 2);
+                            var endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                        }
+                        
+                        @for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <button class="page-link" onclick="changePage(@i)">@i</button>
+                            </li>
+                        }
+                        
+                        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                            <button class="page-link" onclick="changePage(@(Model.CurrentPage + 1))" disabled="@(!Model.HasNextPage)">
+                                <i class="fas fa-angle-right"></i>
+                            </button>
+                        </li>
+                        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                            <button class="page-link" onclick="changePage(@Model.TotalPages)" disabled="@(!Model.HasNextPage)">
+                                <i class="fas fa-angle-double-right"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let isLoading = false;
+        
+        // Configurar eventos dos filtros
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filtros com debounce para busca
+            let searchTimeout;
+            document.getElementById('searchClientes').addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(aplicarFiltros, 500);
+            });
+            
+            // Outros filtros aplicam imediatamente
+            ['filterTipo', 'filterStatus']
+                .forEach(id => {
+                    document.getElementById(id).addEventListener('change', aplicarFiltros);
+                });
+            
+            // Seletor de tamanho de página
+            document.getElementById('pageSizeSelector').addEventListener('change', function() {
+                aplicarFiltros(1); // Volta para primeira página
+            });
+        });
+
+                function aplicarFiltros(page = 1) {
+            // Prevenir múltiplas requisições
+            if (isLoadingVisible) {
+                console.log('Já carregando, ignorando nova requisição');
+                return;
+            }
+
+            showLoading(true);
+
+            const formData = new FormData(document.getElementById('filtrosForm'));
+            const pageSize = document.getElementById('pageSizeSelector')?.value || 50;
+
+            const params = new URLSearchParams();
+            params.append('page', page);
+            params.append('pageSize', pageSize);
+
+            // Adicionar filtros
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    params.append(key, value);
+                }
+            }
+
+            // Determinar URL baseado na página atual
+            const currentPath = window.location.pathname;
+            let ajaxUrl;
+
+            if (currentPath.includes('Veiculos')) {
+                ajaxUrl = '/Veiculos/GetVeiculosAjax';
+            } else if (currentPath.includes('Clientes')) {
+                ajaxUrl = '/Clientes/GetClientesAjax';
+            } else {
+                console.error('URL Ajax não identificada para:', currentPath);
+                forceHideLoading();
+                return;
+            }
+
+            console.log(`Fazendo requisição para: ${ajaxUrl}?${params.toString()}`);
+
+            fetch(`${ajaxUrl}?${params.toString()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    const gridContainer = document.getElementById('gridContainer');
+                    if (gridContainer) {
+                        gridContainer.innerHTML = html;
+                        updateUrl(params);
+                        console.log('Grid atualizada com sucesso');
+                    } else {
+                        console.error('Grid container não encontrado');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar dados:', error);
+                    showToast('Erro ao carregar dados: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    // Sempre esconder loading
+                    setTimeout(() => {
+                        showLoading(false);
+                    }, 300); // Pequeno delay para UX melhor
+                });
+        }
+
+        // Função para mudar página
+        function changePage(page) {
+            aplicarFiltros(page);
+        }
+
+        // Função para atualizar URL sem recarregar
+        function updateUrl(params) {
+            try {
+                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                window.history.replaceState({}, '', newUrl);
+            } catch (error) {
+                console.error('Erro ao atualizar URL:', error);
+            }
+        }
+
+        // Função para limpar filtros
+        function limparFiltros() {
+            const form = document.getElementById('filtrosForm');
+            if (form) {
+                form.reset();
+            }
+
+            const pageSize = document.getElementById('pageSizeSelector');
+            if (pageSize) {
+                pageSize.value = '50';
+            }
+
+            aplicarFiltros(1);
+        }
+
+        // Inicialização melhorada
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esconder loading inicial
+            forceHideLoading();
+
+            // Configurar eventos dos filtros com debounce melhorado
+            let searchTimeout;
+            const searchInput = document.getElementById('searchInput') ||
+                               document.getElementById('searchClientes') ||
+                               document.querySelector('input[name="search"]');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        aplicarFiltros(1);
+                    }, 600); // Aumentado para 600ms
+                });
+            }
+
+            // Outros filtros aplicam imediatamente
+            ['filterSituacao', 'filterTipo', 'filterStatus', 'filterMarca', 'filterAno', 'filterCombustivel']
+                .forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('change', () => aplicarFiltros(1));
+                    }
+                });
+
+            // Seletor de tamanho de página
+            const pageSizeSelector = document.getElementById('pageSizeSelector');
+            if (pageSizeSelector) {
+                pageSizeSelector.addEventListener('change', function() {
+                    aplicarFiltros(1);
+                });
+            }
+
+            // Esconder loading ao carregar página
+            setTimeout(forceHideLoading, 500);
+        });
+
+        // Event listener para detectar quando a página termina de carregar
+        window.addEventListener('load', function() {
+            setTimeout(forceHideLoading, 1000);
+        });
+
+        // Prevenir loading infinito em caso de erro de JavaScript
+        window.addEventListener('error', function(event) {
+            console.error('Erro JavaScript detectado:', event.error);
+            forceHideLoading();
+        });
+
+        // Detectar mudanças de visibilidade da página
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && isLoadingVisible) {
+                // Se a página ficou visível e o loading ainda está aparecendo
+                setTimeout(() => {
+                    if (isLoadingVisible) {
+                        console.warn('Loading ainda visível após mudança de visibilidade, forçando esconder');
+                        forceHideLoading();
+                    }
+                }, 2000);
+            }
+        });
+
+        // Função de debug para verificar estado do loading
+        function debugLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            console.log('Loading Debug:', {
+                exists: !!overlay,
+                visible: isLoadingVisible,
+                hasClass: overlay?.classList.contains('d-none'),
+                display: overlay?.style.display,
+                opacity: overlay?.style.opacity,
+                visibility: overlay?.style.visibility
+            });
+        }
+
+        // Adicionar função global para esconder loading (emergência)
+        window.hideLoadingForce = forceHideLoading;
+        window.debugLoading = debugLoading;
+
+        // Log para debug
+        console.log('Loading fix carregado. Use hideLoadingForce() se necessário.');
+
+        // ===================================================================
+        // MELHORIAS ESPECÍFICAS PARA RESPONSIVIDADE DOS FILTROS
+        // ===================================================================
+
+        // Redimensionar campos baseado no espaço disponível
+        function optimizeFieldSizes() {
+            const sidebarCollapsed = document.getElementById('sidebar')?.classList.contains('collapsed');
+            const windowWidth = window.innerWidth;
+            const availableWidth = windowWidth - (sidebarCollapsed ? 80 : 280);
+
+            const filterCards = document.querySelectorAll('.card-modern .card-body-modern .grid-3');
+
+            filterCards.forEach(grid => {
+                const fieldCount = grid.children.length;
+                let minWidth;
+
+                if (availableWidth > 1400) {
+                    minWidth = fieldCount > 4 ? '140px' : '160px';
+                } else if (availableWidth > 1024) {
+                    minWidth = fieldCount > 3 ? '150px' : '180px';
+                } else {
+                    minWidth = '200px';
+                }
+
+                grid.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minWidth}, 1fr))`;
+            });
+        }
+
+        // Executar otimização
+        window.addEventListener('resize', debounce(optimizeFieldSizes, 300));
+        document.addEventListener('DOMContentLoaded', optimizeFieldSizes);
+
+        // Função debounce helper
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        function changePage(page) {
+            aplicarFiltros(page);
+        }
+
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+
+            if (!overlay) {
+                console.warn('Loading overlay não encontrado');
+                return;
+            }
+
+            // Limpar timeout anterior
+            if (loadingTimeout) {
+                clearTimeout(loadingTimeout);
+                loadingTimeout = null;
+            }
+
+            if (show) {
+                isLoadingVisible = true;
+                overlay.classList.remove('d-none');
+                overlay.style.display = 'flex';
+                overlay.style.opacity = '1';
+                overlay.style.visibility = 'visible';
+
+                // Timeout de segurança - forçar esconder após 10 segundos
+                loadingTimeout = setTimeout(() => {
+                    console.warn('Loading forçado a esconder após timeout');
+                    showLoading(false);
+                }, 10000);
+
+            } else {
+                isLoadingVisible = false;
+                overlay.style.opacity = '0';
+
+                // Aguardar transição antes de esconder completamente
+                setTimeout(() => {
+                    overlay.classList.add('d-none');
+                    overlay.style.display = 'none';
+                    overlay.style.visibility = 'hidden';
+                }, 300);
+            }
+        }
+
+        
+        function updateUrl(params) {
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState({}, '', newUrl);
+        }
+        
+        function limparFiltros() {
+            document.getElementById('filtrosForm').reset();
+            document.getElementById('pageSizeSelector').value = '50';
+            aplicarFiltros(1);
+        }
+        
+        function novaVenda(clienteId) {
+            window.location.href = `/Vendas/Create?clienteId=${clienteId}`;
+        }
+        
+        function importarContatos() {
+            showToast('Funcionalidade em desenvolvimento!', 'info');
+        }
+        
+        function exportarExcel() {
+            showToast('Exportação iniciada!', 'success');
+            // Implementar exportação
+        }
+        
+        // Função para ordenar colunas
+        function sortColumn(column) {
+            const currentOrder = document.getElementById('orderBy').value;
+            const currentDirection = document.getElementById('orderDirection').value;
+            
+            // Se já está ordenando por esta coluna, inverte a direção
+            if (currentOrder === column) {
+                document.getElementById('orderDirection').value = currentDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                document.getElementById('orderBy').value = column;
+                document.getElementById('orderDirection').value = 'asc';
+            }
+            
+            aplicarFiltros();
+        }
+
+        function forceHideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                isLoadingVisible = false;
+                overlay.classList.add('d-none');
+                overlay.style.display = 'none';
+                overlay.style.opacity = '0';
+                overlay.style.visibility = 'hidden';
+
+                if (loadingTimeout) {
+                    clearTimeout(loadingTimeout);
+                    loadingTimeout = null;
+                }
+            }
+        }
+    </script>
+}

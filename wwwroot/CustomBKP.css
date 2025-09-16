@@ -1,0 +1,3246 @@
+/* ===================================================================
+   AUTO-GESTÃO - CSS COMPLETO
+   Versão: 2.1 - Layout Sidebar Colapsável
+   =================================================================== */
+
+:root {
+    --primary-color: #374151;
+    --primary-dark: #1f2937;
+    --primary-light: #6b7280;
+    --secondary-color: #9ca3af;
+    --accent-color: #f59e0b;
+    --accent-hover: #d97706;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --dark-color: #111827;
+    --light-color: #f9fafb;
+    --border-color: #e5e7eb;
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --topbar-height: 70px;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* ===================================================================
+   RESET E BASE
+   =================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f3f4f6;
+    color: var(--dark-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ===================================================================
+   LAYOUT PRINCIPAL
+   =================================================================== */
+
+.layout-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* ===================================================================
+   SIDEBAR COLAPSÁVEL
+   =================================================================== */
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: linear-gradient(180deg, var(--primary-dark) 0%, var(--dark-color) 100%);
+    box-shadow: var(--shadow-lg);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+    .sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+        min-width: var(--sidebar-collapsed-width);
+    }
+
+    /* Scrollbar customizada para o sidebar */
+    .sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+    }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+/* ===================================================================
+   SIDEBAR BRAND
+   =================================================================== */
+
+.sidebar-brand {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-brand {
+    padding: 1rem 0.5rem;
+}
+
+.brand-logo {
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .brand-logo {
+    justify-content: center;
+    gap: 0;
+}
+
+.brand-logo i {
+    color: var(--accent-color);
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.brand-text-content {
+    transition: all 0.3s ease;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .brand-text-content {
+    opacity: 0;
+    width: 0;
+}
+
+.brand-text {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+    transition: all 0.3s ease;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .brand-text {
+    opacity: 0;
+    height: 0;
+    margin: 0;
+}
+
+/* ===================================================================
+   BOTÃO DE COLAPSAR
+   =================================================================== */
+
+.sidebar-collapse-btn {
+    position: absolute;
+    top: 1.75rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    z-index: 10;
+}
+
+    .sidebar-collapse-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+    }
+
+.sidebar.collapsed .sidebar-collapse-btn {
+    right: 50%;
+    transform: translateX(50%);
+}
+
+    .sidebar.collapsed .sidebar-collapse-btn:hover {
+        transform: translateX(50%) scale(1.1);
+    }
+
+.sidebar-collapse-btn:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* Indicador de tecla de atalho */
+.sidebar-collapse-btn::after {
+    content: 'Ctrl+B';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.sidebar-collapse-btn:hover::after {
+    opacity: 1;
+}
+
+/* ===================================================================
+   MENU SIDEBAR
+   =================================================================== */
+
+.sidebar-menu {
+    padding: 1rem 0;
+}
+
+.menu-section {
+    margin-bottom: 2rem;
+}
+
+.menu-section-title {
+    color: var(--secondary-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 1.5rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .menu-section-title {
+    opacity: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.menu-item {
+    margin-bottom: 0.25rem;
+    position: relative;
+}
+
+.menu-link {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-right: 3px solid transparent;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .menu-link {
+    padding: 0.875rem 0;
+    justify-content: center;
+}
+
+.menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-right-color: var(--accent-color);
+    text-decoration: none;
+}
+
+.menu-link.active {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: white;
+    border-right-color: var(--accent-color);
+}
+
+.menu-link:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: -2px;
+}
+
+.menu-link i {
+    width: 20px;
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    text-align: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.sidebar.collapsed .menu-link i {
+    margin-right: 0;
+}
+
+.menu-link-text {
+    flex: 1;
+    transition: all 0.3s ease;
+    opacity: 1;
+    overflow: hidden;
+    animation: slideInFromLeft 0.3s ease both;
+}
+
+.sidebar.collapsed .menu-link-text {
+    opacity: 0;
+    width: 0;
+}
+
+.menu-badge {
+    background-color: var(--accent-color);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    margin-left: auto;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .menu-badge {
+    opacity: 0;
+    width: 0;
+}
+
+/* ===================================================================
+   TOOLTIPS PARA MODO COLAPSADO
+   =================================================================== */
+
+.menu-tooltip {
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--dark-color);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1001;
+    pointer-events: none;
+    font-weight: 500;
+}
+
+    .menu-tooltip::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -4px;
+        transform: translateY(-50%);
+        border: 4px solid transparent;
+        border-right-color: var(--dark-color);
+    }
+
+.sidebar.collapsed .menu-item:hover .menu-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Estados de hover melhorados para modo colapsado */
+.sidebar.collapsed .menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-right-color: transparent;
+}
+
+    .sidebar.collapsed .menu-link:hover i {
+        color: var(--accent-color);
+        transform: scale(1.1);
+    }
+
+/* ===================================================================
+   ÁREA PRINCIPAL
+   =================================================================== */
+
+.main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    width: calc(100vw - var(--sidebar-width));
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed + .main-area {
+    margin-left: var(--sidebar-collapsed-width);
+    width: calc(100vw - var(--sidebar-collapsed-width));
+}
+
+/* ===================================================================
+   TOPBAR
+   =================================================================== */
+
+.topbar {
+    background: white;
+    height: var(--topbar-height);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+    .sidebar-toggle:hover {
+        background-color: var(--light-color);
+    }
+
+.breadcrumb-custom {
+    background: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .breadcrumb-custom .breadcrumb-item {
+        color: var(--secondary-color);
+    }
+
+        .breadcrumb-custom .breadcrumb-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+/* ===================================================================
+   CONTEÚDO PRINCIPAL
+   =================================================================== */
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    width: 100%;
+    max-width: none;
+    background-color: #f3f4f6;
+    overflow-x: auto;
+    transition: all 0.3s ease;
+}
+
+/* ===================================================================
+   CARDS MODERNOS
+   =================================================================== */
+
+.card-modern {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    width: 100%;
+    max-width: none;
+}
+
+    .card-modern:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+.card-header-modern {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body-modern {
+    padding: 2rem;
+}
+
+/* ===================================================================
+   CARDS DE ESTATÍSTICAS
+   =================================================================== */
+
+.stats-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    max-width: none;
+}
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    }
+
+    .stats-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+.stats-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stats-info h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 0.25rem;
+}
+
+.stats-info p {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+    .stats-icon.primary {
+        background: linear-gradient(135deg, rgba(55, 65, 81, 0.1), rgba(55, 65, 81, 0.2));
+        color: var(--primary-color);
+    }
+
+    .stats-icon.success {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
+        color: var(--success-color);
+    }
+
+    .stats-icon.warning {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.2));
+        color: var(--warning-color);
+    }
+
+    .stats-icon.info {
+        background: linear-gradient(135deg, rgba(156, 163, 175, 0.1), rgba(156, 163, 175, 0.2));
+        color: var(--secondary-color);
+    }
+
+/* ===================================================================
+   FORMULÁRIOS
+   =================================================================== */
+
+.form-group-modern {
+    margin-bottom: 1.5rem;
+}
+
+.form-label-modern {
+    display: block;
+    font-weight: 500;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-control-modern {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+    .form-control-modern:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.1);
+    }
+
+.form-select-modern {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    background-color: white;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    transition: all 0.3s ease;
+}
+
+    .form-select-modern:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.1);
+    }
+
+/* ===================================================================
+   BOTÕES
+   =================================================================== */
+
+.btn-modern {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+        text-decoration: none;
+    }
+
+.btn-accent-modern {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    color: white;
+}
+
+    .btn-accent-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+        text-decoration: none;
+    }
+
+.btn-secondary-modern {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+    .btn-secondary-modern:hover {
+        background-color: #6b7280;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+
+.btn-success-modern {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    color: white;
+}
+
+    .btn-success-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+        text-decoration: none;
+    }
+
+.btn-outline-modern {
+    background: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+    .btn-outline-modern:hover {
+        background: var(--primary-color);
+        color: white;
+        text-decoration: none;
+    }
+
+/* ===================================================================
+   TÍTULOS E TIPOGRAFIA
+   =================================================================== */
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+    .page-title i {
+        color: var(--accent-color);
+    }
+
+.page-subtitle {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+/* ===================================================================
+   GRID SYSTEM
+   =================================================================== */
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+}
+
+/* ===================================================================
+   CONTAINER DASHBOARD
+   =================================================================== */
+
+.dashboard-container {
+    width: 100%;
+    max-width: none;
+}
+
+/* ===================================================================
+   TABELAS
+   =================================================================== */
+
+.table-modern {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    width: 100%;
+}
+
+    .table-modern table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-modern th {
+        background: var(--primary-dark);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .table-modern td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.95rem;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .table-modern tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+/* ===================================================================
+   BADGES
+   =================================================================== */
+
+.badge-modern {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+}
+
+.badge-success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-info {
+    background-color: #e0e7ff;
+    color: #3730a3;
+}
+
+.badge-primary {
+    background-color: #e5e7eb;
+    color: var(--primary-dark);
+}
+
+/* ===================================================================
+   ATIVIDADES E LISTAS
+   =================================================================== */
+
+.activity-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+    .activity-item:hover {
+        background-color: #f9fafb;
+    }
+
+.activity-icon {
+    flex-shrink: 0;
+}
+
+/* ===================================================================
+   ANIMAÇÕES
+   =================================================================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.6s ease-out;
+}
+
+.slide-in-up {
+    animation: slideInUp 0.5s ease-out;
+}
+
+.sidebar.collapsed .menu-link i {
+    animation: fadeInScale 0.3s ease 0.1s both;
+}
+
+/* ===================================================================
+   UTILITIES
+   =================================================================== */
+
+.text-success {
+    color: var(--success-color) !important;
+}
+
+.text-warning {
+    color: var(--warning-color) !important;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE
+   =================================================================== */
+
+/* Tablets e dispositivos médios */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+            .sidebar.collapsed.open {
+                transform: translateX(0);
+                width: var(--sidebar-width);
+                min-width: var(--sidebar-width);
+            }
+
+    .main-area {
+        margin-left: 0;
+        width: 100vw;
+    }
+
+    .sidebar.collapsed + .main-area {
+        margin-left: 0;
+        width: 100vw;
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+    }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+    .sidebar-collapse-btn {
+        display: none;
+    }
+
+        .sidebar-collapse-btn::after {
+            display: none;
+        }
+
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Smartphones */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+    }
+
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        padding: 0 1rem;
+    }
+
+    .stats-card {
+        padding: 1rem;
+    }
+
+    .stats-info h3 {
+        font-size: 1.5rem;
+    }
+
+    .card-body-modern {
+        padding: 1rem;
+    }
+
+    .card-header-modern {
+        padding: 1rem;
+    }
+}
+
+/* Smartphones pequenos */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 0.75rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .topbar {
+        padding: 0 0.75rem;
+    }
+
+    .topbar-left, .topbar-right {
+        gap: 0.5rem;
+    }
+
+    .btn-modern {
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Telas muito grandes */
+@media (min-width: 1400px) {
+    .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .main-content {
+        padding: 2.5rem;
+    }
+}
+
+/* Telas extra grandes */
+@media (min-width: 1600px) {
+    .main-content {
+        padding: 3rem;
+    }
+
+    .stats-card {
+        padding: 2rem;
+    }
+
+    .card-body-modern {
+        padding: 2.5rem;
+    }
+}
+
+/* ===================================================================
+   PRINT STYLES
+   =================================================================== */
+
+@media print {
+    .sidebar,
+    .topbar,
+    .btn-modern {
+        display: none !important;
+    }
+
+    .main-area {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .main-content {
+        padding: 0 !important;
+    }
+
+    .card-modern {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+    }
+}
+
+/* ===================================================================
+   SISTEMA DE NOTIFICAÇÕES TOAST
+   =================================================================== */
+
+.toast-container {
+    position: fixed;
+    top: 90px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 350px;
+}
+
+.toast-modern {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transform: translateX(400px);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    opacity: 0;
+}
+
+    .toast-modern.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .toast-modern.hide {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+
+.toast-header-modern {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--light-color);
+}
+
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    font-size: 0.8rem;
+}
+
+    .toast-icon.success {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .toast-icon.error {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .toast-icon.warning {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .toast-icon.info {
+        background: var(--primary-color);
+        color: white;
+    }
+
+.toast-title {
+    font-weight: 600;
+    color: var(--dark-color);
+    flex: 1;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.2rem;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+    .toast-close:hover {
+        color: var(--dark-color);
+    }
+
+.toast-body-modern {
+    padding: 0.75rem 1.25rem 1rem;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.toast-progress {
+    height: 3px;
+    background: var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.toast-progress-bar {
+    height: 100%;
+    background: var(--accent-color);
+    width: 100%;
+    animation: toastProgress 5s linear forwards;
+}
+
+@keyframes toastProgress {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+/* ===================================================================
+   MODO ESCURO
+   =================================================================== */
+
+[data-theme="dark"] {
+    --primary-color: #4b5563;
+    --primary-dark: #374151;
+    --primary-light: #9ca3af;
+    --secondary-color: #6b7280;
+    --accent-color: #fbbf24;
+    --accent-hover: #f59e0b;
+    --success-color: #34d399;
+    --warning-color: #fbbf24;
+    --danger-color: #f87171;
+    --dark-color: #f9fafb;
+    --light-color: #1f2937;
+    --border-color: #374151;
+}
+
+    [data-theme="dark"] body {
+        background-color: #111827;
+        color: var(--dark-color);
+    }
+
+    [data-theme="dark"] .sidebar {
+        background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+    }
+
+    [data-theme="dark"] .topbar {
+        background: #1f2937;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    [data-theme="dark"] .card-modern {
+        background: #1f2937;
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .stats-card {
+        background: #1f2937;
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .form-control-modern,
+    [data-theme="dark"] .form-select-modern {
+        background-color: #374151;
+        border-color: var(--border-color);
+        color: var(--dark-color);
+    }
+
+    [data-theme="dark"] .table-modern th {
+        background: #0f172a;
+    }
+
+    [data-theme="dark"] .table-modern td {
+        border-bottom-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .table-modern tbody tr:hover {
+        background-color: #374151;
+    }
+
+    [data-theme="dark"] .menu-tooltip {
+        background: #0f172a;
+        border: 1px solid var(--border-color);
+    }
+
+        [data-theme="dark"] .menu-tooltip::before {
+            border-right-color: #0f172a;
+        }
+
+    [data-theme="dark"] .sidebar-collapse-btn {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+        [data-theme="dark"] .sidebar-collapse-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+/* Toggle do Modo Escuro */
+.theme-toggle {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+}
+
+    .theme-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+/* ===================================================================
+   ESTILOS PARA GRIDS AVANÇADAS - SISTEMA GARAGEM
+   =================================================================== */
+
+/* Grid Container com Scroll */
+.table-responsive {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+}
+
+    .table-responsive::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--secondary-color);
+        border-radius: 4px;
+    }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+/* Header fixo da tabela */
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--primary-dark) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Colunas ordenáveis */
+th[style*="cursor: pointer"] {
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+    th[style*="cursor: pointer"]:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+/* Ícones de ordenação */
+.fa-sort, .fa-sort-up, .fa-sort-down {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+th:hover .fa-sort {
+    opacity: 1;
+}
+
+.fa-sort-up, .fa-sort-down {
+    opacity: 1 !important;
+    color: var(--accent-color);
+}
+
+/* Loading Overlay */
+#loadingOverlay {
+    backdrop-filter: blur(2px);
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Paginação */
+.pagination {
+    gap: 0.25rem;
+}
+
+.page-link {
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    color: var(--primary-color);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+    .page-link:hover {
+        background-color: var(--light-color);
+        border-color: var(--primary-color);
+        color: var(--primary-dark);
+    }
+
+.page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.page-item.disabled .page-link {
+    color: var(--secondary-color);
+    background-color: transparent;
+    border-color: var(--border-color);
+}
+
+/* Seletor de tamanho de página */
+#pageSizeSelector {
+    min-width: 80px;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Animações para linhas da tabela */
+.cliente-row, .veiculo-row {
+    transition: all 0.2s ease;
+}
+
+    .cliente-row:hover, .veiculo-row:hover {
+        background-color: rgba(55, 65, 81, 0.05) !important;
+        transform: translateX(2px);
+    }
+
+/* Avatar de cliente */
+.cliente-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(55, 65, 81, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Thumb de veículo */
+.vehicle-thumb {
+    width: 50px;
+    height: 40px;
+    border-radius: 0.5rem;
+    background-color: rgba(156, 163, 175, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Estados dos filtros */
+.form-control-modern:focus,
+.form-select-modern:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(55, 65, 81, 0.1);
+}
+
+/* Botões de ação */
+.btn-group .btn {
+    border-radius: 0.375rem;
+    margin: 0 1px;
+    transition: all 0.2s ease;
+}
+
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        z-index: 2;
+    }
+
+/* Card de veículo no grid */
+.vehicle-card {
+    transition: all 0.3s ease;
+}
+
+    .vehicle-card:hover {
+        transform: translateY(-4px);
+    }
+
+.vehicle-card-header {
+    position: relative;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.vehicle-image {
+    text-align: center;
+    opacity: 0.6;
+}
+
+.vehicle-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.vehicle-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.detail-item {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+}
+
+.vehicle-price {
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.price-main {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.price-sub {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+}
+
+.vehicle-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+/* ===================================================================
+   INDICADORES DE ESTADO SIDEBAR
+   =================================================================== */
+
+/* Indicador visual quando o sidebar está colapsado */
+.sidebar.collapsed::after {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 2px;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60px;
+    background: linear-gradient(180deg, var(--accent-color), var(--accent-hover));
+    border-radius: 0 4px 4px 0;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+    z-index: 1002;
+}
+
+.sidebar.collapsed:hover::after {
+    opacity: 0.6;
+}
+
+/* ===================================================================
+   TRANSIÇÕES ESCALONADAS PARA MENUS
+   =================================================================== */
+
+.menu-item:nth-child(1) .menu-link-text {
+    transition-delay: 0ms;
+}
+
+.menu-item:nth-child(2) .menu-link-text {
+    transition-delay: 20ms;
+}
+
+.menu-item:nth-child(3) .menu-link-text {
+    transition-delay: 40ms;
+}
+
+.menu-item:nth-child(4) .menu-link-text {
+    transition-delay: 60ms;
+}
+
+.menu-item:nth-child(5) .menu-link-text {
+    transition-delay: 80ms;
+}
+
+.menu-item:nth-child(6) .menu-link-text {
+    transition-delay: 100ms;
+}
+
+/* ===================================================================
+   OTIMIZAÇÕES DE PERFORMANCE
+   =================================================================== */
+
+.sidebar,
+.main-area,
+.menu-link,
+.menu-link-text,
+.menu-tooltip,
+.brand-text-content,
+.brand-text,
+.menu-badge {
+    will-change: transform, opacity, width;
+}
+
+/* Reduzir motion para usuários que preferem */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .main-area,
+    .menu-link,
+    .menu-link-text,
+    .menu-tooltip,
+    .brand-text-content,
+    .brand-text,
+    .menu-badge,
+    .sidebar-collapse-btn {
+        transition: none;
+    }
+}
+
+/* ===================================================================
+   MODO ESCURO - ATUALIZAÇÕES PARA GRIDS
+   =================================================================== */
+
+[data-theme="dark"] .table-responsive {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .sticky-top {
+    background: #0f172a !important;
+}
+
+[data-theme="dark"] .cliente-row:hover,
+[data-theme="dark"] .veiculo-row:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .cliente-avatar {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .vehicle-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .vehicle-card-header {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+}
+
+/* ===================================================================
+   ANIMAÇÕES DE ENTRADA
+   =================================================================== */
+
+@keyframes fadeInGrid {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-grid {
+    animation: fadeInGrid 0.6s ease-out;
+}
+
+/* ===================================================================
+   INDICADOR DE FILTROS ATIVOS
+   =================================================================== */
+
+.filter-active::after {
+    content: "•";
+    color: var(--accent-color);
+    font-weight: bold;
+    margin-left: 0.25rem;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE PARA GRIDS
+   =================================================================== */
+
+@media (max-width: 1200px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.8rem;
+        max-height: 400px;
+    }
+
+    .table th, .table td {
+        padding: 0.5rem 0.25rem;
+        vertical-align: middle;
+    }
+
+    .btn-group {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+        .btn-group .btn {
+            width: 100%;
+            margin: 0;
+        }
+
+    /* Ocultar algumas colunas em mobile */
+    .table th:nth-child(4),
+    .table td:nth-child(4),
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        display: none;
+    }
+}
+
+/* ===================================================================
+   CORREÇÃO 1: ÍCONES CENTRALIZADOS NO MODO COLAPSADO
+   =================================================================== */
+
+.sidebar.collapsed .menu-link {
+    padding: 0.875rem 0;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+    .sidebar.collapsed .menu-link i {
+        margin-right: 0;
+        width: auto;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+    }
+
+/* ===================================================================
+   CORREÇÃO 2: FORÇAR O CONTEÚDO A USAR TODO O ESPAÇO DISPONÍVEL
+   =================================================================== */
+
+.main-content {
+    min-width: 0; /* Permite que o flex item encolha */
+    flex: 1;
+    width: 100%;
+}
+
+.card-modern,
+.table-responsive,
+.dashboard-container {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+}
+
+/* Força as grids a usarem todo o espaço */
+.grid-2,
+.grid-3,
+.grid-4 {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 3: TRANSIÇÕES MAIS SUAVES PARA O CONTEÚDO
+   =================================================================== */
+
+.main-area {
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content {
+    transition: all 0.3s ease;
+}
+
+/* ===================================================================
+   CORREÇÃO 4: GARANTIR QUE TABELAS USEM TODO O ESPAÇO
+   =================================================================== */
+
+.table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto;
+}
+
+    .table-responsive table {
+        width: 100% !important;
+        min-width: 100%;
+    }
+
+/* ===================================================================
+   CORREÇÃO 5: MELHORAR ALINHAMENTO DO BRAND NO MODO COLAPSADO
+   =================================================================== */
+
+.sidebar.collapsed .brand-logo {
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+}
+
+    .sidebar.collapsed .brand-logo i {
+        margin: 0;
+    }
+
+/* ===================================================================
+   CORREÇÃO 6: GARANTIR QUE CARDS SE EXPANDAM CORRETAMENTE
+   =================================================================== */
+
+.card-header-modern {
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.card-body-modern {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* ===================================================================
+   CORREÇÃO 7: MELHORAR TOOLTIPS NO MODO COLAPSADO
+   =================================================================== */
+
+.sidebar.collapsed .menu-tooltip {
+    left: calc(var(--sidebar-collapsed-width) + 10px);
+}
+
+/* ===================================================================
+   CORREÇÃO 8: FORÇAR RECALCULO DE LAYOUT APÓS TRANSIÇÃO
+   =================================================================== */
+
+.sidebar.collapsed ~ .main-area {
+    margin-left: var(--sidebar-collapsed-width) !important;
+    width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+}
+
+.sidebar:not(.collapsed) ~ .main-area {
+    margin-left: var(--sidebar-width) !important;
+    width: calc(100vw - var(--sidebar-width)) !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 10: MELHORAR RESPONSIVIDADE DAS GRIDS
+   =================================================================== */
+
+@media (min-width: 1024px) {
+    .sidebar.collapsed ~ .main-area .grid-4 {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .sidebar.collapsed ~ .main-area .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .sidebar.collapsed ~ .main-area .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+}
+
+/* ===================================================================
+   CORREÇÃO 11: OTIMIZAR LARGURA DE COLUNAS DA TABELA
+   =================================================================== */
+
+.sidebar.collapsed ~ .main-area .table-responsive {
+    /* Aproveitar melhor o espaço extra */
+    font-size: 0.95rem;
+}
+
+.sidebar.collapsed ~ .main-area .table th,
+.sidebar.collapsed ~ .main-area .table td {
+    padding: 0.875rem 0.75rem;
+}
+
+/* ===================================================================
+   CORREÇÃO 13: GARANTIR QUE FLEX CONTAINERS SE COMPORTEM CORRETAMENTE
+   =================================================================== */
+
+.d-flex,
+.dashboard-container > .d-flex,
+.card-header-modern.d-flex {
+    width: 100%;
+    max-width: none;
+}
+
+/* ===================================================================
+   CORREÇÃO 14: MELHORAR PERFORMANCE DAS TRANSIÇÕES
+   =================================================================== */
+
+.main-area,
+.main-content,
+.card-modern,
+.table-responsive {
+    will-change: auto;
+}
+
+.sidebar.collapsed ~ .main-area .main-content,
+.sidebar.collapsed ~ .main-area .card-modern {
+    transform: translateZ(0); /* Força aceleração de hardware */
+}
+
+/* ===================================================================
+   CORREÇÃO 15: AJUSTAR SIDEBAR COLLAPSE BUTTON POSITION
+   =================================================================== */
+
+.sidebar.collapsed .sidebar-collapse-btn {
+    right: 50%;
+    transform: translateX(50%);
+    position: absolute;
+    top: 1.75rem;
+}
+
+/* ===================================================================
+   ADICIONAR CLASSE HELPER PARA FORÇAR RECALCULO
+   =================================================================== */
+
+.force-reflow {
+    transform: translateZ(0);
+}
+
+.sidebar.collapsed ~ .main-area .force-reflow {
+    width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+}
+
+/* ===================================================================
+   CORREÇÃO DEFINITIVA PARA CENTRALIZAÇÃO DOS ÍCONES
+   =================================================================== */
+
+/* Desabilitar transições durante redimensionamento */
+.resize-in-progress * {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* Reset completo para modo colapsado */
+.sidebar.collapsed .menu-link {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 50px;
+    width: var(--sidebar-collapsed-width) !important;
+    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    text-decoration: none !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-right: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+    /* Posicionamento absoluto para garantir centralização */
+    .sidebar.collapsed .menu-link i {
+        position: absolute !important;
+        vertical-align: middle;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        font-size: 1.1rem !important;
+        line-height: 1 !important;
+        text-align: center !important;
+        display: block !important;
+    }
+
+/* Esconder elementos desnecessários */
+.sidebar.collapsed .menu-link-text,
+.sidebar.collapsed .menu-badge {
+    position: absolute !important;
+    left: -9999px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Estados de hover */
+.sidebar.collapsed .menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-right-color: var(--accent-color) !important;
+}
+
+.sidebar.collapsed .menu-link.active {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+    color: white !important;
+    border-right-color: var(--accent-color) !important;
+}
+
+/* Tooltip posicionamento */
+.sidebar.collapsed .menu-tooltip {
+    left: calc(var(--sidebar-collapsed-width) + 15px) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 1001 !important;
+}
+
+/* ===================================================================
+   OVERRIDE PARA CASOS ESPECÍFICOS DE ÍCONES FONT AWESOME
+   =================================================================== */
+.sidebar.collapsed .menu-link .fas,
+.sidebar.collapsed .menu-link .far,
+.sidebar.collapsed .menu-link .fab,
+.sidebar.collapsed .menu-link .fal {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    font-size: 1.1rem !important;
+    line-height: 1 !important;
+}
+
+/* ===================================================================
+   CORREÇÃO PARA PROBLEMAS DE ESPECIFICIDADE
+   =================================================================== */
+body .sidebar.collapsed .menu-link {
+    width: var(--sidebar-collapsed-width) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+    body .sidebar.collapsed .menu-link i {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+
+/* ===================================================================
+   CORREÇÃO DEFINITIVA: ÍCONES PERFEITAMENTE CENTRALIZADOS
+   =================================================================== */
+
+.sidebar.collapsed .menu-link {
+    padding: 0.875rem 0 !important;
+    justify-content: center !important;
+    align-items: center !important;
+    display: flex !important;
+    text-align: center !important;
+    width: var(--sidebar-collapsed-width) !important;
+    margin: 0 !important;
+    position: relative;
+}
+
+    .sidebar.collapsed .menu-link i {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: auto !important;
+        text-align: center !important;
+        display: block !important;
+        line-height: 1 !important;
+        font-size: 1.1rem !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+
+/* Garantir que o container do link ocupe toda a largura do sidebar colapsado */
+.sidebar.collapsed .menu-item {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* ===================================================================
+   CORREÇÃO: REMOVER ESPAÇOS E MARGENS CONFLITANTES
+   =================================================================== */
+.sidebar.collapsed .menu-link-text,
+.sidebar.collapsed .menu-badge {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+}
+
+/* ===================================================================
+   CORREÇÃO: MELHORAR ÁREA CLICÁVEL DOS ÍCONES
+   =================================================================== */
+.sidebar.collapsed .menu-link {
+    min-height: 60px !important;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+    .sidebar.collapsed .menu-link:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+/* ===================================================================
+   CORREÇÃO: GARANTIR QUE O TOOLTIP APAREÇA CORRETAMENTE
+   =================================================================== */
+.sidebar.collapsed .menu-tooltip {
+    left: calc(var(--sidebar-collapsed-width) + 15px) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+/* ===================================================================
+   CORREÇÃO ADICIONAL: FORÇAR RECENTRALIZAÇÃO
+   =================================================================== */
+.sidebar.collapsed .menu-section {
+    width: 100% !important;
+    margin-bottom: 2rem !important;
+}
+
+.sidebar.collapsed .menu-item {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* ===================================================================
+   OVERRIDE PARA CASOS ESPECÍFICOS
+   =================================================================== */
+.sidebar.collapsed .fas,
+.sidebar.collapsed .far,
+.sidebar.collapsed .fab {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ===================================================================
+   CORREÇÃO: SETAS DUPLAS NOS SELECTS
+   Adicione estas regras ao final do custom.css
+   =================================================================== */
+
+/* ===================================================================
+   RESET COMPLETO DOS SELECTS - REMOVER SETAS PADRÃO
+   =================================================================== */
+
+/* Remover setas nativas do navegador */
+select,
+.form-select,
+.form-select-modern,
+.form-control,
+select.form-control {
+    /* Remover aparência nativa */
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    /* Remover setas do IE/Edge */
+    background-image: none !important;
+    /* Reset específico para Firefox */
+    -moz-background-clip: padding !important;
+    -moz-background-origin: padding !important;
+    -moz-background-size: auto !important;
+}
+
+    /* Remover seta específica do IE */
+    select::-ms-expand {
+        display: none !important;
+    }
+
+    /* ===================================================================
+   APLICAR NOSSA SETA CUSTOMIZADA ÚNICA
+   =================================================================== */
+
+    .form-select-modern,
+    .form-select,
+    select.form-control,
+    select {
+        background-color: white !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+        background-position: right 0.75rem center !important;
+        background-repeat: no-repeat !important;
+        background-size: 1.5em 1.5em !important;
+        padding-right: 2.5rem !important;
+    }
+
+/* ===================================================================
+   CORREÇÕES ESPECÍFICAS PARA BOOTSTRAP
+   =================================================================== */
+
+/* Override específico para classes do Bootstrap */
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+}
+
+/* ===================================================================
+   CORREÇÕES PARA DIFERENTES ESTADOS
+   =================================================================== */
+
+/* Estado normal */
+.form-select-modern,
+.form-select {
+    border: 2px solid var(--border-color) !important;
+    border-radius: 0.75rem !important;
+    font-size: 0.95rem !important;
+    padding: 0.875rem 2.5rem 0.875rem 1rem !important;
+    transition: all 0.3s ease !important;
+}
+
+    /* Estado focus */
+    .form-select-modern:focus,
+    .form-select:focus {
+        outline: none !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.1) !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23374151' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    }
+
+/* ===================================================================
+   CORREÇÕES PARA MODO ESCURO
+   =================================================================== */
+
+[data-theme="dark"] .form-select-modern,
+[data-theme="dark"] .form-select {
+    background-color: #374151 !important;
+    border-color: var(--border-color) !important;
+    color: var(--dark-color) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23f9fafb' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+}
+
+/* ===================================================================
+   CORREÇÕES ESPECÍFICAS PARA SELECTS DO SISTEMA
+   =================================================================== */
+
+/* Selects nos filtros */
+#filterSituacao,
+#filterTipo,
+#filterStatus,
+#pageSizeSelector,
+select[name="situacao"],
+select[name="tipoCliente"],
+select[name="status"] {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 0.75rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5em 1.5em !important;
+    padding-right: 2.5rem !important;
+}
+
+/* ===================================================================
+   RESET PARA INPUTS QUE NÃO SÃO SELECTS
+   =================================================================== */
+
+/* Garantir que inputs normais não tenham seta */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea {
+    background-image: none !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* ===================================================================
+   CORREÇÕES PARA SELECTS SMALL/LARGE
+   =================================================================== */
+
+.form-select-sm {
+    padding: 0.25rem 2rem 0.25rem 0.5rem !important;
+    font-size: 0.875rem !important;
+    background-size: 1.2em 1.2em !important;
+    background-position: right 0.5rem center !important;
+}
+
+.form-select-lg {
+    padding: 0.5rem 3rem 0.5rem 1rem !important;
+    font-size: 1.25rem !important;
+    background-size: 1.8em 1.8em !important;
+    background-position: right 1rem center !important;
+}
+
+/* ===================================================================
+   OVERRIDE PARA CASOS ESPECÍFICOS PROBLEMÁTICOS
+   =================================================================== */
+
+/* Força a remoção de qualquer seta adicional */
+body select,
+body .form-select,
+body .form-control[type="select-one"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+}
+
+/* Remove especificamente setas do Bootstrap 5 */
+.form-select::after,
+.form-select::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* ===================================================================
+   CAMPOS DE BUSCA COMPACTOS - Adicione ao final do custom.css
+   =================================================================== */
+
+/* ===================================================================
+   REDUZIR TAMANHO DOS CARDS DE FILTROS
+   =================================================================== */
+
+/* Card de filtros mais compacto */
+.card-modern .card-header-modern {
+    padding: 1rem 1.5rem !important;
+    font-size: 0.9rem !important;
+}
+
+.card-modern .card-body-modern {
+    padding: 1.25rem 1.5rem !important;
+}
+
+/* ===================================================================
+   CAMPOS DE FORMULÁRIO COMPACTOS
+   =================================================================== */
+
+/* Reduzir altura dos campos */
+.form-control-modern,
+.form-select-modern,
+.form-select {
+    padding: 0.625rem 1rem !important;
+    font-size: 0.9rem !important;
+    min-height: auto !important;
+    height: auto !important;
+}
+
+/* Ajustar selects para o novo tamanho */
+.form-select-modern,
+.form-select {
+    padding-right: 2.25rem !important;
+    background-size: 1.2em 1.2em !important;
+    background-position: right 0.625rem center !important;
+}
+
+/* ===================================================================
+   LABELS MAIS COMPACTAS
+   =================================================================== */
+
+.form-label-modern {
+    margin-bottom: 0.375rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+}
+
+/* ===================================================================
+   ESPAÇAMENTO ENTRE CAMPOS REDUZIDO
+   =================================================================== */
+
+.form-group-modern {
+    margin-bottom: 1rem !important;
+}
+
+/* ===================================================================
+   GRID DE FILTROS MAIS COMPACTA
+   =================================================================== */
+
+/* Grid com mais colunas para aproveitar melhor o espaço */
+.grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 1rem !important;
+}
+
+/* Para seção de filtros específica */
+.card-modern .card-body-modern .grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 0.875rem !important;
+}
+
+/* ===================================================================
+   AJUSTES ESPECÍFICOS PARA SEÇÕES DE FILTROS
+   =================================================================== */
+
+/* Reduzir margem inferior dos filtros */
+.card-modern:has([id*="filtro"]),
+.card-modern:has(.grid-3) {
+    margin-bottom: 1rem !important;
+}
+
+/* ===================================================================
+   BOTÕES COMPACTOS NOS FILTROS
+   =================================================================== */
+
+.btn-modern {
+    padding: 0.625rem 1.25rem !important;
+    font-size: 0.9rem !important;
+}
+
+/* Botões pequenos específicos */
+.btn-sm {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important;
+}
+
+/* ===================================================================
+   CARD HEADER COM ÍCONE COLLAPSE PARA FILTROS
+   =================================================================== */
+
+/* Tornar card de filtros colapsável */
+.card-header-modern {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+    .card-header-modern:hover {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+    }
+
+    /* Ícone para indicar que é colapsável */
+    .card-header-modern::after {
+        content: '\f077';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        float: right;
+        transition: transform 0.3s ease;
+        opacity: 0.6;
+    }
+
+    .card-header-modern.collapsed::after {
+        transform: rotate(180deg);
+    }
+
+/* ===================================================================
+   RESPONSIVIDADE PARA FILTROS COMPACTOS
+   =================================================================== */
+
+/* Desktop grande - 4 colunas */
+@media (min-width: 1400px) {
+    .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 1rem !important;
+    }
+}
+
+/* Desktop médio - 3 colunas */
+@media (min-width: 1024px) and (max-width: 1399px) {
+    .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.875rem !important;
+    }
+}
+
+/* Tablet - 2 colunas */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+
+    .form-control-modern,
+    .form-select-modern {
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.875rem !important;
+    }
+}
+
+/* Mobile - 1 coluna */
+@media (max-width: 767px) {
+    .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+
+    .card-modern .card-header-modern,
+    .card-modern .card-body-modern {
+        padding: 1rem !important;
+    }
+
+    .form-control-modern,
+    .form-select-modern {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.875rem !important;
+    }
+}
+
+/* ===================================================================
+   GANHO DE ESPAÇO QUANDO SIDEBAR COLAPSADO
+   =================================================================== */
+
+/* Mais colunas quando sidebar colapsado */
+.sidebar.collapsed ~ .main-area .card-modern .card-body-modern .grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+}
+
+@media (min-width: 1400px) {
+    .sidebar.collapsed ~ .main-area .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
+    .sidebar.collapsed ~ .main-area .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+}
+
+/* ===================================================================
+   AJUSTES PARA CAMPOS ESPECÍFICOS DO SISTEMA
+   =================================================================== */
+
+/* Campos de busca por nome/documento */
+input[name="search"],
+#searchInput,
+#searchClientes {
+    min-width: 200px !important;
+}
+
+/* Selects de filtro */
+select[name="situacao"],
+select[name="tipoCliente"],
+select[name="status"],
+#filterSituacao,
+#filterTipo,
+#filterStatus {
+    min-width: 150px !important;
+}
+
+/* Seletor de página */
+#pageSizeSelector {
+    min-width: 80px !important;
+    padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* ===================================================================
+   ESTILOS PARA CARD DE FILTROS COLAPSÁVEL
+   =================================================================== */
+
+/* Animação de colapso */
+.card-body-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+    .card-body-collapse.show {
+        max-height: 500px;
+        padding: 1.25rem 1.5rem !important;
+    }
+
+/* ===================================================================
+   OTIMIZAÇÕES PARA MAIS ESPAÇO NA LISTA
+   =================================================================== */
+
+/* Reduzir espaçamento entre seções */
+.dashboard-container > .card-modern + .card-modern {
+    margin-top: 1rem !important;
+}
+
+/* Título da página mais compacto */
+.page-title {
+    font-size: 1.75rem !important;
+    margin-bottom: 0.375rem !important;
+}
+
+.page-subtitle {
+    font-size: 1rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+/* Header da página mais compacto */
+.dashboard-container > .d-flex:first-child {
+    margin-bottom: 1.25rem !important;
+}
+
+/* ===================================================================
+   INDICADOR VISUAL DE ECONOMIA DE ESPAÇO
+   =================================================================== */
+
+/* Pequeno indicador de espaço economizado */
+.card-modern .card-header-modern .badge {
+    font-size: 0.7rem !important;
+    padding: 0.25rem 0.5rem !important;
+}
+
+/* ===================================================================
+   AJUSTES PARA TABELAS/LISTAS
+   =================================================================== */
+
+/* Mais espaço para a área de listagem */
+.table-responsive {
+    max-height: calc(100vh - 320px) !important;
+    min-height: 400px !important;
+}
+
+/* ===================================================================
+   MODO ESCURO - AJUSTES PARA CAMPOS COMPACTOS
+   =================================================================== */
+
+[data-theme="dark"] .card-header-modern:hover {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%) !important;
+}
+
+[data-theme="dark"] .form-control-modern,
+[data-theme="dark"] .form-select-modern {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+}
+
+/* ===================================================================
+   CLASSES UTILITÁRIAS PARA CONTROLE FINO
+   =================================================================== */
+
+/* Classe para forçar campos extra compactos */
+.form-control-compact {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.85rem !important;
+    min-height: 36px !important;
+}
+
+/* Classe para formulários horizontais compactos */
+.form-horizontal-compact .form-group-modern {
+    margin-bottom: 0.75rem !important;
+}
+
+.form-horizontal-compact .form-label-modern {
+    margin-bottom: 0.25rem !important;
+    font-size: 0.8rem !important;
+}
+
+/* ===================================================================
+   ULTRA COMPACTO + CORREÇÃO DO LOADING
+   Adicione ao final do custom.css (substitui as regras anteriores)
+   =================================================================== */
+
+/* ===================================================================
+   REDUÇÃO AGRESSIVA DOS FILTROS
+   =================================================================== */
+
+/* Cards ultra compactos */
+.card-modern .card-header-modern {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    min-height: auto !important;
+}
+
+.card-modern .card-body-modern {
+    padding: 0.875rem 1rem !important;
+}
+
+/* ===================================================================
+   CAMPOS ULTRA COMPACTOS
+   =================================================================== */
+
+/* Altura mínima dos campos */
+.form-control-modern,
+.form-select-modern,
+.form-select,
+input[type="text"],
+input[type="search"],
+select {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.85rem !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    line-height: 1.2 !important;
+}
+
+/* Selects com padding específico para a seta */
+.form-select-modern,
+.form-select {
+    padding-right: 2rem !important;
+    background-size: 1em 1em !important;
+    background-position: right 0.5rem center !important;
+}
+
+/* ===================================================================
+   LABELS E ESPAÇAMENTOS MÍNIMOS
+   =================================================================== */
+
+.form-label-modern {
+    margin-bottom: 0.25rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+}
+
+.form-group-modern {
+    margin-bottom: 0.75rem !important;
+}
+
+/* ===================================================================
+   GRID ULTRA COMPACTA
+   =================================================================== */
+
+.grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    gap: 0.75rem !important;
+}
+
+/* Para filtros específicos */
+.card-modern .card-body-modern .grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 0.625rem !important;
+}
+
+/* ===================================================================
+   REDUÇÃO MÁXIMA DE ESPAÇAMENTOS DA PÁGINA
+   =================================================================== */
+
+/* Padding do conteúdo principal */
+.main-content {
+    padding: 1.25rem 1.5rem !important;
+}
+
+/* Espaçamento entre cards */
+.dashboard-container > * + * {
+    margin-top: 0.75rem !important;
+}
+
+/* Header da página compacto */
+.page-title {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.3 !important;
+}
+
+.page-subtitle {
+    font-size: 0.9rem !important;
+    margin-bottom: 1rem !important;
+    opacity: 0.8 !important;
+}
+
+/* Container do header */
+.dashboard-container > .d-flex:first-child {
+    margin-bottom: 1rem !important;
+}
+
+/* ===================================================================
+   BOTÕES ULTRA COMPACTOS
+   =================================================================== */
+
+.btn-modern {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important;
+    line-height: 1.2 !important;
+    min-height: 34px !important;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    min-height: 30px !important;
+}
+
+/* ===================================================================
+   MAXIMIZAR ESPAÇO DA TABELA/GRID
+   =================================================================== */
+
+/* Altura máxima da tabela */
+.table-responsive {
+    max-height: calc(100vh - 280px) !important;
+    min-height: 450px !important;
+    overflow-y: auto !important;
+}
+
+/* Card da lista sem padding extra */
+.card-modern:has(.table-responsive) .card-body-modern {
+    padding: 0 !important;
+}
+
+.card-modern:has(.table-responsive) .card-header-modern {
+    padding: 0.75rem 1rem !important;
+}
+
+/* ===================================================================
+   CORREÇÃO DO LOADING QUE NÃO SAI
+   =================================================================== */
+
+/* Loading overlay com z-index e display corretos */
+#loadingOverlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(2px) !important;
+    z-index: 1000 !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 200px !important;
+}
+
+    /* Quando visível */
+    #loadingOverlay:not(.d-none) {
+        display: flex !important;
+    }
+
+/* Loading spinner */
+.loading-spinner {
+    width: 24px !important;
+    height: 24px !important;
+    border: 3px solid var(--border-color) !important;
+    border-top: 3px solid var(--accent-color) !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+}
+
+/* Texto do loading */
+#loadingOverlay .loading-text {
+    margin-left: 0.75rem !important;
+    font-size: 0.9rem !important;
+    color: var(--secondary-color) !important;
+    font-weight: 500 !important;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE ULTRA AGRESSIVA
+   =================================================================== */
+
+/* Desktop grande */
+@media (min-width: 1400px) {
+    .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+
+    .main-content {
+        padding: 1.5rem 2rem !important;
+    }
+}
+
+/* Desktop médio */
+@media (min-width: 1024px) and (max-width: 1399px) {
+    .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.625rem !important;
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.5rem !important;
+    }
+
+    .main-content {
+        padding: 1rem !important;
+    }
+
+    .form-control-modern,
+    .form-select-modern {
+        font-size: 0.8rem !important;
+        padding: 0.375rem 0.625rem !important;
+        min-height: 32px !important;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.5rem !important;
+    }
+
+    .main-content {
+        padding: 0.75rem !important;
+    }
+
+    .card-modern .card-header-modern,
+    .card-modern .card-body-modern {
+        padding: 0.625rem !important;
+    }
+
+    .page-title {
+        font-size: 1.25rem !important;
+    }
+
+    .form-control-modern,
+    .form-select-modern {
+        font-size: 0.8rem !important;
+        padding: 0.375rem 0.5rem !important;
+        min-height: 30px !important;
+    }
+}
+
+/* ===================================================================
+   GANHO EXTRA COM SIDEBAR COLAPSADO
+   =================================================================== */
+
+.sidebar.collapsed ~ .main-area .card-modern .card-body-modern .grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+}
+
+/* Desktop com sidebar colapsado */
+@media (min-width: 1400px) {
+    .sidebar.collapsed ~ .main-area .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(6, 1fr) !important;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
+    .sidebar.collapsed ~ .main-area .card-modern .card-body-modern .grid-3 {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+}
+
+/* ===================================================================
+   OTIMIZAÇÕES ESPECÍFICAS DO SISTEMA
+   =================================================================== */
+
+/* Campos específicos */
+input[name="search"],
+#searchInput,
+#searchClientes {
+    min-width: 160px !important;
+}
+
+select[name="situacao"],
+select[name="tipoCliente"],
+select[name="status"] {
+    min-width: 120px !important;
+}
+
+#pageSizeSelector {
+    min-width: 70px !important;
+    padding: 0.375rem 1.75rem 0.375rem 0.5rem !important;
+    font-size: 0.8rem !important;
+}
+
+/* ===================================================================
+   REDUZIR PADDING DA TOPBAR
+   =================================================================== */
+
+.topbar {
+    height: 60px !important;
+    padding: 0 1.5rem !important;
+}
+
+.topbar-left,
+.topbar-right {
+    gap: 0.75rem !important;
+}
+
+/* ===================================================================
+   MELHORAR DENSIDADE DA TABELA
+   =================================================================== */
+
+.table th,
+.table td {
+    padding: 0.625rem 0.5rem !important;
+    font-size: 0.85rem !important;
+    line-height: 1.3 !important;
+}
+
+.table th {
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+}
+
+/* Header da tabela mais compacto */
+.sticky-top {
+    height: auto !important;
+}
+
+/* ===================================================================
+   CORREÇÕES PARA MODO ESCURO
+   =================================================================== */
+
+[data-theme="dark"] #loadingOverlay {
+    background: rgba(31, 41, 55, 0.9) !important;
+}
+
+[data-theme="dark"] .form-control-modern,
+[data-theme="dark"] .form-select-modern {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #f9fafb !important;
+}
+
+/* ===================================================================
+   CLASSES UTILITÁRIAS PARA CONTROLE MÁXIMO
+   =================================================================== */
+
+/* Para casos extremos */
+.ultra-compact {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    min-height: 28px !important;
+}
+
+/* Para headers mínimos */
+.header-minimal {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+}
+
+/* Para espaçamento zero */
+.no-spacing {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ===================================================================
+   ANIMAÇÃO DO LOADING MELHORADA
+   =================================================================== */
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Fade suave para o loading */
+#loadingOverlay {
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+}
+
+    #loadingOverlay.d-none {
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+/* ===================================================================
+   INDICADOR DE ECONOMIA DE ESPAÇO
+   =================================================================== */
+
+/* Badge pequeno indicando economia */
+.space-saver {
+    position: relative;
+}
+
+    .space-saver::after {
+        content: '📏 Compacto';
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--success-color);
+        color: white;
+        font-size: 0.6rem;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        opacity: 0.8;
+        pointer-events: none;
+    }
+
+/* ===================================================================
+   OVERRIDE FINAL PARA GARANTIR APLICAÇÃO
+   =================================================================== */
+
+body .main-content {
+    padding: 1.25rem 1.5rem !important;
+}
+
+body .card-modern .card-header-modern {
+    padding: 0.75rem 1rem !important;
+}
+
+body .card-modern .card-body-modern {
+    padding: 0.875rem 1rem !important;
+}
+
+body .form-control-modern,
+body .form-select-modern,
+body .form-select {
+    padding: 0.5rem 0.75rem !important;
+    min-height: 34px !important;
+}
