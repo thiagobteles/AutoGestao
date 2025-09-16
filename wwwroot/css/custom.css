@@ -3245,286 +3245,647 @@ body .form-select {
     min-height: 34px !important;
 }
 
-
 /* ===================================================================
-   REDUÇÃO AGRESSIVA DO ESPAÇO DO CABEÇALHO
-   Adicione essas regras ao final do custom.css
+   RESET E BASE PARA GARANTIR FUNCIONAMENTO
    =================================================================== */
 
-/* ===================================================================
-   CABEÇALHO DA PÁGINA ULTRA COMPACTO
-   =================================================================== */
-
-/* Reduzir drasticamente o padding do cabeçalho principal */
-.dashboard-container > .d-flex:first-child {
-    margin-bottom: 0.75rem !important;
-    padding: 0.5rem 0 !important;
+/* Forçar aplicação das regras do cabeçalho */
+body .dashboard-container,
+.dashboard-container {
+    width: 100% !important;
+    max-width: none !important;
 }
 
-/* Título da página mais compacto */
+    /* ===================================================================
+   CABEÇALHO COMPACTO FUNCIONAL
+   =================================================================== */
+
+    /* Container principal do cabeçalho */
+    .dashboard-container > .d-flex:first-child {
+        margin-bottom: 1rem !important;
+        padding: 0.75rem 0 !important;
+        min-height: auto !important;
+        align-items: center !important;
+    }
+
+/* Título principal */
 .page-title {
-    font-size: 1.4rem !important;
-    margin-bottom: 0.125rem !important;
-    line-height: 1.2 !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.3 !important;
     font-weight: 600 !important;
 }
 
+    /* Ícone do título */
     .page-title i {
-        font-size: 1.2rem !important;
+        font-size: 1.3rem !important;
         margin-right: 0.5rem !important;
     }
 
-/* Subtítulo mínimo */
+/* Subtítulo */
 .page-subtitle {
-    font-size: 0.8rem !important;
-    margin-bottom: 0.5rem !important;
-    opacity: 0.7 !important;
-    line-height: 1.1 !important;
-}
-
-/* ===================================================================
-   BOTÕES DO CABEÇALHO COMPACTOS
-   =================================================================== */
-
-/* Container dos botões do cabeçalho */
-.dashboard-container > .d-flex:first-child .d-flex {
-    gap: 0.5rem !important;
-}
-
-/* Botões do cabeçalho menores */
-.dashboard-container > .d-flex:first-child .btn-modern {
-    padding: 0.4rem 0.75rem !important;
-    font-size: 0.8rem !important;
-    min-height: 32px !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 0 !important;
+    opacity: 0.8 !important;
     line-height: 1.2 !important;
 }
 
-    .dashboard-container > .d-flex:first-child .btn-modern i {
-        font-size: 0.85rem !important;
-        margin-right: 0.375rem !important;
+/* ===================================================================
+   BOTÕES DO CABEÇALHO OTIMIZADOS
+   =================================================================== */
+
+/* Container dos botões */
+.dashboard-container > .d-flex:first-child .d-flex {
+    gap: 0.75rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* Botões do cabeçalho */
+.dashboard-container > .d-flex:first-child .btn-modern {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+    min-height: 36px !important;
+    white-space: nowrap !important;
+}
+
+/* ===================================================================
+   MAXIMIZAR ESPAÇO PARA CONTEÚDO
+   =================================================================== */
+
+/* Aumentar altura disponível para tabelas */
+.table-responsive {
+    max-height: calc(100vh - 320px) !important;
+    min-height: 450px !important;
+    overflow-y: auto !important;
+}
+
+/* Garantir que o container da tabela use todo espaço */
+.card-modern:has(.table-responsive) {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+    .card-modern:has(.table-responsive) .card-body-modern {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 0 !important;
     }
 
 /* ===================================================================
-   REDUÇÃO DO ESPAÇAMENTO GERAL DA PÁGINA
+   OTIMIZAÇÃO DO MAIN CONTENT
    =================================================================== */
 
-/* Padding do container principal */
+/* Container principal mais eficiente */
 .main-content {
-    padding: 1rem 1.5rem !important;
+    padding: 1.25rem 1.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: calc(100vh - 70px) !important;
 }
 
-/* Reduzir espaçamento entre elementos */
-.dashboard-container > * + * {
-    margin-top: 0.625rem !important;
+/* Dashboard container flexível */
+.dashboard-container {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+    /* ===================================================================
+   ESPAÇAMENTOS OTIMIZADOS
+   =================================================================== */
+
+    /* Reduzir espaços entre cards */
+    .dashboard-container > .card-modern + .card-modern {
+        margin-top: 1rem !important;
+    }
+
+/* Card de filtros mais compacto */
+.card-modern .card-header-modern {
+    padding: 1rem 1.25rem !important;
+}
+
+.card-modern .card-body-modern {
+    padding: 1.25rem !important;
 }
 
 /* ===================================================================
-   OTIMIZAÇÕES PARA DIFERENTES TAMANHOS DE TELA
+   RESPONSIVIDADE MELHORADA
    =================================================================== */
 
 /* Desktop */
 @media (min-width: 1024px) {
-    .dashboard-container > .d-flex:first-child {
-        margin-bottom: 0.625rem !important;
-        padding: 0.375rem 0 !important;
-    }
-
-    .page-title {
-        font-size: 1.5rem !important;
-    }
-
     .main-content {
-        padding: 1.25rem 1.75rem !important;
+        padding: 1.5rem 2rem !important;
+    }
+
+    .dashboard-container > .d-flex:first-child {
+        margin-bottom: 1.25rem !important;
+    }
+
+    .table-responsive {
+        max-height: calc(100vh - 340px) !important;
+        min-height: 500px !important;
     }
 }
 
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1023px) {
-    .dashboard-container > .d-flex:first-child {
-        margin-bottom: 0.5rem !important;
-        padding: 0.25rem 0 !important;
+    .main-content {
+        padding: 1rem 1.25rem !important;
     }
 
     .page-title {
-        font-size: 1.3rem !important;
+        font-size: 1.4rem !important;
     }
 
-    .main-content {
-        padding: 0.875rem 1.25rem !important;
+    .table-responsive {
+        max-height: calc(100vh - 300px) !important;
+        min-height: 400px !important;
     }
 }
 
 /* Mobile */
 @media (max-width: 767px) {
+    .main-content {
+        padding: 1rem !important;
+    }
+
     .dashboard-container > .d-flex:first-child {
-        margin-bottom: 0.5rem !important;
-        padding: 0.25rem 0 !important;
         flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 0.5rem !important;
+        gap: 0.75rem !important;
+        margin-bottom: 1rem !important;
     }
 
     .page-title {
-        font-size: 1.2rem !important;
+        font-size: 1.3rem !important;
         margin-bottom: 0.125rem !important;
     }
 
-    .page-subtitle {
-        font-size: 0.75rem !important;
-        margin-bottom: 0.375rem !important;
-    }
-
-    .main-content {
-        padding: 0.75rem 1rem !important;
-    }
-
-    /* Botões em coluna no mobile */
     .dashboard-container > .d-flex:first-child .d-flex {
-        flex-direction: row !important;
+        width: 100% !important;
+        justify-content: flex-start !important;
         flex-wrap: wrap !important;
-        gap: 0.375rem !important;
+        gap: 0.5rem !important;
     }
 
     .dashboard-container > .d-flex:first-child .btn-modern {
-        padding: 0.375rem 0.625rem !important;
-        font-size: 0.75rem !important;
-        min-height: 30px !important;
+        flex: 1 !important;
+        min-width: 120px !important;
+        justify-content: center !important;
+    }
+
+    .table-responsive {
+        max-height: calc(100vh - 280px) !important;
+        min-height: 350px !important;
     }
 }
 
 /* ===================================================================
-   AJUSTES ESPECÍFICOS PARA GANHO MÁXIMO DE ESPAÇO
+   SIDEBAR COLAPSADO - APROVEITAR ESPAÇO EXTRA
    =================================================================== */
 
-/* Quando sidebar colapsado, aproveitar ainda mais espaço */
 .sidebar.collapsed ~ .main-area .main-content {
-    padding: 1rem 2rem !important;
+    padding: 1.25rem 2.25rem !important;
 }
 
-.sidebar.collapsed ~ .main-area .dashboard-container > .d-flex:first-child {
-    margin-bottom: 0.75rem !important;
+.sidebar.collapsed ~ .main-area .table-responsive {
+    max-height: calc(100vh - 320px) !important;
+}
+
+@media (min-width: 1024px) {
+    .sidebar.collapsed ~ .main-area .main-content {
+        padding: 1.5rem 2.5rem !important;
+    }
+
+    .sidebar.collapsed ~ .main-area .table-responsive {
+        max-height: calc(100vh - 340px) !important;
+        min-height: 520px !important;
+    }
 }
 
 /* ===================================================================
-   CORREÇÕES PARA ALINHAMENTO
+   CORREÇÕES ESPECÍFICAS PARA LAYOUT FLEX
    =================================================================== */
 
-/* Garantir que o conteúdo do cabeçalho fique bem alinhado */
-.dashboard-container > .d-flex:first-child > div:first-child {
-    min-width: 0 !important;
+/* Garantir que cards de lista ocupem todo espaço disponível */
+.dashboard-container > .card-modern:last-child {
     flex: 1 !important;
+    min-height: 0 !important;
 }
 
-.dashboard-container > .d-flex:first-child > div:last-child {
+/* Header da lista de veículos */
+.card-header-modern {
     flex-shrink: 0 !important;
 }
 
 /* ===================================================================
-   REDUÇÃO ADICIONAL PARA CASOS EXTREMOS
+   AJUSTES PARA MELHOR APROVEITAMENTO VERTICAL
    =================================================================== */
 
-/* Classe utilitária para cabeçalho mínimo */
-.header-minimal {
-    margin-bottom: 0.5rem !important;
-    padding: 0.25rem 0 !important;
-}
-
-    .header-minimal .page-title {
-        font-size: 1.25rem !important;
-        margin-bottom: 0 !important;
-    }
-
-    .header-minimal .page-subtitle {
-        font-size: 0.75rem !important;
-        margin-bottom: 0.25rem !important;
-    }
-
-/* ===================================================================
-   VERSÃO ULTRA COMPACTA (OPCIONAL)
-   Descomente essas regras para redução máxima
-   =================================================================== */
-
-.dashboard-container > .d-flex:first-child {
-    margin-bottom: 0.5rem !important;
-    padding: 0.25rem 0 !important;
-}
-
-.page-title {
-    font-size: 1.2rem !important;
+/* Remover margins desnecessárias do final */
+.dashboard-container > *:last-child {
     margin-bottom: 0 !important;
-    line-height: 1.1 !important;
 }
 
-.page-subtitle {
-    font-size: 0.7rem !important;
-    margin-bottom: 0.25rem !important;
-    opacity: 0.6 !important;
+/* Otimizar altura do topbar */
+.topbar {
+    height: 60px !important;
+    flex-shrink: 0 !important;
 }
 
-.main-content {
-    padding: 0.75rem 1.25rem !important;
-}
-
-.dashboard-container > * + * {
-    margin-top: 0.5rem !important;
+/* Main area otimizada */
+.main-area {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
 }
 
 /* ===================================================================
-   MAXIMIZAR ESPAÇO PARA CONTEÚDO ÚTIL
+   CORREÇÕES PARA CONTEÚDO FLEXÍVEL
    =================================================================== */
 
-/* Garantir que a área de lista/tabela tenha máximo espaço possível */
+/* Fazer tabela crescer para ocupar espaço disponível */
 .table-responsive {
-    max-height: calc(100vh - 240px) !important;
-    min-height: 500px !important;
+    flex: 1 !important;
+    min-height: 300px !important;
 }
 
-/* Para telas menores, ajustar proporcionalmente */
-@media (max-width: 768px) {
-    .table-responsive {
-        max-height: calc(100vh - 200px) !important;
-        min-height: 400px !important;
-    }
-}
-
-/* ===================================================================
-   INDICADOR VISUAL DE ECONOMIA
-   =================================================================== */
-
-/* Pequeno indicador de que o espaço foi otimizado */
-.dashboard-container > .d-flex:first-child::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 3px;
-    height: 20px;
-    background: linear-gradient(180deg, var(--success-color), transparent);
-    border-radius: 0 2px 2px 0;
-    opacity: 0.3;
-    margin-top: 0.5rem;
+/* Container da grid flexível */
+#gridContainer {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 /* ===================================================================
-   OVERRIDE FINAL PARA GARANTIR APLICAÇÃO
+   OVERRIDE FINAL PARA GARANTIR FUNCIONAMENTO
    =================================================================== */
 
-/* Força a aplicação das regras */
+/* Força aplicação das regras principais */
 body .dashboard-container > .d-flex:first-child {
-    margin-bottom: 0.75rem !important;
-    padding: 0.5rem 0 !important;
+    margin-bottom: 1rem !important;
+    padding: 0.75rem 0 !important;
 }
 
 body .page-title {
-    font-size: 1.4rem !important;
-    margin-bottom: 0.125rem !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0.25rem !important;
 }
 
 body .page-subtitle {
-    font-size: 0.8rem !important;
-    margin-bottom: 0.5rem !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 0 !important;
 }
 
 body .main-content {
-    padding: 1rem 1.5rem !important;
+    padding: 1.25rem 1.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+body .table-responsive {
+    max-height: calc(100vh - 320px) !important;
+    min-height: 450px !important;
+    flex: 1 !important;
+}
+/* ===================================================================
+   CORREÇÃO COMPLETA - SIDEBAR E ESPAÇAMENTO
+   Substitua as regras anteriores por estas (corrige todos os problemas)
+   =================================================================== */
+
+/* ===================================================================
+   RESET COMPLETO - REMOVER PROBLEMAS ANTERIORES
+   =================================================================== */
+
+/* Remover qualquer pseudo-elemento problemático */
+.sidebar.collapsed::after,
+.sidebar.collapsed::before,
+.sidebar::after,
+.sidebar::before {
+    display: none !important;
+    content: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 1: SISTEMA DE MENU ATIVO FUNCIONAL
+   =================================================================== */
+
+/* Reset de todos os estados ativos */
+.sidebar .menu-link {
+    background-color: transparent !important;
+    border-right: 3px solid transparent !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease !important;
+}
+
+    /* Estado hover */
+    .sidebar .menu-link:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-right-color: var(--accent-color) !important;
+    }
+
+    /* Menu ativo - APENAS quando realmente ativo */
+    .sidebar .menu-link.active {
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        color: white !important;
+        border-right-color: var(--accent-color) !important;
+    }
+
+/* ===================================================================
+   CORREÇÃO 2: ESPAÇAMENTO CORRETO QUANDO COLAPSADO
+   =================================================================== */
+
+/* Sidebar colapsada - manter largura correta */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width) !important;
+    min-width: var(--sidebar-collapsed-width) !important;
+}
+
+/* Main area - ajustar margem corretamente */
+.main-area {
+    margin-left: var(--sidebar-width) !important;
+    width: calc(100vw - var(--sidebar-width)) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Quando sidebar colapsado */
+.sidebar.collapsed + .main-area {
+    margin-left: var(--sidebar-collapsed-width) !important;
+    width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 3: ÍCONES PERFEITAMENTE CENTRALIZADOS NO MODO COLAPSADO
+   =================================================================== */
+
+/* Container do menu no modo colapsado */
+.sidebar.collapsed .menu-item {
+    width: 100% !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* Link do menu colapsado */
+.sidebar.collapsed .menu-link {
+    width: var(--sidebar-collapsed-width) !important;
+    height: 60px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    border-right: 3px solid transparent !important;
+}
+
+    /* Ícones centralizados */
+    .sidebar.collapsed .menu-link i {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        font-size: 1.1rem !important;
+        margin: 0 !important;
+        width: auto !important;
+        height: auto !important;
+    }
+
+/* Esconder texto no modo colapsado */
+.sidebar.collapsed .menu-link-text {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 4: ESTADOS CORRETOS NO MODO COLAPSADO
+   =================================================================== */
+
+/* Hover no modo colapsado */
+.sidebar.collapsed .menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-right: 3px solid rgba(245, 158, 11, 0.7) !important;
+}
+
+    .sidebar.collapsed .menu-link:hover i {
+        color: var(--accent-color) !important;
+        transform: translate(-50%, -50%) scale(1.1) !important;
+    }
+
+/* Menu ativo no modo colapsado */
+.sidebar.collapsed .menu-link.active {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+    border-right: 3px solid var(--accent-color) !important;
+}
+
+    .sidebar.collapsed .menu-link.active i {
+        color: var(--accent-color) !important;
+        transform: translate(-50%, -50%) scale(1.05) !important;
+    }
+
+/* ===================================================================
+   CORREÇÃO 5: TOOLTIPS FUNCIONAIS NO MODO COLAPSADO
+   =================================================================== */
+
+.sidebar.collapsed .menu-tooltip {
+    position: absolute !important;
+    left: calc(var(--sidebar-collapsed-width) + 15px) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: var(--dark-color) !important;
+    color: white !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    white-space: nowrap !important;
+    box-shadow: var(--shadow-lg) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: all 0.3s ease !important;
+    z-index: 1001 !important;
+}
+
+    .sidebar.collapsed .menu-tooltip::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: -4px !important;
+        transform: translateY(-50%) !important;
+        border: 4px solid transparent !important;
+        border-right-color: var(--dark-color) !important;
+    }
+
+.sidebar.collapsed .menu-item:hover .menu-tooltip {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 6: VARIÁVEIS CSS CORRETAS
+   =================================================================== */
+
+:root {
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --topbar-height: 70px;
+}
+
+/* ===================================================================
+   CORREÇÃO 7: RESPONSIVIDADE CORRETA
+   =================================================================== */
+
+/* Desktop */
+@media (min-width: 1025px) {
+    .sidebar {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: var(--sidebar-width) !important;
+        height: 100vh !important;
+        z-index: 1000 !important;
+    }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width) !important;
+        }
+
+    .main-area {
+        margin-left: var(--sidebar-width) !important;
+        width: calc(100vw - var(--sidebar-width)) !important;
+    }
+
+    .sidebar.collapsed + .main-area {
+        margin-left: var(--sidebar-collapsed-width) !important;
+        width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+    }
+}
+
+/* Tablet e Mobile */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%) !important;
+        width: var(--sidebar-width) !important;
+    }
+
+        .sidebar.open {
+            transform: translateX(0) !important;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%) !important;
+            width: var(--sidebar-width) !important;
+        }
+
+            .sidebar.collapsed.open {
+                transform: translateX(0) !important;
+            }
+
+    .main-area {
+        margin-left: 0 !important;
+        width: 100vw !important;
+    }
+
+    .sidebar.collapsed + .main-area {
+        margin-left: 0 !important;
+        width: 100vw !important;
+    }
+}
+
+/* ===================================================================
+   CORREÇÃO 8: BRAND E COLLAPSE BUTTON
+   =================================================================== */
+
+/* Brand no modo colapsado */
+.sidebar.collapsed .brand-text-content {
+    width: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+}
+
+.sidebar.collapsed .brand-logo {
+    justify-content: center !important;
+}
+
+/* Botão de collapse posicionado corretamente */
+.sidebar.collapsed .sidebar-collapse-btn {
+    right: 50% !important;
+    transform: translateX(50%) !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 9: SEÇÕES DO MENU NO MODO COLAPSADO
+   =================================================================== */
+
+.sidebar.collapsed .menu-section-title {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+}
+
+/* ===================================================================
+   OVERRIDE FINAL COM MÁXIMA ESPECIFICIDADE
+   =================================================================== */
+
+/* Forçar aplicação das correções */
+body .sidebar {
+    width: var(--sidebar-width) !important;
+}
+
+    body .sidebar.collapsed {
+        width: var(--sidebar-collapsed-width) !important;
+    }
+
+body .main-area {
+    margin-left: var(--sidebar-width) !important;
+    width: calc(100vw - var(--sidebar-width)) !important;
+}
+
+body .sidebar.collapsed + .main-area {
+    margin-left: var(--sidebar-collapsed-width) !important;
+    width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+}
+
+/* Remover qualquer pseudo-elemento */
+body .sidebar.collapsed::after,
+body .sidebar.collapsed::before,
+html body .sidebar.collapsed::after,
+html body .sidebar.collapsed::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 10: GARANTIR FUNCIONAMENTO EM TODOS OS NAVEGADORES
+   =================================================================== */
+
+/* Chrome/Safari */
+@supports (-webkit-appearance: none) {
+    .sidebar.collapsed::after {
+        display: none !important;
+    }
+}
+
+/* Firefox */
+@-moz-document url-prefix() {
+    .sidebar.collapsed::after {
+        display: none !important;
+    }
+}
+
+/* Edge */
+@supports (-ms-ime-align: auto) {
+    .sidebar.collapsed::after {
+        display: none !important;
+    }
 }

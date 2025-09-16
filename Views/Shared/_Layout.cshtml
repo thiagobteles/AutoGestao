@@ -467,6 +467,529 @@
             });
         }
 
+                // ===================================================================
+        // OTIMIZAÇÃO AUTOMÁTICA DO LAYOUT
+        // Adicione este script no final da página ou em um arquivo separado
+        // ===================================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ===================================================================
+            // FUNÇÃO PARA OTIMIZAR ALTURA DA TABELA
+            // ===================================================================
+            function optimizeTableHeight() {
+                const tableContainer = document.querySelector('.table-responsive');
+                if (!tableContainer) return;
+
+                // Calcular altura disponível
+                const windowHeight = window.innerHeight;
+                const topbarHeight = document.querySelector('.topbar')?.offsetHeight || 60;
+                const headerHeight = document.querySelector('.dashboard-container > .d-flex:first-child')?.offsetHeight || 80;
+                const filtersHeight = document.querySelector('.card-modern:has([id*="filtro"])')?.offsetHeight || 120;
+                const listHeaderHeight = document.querySelector('.card-header-modern')?.offsetHeight || 50;
+                const paginationHeight = document.querySelector('.pagination')?.parentElement?.offsetHeight || 60;
+                const padding = 40; // Padding extra para respirar
+
+                const availableHeight = windowHeight - topbarHeight - headerHeight - filtersHeight - listHeaderHeight - paginationHeight - padding;
+
+                // Aplicar altura otimizada
+                const minHeight = Math.max(300, Math.min(availableHeight, 600));
+                tableContainer.style.maxHeight = `${availableHeight}px`;
+                tableContainer.style.minHeight = `${minHeight}px`;
+
+                console.log(`📊 Altura da tabela otimizada: ${availableHeight}px (min: ${minHeight}px)`);
+            }
+
+            // ===================================================================
+            // FUNÇÃO PARA COMPACTAR CABEÇALHO
+            // ===================================================================
+            function compactHeader() {
+                const headerContainer = document.querySelector('.dashboard-container > .d-flex:first-child');
+                if (!headerContainer) return;
+
+                // Adicionar classe para controle
+                headerContainer.classList.add('header-optimized');
+
+                // Otimizar botões
+                const buttons = headerContainer.querySelectorAll('.btn-modern');
+                buttons.forEach(btn => {
+                    btn.classList.add('btn-compact');
+                });
+
+                console.log('🎯 Cabeçalho otimizado');
+            }
+
+            // ===================================================================
+            // FUNÇÃO PARA OTIMIZAR CARDS DE FILTROS
+            // ===================================================================
+            function optimizeFilters() {
+                const filterCards = document.querySelectorAll('.card-modern');
+                filterCards.forEach(card => {
+                    const header = card.querySelector('.card-header-modern');
+                    if (header && header.textContent.includes('Filtros')) {
+                        card.classList.add('filter-compact');
+
+                        // Tornar colapsável se não for
+                        if (!header.hasAttribute('data-bs-toggle')) {
+                            header.style.cursor = 'pointer';
+                            header.addEventListener('click', function() {
+                                const body = card.querySelector('.card-body-modern');
+                                if (body) {
+                                    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+                                    header.classList.toggle('collapsed');
+                                }
+                            });
+                        }
+                    }
+                });
+
+                console.log('🔧 Filtros otimizados');
+            }
+
+            // ===================================================================
+            // FUNÇÃO PARA MONITORAR MUDANÇAS DE LAYOUT
+            // ===================================================================
+            function setupLayoutMonitoring() {
+                // Observer para mudanças no DOM
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                            // Re-otimizar quando conteúdo mudar
+                            setTimeout(() => {
+                                optimizeTableHeight();
+                            }, 100);
+                        }
+                    });
+                });
+
+                // Observar mudanças no container da grid
+                const gridContainer = document.getElementById('gridContainer');
+                if (gridContainer) {
+                    observer.observe(gridContainer, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+
+                console.log('👁️ Monitoramento de layout ativo');
+            }
+
+            // ===================================================================
+            // FUNÇÃO PARA REDIMENSIONAMENTO RESPONSIVO
+            // ===================================================================
+            let resizeTimeout;
+            function handleResize() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    optimizeTableHeight();
+
+                    // Adicionar classe de redimensionamento
+                    document.body.classList.add('resizing');
+                    setTimeout(() => {
+                        document.body.classList.remove('resizing');
+                    }, 300);
+
+                }, 150);
+            }
+
+            // ===================================================================
+            // FUNÇÃO PARA DETECTAR SIDEBAR COLAPSADO
+            // ===================================================================
+            function handleSidebarChange() {
+                const sidebar = document.getElementById('sidebar');
+                if (!sidebar) return;
+
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            setTimeout(() => {
+                                optimizeTableHeight();
+                                console.log('📱 Layout ajustado para mudança do sidebar');
+                            }, 350); // Aguardar transição
+                        }
+                    });
+                });
+
+                observer.observe(sidebar, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            }
+
+            // ===================================================================
+            // INICIALIZAÇÃO
+            // ===================================================================
+            function initLayoutOptimizer() {
+                // Aplicar otimizações iniciais
+                compactHeader();
+                optimizeFilters();
+
+                // Aguardar renderização completa
+                setTimeout(() => {
+                    optimizeTableHeight();
+                }, 100);
+
+                // Configurar monitoramento
+                setupLayoutMonitoring();
+                handleSidebarChange();
+
+                // Configurar redimensionamento
+                window.addEventListener('resize', handleResize);
+
+                // Otimizar após carregamento completo
+                window.addEventListener('load', () => {
+                    setTimeout(optimizeTableHeight, 200);
+                });
+            }
+
+            window.forceOptimize = function() {
+                optimizeTableHeight();
+            };
+
+            // Inicializar
+            initLayoutOptimizer();
+        });
+
+        // ===================================================================
+        // CSS ADICIONAL VIA JAVASCRIPT
+        // ===================================================================
+        const additionalCSS = `
+        /* Estilos aplicados via JavaScript */
+        .header-optimized {
+            margin-bottom: 1rem !important;
+            padding: 0.75rem 0 !important;
+        }
+
+        .btn-compact {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.875rem !important;
+        }
+
+        .filter-compact .card-header-modern {
+            padding: 0.875rem 1.25rem !important;
+        }
+
+        .filter-compact .card-body-modern {
+            padding: 1rem 1.25rem !important;
+        }
+
+        .resizing * {
+            transition: none !important;
+        }
+
+        /* Melhorar scroll da tabela */
+        .table-responsive {
+            scroll-behavior: smooth;
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        `;
+
+        // Aplicar CSS adicional
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = additionalCSS;
+        document.head.appendChild(styleSheet);
+
+
+
+                // ===================================================================
+        // CORREÇÃO DEFINITIVA - SISTEMA DE MENU ATIVO
+        // Substitua todo o JavaScript anterior por este
+        // ===================================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ===================================================================
+            // SISTEMA DE DETECÇÃO DE MENU ATIVO CORRIGIDO
+            // ===================================================================
+            function setCorrectActiveMenu() {
+                const currentPath = window.location.pathname.toLowerCase().trim();
+                const menuLinks = document.querySelectorAll('.sidebar .menu-link');
+
+                console.log('🔍 URL detectada:', currentPath);
+
+                // PRIMEIRO: Remover TODAS as classes active
+                menuLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                // SEGUNDO: Detectar o menu correto baseado na URL
+                let menuFound = false;
+
+                // Mapeamento exato de URLs
+                const exactMatches = {
+                    '/': 'Dashboard',
+                    '/home': 'Dashboard',
+                    '/home/index': 'Dashboard',
+                    '/veiculos': 'Veículos',
+                    '/veiculos/index': 'Veículos',
+                    '/clientes': 'Clientes',
+                    '/clientes/index': 'Clientes',
+                    '/vendedores': 'Vendedores',
+                    '/vendedores/index': 'Vendedores',
+                    '/vendas': 'Vendas',
+                    '/vendas/index': 'Vendas'
+                };
+
+                // Tentar correspondência exata primeiro
+                for (const [url, menuName] of Object.entries(exactMatches)) {
+                    if (currentPath === url || currentPath.endsWith(url)) {
+                        menuLinks.forEach(link => {
+                            const linkText = link.querySelector('.menu-link-text')?.textContent?.trim();
+                            if (linkText === menuName) {
+                                link.classList.add('active');
+                                menuFound = true;
+                                console.log('✅ Menu ativo (exato):', menuName);
+                                return;
+                            }
+                        });
+                        if (menuFound) break;
+                    }
+                }
+
+                // Se não encontrou correspondência exata, tentar por segmento
+                if (!menuFound) {
+                    const pathSegments = currentPath.split('/').filter(s => s.length > 0);
+                    const mainSegment = pathSegments[0] || 'home';
+
+                    console.log('🔍 Tentando por segmento:', mainSegment);
+
+                    const segmentMatches = {
+                        'home': 'Dashboard',
+                        'veiculos': 'Veículos',
+                        'clientes': 'Clientes',
+                        'vendedores': 'Vendedores',
+                        'vendas': 'Vendas'
+                    };
+
+                    const targetMenu = segmentMatches[mainSegment] || segmentMatches['home'];
+
+                    menuLinks.forEach(link => {
+                        const linkText = link.querySelector('.menu-link-text')?.textContent?.trim();
+                        if (linkText === targetMenu) {
+                            link.classList.add('active');
+                            menuFound = true;
+                            console.log('✅ Menu ativo (segmento):', targetMenu);
+                        }
+                    });
+                }
+
+                // Se ainda não encontrou, verificar pelo href do link
+                if (!menuFound) {
+                    console.log('🔍 Tentando por href dos links...');
+
+                    menuLinks.forEach(link => {
+                        const href = link.getAttribute('href')?.toLowerCase();
+                        if (href) {
+                            // Extrair a parte relevante do href
+                            const hrefPath = href.split('/').pop() || '';
+                            const currentSegment = currentPath.split('/').pop() || '';
+
+                            if (hrefPath === currentSegment && currentSegment !== '') {
+                                link.classList.add('active');
+                                menuFound = true;
+                                console.log('✅ Menu ativo (href):', link.querySelector('.menu-link-text')?.textContent?.trim());
+                            }
+                        }
+                    });
+                }
+
+                // Log final
+                if (!menuFound) {
+                    console.warn('⚠️ Nenhum menu correspondente encontrado para:', currentPath);
+                }
+            }
+
+            // ===================================================================
+            // CORRIGIR CLIQUES NOS MENUS
+            // ===================================================================
+            function setupMenuClicks() {
+                const menuLinks = document.querySelectorAll('.sidebar .menu-link');
+
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        // Não remover todos os active aqui - deixar para a próxima página
+                        console.log('🖱️ Menu clicado:', this.querySelector('.menu-link-text')?.textContent?.trim());
+
+                        // Apenas adicionar uma classe temporária para feedback visual
+                        this.classList.add('clicking');
+                        setTimeout(() => {
+                            this.classList.remove('clicking');
+                        }, 150);
+                    });
+                });
+            }
+
+            // ===================================================================
+            // REMOVER PSEUDO-ELEMENTOS PROBLEMÁTICOS
+            // ===================================================================
+            function removePseudoElements() {
+                // Criar style para forçar remoção
+                let style = document.getElementById('pseudo-remover');
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = 'pseudo-remover';
+                    document.head.appendChild(style);
+                }
+
+                style.textContent = `
+                    .sidebar.collapsed::after,
+                    .sidebar.collapsed::before,
+                    .sidebar::after,
+                    .sidebar::before {
+                        display: none !important;
+                        content: none !important;
+                        visibility: hidden !important;
+                        opacity: 0 !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                    }
+
+                    /* Estilo temporário para clique */
+                    .menu-link.clicking {
+                        background-color: rgba(245, 158, 11, 0.3) !important;
+                    }
+                `;
+            }
+
+            // ===================================================================
+            // CORRIGIR ESPAÇAMENTO DA SIDEBAR
+            // ===================================================================
+            function fixSidebarSpacing() {
+                const sidebar = document.getElementById('sidebar');
+                const mainArea = document.querySelector('.main-area');
+
+                if (!sidebar || !mainArea) return;
+
+                function applySpacing() {
+                    if (window.innerWidth <= 1024) {
+                        // Mobile - sem margem
+                        mainArea.style.marginLeft = '0px';
+                        mainArea.style.width = '100vw';
+                    } else {
+                        // Desktop
+                        const isCollapsed = sidebar.classList.contains('collapsed');
+                        const marginLeft = isCollapsed ? '80px' : '280px';
+                        const width = isCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 280px)';
+
+                        mainArea.style.marginLeft = marginLeft;
+                        mainArea.style.width = width;
+
+                        console.log('📐 Espaçamento aplicado:', { marginLeft, width, collapsed: isCollapsed });
+                    }
+                }
+
+                // Aplicar imediatamente
+                applySpacing();
+
+                // Monitorar mudanças na sidebar
+                const observer = new MutationObserver(() => {
+                    setTimeout(applySpacing, 50);
+                });
+
+                observer.observe(sidebar, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+
+                // Monitorar redimensionamento
+                window.addEventListener('resize', () => {
+                    setTimeout(applySpacing, 100);
+                });
+            }
+
+            // ===================================================================
+            // INICIALIZAÇÃO
+            // ===================================================================
+            function initialize() {
+                console.log('🚀 Iniciando correção do menu ativo...');
+
+                // Remover elementos problemáticos primeiro
+                removePseudoElements();
+
+                // Aguardar um pouco para garantir que o DOM está pronto
+                setTimeout(() => {
+                    // Corrigir o menu ativo
+                    setCorrectActiveMenu();
+
+                    // Configurar cliques
+                    setupMenuClicks();
+
+                    // Corrigir espaçamento
+                    fixSidebarSpacing();
+
+                }, 100);
+
+                // Re-aplicar após carregamento completo
+                window.addEventListener('load', () => {
+                    setTimeout(() => {
+                        setCorrectActiveMenu();
+                        fixSidebarSpacing();
+                    }, 200);
+                });
+
+                console.log('✅ Sistema de menu ativo inicializado');
+            }
+
+            // ===================================================================
+            // UTILITÁRIOS DE DEBUG
+            // ===================================================================
+            window.debugMenu = function() {
+                const currentPath = window.location.pathname;
+                const activeMenus = document.querySelectorAll('.menu-link.active');
+
+                console.log('=== DEBUG MENU ===');
+                console.log('URL atual:', currentPath);
+                console.log('Menus ativos encontrados:', activeMenus.length);
+
+                activeMenus.forEach((menu, index) => {
+                    const text = menu.querySelector('.menu-link-text')?.textContent?.trim();
+                    console.log(`Menu ativo ${index + 1}:`, text);
+                });
+            };
+
+            window.fixMenuManually = function() {
+                removePseudoElements();
+                setCorrectActiveMenu();
+                fixSidebarSpacing();
+            };
+
+            // INICIALIZAR
+            initialize();
+
+            // ===================================================================
+            // VERIFICAÇÃO PERIÓDICA (OPCIONAL - REMOVE SE CAUSAR PROBLEMAS)
+            // ===================================================================
+            /*
+            setInterval(() => {
+                const activeMenus = document.querySelectorAll('.menu-link.active');
+                if (activeMenus.length > 1) {
+                    console.log('🔄 Múltiplos menus ativos detectados, corrigindo...');
+                    setCorrectActiveMenu();
+                }
+            }, 10000); // A cada 10 segundos
+            */
+        });
+
+
+
         document.addEventListener('DOMContentLoaded', observeElements);
     </script>
 
