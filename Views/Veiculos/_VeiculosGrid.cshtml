@@ -3,20 +3,6 @@
 @using AutoGestao.Models
 @model VeiculosIndexViewModel
 
-@{
-    ViewData["GridType"] = "Veiculos";
-    ViewData["Controller"] = "Veiculos";
-    ViewData["GridId"] = "veiculosTable";
-    ViewData["Columns"] = new List<dynamic> {
-        new { Title = "Código", Style = "width: 100px; text-align: center;", Sortable = true, SortKey = "Codigo" },
-        new { Title = "Veículo", Style = "width: 200px;", Sortable = true, SortKey = "Marca" },
-        new { Title = "Ano", Style = "width: 100px; text-align: center;", Sortable = true, SortKey = "Ano" },
-        new { Title = "Placa", Style = "width: 120px; text-align: center;", Sortable = false, SortKey = "" },
-        new { Title = "Situação", Style = "width: 100px; text-align: center;", Sortable = true, SortKey = "Situacao" },
-        new { Title = "Preço", Style = "width: 140px; text-align: right;", Sortable = true, SortKey = "Preco" }
-    };
-}
-
 <div class="base-grid-container">
     <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
         <table class="table table-hover mb-0 base-grid-table veiculos-grid" id="veiculosTable">
@@ -73,15 +59,15 @@
                             </td>
                             <td>
                                 <div class="vehicle-info">
-                                    <div class="fw-semibold text-truncate">@item?.Marca?.Descricao @item?.Modelo?.Descricao</div>
-                                    <small class="text-muted text-truncate">@item?.Motorizacao • @item?.Combustivel.GetDescription()</small>
+                                    <div class="fw-semibold text-truncate">@item.Marca.Descricao @item.Modelo?.Descricao</div>
+                                    <small class="text-muted text-truncate">@item.Motorizacao • @item.Combustivel.GetDescription()</small>
                                 </div>
                             </td>
                             <td class="text-center">
-                                <span class="year-badge">@item?.AnoFabricacao/@item?.AnoModelo</span>
+                                <span class="year-badge">@item.AnoFabricacao/@item.AnoModelo</span>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-light text-dark">@item?.Placa</span>
+                                <span class="badge bg-light text-dark">@item.Placa</span>
                             </td>
                             <td class="text-center">
                                 @{
@@ -101,11 +87,11 @@
                                 </div>
                             </td>
                             <td class="text-center">
-                                <div class="dropdown">
+                                <div class="dropdown dropup">
                                     <button class="btn btn-sm btn-link p-1 actions-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-ellipsis-v text-muted"></i>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
+                                    <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="/Veiculos/Details/@item.Id"><i class="fas fa-eye me-2"></i>Visualizar</a></li>
                                         <li><a class="dropdown-item" href="/Veiculos/Edit/@item.Id"><i class="fas fa-edit me-2"></i>Editar</a></li>
                                         <li><hr class="dropdown-divider"></li>

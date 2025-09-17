@@ -36,8 +36,8 @@
                 <div class="grid-2 mb-3">
                     <div class="form-group-modern">
                         <label class="form-label-modern">Buscar</label>
-                        <input type="text" name="search" id="searchInput" class="form-control-modern" 
-                               placeholder="Marca, modelo, placa, código..." 
+                        <input type="text" name="search" id="searchInput" class="form-control-modern"
+                               placeholder="Marca, modelo, placa, código..."
                                value="@Model.Search" />
                     </div>
                     <div class="form-group-modern">
@@ -58,54 +58,53 @@
     <!-- Controles da Grid -->
     <div class="card-modern">
         <div class="card-header-modern">
-            <i class="fas fa-list"></i>
-            Lista de Veículos
-            <div class="ms-auto d-flex align-items-center gap-3">
-                <!-- Informações de registros -->
-                <span class="text-muted">
-                    Mostrando @Model.StartRecord-@Model.EndRecord de @Model.TotalRecords registros
-                </span>
-                
-                <!-- Seletor de quantidade por página -->
-                <div class="d-flex align-items-center gap-2">
-                    <span class="text-muted">Exibir:</span>
-                    <select id="pageSizeSelector" class="form-select form-select-sm" style="width: auto;">
-                        @foreach (var size in Model.PageSizeOptions)
-                        {
-                            <option value="@size" selected="@(Model.PageSize == size)">
-                                @Model.GetPageSizeText(size)
-                            </option>
-                        }
-                    </select>
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-list me-2"></i>
+                    <span>Lista de Veículos</span>
                 </div>
-                
-                <!-- Toggle de visualização -->
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-secondary active" onclick="toggleView('table')" id="btnTable">
-                        <i class="fas fa-table"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleView('grid')" id="btnGrid">
-                        <i class="fas fa-th"></i>
-                    </button>
+
+                <!-- Informações e controles em linha única -->
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Badge com total -->
+                    <span class="badge bg-primary">@Model.TotalRecords veículos</span>
+
+                    <!-- Informações de registros -->
+                    <span class="text-muted fs-sm">
+                        Mostrando @Model.StartRecord-@Model.EndRecord de @Model.TotalRecords registros
+                    </span>
+
+                    <!-- Seletor de quantidade por página -->
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted fs-sm">Exibir:</span>
+                        <select id="pageSizeSelector" class="form-select form-select-sm" style="width: 80px;">
+                            @foreach (var size in Model.PageSizeOptions)
+                            {
+                                <option value="@size" selected="@(Model.PageSize == size)">
+                                    @Model.GetPageSizeText(size)
+                                </option>
+                            }
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Container da Grid com Loading -->
         <div class="card-body-modern p-0 position-relative">
-            <div id="loadingOverlay" class="position-absolute w-100 h-100 d-none" 
+            <div id="loadingOverlay" class="position-absolute w-100 h-100 d-none"
                  style="background: rgba(255,255,255,0.8); z-index: 10;">
                 <div class="d-flex justify-content-center align-items-center h-100">
                     <div class="loading-spinner me-2"></div>
                     Carregando...
                 </div>
             </div>
-            
+
             <div id="gridContainer">
                 @await Html.PartialAsync("_VeiculosGrid", Model)
             </div>
         </div>
-        
+
         <!-- Paginação -->
         @if (Model.TotalPages > 1 && Model.PageSize != -1)
         {
@@ -122,19 +121,19 @@
                                 <i class="fas fa-angle-left"></i>
                             </button>
                         </li>
-                        
+
                         @{
                             var startPage = Math.Max(1, Model.CurrentPage - 2);
                             var endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
                         }
-                        
+
                         @for (int i = startPage; i <= endPage; i++)
                         {
                             <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
                                 <button class="page-link" onclick="changePage(@i)">@i</button>
                             </li>
                         }
-                        
+
                         <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
                             <button class="page-link" onclick="changePage(@(Model.CurrentPage + 1))" disabled="@(!Model.HasNextPage)">
                                 <i class="fas fa-angle-right"></i>
@@ -154,139 +153,7 @@
 
 @section Scripts {
     <script>
-        let currentView = 'table';
-        let isLoading = false;
-        
-        // Configurar eventos dos filtros
-        document.addEventListener('DOMContentLoaded', function() {
-            // Filtros com debounce para busca
-            let searchTimeout;
-            document.getElementById('searchInput').addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(aplicarFiltros, 500);
-            });
-            
-            // Outros filtros aplicam imediatamente
-            ['filterSituacao', 'orderBy', 'orderDirection']
-                .forEach(id => {
-                    document.getElementById(id).addEventListener('change', aplicarFiltros);
-                });
-            
-            // Seletor de tamanho de página
-            document.getElementById('pageSizeSelector').addEventListener('change', function() {
-                aplicarFiltros(1); // Volta para primeira página
-            });
-        });
-        
-        function aplicarFiltros(page = 1) {
-            if (isLoading) return;
-            
-            showLoading(true);
-            
-            const formData = new FormData(document.getElementById('filtrosForm'));
-            const pageSize = document.getElementById('pageSizeSelector').value;
-            
-            const params = new URLSearchParams();
-            params.append('page', page);
-            params.append('pageSize', pageSize);
-            
-            // Adicionar filtros
-            for (let [key, value] of formData.entries()) {
-                if (value) params.append(key, value);
-            }
-            
-            fetch(`/Veiculos/GetVeiculosAjax?${params.toString()}`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('gridContainer').innerHTML = html;
-                    updateUrl(params);
-                    
-                    // Restaurar visualização
-                    if (currentView === 'grid') {
-                        toggleView('grid');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    showToast('Erro ao carregar dados', 'error');
-                })
-                .finally(() => {
-                    showLoading(false);
-                });
-        }
-        
-        function changePage(page) {
-            aplicarFiltros(page);
-        }
-        
-        function showLoading(show) {
-            isLoading = show;
-            const overlay = document.getElementById('loadingOverlay');
-            if (show) {
-                overlay.classList.remove('d-none');
-            } else {
-                overlay.classList.add('d-none');
-            }
-        }
-        
-        function updateUrl(params) {
-            const newUrl = `${window.location.pathname}?${params.toString()}`;
-            window.history.replaceState({}, '', newUrl);
-        }
-        
-        function limparFiltros() {
-            document.getElementById('filtrosForm').reset();
-            document.getElementById('pageSizeSelector').value = '50';
-            aplicarFiltros(1);
-        }
-        
-        function toggleView(view) {
-            const tableView = document.getElementById('tableView');
-            const gridView = document.getElementById('gridView');
-            const btnTable = document.getElementById('btnTable');
-            const btnGrid = document.getElementById('btnGrid');
-            
-            currentView = view;
-            
-            btnTable.classList.remove('active');
-            btnGrid.classList.remove('active');
-            
-            if (view === 'table') {
-                tableView?.classList.remove('d-none');
-                gridView?.classList.add('d-none');
-                btnTable.classList.add('active');
-            } else {
-                tableView?.classList.add('d-none');
-                gridView?.classList.remove('d-none');
-                btnGrid.classList.add('active');
-            }
-        }
-        
-        function confirmarExclusao(id) {
-            if (confirm('Tem certeza que deseja excluir este veículo?')) {
-                window.location.href = `/Veiculos/Delete/${id}`;
-            }
-        }
-        
-        function exportarExcel() {
-            showToast('Exportação iniciada!', 'success');
-            // Implementar exportação
-        }
-        
-        // Função para ordenar colunas
-        function sortColumn(column) {
-            const currentOrder = document.getElementById('orderBy').value;
-            const currentDirection = document.getElementById('orderDirection').value;
-            
-            // Se já está ordenando por esta coluna, inverte a direção
-            if (currentOrder === column) {
-                document.getElementById('orderDirection').value = currentDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                document.getElementById('orderBy').value = column;
-                document.getElementById('orderDirection').value = 'asc';
-            }
-            
-            aplicarFiltros();
-        }
+        // Script será carregado automaticamente pelo grid-system.js
+        console.log('📋 Página de Veículos carregada com Grid System v2.0');
     </script>
 }
