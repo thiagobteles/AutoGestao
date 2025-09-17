@@ -1,5 +1,6 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
+using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
@@ -31,7 +32,7 @@ namespace AutoGestao.Controllers
             {
                 query = query.Where(v =>
                     v.Marca.GetDescription().Contains(search) ||
-                    v.Modelo.Contains(search) ||
+                    v.Modelo.Descricao.Contains(search) ||
                     v.Placa.Contains(search) ||
                     v.Codigo.Contains(search) ||
                     v.Proprietario != null && v.Proprietario.Nome.Contains(search));
@@ -74,40 +75,16 @@ namespace AutoGestao.Controllers
                     .ToListAsync();
             }
 
-            // Dados para filtros
-            var marcasDisponiveis = await _context.Veiculos
-                .Where(v => v.Marca != EnumMarcaVeiculo.Nenhum)
-                .Select(v => v.Marca)
-                .Distinct()
-                .OrderBy(m => m)
-                .ToListAsync();
-
-            var combustiveisDisponiveis = await _context.Veiculos
-                .Where(v => v.Combustivel != EnumCombustivelVeiculo.Nenhum)
-                .Select(v => v.Combustivel)
-                .Distinct()
-                .OrderBy(c => c)
-                .ToListAsync();
-
-            var anosDisponiveis = await _context.Veiculos
-                .Select(v => v.AnoModelo)
-                .Distinct()
-                .OrderByDescending(a => a)
-                .ToListAsync();
-
             var viewModel = new VeiculosIndexViewModel
             {
-                Veiculos = veiculos,
+                ListaObjeto = veiculos,
                 TotalRecords = totalRecords,
                 CurrentPage = page,
                 PageSize = pageSize,
                 Search = search,
-                Situacao = situacao,
+                Situacao = situacao != null ? (EnumSituacaoVeiculo)situacao : null,
                 OrderBy = orderBy,
                 OrderDirection = orderDirection,
-                MarcasDisponiveis = marcasDisponiveis,
-                CombustiveisDisponiveis = combustiveisDisponiveis,
-                AnosDisponiveis = anosDisponiveis,
                 TotalPages = pageSize == -1 ? 1 : (int)Math.Ceiling((double)totalRecords / pageSize)
             };
 
@@ -125,12 +102,9 @@ namespace AutoGestao.Controllers
         {
             var result = await Index(search, situacao, orderBy, orderDirection, pageSize, page);
 
-            if (result is ViewResult viewResult && viewResult.Model is VeiculosIndexViewModel model)
-            {
-                return PartialView("_VeiculosGrid", model);
-            }
-
-            return BadRequest();
+            return result is ViewResult viewResult && viewResult.Model is VeiculosIndexViewModel model
+                ? PartialView("_VeiculosGrid", model)
+                : (IActionResult)BadRequest();
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -147,12 +121,9 @@ namespace AutoGestao.Controllers
                 .Include(v => v.Despesas)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (veiculo == null)
-            {
-                return NotFound();
-            }
-
-            return View(veiculo);
+            return veiculo == null 
+                ? NotFound()
+                : View(veiculo);
         }
 
         public IActionResult Create()

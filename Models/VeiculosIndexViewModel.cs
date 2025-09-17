@@ -5,6 +5,7 @@ namespace AutoGestao.Models
 {
     public class VeiculosIndexViewModel : BaseViewModel<Veiculo>
     {
-       // Filtros Específicos para Veículos
+        // Filtros Específicos para Veículos
         public EnumSituacaoVeiculo? Situacao { get; set; }
+    }
 }

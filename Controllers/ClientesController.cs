@@ -1,5 +1,6 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
+using AutoGestao.Enumerador;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,8 @@ namespace AutoGestao.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(
             string? search = null,
-            string? tipoCliente = null,
-            string? status = null,
-            string? estado = null,
-            string? cidade = null,
+            EnumTipoPessoa? tipoCliente = null,
+            bool? status = null,
             string? orderBy = "Nome",
             string? orderDirection = "asc",
             int pageSize = 50,
@@ -36,24 +35,14 @@ namespace AutoGestao.Controllers
                     c.Celular != null && c.Celular.Contains(search));
             }
 
-            if (!string.IsNullOrEmpty(tipoCliente))
+            if (tipoCliente != null)
             {
                 query = query.Where(c => c.TipoCliente == tipoCliente);
             }
 
-            if (!string.IsNullOrEmpty(status))
+            if (status != null)
             {
-                query = query.Where(c => c.Status == status);
-            }
-
-            if (!string.IsNullOrEmpty(estado))
-            {
-                query = query.Where(c => c.Estado == estado);
-            }
-
-            if (!string.IsNullOrEmpty(cidade))
-            {
-                query = query.Where(c => c.Cidade == cidade);
+                query = query.Where(c => c.Ativo == status);
             }
 
             // Aplicar ordenação
@@ -94,36 +83,17 @@ namespace AutoGestao.Controllers
                     .ToListAsync();
             }
 
-            // Dados para filtros
-            var estadosDisponiveis = await _context.Clientes
-                .Where(c => !string.IsNullOrEmpty(c.Estado))
-                .Select(c => c.Estado)
-                .Distinct()
-                .OrderBy(e => e)
-                .ToListAsync();
-
-            var cidadesDisponiveis = await _context.Clientes
-                .Where(c => !string.IsNullOrEmpty(c.Cidade))
-                .Select(c => c.Cidade)
-                .Distinct()
-                .OrderBy(c => c)
-                .ToListAsync();
-
             var viewModel = new ClientesIndexViewModel
             {
-                Clientes = clientes,
+                ListaObjeto = clientes,
                 TotalRecords = totalRecords,
                 CurrentPage = page,
                 PageSize = pageSize,
                 Search = search,
                 TipoCliente = tipoCliente,
-                Status = status,
-                Estado = estado,
-                Cidade = cidade,
+                Ativo = status,
                 OrderBy = orderBy,
                 OrderDirection = orderDirection,
-                EstadosDisponiveis = estadosDisponiveis,
-                CidadesDisponiveis = cidadesDisponiveis,
                 TotalPages = pageSize == -1 ? 1 : (int)Math.Ceiling((double)totalRecords / pageSize)
             };
 
@@ -133,16 +103,14 @@ namespace AutoGestao.Controllers
         [HttpGet]
         public async Task<IActionResult> GetClientesAjax(
             string? search = null,
-            string? tipoCliente = null,
-            string? status = null,
-            string? estado = null,
-            string? cidade = null,
+            EnumTipoPessoa? tipoCliente = null,
+            bool? status = null,
             string? orderBy = "Nome",
             string? orderDirection = "asc",
             int pageSize = 50,
             int page = 1)
         {
-            var result = await Index(search, tipoCliente, status, estado, cidade, orderBy, orderDirection, pageSize, page);
+            var result = await Index(search, tipoCliente, status, orderBy, orderDirection, pageSize, page);
 
             if (result is ViewResult viewResult && viewResult.Model is ClientesIndexViewModel model)
             {

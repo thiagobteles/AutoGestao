@@ -1,3 +1,4 @@
+@using AutoGestao.Enumerador.Veiculo
 @using AutoGestao.Models
 @model VeiculosIndexViewModel
 @{
@@ -43,10 +44,10 @@
                         <label class="form-label-modern">Situação</label>
                         <select name="situacao" id="filterSituacao" class="form-select-modern">
                             <option value="">Todas</option>
-                            <option value="1" selected="@(Model.Situacao == 1)">📦 Estoque</option>
-                            <option value="2" selected="@(Model.Situacao == 2)">✅ Vendido</option>
-                            <option value="3" selected="@(Model.Situacao == 3)">🔒 Reservado</option>
-                            <option value="4" selected="@(Model.Situacao == 4)">🔧 Manutenção</option>
+                            <option value="1" selected="@(Model.Situacao == EnumSituacaoVeiculo.Estoque)">📦 Estoque</option>
+                            <option value="2" selected="@(Model.Situacao == EnumSituacaoVeiculo.Vendido)">✅ Vendido</option>
+                            <option value="3" selected="@(Model.Situacao == EnumSituacaoVeiculo.Reservado)">🔒 Reservado</option>
+                            <option value="4" selected="@(Model.Situacao == EnumSituacaoVeiculo.Manutencao)">🔧 Manutenção</option>
                         </select>
                     </div>
                 </div>
