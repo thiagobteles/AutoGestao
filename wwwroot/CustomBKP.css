@@ -1,8 +1,3 @@
-/* ===================================================================
-   AUTO-GESTÃO - CSS COMPLETO
-   Versão: 2.1 - Layout Sidebar Colapsável
-   =================================================================== */
-
 :root {
     --primary-color: #374151;
     --primary-dark: #1f2937;
@@ -23,10 +18,6 @@
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* ===================================================================
-   RESET E BASE
-   =================================================================== */
-
 * {
     margin: 0;
     padding: 0;
@@ -41,19 +32,11 @@ body {
     overflow-x: hidden;
 }
 
-/* ===================================================================
-   LAYOUT PRINCIPAL
-   =================================================================== */
-
 .layout-wrapper {
     display: flex;
     min-height: 100vh;
     width: 100%;
 }
-
-/* ===================================================================
-   SIDEBAR COLAPSÁVEL
-   =================================================================== */
 
 .sidebar {
     width: var(--sidebar-width);
@@ -93,10 +76,6 @@ body {
         .sidebar::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.3);
         }
-
-/* ===================================================================
-   SIDEBAR BRAND
-   =================================================================== */
 
 .sidebar-brand {
     padding: 1.5rem;
@@ -162,10 +141,6 @@ body {
     margin: 0;
 }
 
-/* ===================================================================
-   BOTÃO DE COLAPSAR
-   =================================================================== */
-
 .sidebar-collapse-btn {
     position: absolute;
     top: 1.75rem;
@@ -225,10 +200,6 @@ body {
 .sidebar-collapse-btn:hover::after {
     opacity: 1;
 }
-
-/* ===================================================================
-   MENU SIDEBAR
-   =================================================================== */
 
 .sidebar-menu {
     padding: 1rem 0;
@@ -343,10 +314,6 @@ body {
     width: 0;
 }
 
-/* ===================================================================
-   TOOLTIPS PARA MODO COLAPSADO
-   =================================================================== */
-
 .menu-tooltip {
     position: absolute;
     left: calc(100% + 10px);
@@ -393,10 +360,6 @@ body {
         transform: scale(1.1);
     }
 
-/* ===================================================================
-   ÁREA PRINCIPAL
-   =================================================================== */
-
 .main-area {
     flex: 1;
     display: flex;
@@ -411,10 +374,6 @@ body {
     margin-left: var(--sidebar-collapsed-width);
     width: calc(100vw - var(--sidebar-collapsed-width));
 }
-
-/* ===================================================================
-   TOPBAR
-   =================================================================== */
 
 .topbar {
     background: white;
@@ -477,10 +436,6 @@ body {
             font-weight: 500;
         }
 
-/* ===================================================================
-   CONTEÚDO PRINCIPAL
-   =================================================================== */
-
 .main-content {
     flex: 1;
     padding: 2rem;
@@ -490,10 +445,6 @@ body {
     overflow-x: auto;
     transition: all 0.3s ease;
 }
-
-/* ===================================================================
-   CARDS MODERNOS
-   =================================================================== */
 
 .card-modern {
     background: white;
@@ -525,10 +476,6 @@ body {
 .card-body-modern {
     padding: 2rem;
 }
-
-/* ===================================================================
-   CARDS DE ESTATÍSTICAS
-   =================================================================== */
 
 .stats-card {
     background: white;
@@ -1347,85 +1294,6 @@ body {
     }
 }
 
-/* ===================================================================
-   MODO ESCURO
-   =================================================================== */
-
-[data-theme="dark"] {
-    --primary-color: #4b5563;
-    --primary-dark: #374151;
-    --primary-light: #9ca3af;
-    --secondary-color: #6b7280;
-    --accent-color: #fbbf24;
-    --accent-hover: #f59e0b;
-    --success-color: #34d399;
-    --warning-color: #fbbf24;
-    --danger-color: #f87171;
-    --dark-color: #f9fafb;
-    --light-color: #1f2937;
-    --border-color: #374151;
-}
-
-    [data-theme="dark"] body {
-        background-color: #111827;
-        color: var(--dark-color);
-    }
-
-    [data-theme="dark"] .sidebar {
-        background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
-    }
-
-    [data-theme="dark"] .topbar {
-        background: #1f2937;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    [data-theme="dark"] .card-modern {
-        background: #1f2937;
-        border-color: var(--border-color);
-    }
-
-    [data-theme="dark"] .stats-card {
-        background: #1f2937;
-        border-color: var(--border-color);
-    }
-
-    [data-theme="dark"] .form-control-modern,
-    [data-theme="dark"] .form-select-modern {
-        background-color: #374151;
-        border-color: var(--border-color);
-        color: var(--dark-color);
-    }
-
-    [data-theme="dark"] .table-modern th {
-        background: #0f172a;
-    }
-
-    [data-theme="dark"] .table-modern td {
-        border-bottom-color: var(--border-color);
-    }
-
-    [data-theme="dark"] .table-modern tbody tr:hover {
-        background-color: #374151;
-    }
-
-    [data-theme="dark"] .menu-tooltip {
-        background: #0f172a;
-        border: 1px solid var(--border-color);
-    }
-
-        [data-theme="dark"] .menu-tooltip::before {
-            border-right-color: #0f172a;
-        }
-
-    [data-theme="dark"] .sidebar-collapse-btn {
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-        [data-theme="dark"] .sidebar-collapse-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
 /* Toggle do Modo Escuro */
 .theme-toggle {
     background: none;
@@ -1776,35 +1644,6 @@ th:hover .fa-sort {
     .sidebar-collapse-btn {
         transition: none;
     }
-}
-
-/* ===================================================================
-   MODO ESCURO - ATUALIZAÇÕES PARA GRIDS
-   =================================================================== */
-
-[data-theme="dark"] .table-responsive {
-    border-color: var(--border-color);
-}
-
-[data-theme="dark"] .sticky-top {
-    background: #0f172a !important;
-}
-
-[data-theme="dark"] .cliente-row:hover,
-[data-theme="dark"] .veiculo-row:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-[data-theme="dark"] .cliente-avatar {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="dark"] .vehicle-thumb {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="dark"] .vehicle-card-header {
-    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
 }
 
 /* ===================================================================
@@ -2384,18 +2223,6 @@ select.form-control {
     }
 
 /* ===================================================================
-   CORREÇÕES PARA MODO ESCURO
-   =================================================================== */
-
-[data-theme="dark"] .form-select-modern,
-[data-theme="dark"] .form-select {
-    background-color: #374151 !important;
-    border-color: var(--border-color) !important;
-    color: var(--dark-color) !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23f9fafb' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
-}
-
-/* ===================================================================
    CORREÇÕES ESPECÍFICAS PARA SELECTS DO SISTEMA
    =================================================================== */
 
@@ -2764,20 +2591,6 @@ select[name="status"],
 }
 
 /* ===================================================================
-   MODO ESCURO - AJUSTES PARA CAMPOS COMPACTOS
-   =================================================================== */
-
-[data-theme="dark"] .card-header-modern:hover {
-    background: linear-gradient(135deg, #374151 0%, #1f2937 100%) !important;
-}
-
-[data-theme="dark"] .form-control-modern,
-[data-theme="dark"] .form-select-modern {
-    background-color: #374151 !important;
-    border-color: #4b5563 !important;
-}
-
-/* ===================================================================
    CLASSES UTILITÁRIAS PARA CONTROLE FINO
    =================================================================== */
 
@@ -3138,21 +2951,6 @@ select[name="status"] {
 }
 
 /* ===================================================================
-   CORREÇÕES PARA MODO ESCURO
-   =================================================================== */
-
-[data-theme="dark"] #loadingOverlay {
-    background: rgba(31, 41, 55, 0.9) !important;
-}
-
-[data-theme="dark"] .form-control-modern,
-[data-theme="dark"] .form-select-modern {
-    background-color: #374151 !important;
-    border-color: #4b5563 !important;
-    color: #f9fafb !important;
-}
-
-/* ===================================================================
    CLASSES UTILITÁRIAS PARA CONTROLE MÁXIMO
    =================================================================== */
 
@@ -3243,4 +3041,3159 @@ body .form-select-modern,
 body .form-select {
     padding: 0.5rem 0.75rem !important;
     min-height: 34px !important;
+}
+
+/* ===================================================================
+   RESET E BASE PARA GARANTIR FUNCIONAMENTO
+   =================================================================== */
+
+/* Forçar aplicação das regras do cabeçalho */
+body .dashboard-container,
+.dashboard-container {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+    /* ===================================================================
+   CABEÇALHO COMPACTO FUNCIONAL
+   =================================================================== */
+
+    /* Container principal do cabeçalho */
+    .dashboard-container > .d-flex:first-child {
+        margin-bottom: 1rem !important;
+        padding: 0.75rem 0 !important;
+        min-height: auto !important;
+        align-items: center !important;
+    }
+
+/* Título principal */
+.page-title {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+}
+
+    /* Ícone do título */
+    .page-title i {
+        font-size: 1.3rem !important;
+        margin-right: 0.5rem !important;
+    }
+
+/* Subtítulo */
+.page-subtitle {
+    font-size: 0.875rem !important;
+    margin-bottom: 0 !important;
+    opacity: 0.8 !important;
+    line-height: 1.2 !important;
+}
+
+/* ===================================================================
+   BOTÕES DO CABEÇALHO OTIMIZADOS
+   =================================================================== */
+
+/* Container dos botões */
+.dashboard-container > .d-flex:first-child .d-flex {
+    gap: 0.75rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* Botões do cabeçalho */
+.dashboard-container > .d-flex:first-child .btn-modern {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+    min-height: 36px !important;
+    white-space: nowrap !important;
+}
+
+/* ===================================================================
+   MAXIMIZAR ESPAÇO PARA CONTEÚDO
+   =================================================================== */
+
+/* Aumentar altura disponível para tabelas */
+.table-responsive {
+    max-height: calc(100vh - 320px) !important;
+    min-height: 450px !important;
+    overflow-y: auto !important;
+}
+
+/* Garantir que o container da tabela use todo espaço */
+.card-modern:has(.table-responsive) {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+    .card-modern:has(.table-responsive) .card-body-modern {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 0 !important;
+    }
+
+/* ===================================================================
+   OTIMIZAÇÃO DO MAIN CONTENT
+   =================================================================== */
+
+/* Container principal mais eficiente */
+.main-content {
+    padding: 1.25rem 1.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: calc(100vh - 70px) !important;
+}
+
+/* Dashboard container flexível */
+.dashboard-container {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+    /* ===================================================================
+   ESPAÇAMENTOS OTIMIZADOS
+   =================================================================== */
+
+    /* Reduzir espaços entre cards */
+    .dashboard-container > .card-modern + .card-modern {
+        margin-top: 1rem !important;
+    }
+
+/* Card de filtros mais compacto */
+.card-modern .card-header-modern {
+    padding: 1rem 1.25rem !important;
+}
+
+.card-modern .card-body-modern {
+    padding: 1.25rem !important;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE MELHORADA
+   =================================================================== */
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .main-content {
+        padding: 1.5rem 2rem !important;
+    }
+
+    .dashboard-container > .d-flex:first-child {
+        margin-bottom: 1.25rem !important;
+    }
+
+    .table-responsive {
+        max-height: calc(100vh - 340px) !important;
+        min-height: 500px !important;
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .main-content {
+        padding: 1rem 1.25rem !important;
+    }
+
+    .page-title {
+        font-size: 1.4rem !important;
+    }
+
+    .table-responsive {
+        max-height: calc(100vh - 300px) !important;
+        min-height: 400px !important;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .main-content {
+        padding: 1rem !important;
+    }
+
+    .dashboard-container > .d-flex:first-child {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .page-title {
+        font-size: 1.3rem !important;
+        margin-bottom: 0.125rem !important;
+    }
+
+    .dashboard-container > .d-flex:first-child .d-flex {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    .dashboard-container > .d-flex:first-child .btn-modern {
+        flex: 1 !important;
+        min-width: 120px !important;
+        justify-content: center !important;
+    }
+
+    .table-responsive {
+        max-height: calc(100vh - 280px) !important;
+        min-height: 350px !important;
+    }
+}
+
+/* ===================================================================
+   SIDEBAR COLAPSADO - APROVEITAR ESPAÇO EXTRA
+   =================================================================== */
+
+.sidebar.collapsed ~ .main-area .main-content {
+    padding: 1.25rem 2.25rem !important;
+}
+
+.sidebar.collapsed ~ .main-area .table-responsive {
+    max-height: calc(100vh - 320px) !important;
+}
+
+@media (min-width: 1024px) {
+    .sidebar.collapsed ~ .main-area .main-content {
+        padding: 1.5rem 2.5rem !important;
+    }
+
+    .sidebar.collapsed ~ .main-area .table-responsive {
+        max-height: calc(100vh - 340px) !important;
+        min-height: 520px !important;
+    }
+}
+
+/* ===================================================================
+   CORREÇÕES ESPECÍFICAS PARA LAYOUT FLEX
+   =================================================================== */
+
+/* Garantir que cards de lista ocupem todo espaço disponível */
+.dashboard-container > .card-modern:last-child {
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+/* Header da lista de veículos */
+.card-header-modern {
+    flex-shrink: 0 !important;
+}
+
+/* ===================================================================
+   AJUSTES PARA MELHOR APROVEITAMENTO VERTICAL
+   =================================================================== */
+
+/* Remover margins desnecessárias do final */
+.dashboard-container > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Otimizar altura do topbar */
+.topbar {
+    height: 60px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Main area otimizada */
+.main-area {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+}
+
+/* ===================================================================
+   CORREÇÕES PARA CONTEÚDO FLEXÍVEL
+   =================================================================== */
+
+/* Fazer tabela crescer para ocupar espaço disponível */
+.table-responsive {
+    flex: 1 !important;
+    min-height: 300px !important;
+}
+
+/* Container da grid flexível */
+#gridContainer {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* ===================================================================
+   OVERRIDE FINAL PARA GARANTIR FUNCIONAMENTO
+   =================================================================== */
+
+/* Força aplicação das regras principais */
+body .dashboard-container > .d-flex:first-child {
+    margin-bottom: 1rem !important;
+    padding: 0.75rem 0 !important;
+}
+
+body .page-title {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+body .page-subtitle {
+    font-size: 0.875rem !important;
+    margin-bottom: 0 !important;
+}
+
+body .main-content {
+    padding: 1.25rem 1.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+body .table-responsive {
+    max-height: calc(100vh - 320px) !important;
+    min-height: 450px !important;
+    flex: 1 !important;
+}
+/* ===================================================================
+   CORREÇÃO COMPLETA - SIDEBAR E ESPAÇAMENTO
+   Substitua as regras anteriores por estas (corrige todos os problemas)
+   =================================================================== */
+
+/* ===================================================================
+   RESET COMPLETO - REMOVER PROBLEMAS ANTERIORES
+   =================================================================== */
+
+/* Remover qualquer pseudo-elemento problemático */
+.sidebar.collapsed::after,
+.sidebar.collapsed::before,
+.sidebar::after,
+.sidebar::before {
+    display: none !important;
+    content: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 1: SISTEMA DE MENU ATIVO FUNCIONAL
+   =================================================================== */
+
+/* Reset de todos os estados ativos */
+.sidebar .menu-link {
+    background-color: transparent !important;
+    border-right: 3px solid transparent !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease !important;
+}
+
+    /* Estado hover */
+    .sidebar .menu-link:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-right-color: var(--accent-color) !important;
+    }
+
+    /* Menu ativo - APENAS quando realmente ativo */
+    .sidebar .menu-link.active {
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        color: white !important;
+        border-right-color: var(--accent-color) !important;
+    }
+
+/* ===================================================================
+   CORREÇÃO 2: ESPAÇAMENTO CORRETO QUANDO COLAPSADO
+   =================================================================== */
+
+/* Sidebar colapsada - manter largura correta */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width) !important;
+    min-width: var(--sidebar-collapsed-width) !important;
+}
+
+/* Main area - ajustar margem corretamente */
+.main-area {
+    margin-left: var(--sidebar-width) !important;
+    width: calc(100vw - var(--sidebar-width)) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Quando sidebar colapsado */
+.sidebar.collapsed + .main-area {
+    margin-left: var(--sidebar-collapsed-width) !important;
+    width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 3: ÍCONES PERFEITAMENTE CENTRALIZADOS NO MODO COLAPSADO
+   =================================================================== */
+
+/* Container do menu no modo colapsado */
+.sidebar.collapsed .menu-item {
+    width: 100% !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* Link do menu colapsado */
+.sidebar.collapsed .menu-link {
+    width: var(--sidebar-collapsed-width) !important;
+    height: 60px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    border-right: 3px solid transparent !important;
+}
+
+    /* Ícones centralizados */
+    .sidebar.collapsed .menu-link i {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        font-size: 1.1rem !important;
+        margin: 0 !important;
+        width: auto !important;
+        height: auto !important;
+    }
+
+/* Esconder texto no modo colapsado */
+.sidebar.collapsed .menu-link-text {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 4: ESTADOS CORRETOS NO MODO COLAPSADO
+   =================================================================== */
+
+/* Hover no modo colapsado */
+.sidebar.collapsed .menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-right: 3px solid rgba(245, 158, 11, 0.7) !important;
+}
+
+    .sidebar.collapsed .menu-link:hover i {
+        color: var(--accent-color) !important;
+        transform: translate(-50%, -50%) scale(1.1) !important;
+    }
+
+/* Menu ativo no modo colapsado */
+.sidebar.collapsed .menu-link.active {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+    border-right: 3px solid var(--accent-color) !important;
+}
+
+    .sidebar.collapsed .menu-link.active i {
+        color: var(--accent-color) !important;
+        transform: translate(-50%, -50%) scale(1.05) !important;
+    }
+
+/* ===================================================================
+   CORREÇÃO 5: TOOLTIPS FUNCIONAIS NO MODO COLAPSADO
+   =================================================================== */
+
+.sidebar.collapsed .menu-tooltip {
+    position: absolute !important;
+    left: calc(var(--sidebar-collapsed-width) + 15px) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: var(--dark-color) !important;
+    color: white !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    white-space: nowrap !important;
+    box-shadow: var(--shadow-lg) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: all 0.3s ease !important;
+    z-index: 1001 !important;
+}
+
+    .sidebar.collapsed .menu-tooltip::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: -4px !important;
+        transform: translateY(-50%) !important;
+        border: 4px solid transparent !important;
+        border-right-color: var(--dark-color) !important;
+    }
+
+.sidebar.collapsed .menu-item:hover .menu-tooltip {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 6: VARIÁVEIS CSS CORRETAS
+   =================================================================== */
+
+:root {
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --topbar-height: 70px;
+}
+
+/* ===================================================================
+   CORREÇÃO 7: RESPONSIVIDADE CORRETA
+   =================================================================== */
+
+/* Desktop */
+@media (min-width: 1025px) {
+    .sidebar {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: var(--sidebar-width) !important;
+        height: 100vh !important;
+        z-index: 1000 !important;
+    }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width) !important;
+        }
+
+    .main-area {
+        margin-left: var(--sidebar-width) !important;
+        width: calc(100vw - var(--sidebar-width)) !important;
+    }
+
+    .sidebar.collapsed + .main-area {
+        margin-left: var(--sidebar-collapsed-width) !important;
+        width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+    }
+}
+
+/* Tablet e Mobile */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%) !important;
+        width: var(--sidebar-width) !important;
+    }
+
+        .sidebar.open {
+            transform: translateX(0) !important;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%) !important;
+            width: var(--sidebar-width) !important;
+        }
+
+            .sidebar.collapsed.open {
+                transform: translateX(0) !important;
+            }
+
+    .main-area {
+        margin-left: 0 !important;
+        width: 100vw !important;
+    }
+
+    .sidebar.collapsed + .main-area {
+        margin-left: 0 !important;
+        width: 100vw !important;
+    }
+}
+
+/* ===================================================================
+   CORREÇÃO 8: BRAND E COLLAPSE BUTTON
+   =================================================================== */
+
+/* Brand no modo colapsado */
+.sidebar.collapsed .brand-text-content {
+    width: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+}
+
+.sidebar.collapsed .brand-logo {
+    justify-content: center !important;
+}
+
+/* Botão de collapse posicionado corretamente */
+.sidebar.collapsed .sidebar-collapse-btn {
+    right: 50% !important;
+    transform: translateX(50%) !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 9: SEÇÕES DO MENU NO MODO COLAPSADO
+   =================================================================== */
+
+.sidebar.collapsed .menu-section-title {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+}
+
+/* ===================================================================
+   OVERRIDE FINAL COM MÁXIMA ESPECIFICIDADE
+   =================================================================== */
+
+/* Forçar aplicação das correções */
+body .sidebar {
+    width: var(--sidebar-width) !important;
+}
+
+    body .sidebar.collapsed {
+        width: var(--sidebar-collapsed-width) !important;
+    }
+
+body .main-area {
+    margin-left: var(--sidebar-width) !important;
+    width: calc(100vw - var(--sidebar-width)) !important;
+}
+
+body .sidebar.collapsed + .main-area {
+    margin-left: var(--sidebar-collapsed-width) !important;
+    width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+}
+
+/* Remover qualquer pseudo-elemento */
+body .sidebar.collapsed::after,
+body .sidebar.collapsed::before,
+html body .sidebar.collapsed::after,
+html body .sidebar.collapsed::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* ===================================================================
+   CORREÇÃO 10: GARANTIR FUNCIONAMENTO EM TODOS OS NAVEGADORES
+   =================================================================== */
+
+/* Chrome/Safari */
+@supports (-webkit-appearance: none) {
+    .sidebar.collapsed::after {
+        display: none !important;
+    }
+}
+
+/* Firefox */
+@-moz-document url-prefix() {
+    .sidebar.collapsed::after {
+        display: none !important;
+    }
+}
+
+/* Edge */
+@supports (-ms-ime-align: auto) {
+    .sidebar.collapsed::after {
+        display: none !important;
+    }
+}
+
+/* ===================================================================
+   ANIMAÇÕES E TRANSIÇÕES PARA GRID - Adicionar ao final do custom.css
+   =================================================================== */
+
+/* ===================================================================
+   ANIMAÇÕES DE ENTRADA
+   =================================================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+/* ===================================================================
+   CLASSES DE ANIMAÇÃO
+   =================================================================== */
+
+.animate-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.scale-in {
+    animation: scaleIn 0.4s ease-out;
+}
+
+/* ===================================================================
+   ANIMAÇÕES ESPECÍFICAS DA GRID
+   =================================================================== */
+
+/* Animação das linhas da tabela ao carregar */
+.base-grid-table tbody tr {
+    animation: fadeInUp 0.4s ease-out;
+    animation-fill-mode: both;
+}
+
+    .base-grid-table tbody tr:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .base-grid-table tbody tr:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .base-grid-table tbody tr:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .base-grid-table tbody tr:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+
+    .base-grid-table tbody tr:nth-child(5) {
+        animation-delay: 0.3s;
+    }
+
+    .base-grid-table tbody tr:nth-child(n+6) {
+        animation-delay: 0.35s;
+    }
+
+/* ===================================================================
+   LOADING SKELETON
+   =================================================================== */
+
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.base-grid-table.loading tbody tr {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.base-grid-table.loading .badge-compact,
+.base-grid-table.loading .cliente-avatar {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+    color: transparent;
+}
+
+/* ===================================================================
+   HOVER ANIMATIONS
+   =================================================================== */
+
+.base-grid-table tbody tr {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .base-grid-table tbody tr:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+.badge-compact {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .badge-compact:hover {
+        transform: scale(1.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+.actions-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .actions-btn:hover {
+        transform: scale(1.2) rotate(90deg);
+        background-color: rgba(55, 65, 81, 0.15) !important;
+    }
+
+/* ===================================================================
+   SORT ANIMATIONS
+   =================================================================== */
+
+.sort-icon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .sort-icon:hover {
+        transform: scale(1.2);
+    }
+
+    .sort-icon.fa-sort-up {
+        animation: sortUp 0.3s ease-out;
+    }
+
+    .sort-icon.fa-sort-down {
+        animation: sortDown 0.3s ease-out;
+    }
+
+@keyframes sortUp {
+    0% {
+        transform: translateY(2px);
+    }
+
+    50% {
+        transform: translateY(-2px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes sortDown {
+    0% {
+        transform: translateY(-2px);
+    }
+
+    50% {
+        transform: translateY(2px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* ===================================================================
+   DROPDOWN ANIMATIONS
+   =================================================================== */
+
+.dropdown-menu {
+    animation: dropdownShow 0.2s ease-out;
+    transform-origin: top;
+}
+
+@keyframes dropdownShow {
+    0% {
+        opacity: 0;
+        transform: scaleY(0.8) translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scaleY(1) translateY(0);
+    }
+}
+
+.dropdown-item {
+    transition: all 0.2s ease;
+    transform: translateX(0);
+}
+
+    .dropdown-item:hover {
+        transform: translateX(4px);
+    }
+
+/* ===================================================================
+   TOAST ANIMATIONS MELHORADAS
+   =================================================================== */
+
+.toast-modern {
+    animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .toast-modern.hide {
+        animation: toastSlideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+@keyframes toastSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(100%) scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes toastSlideOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(100%) scale(0.8);
+    }
+}
+
+/* ===================================================================
+   CARD ANIMATIONS
+   =================================================================== */
+
+.card-modern {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .card-modern:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+/* ===================================================================
+   BUTTON ANIMATIONS
+   =================================================================== */
+
+.btn-modern {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-modern:active {
+        transform: translateY(0);
+        transition: all 0.1s;
+    }
+
+/* ===================================================================
+   LOADING OVERLAY ANIMATIONS
+   =================================================================== */
+
+#loadingOverlay {
+    transition: all 0.3s ease;
+}
+
+    #loadingOverlay:not(.d-none) {
+        animation: loadingFadeIn 0.3s ease;
+    }
+
+@keyframes loadingFadeIn {
+    0% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+
+    100% {
+        opacity: 1;
+        backdrop-filter: blur(2px);
+    }
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* ===================================================================
+   MICRO-INTERACTIONS
+   =================================================================== */
+
+/* Ripple effect para botões */
+.btn-modern {
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-modern::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-modern:active::after {
+        width: 300px;
+        height: 300px;
+    }
+
+/* Efeito de foco melhorado */
+.form-control-modern:focus,
+.form-select-modern:focus {
+    transform: scale(1.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===================================================================
+   SCROLL ANIMATIONS
+   =================================================================== */
+
+.table-responsive {
+    scroll-behavior: smooth;
+}
+
+    /* Custom scrollbar com animação */
+    .table-responsive::-webkit-scrollbar-thumb {
+        transition: background-color 0.3s ease;
+    }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background-color: var(--primary-color);
+        }
+
+/* ===================================================================
+   SIDEBAR ANIMATIONS MELHORADAS
+   =================================================================== */
+
+.sidebar {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .sidebar.collapsed .menu-link i {
+        animation: iconBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+@keyframes iconBounce {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* ===================================================================
+   RESPONSIVE ANIMATIONS
+   =================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ===================================================================
+   HIGH CONTRAST MODE
+   =================================================================== */
+
+@media (prefers-contrast: high) {
+    .base-grid-table tbody tr:hover {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
+
+    .badge-compact {
+        border: 2px solid currentColor;
+    }
+}
+
+/* ===================================================================
+   PERFORMANCE OPTIMIZATIONS
+   =================================================================== */
+
+/*.base-grid-table,
+.base-grid-table *,
+.btn-modern,
+.card-modern {
+    will-change: transform;
+}*/
+
+/* Usar transform3d para forçar aceleração de hardware */
+/*.base-grid-table tbody tr:hover {
+        transform: translate3d(4px, 0, 0);
+    }
+
+    .card-modern:hover {
+        transform: translate3d(0, -4px, 0);
+    }*/
+
+/* ===================================================================
+   PRINT STYLES
+   =================================================================== */
+
+@media print {
+    .base-grid-table tbody tr,
+    .card-modern,
+    .btn-modern {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ===================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   =================================================================== */
+
+/* Indicador visual para elementos focáveis via teclado */
+.base-grid-table tbody tr:focus,
+.sort-icon:focus,
+.actions-btn:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    animation: focusPulse 2s infinite;
+}
+
+@keyframes focusPulse {
+    0%, 100% {
+        outline-color: var(--accent-color);
+    }
+
+    50% {
+        outline-color: transparent;
+    }
+}
+
+/* ===================================================================
+   ESTADOS DE ERRO E SUCESSO
+   =================================================================== */
+
+.grid-row-error {
+    animation: errorShake 0.5s ease-in-out;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.grid-row-success {
+    animation: successPulse 0.8s ease-in-out;
+    background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+@keyframes errorShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-2px);
+    }
+
+    20%, 40%, 60%, 80% {
+        transform: translateX(2px);
+    }
+}
+
+@keyframes successPulse {
+    0% {
+        background-color: rgba(16, 185, 129, 0.3);
+    }
+
+    100% {
+        background-color: rgba(16, 185, 129, 0.1);
+    }
+}
+
+/* ===================================================================
+   LOADING STATES MAIS SOFISTICADOS
+   =================================================================== */
+
+.grid-loading-skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+    .grid-loading-skeleton::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        animation: shimmer 2s infinite;
+        content: '';
+    }
+
+/* ===================================================================
+   FINALIZAÇÕES E POLIMENTOS
+   =================================================================== */
+
+/* Suavizar todas as transições */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Otimizar performance do scroll */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Melhorar a renderização de texto */
+.base-grid-table {
+    text-rendering: optimizeLegibility;
+}
+
+
+/* ===================================================================
+   ESTILOS PARA GRID BASE - Adicionar ao final do custom.css
+   =================================================================== */
+
+/* ===================================================================
+   GRID BASE - ESTILOS GERAIS
+   =================================================================== */
+
+.base-grid-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.base-grid-table {
+    width: 100%;
+    table-layout: fixed; /* Força larguras fixas */
+}
+
+    /* ===================================================================
+   CABEÇALHO DA GRID
+   =================================================================== */
+
+    .base-grid-table thead th {
+        background: var(--primary-dark) !important;
+        color: white !important;
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 1rem 0.75rem;
+        border: none;
+        white-space: nowrap;
+        vertical-align: middle;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+/* Ícones de ordenação */
+.sort-icon {
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+    .sort-icon:hover {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+    .sort-icon.fa-sort-up,
+    .sort-icon.fa-sort-down {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+/* ===================================================================
+   LINHAS DA GRID
+   =================================================================== */
+
+.base-grid-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+    .base-grid-table tbody tr:hover {
+        background-color: rgba(55, 65, 81, 0.05);
+        transform: translateX(2px);
+    }
+
+    .base-grid-table tbody tr.grid-row {
+        cursor: pointer;
+    }
+
+        .base-grid-table tbody tr.grid-row:hover {
+            background-color: rgba(55, 65, 81, 0.08);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+/* ===================================================================
+   CÉLULAS DA GRID
+   =================================================================== */
+
+.base-grid-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border: none;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+    /* Campos que podem quebrar linha controladamente */
+    .base-grid-table td .vehicle-info,
+    .base-grid-table td .contato-display,
+    .base-grid-table td .data-display {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+        .base-grid-table td .vehicle-info div,
+        .base-grid-table td .contato-display div,
+        .base-grid-table td .documento-display {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+/* ===================================================================
+   BADGES COMPACTOS
+   =================================================================== */
+
+.badge-compact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: default;
+}
+
+    .badge-compact.badge-primary {
+        background-color: rgba(55, 65, 81, 0.15);
+        color: var(--primary-color);
+    }
+
+    .badge-compact.badge-success {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: var(--success-color);
+    }
+
+    .badge-compact.badge-warning {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: var(--warning-color);
+    }
+
+    .badge-compact.badge-danger {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: var(--danger-color);
+    }
+
+    .badge-compact.badge-secondary {
+        background-color: rgba(156, 163, 175, 0.15);
+        color: var(--secondary-color);
+    }
+
+/* ===================================================================
+   AVATAR DE CLIENTE
+   =================================================================== */
+
+.cliente-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(55, 65, 81, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+}
+
+/* ===================================================================
+   BOTÃO DE AÇÕES
+   =================================================================== */
+
+.actions-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0.25rem !important;
+    line-height: 1 !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+    .actions-btn:hover {
+        background-color: rgba(55, 65, 81, 0.1) !important;
+        transform: scale(1.1) !important;
+    }
+
+    .actions-btn:focus {
+        box-shadow: 0 0 0 2px rgba(55, 65, 81, 0.2) !important;
+    }
+
+/* ===================================================================
+   DROPDOWN DE AÇÕES
+   =================================================================== */
+
+.dropdown-menu {
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0;
+    min-width: 150px;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+    .dropdown-item:hover {
+        background-color: var(--light-color);
+        color: var(--primary-dark);
+    }
+
+    .dropdown-item i {
+        width: 16px;
+        font-size: 0.75rem;
+    }
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+/* ===================================================================
+   ELEMENTOS DE EXIBIÇÃO ESPECÍFICOS
+   =================================================================== */
+
+/* Badge de ano */
+.year-badge {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+/* Exibição de preços */
+.price-display {
+    text-align: right;
+}
+
+    .price-display .fw-bold {
+        font-size: 0.9rem;
+    }
+
+/* Exibição de dados com limite de largura */
+.min-width-0 {
+    min-width: 0;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE DA GRID
+   =================================================================== */
+
+/* Larguras específicas das colunas para diferentes grids */
+
+/* Grid de Veículos */
+.base-grid-table.veiculos-grid th:nth-child(1) {
+    width: 100px;
+}
+/* Código */
+.base-grid-table.veiculos-grid th:nth-child(2) {
+    width: 200px;
+}
+/* Veículo */
+.base-grid-table.veiculos-grid th:nth-child(3) {
+    width: 100px;
+}
+/* Ano */
+.base-grid-table.veiculos-grid th:nth-child(4) {
+    width: 120px;
+}
+/* Placa */
+.base-grid-table.veiculos-grid th:nth-child(5) {
+    width: 100px;
+}
+/* Situação */
+.base-grid-table.veiculos-grid th:nth-child(6) {
+    width: 140px;
+}
+/* Preço */
+.base-grid-table.veiculos-grid th:nth-child(7) {
+    width: 50px;
+}
+/* Ações */
+
+/* Grid de Clientes */
+.base-grid-table.clientes-grid th:nth-child(1) {
+    width: 250px;
+}
+/* Cliente */
+.base-grid-table.clientes-grid th:nth-child(2) {
+    width: 80px;
+}
+/* Tipo */
+.base-grid-table.clientes-grid th:nth-child(3) {
+    width: 150px;
+}
+/* Documento */
+.base-grid-table.clientes-grid th:nth-child(4) {
+    width: 180px;
+}
+/* Contato */
+.base-grid-table.clientes-grid th:nth-child(5) {
+    width: 120px;
+}
+/* Localização */
+.base-grid-table.clientes-grid th:nth-child(6) {
+    width: 80px;
+}
+/* Status */
+.base-grid-table.clientes-grid th:nth-child(7) {
+    width: 120px;
+}
+/* Cadastro */
+.base-grid-table.clientes-grid th:nth-child(8) {
+    width: 50px;
+}
+/* Ações */
+
+/* ===================================================================
+   RESPONSIVIDADE MOBILE
+   =================================================================== */
+
+@media (max-width: 768px) {
+    .base-grid-table {
+        font-size: 0.8rem;
+    }
+
+        .base-grid-table td {
+            padding: 0.5rem 0.375rem;
+        }
+
+        .base-grid-table thead th {
+            padding: 0.75rem 0.375rem;
+            font-size: 0.8rem;
+        }
+
+        /* Ocultar algumas colunas em mobile */
+        .base-grid-table th:nth-child(3),
+        .base-grid-table td:nth-child(3),
+        .base-grid-table th:nth-child(5),
+        .base-grid-table td:nth-child(5) {
+            display: none;
+        }
+
+    .cliente-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .badge-compact {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ===================================================================
+   LOADING STATE
+   =================================================================== */
+
+.base-grid-table.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+    .base-grid-table.loading tbody tr {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ===================================================================
+   ESTADOS DE HOVER MELHORADOS
+   =================================================================== */
+
+.base-grid-table tbody tr:hover .badge-compact {
+    transform: scale(1.1);
+}
+
+.base-grid-table tbody tr:hover .actions-btn {
+    opacity: 1;
+}
+
+/* Tornar o botão de ações mais visível apenas no hover da linha */
+.actions-btn {
+    opacity: 0.6;
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.base-grid-table tbody tr:hover .actions-btn {
+    opacity: 1;
+}
+
+/* ===================================================================
+   INDICADOR DE LINHA SELECIONADA/ATIVA
+   =================================================================== */
+
+.base-grid-table tbody tr.selected {
+    background-color: rgba(55, 65, 81, 0.1) !important;
+    border-left: 3px solid var(--accent-color);
+}
+
+/* ===================================================================
+   ESTILOS PARA GRID BASE - Adicionar ao final do custom.css
+   =================================================================== */
+
+/* ===================================================================
+   GRID BASE - ESTILOS GERAIS
+   =================================================================== */
+
+.base-grid-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.base-grid-table {
+    width: 100%;
+    table-layout: fixed; /* Força larguras fixas */
+}
+
+    /* ===================================================================
+   CABEÇALHO DA GRID
+   =================================================================== */
+
+    .base-grid-table thead th {
+        background: var(--primary-dark) !important;
+        color: white !important;
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 1rem 0.75rem;
+        border: none;
+        white-space: nowrap;
+        vertical-align: middle;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+/* Ícones de ordenação */
+.sort-icon {
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+    .sort-icon:hover {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+    .sort-icon.fa-sort-up,
+    .sort-icon.fa-sort-down {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+/* ===================================================================
+   LINHAS DA GRID
+   =================================================================== */
+
+.base-grid-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+    .base-grid-table tbody tr:hover {
+        background-color: rgba(55, 65, 81, 0.05);
+        transform: translateX(2px);
+    }
+
+    .base-grid-table tbody tr.grid-row {
+        cursor: pointer;
+    }
+
+        .base-grid-table tbody tr.grid-row:hover {
+            background-color: rgba(55, 65, 81, 0.08);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+/* ===================================================================
+   CÉLULAS DA GRID
+   =================================================================== */
+
+.base-grid-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border: none;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+    /* Campos que podem quebrar linha controladamente */
+    .base-grid-table td .vehicle-info,
+    .base-grid-table td .contato-display,
+    .base-grid-table td .data-display {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+        .base-grid-table td .vehicle-info div,
+        .base-grid-table td .contato-display div,
+        .base-grid-table td .documento-display {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+/* ===================================================================
+   BADGES COMPACTOS
+   =================================================================== */
+
+.badge-compact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: default;
+}
+
+    .badge-compact.badge-primary {
+        background-color: rgba(55, 65, 81, 0.15);
+        color: var(--primary-color);
+    }
+
+    .badge-compact.badge-success {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: var(--success-color);
+    }
+
+    .badge-compact.badge-warning {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: var(--warning-color);
+    }
+
+    .badge-compact.badge-danger {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: var(--danger-color);
+    }
+
+    .badge-compact.badge-secondary {
+        background-color: rgba(156, 163, 175, 0.15);
+        color: var(--secondary-color);
+    }
+
+/* ===================================================================
+   AVATAR DE CLIENTE
+   =================================================================== */
+
+.cliente-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(55, 65, 81, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+}
+
+/* ===================================================================
+   HEADER DA GRID OTIMIZADO
+   =================================================================== */
+
+.card-header-modern {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem !important;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+    /* Layout flexível para o header */
+    .card-header-modern .d-flex {
+        width: 100%;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+/* Informações compactas */
+.fs-sm {
+    font-size: 0.875rem !important;
+}
+
+/* Badge compacto */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+    white-space: nowrap;
+}
+
+/* Seletor de página compacto */
+#pageSizeSelector {
+    min-width: 70px !important;
+    max-width: 80px !important;
+    padding: 0.375rem 1.75rem 0.375rem 0.5rem !important;
+    font-size: 0.8rem !important;
+    height: auto !important;
+}
+
+/* ===================================================================
+   BOTÃO DE AÇÕES - CENTRALIZADO
+   =================================================================== */
+
+.actions-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0.25rem !important;
+    line-height: 1 !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    margin: 0 auto !important;
+}
+
+    .actions-btn:hover {
+        background-color: rgba(55, 65, 81, 0.1) !important;
+        transform: scale(1.1) !important;
+    }
+
+    .actions-btn:focus {
+        box-shadow: 0 0 0 2px rgba(55, 65, 81, 0.2) !important;
+    }
+
+/* ===================================================================
+   DROPDOWN DE AÇÕES - POSICIONADO ACIMA
+   =================================================================== */
+
+.dropdown-menu {
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0;
+    min-width: 150px;
+    z-index: 1050 !important;
+    position: absolute !important;
+}
+
+/* Forçar dropdown para aparecer acima usando dropup */
+.dropup .dropdown-menu {
+    top: auto !important;
+    bottom: 100% !important;
+    margin-bottom: 0.125rem !important;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE DO HEADER DA GRID
+   =================================================================== */
+
+/* Desktop - tudo em linha */
+@media (min-width: 1024px) {
+    .card-header-modern .d-flex {
+        flex-wrap: nowrap;
+        gap: 1rem;
+    }
+
+        .card-header-modern .d-flex > div:last-child {
+            flex-shrink: 0;
+        }
+}
+
+/* Tablet - manter layout compacto */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .card-header-modern .d-flex {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+        .card-header-modern .d-flex > div:last-child {
+            width: 100%;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+
+    .fs-sm {
+        font-size: 0.8rem !important;
+    }
+}
+
+/* Mobile - layout vertical */
+@media (max-width: 767px) {
+    .card-header-modern .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+        .card-header-modern .d-flex > div:last-child {
+            width: 100%;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+            .card-header-modern .d-flex > div:last-child > div {
+                justify-content: space-between;
+                width: 100%;
+            }
+
+    .fs-sm {
+        font-size: 0.75rem !important;
+    }
+
+    #pageSizeSelector {
+        min-width: 60px !important;
+        max-width: 70px !important;
+    }
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+    .dropdown-item:hover {
+        background-color: var(--light-color);
+        color: var(--primary-dark);
+    }
+
+    .dropdown-item i {
+        width: 16px;
+        font-size: 0.75rem;
+    }
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+/* ===================================================================
+   ELEMENTOS DE EXIBIÇÃO ESPECÍFICOS
+   =================================================================== */
+
+/* Badge de ano */
+.year-badge {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+/* Exibição de preços */
+.price-display {
+    text-align: right;
+}
+
+    .price-display .fw-bold {
+        font-size: 0.9rem;
+    }
+
+/* Exibição de dados com limite de largura */
+.min-width-0 {
+    min-width: 0;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE DA GRID
+   =================================================================== */
+
+/* Larguras específicas das colunas para diferentes grids */
+
+/* Grid de Veículos */
+.base-grid-table.veiculos-grid th:nth-child(1) {
+    width: 100px;
+}
+/* Código */
+.base-grid-table.veiculos-grid th:nth-child(2) {
+    width: 200px;
+}
+/* Veículo */
+.base-grid-table.veiculos-grid th:nth-child(3) {
+    width: 100px;
+}
+/* Ano */
+.base-grid-table.veiculos-grid th:nth-child(4) {
+    width: 120px;
+}
+/* Placa */
+.base-grid-table.veiculos-grid th:nth-child(5) {
+    width: 100px;
+}
+/* Situação */
+.base-grid-table.veiculos-grid th:nth-child(6) {
+    width: 140px;
+}
+/* Preço */
+.base-grid-table.veiculos-grid th:nth-child(7) {
+    width: 50px;
+}
+/* Ações */
+
+/* Grid de Clientes */
+.base-grid-table.clientes-grid th:nth-child(1) {
+    width: 250px;
+}
+/* Cliente */
+.base-grid-table.clientes-grid th:nth-child(2) {
+    width: 80px;
+}
+/* Tipo */
+.base-grid-table.clientes-grid th:nth-child(3) {
+    width: 150px;
+}
+/* Documento */
+.base-grid-table.clientes-grid th:nth-child(4) {
+    width: 180px;
+}
+/* Contato */
+.base-grid-table.clientes-grid th:nth-child(5) {
+    width: 120px;
+}
+/* Localização */
+.base-grid-table.clientes-grid th:nth-child(6) {
+    width: 80px;
+}
+/* Status */
+.base-grid-table.clientes-grid th:nth-child(7) {
+    width: 120px;
+}
+/* Cadastro */
+.base-grid-table.clientes-grid th:nth-child(8) {
+    width: 50px;
+}
+/* Ações */
+
+/* ===================================================================
+   RESPONSIVIDADE MOBILE
+   =================================================================== */
+
+@media (max-width: 768px) {
+    .base-grid-table {
+        font-size: 0.8rem;
+    }
+
+        .base-grid-table td {
+            padding: 0.5rem 0.375rem;
+        }
+
+        .base-grid-table thead th {
+            padding: 0.75rem 0.375rem;
+            font-size: 0.8rem;
+        }
+
+        /* Ocultar algumas colunas em mobile */
+        .base-grid-table th:nth-child(3),
+        .base-grid-table td:nth-child(3),
+        .base-grid-table th:nth-child(5),
+        .base-grid-table td:nth-child(5) {
+            display: none;
+        }
+
+    .cliente-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .badge-compact {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ===================================================================
+   LOADING STATE
+   =================================================================== */
+
+.base-grid-table.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+    .base-grid-table.loading tbody tr {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ===================================================================
+   ESTADOS DE HOVER MELHORADOS
+   =================================================================== */
+
+.base-grid-table tbody tr:hover .badge-compact {
+    transform: scale(1.1);
+}
+
+.base-grid-table tbody tr:hover .actions-btn {
+    opacity: 1;
+}
+
+/* Tornar o botão de ações mais visível apenas no hover da linha */
+.actions-btn {
+    opacity: 0.6;
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.base-grid-table tbody tr:hover .actions-btn {
+    opacity: 1;
+}
+
+/* ===================================================================
+   INDICADOR DE LINHA SELECIONADA/ATIVA
+   =================================================================== */
+
+.base-grid-table tbody tr.selected {
+    background-color: rgba(55, 65, 81, 0.1) !important;
+    border-left: 3px solid var(--accent-color);
+}
+
+/* ===================================================================
+   ESTILOS PARA GRID BASE - Adicionar ao final do custom.css
+   =================================================================== */
+
+/* ===================================================================
+   GRID BASE - ESTILOS GERAIS
+   =================================================================== */
+
+.base-grid-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.base-grid-table {
+    width: 100%;
+    table-layout: fixed; /* Força larguras fixas */
+}
+
+    /* ===================================================================
+   CABEÇALHO DA GRID
+   =================================================================== */
+
+    .base-grid-table thead th {
+        background: var(--primary-dark) !important;
+        color: white !important;
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 1rem 0.75rem;
+        border: none;
+        white-space: nowrap;
+        vertical-align: middle;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+/* Ícones de ordenação */
+.sort-icon {
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+    .sort-icon:hover {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+    .sort-icon.fa-sort-up,
+    .sort-icon.fa-sort-down {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+/* ===================================================================
+   LINHAS DA GRID
+   =================================================================== */
+
+.base-grid-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+    .base-grid-table tbody tr:hover {
+        background-color: rgba(55, 65, 81, 0.05);
+        transform: translateX(2px);
+    }
+
+    .base-grid-table tbody tr.grid-row {
+        cursor: pointer;
+    }
+
+        .base-grid-table tbody tr.grid-row:hover {
+            background-color: rgba(55, 65, 81, 0.08);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+/* ===================================================================
+   CÉLULAS DA GRID
+   =================================================================== */
+
+.base-grid-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border: none;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+    /* Campos que podem quebrar linha controladamente */
+    .base-grid-table td .vehicle-info,
+    .base-grid-table td .contato-display,
+    .base-grid-table td .data-display {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+        .base-grid-table td .vehicle-info div,
+        .base-grid-table td .contato-display div,
+        .base-grid-table td .documento-display {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+/* ===================================================================
+   BADGES COMPACTOS
+   =================================================================== */
+
+.badge-compact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: default;
+}
+
+    .badge-compact.badge-primary {
+        background-color: rgba(55, 65, 81, 0.15);
+        color: var(--primary-color);
+    }
+
+    .badge-compact.badge-success {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: var(--success-color);
+    }
+
+    .badge-compact.badge-warning {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: var(--warning-color);
+    }
+
+    .badge-compact.badge-danger {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: var(--danger-color);
+    }
+
+    .badge-compact.badge-secondary {
+        background-color: rgba(156, 163, 175, 0.15);
+        color: var(--secondary-color);
+    }
+
+/* ===================================================================
+   AVATAR DE CLIENTE
+   =================================================================== */
+
+.cliente-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(55, 65, 81, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+}
+
+/* ===================================================================
+   BOTÃO DE AÇÕES - CENTRALIZADO
+   =================================================================== */
+
+.actions-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0.25rem !important;
+    line-height: 1 !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    margin: 0 auto !important;
+}
+
+    .actions-btn:hover {
+        background-color: rgba(55, 65, 81, 0.1) !important;
+        transform: scale(1.1) !important;
+    }
+
+    .actions-btn:focus {
+        box-shadow: 0 0 0 2px rgba(55, 65, 81, 0.2) !important;
+    }
+
+/* ===================================================================
+   DROPDOWN DE AÇÕES - POSICIONADO ACIMA
+   =================================================================== */
+
+.dropdown-menu {
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0;
+    min-width: 150px;
+    z-index: 1050 !important;
+    position: absolute !important;
+}
+
+    /* Forçar dropdown para aparecer acima */
+    .dropdown-menu[data-bs-popper] {
+        top: auto !important;
+        bottom: 100% !important;
+        margin-bottom: 0.125rem !important;
+        transform: translate3d(0px, -2px, 0px) !important;
+    }
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+    .dropdown-item:hover {
+        background-color: var(--light-color);
+        color: var(--primary-dark);
+    }
+
+    .dropdown-item i {
+        width: 16px;
+        font-size: 0.75rem;
+    }
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+/* ===================================================================
+   ELEMENTOS DE EXIBIÇÃO ESPECÍFICOS
+   =================================================================== */
+
+/* Badge de ano */
+.year-badge {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+/* Exibição de preços */
+.price-display {
+    text-align: right;
+}
+
+    .price-display .fw-bold {
+        font-size: 0.9rem;
+    }
+
+/* Exibição de dados com limite de largura */
+.min-width-0 {
+    min-width: 0;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE DA GRID
+   =================================================================== */
+
+/* Larguras específicas das colunas para diferentes grids */
+
+/* Grid de Veículos */
+.base-grid-table.veiculos-grid th:nth-child(1) {
+    width: 100px;
+}
+/* Código */
+.base-grid-table.veiculos-grid th:nth-child(2) {
+    width: 200px;
+}
+/* Veículo */
+.base-grid-table.veiculos-grid th:nth-child(3) {
+    width: 100px;
+}
+/* Ano */
+.base-grid-table.veiculos-grid th:nth-child(4) {
+    width: 120px;
+}
+/* Placa */
+.base-grid-table.veiculos-grid th:nth-child(5) {
+    width: 100px;
+}
+/* Situação */
+.base-grid-table.veiculos-grid th:nth-child(6) {
+    width: 140px;
+}
+/* Preço */
+.base-grid-table.veiculos-grid th:nth-child(7) {
+    width: 50px;
+}
+/* Ações */
+
+/* Grid de Clientes */
+.base-grid-table.clientes-grid th:nth-child(1) {
+    width: 250px;
+}
+/* Cliente */
+.base-grid-table.clientes-grid th:nth-child(2) {
+    width: 80px;
+}
+/* Tipo */
+.base-grid-table.clientes-grid th:nth-child(3) {
+    width: 150px;
+}
+/* Documento */
+.base-grid-table.clientes-grid th:nth-child(4) {
+    width: 180px;
+}
+/* Contato */
+.base-grid-table.clientes-grid th:nth-child(5) {
+    width: 120px;
+}
+/* Localização */
+.base-grid-table.clientes-grid th:nth-child(6) {
+    width: 80px;
+}
+/* Status */
+.base-grid-table.clientes-grid th:nth-child(7) {
+    width: 120px;
+}
+/* Cadastro */
+.base-grid-table.clientes-grid th:nth-child(8) {
+    width: 50px;
+}
+/* Ações */
+
+/* ===================================================================
+   RESPONSIVIDADE MOBILE
+   =================================================================== */
+
+@media (max-width: 768px) {
+    .base-grid-table {
+        font-size: 0.8rem;
+    }
+
+        .base-grid-table td {
+            padding: 0.5rem 0.375rem;
+        }
+
+        .base-grid-table thead th {
+            padding: 0.75rem 0.375rem;
+            font-size: 0.8rem;
+        }
+
+        /* Ocultar algumas colunas em mobile */
+        .base-grid-table th:nth-child(3),
+        .base-grid-table td:nth-child(3),
+        .base-grid-table th:nth-child(5),
+        .base-grid-table td:nth-child(5) {
+            display: none;
+        }
+
+    .cliente-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .badge-compact {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ===================================================================
+   LOADING STATE
+   =================================================================== */
+
+.base-grid-table.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+    .base-grid-table.loading tbody tr {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ===================================================================
+   ESTADOS DE HOVER MELHORADOS
+   =================================================================== */
+
+.base-grid-table tbody tr:hover .badge-compact {
+    transform: scale(1.1);
+}
+
+.base-grid-table tbody tr:hover .actions-btn {
+    opacity: 1;
+}
+
+/* Tornar o botão de ações mais visível apenas no hover da linha */
+.actions-btn {
+    opacity: 0.6;
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.base-grid-table tbody tr:hover .actions-btn {
+    opacity: 1;
+}
+
+/* ===================================================================
+   INDICADOR DE LINHA SELECIONADA/ATIVA
+   =================================================================== */
+
+.base-grid-table tbody tr.selected {
+    background-color: rgba(55, 65, 81, 0.1) !important;
+    border-left: 3px solid var(--accent-color);
+}
+
+/* ===================================================================
+   REDUÇÃO MÁXIMA DE ESPAÇAMENTOS - ADICIONAIS AO CUSTOM.CSS
+   =================================================================== */
+
+/* ===================================================================
+   1. REDUZIR ESPAÇAMENTOS DO LAYOUT PRINCIPAL
+   =================================================================== */
+
+/* Main content com padding mínimo */
+.main-content {
+    padding: 0.75rem 1rem !important;
+}
+
+/* Dashboard container sem margens extras */
+.dashboard-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+    /* Header da página mais compacto */
+    .dashboard-container > .d-flex:first-child {
+        margin-bottom: 0.5rem !important;
+        padding: 0.5rem 0 !important;
+    }
+
+/* Título da página compacto */
+.page-title {
+    font-size: 1.4rem !important;
+    margin-bottom: 0.125rem !important;
+    line-height: 1.2 !important;
+}
+
+.page-subtitle {
+    font-size: 0.8rem !important;
+    margin-bottom: 0 !important;
+    opacity: 0.7 !important;
+}
+
+/* ===================================================================
+   2. CARDS ULTRA COMPACTOS
+   =================================================================== */
+
+/* Cards com padding mínimo */
+/*.card-modern {
+    margin-bottom: 0.5rem !important;
+}
+
+    .card-modern .card-header-modern {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        min-height: auto !important;
+    }
+
+    .card-modern .card-body-modern {
+        padding: 0.5rem 0.75rem !important;
+    }*/
+
+/* Card da lista sem padding para aproveitar espaço */
+/*.card-modern:has(.table-responsive) .card-body-modern {
+        padding: 0 !important;
+    }
+
+    .card-modern:has(.table-responsive) .card-header-modern {
+        padding: 0.5rem 0.75rem !important;
+    }*/
+
+/* ===================================================================
+3. FILTROS ULTRA COMPACTOS (BASEADO NA IMAGEM "FILTRO AJUSTADO")
+=================================================================== */
+
+/* Grid de filtros em linha única */
+/*.card-modern .card-body-modern .row,
+    .card-modern .card-body-modern .d-flex {
+        margin: 0 !important;
+        padding: 0 !important;
+    }*/
+
+/* Campos de filtro em linha horizontal */
+/*.card-modern .card-body-modern > form {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.75rem !important;
+        align-items: end !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }*/
+
+/* Grupos de campos inline */
+.form-group-modern {
+    margin-bottom: 0 !important;
+    flex: 1 !important;
+    min-width: 140px !important;
+    max-width: 200px !important;
+}
+
+/* Labels compactas */
+.form-label-modern {
+    margin-bottom: 0.125rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    line-height: 1.1 !important;
+}
+
+/* Campos de input compactos */
+.form-control-modern,
+.form-select-modern,
+.form-select {
+    padding: 0.375rem 0.5rem !important;
+    font-size: 0.8rem !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    line-height: 1.1 !important;
+    border-width: 1px !important;
+}
+
+/* Selects com seta menor */
+.form-select-modern,
+.form-select {
+    padding-right: 1.75rem !important;
+    background-size: 0.875em 0.875em !important;
+    background-position: right 0.375rem center !important;
+}
+
+/* ===================================================================
+   4. TABELA MAIS COMPACTA
+   =================================================================== */
+
+/* Maximizar altura da tabela */
+.table-responsive {
+    max-height: calc(100vh - 200px) !important;
+    min-height: 500px !important;
+    margin: 0 !important;
+}
+
+/* Células da tabela compactas */
+.table th,
+.table td {
+    padding: 0.375rem 0.25rem !important;
+    font-size: 0.8rem !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+}
+
+.table th {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 0.25rem !important;
+}
+
+/* Header sticky mais fino */
+.sticky-top {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+}
+
+/* ===================================================================
+   5. CONTROLES DA GRID COMPACTOS
+   =================================================================== */
+
+/* Header da lista compacto */
+.card-header-modern {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+    .card-header-modern .ms-auto {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+
+/* Seletor de página compacto */
+#pageSizeSelector {
+    min-width: 60px !important;
+    padding: 0.25rem 1.5rem 0.25rem 0.375rem !important;
+    font-size: 0.75rem !important;
+    height: 24px !important;
+}
+
+/* Badge compacto */
+.badge {
+    font-size: 0.65rem !important;
+    padding: 0.125rem 0.375rem !important;
+}
+
+/* ===================================================================
+   6. PAGINAÇÃO COMPACTA
+   =================================================================== */
+
+.pagination {
+    margin: 0 !important;
+    gap: 0.125rem !important;
+}
+
+.page-link {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 0.25rem !important;
+    min-width: 32px !important;
+}
+
+/* Footer da paginação */
+.card-footer {
+    padding: 0.5rem !important;
+}
+
+/* ===================================================================
+   7. BOTÕES DE AÇÃO COMPACTOS
+   =================================================================== */
+
+/* Grupo de botões */
+.btn-group {
+    gap: 0.125rem !important;
+}
+
+    .btn-group .btn {
+        padding: 0.25rem 0.375rem !important;
+        font-size: 0.7rem !important;
+        border-radius: 0.25rem !important;
+        margin: 0 !important;
+    }
+
+.btn-sm {
+    padding: 0.25rem 0.375rem !important;
+    font-size: 0.7rem !important;
+    min-height: 24px !important;
+}
+
+/* ===================================================================
+   8. BADGES E STATUS COMPACTOS
+   =================================================================== */
+
+.badge-modern {
+    padding: 0.125rem 0.375rem !important;
+    font-size: 0.65rem !important;
+    border-radius: 0.25rem !important;
+}
+
+/* ===================================================================
+   9. RESPONSIVIDADE PARA FILTROS HORIZONTAIS
+   =================================================================== */
+
+/* Desktop - filtros em linha */
+@media (min-width: 768px) {
+    .card-modern .card-body-modern > form {
+        flex-wrap: nowrap !important;
+        gap: 1rem !important;
+    }
+
+    .form-group-modern {
+        min-width: 120px !important;
+        max-width: 180px !important;
+    }
+}
+
+/* Mobile - empilhar filtros */
+@media (max-width: 767px) {
+    .card-modern .card-body-modern > form {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+
+    .form-group-modern {
+        max-width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    .main-content {
+        padding: 0.5rem !important;
+    }
+
+    .table-responsive {
+        max-height: calc(100vh - 160px) !important;
+    }
+}
+
+/* ===================================================================
+   10. OTIMIZAÇÕES EXTRAS PARA DENSIDADE MÁXIMA
+   =================================================================== */
+
+/* Remover espaços desnecessários */
+.dashboard-container > * + * {
+    margin-top: 0.5rem !important;
+}
+
+/* Topbar mais fino */
+.topbar {
+    height: 50px !important;
+    padding: 0 1rem !important;
+}
+
+.topbar-left,
+.topbar-right {
+    gap: 0.5rem !important;
+}
+
+/* Sidebar collapsed - aproveitar espaço extra */
+.sidebar.collapsed ~ .main-area .main-content {
+    padding: 0.75rem 1.5rem !important;
+}
+
+.sidebar.collapsed ~ .main-area .table-responsive {
+    max-height: calc(100vh - 200px) !important;
+}
+
+/* ===================================================================
+   11. CLASSE ESPECIAL PARA LAYOUT ULTRA DENSO
+   =================================================================== */
+
+.ultra-dense {
+    padding: 0.25rem !important;
+    margin: 0.25rem 0 !important;
+    font-size: 0.75rem !important;
+}
+
+    .ultra-dense .form-control-modern,
+    .ultra-dense .form-select-modern {
+        padding: 0.25rem 0.375rem !important;
+        font-size: 0.75rem !important;
+        min-height: 24px !important;
+        height: 24px !important;
+    }
+
+    .ultra-dense .form-label-modern {
+        font-size: 0.65rem !important;
+        margin-bottom: 0.125rem !important;
+    }
+
+/* ===================================================================
+   12. FORÇA APLICAÇÃO DAS REGRAS
+   =================================================================== */
+
+/* Override para garantir aplicação */
+body .main-content {
+    padding: 0.75rem 1rem !important;
+}
+
+/*body .card-modern .card-header-modern {
+    padding: 0.5rem 0.75rem !important;
+}
+
+body .card-modern .card-body-modern {
+    padding: 0.5rem 0.75rem !important;
+}*/
+
+body .form-control-modern,
+body .form-select-modern {
+    padding: 0.375rem 0.5rem !important;
+    min-height: 28px !important;
+}
+
+body .table th,
+body .table td {
+    padding: 0.375rem 0.25rem !important;
+    font-size: 0.8rem !important;
+}
+
+/* ===================================================================
+   14. ANIMAÇÕES SUAVES PARA TRANSIÇÕES
+   =================================================================== */
+
+.form-control-modern,
+.form-select-modern,
+.btn,
+.card-modern {
+    transition: all 0.15s ease !important;
+}
+
+/* ===================================================================
+   15. LOADING OVERLAY COMPACTO
+   =================================================================== */
+
+#loadingOverlay {
+    backdrop-filter: blur(1px) !important;
+    padding: 1rem !important;
+}
+
+.loading-spinner {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+#loadingOverlay .loading-text {
+    font-size: 0.8rem !important;
+    margin-left: 0.5rem !important;
+}
+/* ===================================================================
+   CORREÇÃO URGENTE: SELECTS NÃO FUNCIONAM - PROBLEMA DE CLIQUE
+   Adicione esta regra ao final do custom.css para corrigir o problema
+   =================================================================== */
+
+/* Reset completo para selects nativos - garantir funcionamento */
+select,
+select.form-select-modern,
+select.form-select,
+select.form-control,
+select[class*="form-"] {
+    /* Remover interferências do sistema de dropdown customizado */
+    position: relative !important;
+    z-index: auto !important;
+    pointer-events: auto !important;
+    /* Garantir que o select nativo funcione */
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    appearance: menulist !important;
+    /* Estilização básica */
+    background-color: #ffffff !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 0.75rem !important;
+    padding: 0.625rem 1rem !important;
+    font-size: 0.9rem !important;
+    color: #374151 !important;
+    cursor: pointer !important;
+    /* Remover seta customizada que pode estar interferindo */
+    background-image: none !important;
+    padding-right: 1rem !important;
+}
+
+    /* Estados do select */
+    select:focus,
+    select.form-select-modern:focus {
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+
+    select:hover,
+    select.form-select-modern:hover {
+        border-color: #9ca3af !important;
+    }
+
+    /* Options do select */
+    select option {
+        background-color: #ffffff !important;
+        color: #374151 !important;
+        padding: 8px 12px !important;
+        border: none !important;
+    }
+
+        select option:hover,
+        select option:checked {
+            background-color: #f3f4f6 !important;
+            color: #1f2937 !important;
+        }
+
+    /* IMPORTANTE: Remover qualquer interferência do sistema de dropdown customizado */
+    select.dropdown-toggle,
+    select[data-bs-toggle="dropdown"] {
+        pointer-events: auto !important;
+        position: relative !important;
+        z-index: auto !important;
+    }
+
+    /* Garantir que nenhum overlay interfira com os selects */
+    select + .dropdown-menu,
+    select ~ .dropdown-backdrop,
+    select + .modal-backdrop {
+        display: none !important;
+        pointer-events: none !important;
+    }
+
+    /* Override específico para os selects problemáticos */
+    #tipoCliente,
+    #estado,
+    #filterTipo,
+    #filterStatus,
+    select[name="tipoCliente"],
+    select[name="estado"],
+    select[name="status"] {
+        /* Força funcionamento nativo */
+        -webkit-appearance: menulist !important;
+        -moz-appearance: menulist !important;
+        appearance: menulist !important;
+        /* Remove qualquer event listener personalizado */
+        pointer-events: auto !important;
+        user-select: auto !important;
+        /* Garante interatividade */
+        position: static !important;
+        z-index: auto !important;
+    }
+
+    /* ===================================================================
+   CORREÇÃO ADICIONAL: REMOVER EVENT LISTENERS CONFLITANTES
+   =================================================================== */
+
+    /* Garantir que o sistema de dropdown NÃO seja aplicado aos selects */
+    select.dropdown-toggle {
+        /* Reset completo do dropdown customizado */
+        background: #ffffff !important;
+        border: 2px solid #e5e7eb !important;
+        position: static !important;
+        z-index: auto !important;
+        pointer-events: auto !important;
+    }
+
+/* Classe específica para forçar funcionamento nativo */
+.native-select-force {
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    appearance: menulist !important;
+    pointer-events: auto !important;
+    position: static !important;
+    z-index: auto !important;
+}
+
+/* ===================================================================
+   DEBUG: Indicador visual de que a correção está aplicada
+   =================================================================== */
+
+select:before {
+    content: "" !important;
+    display: none !important;
+}
+
+/* Log no console quando a regra for carregada */
+@media screen {
+    body:before {
+        content: "✅ Correção de selects aplicada" !important;
+        display: none !important;
+    }
 }

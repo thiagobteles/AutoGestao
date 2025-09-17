@@ -1966,7 +1966,6 @@ INSERT INTO tarefas (id, titulo, descricao, status, prioridade, data_criacao, da
 -- ====================================================================
 -- 6. VENDAS (5 veículos escolhidos aleatoriamente - 2 com parcelas)
 -- ====================================================================
-
 INSERT INTO vendas (id, valor_venda, valor_entrada, numero_parcelas, forma_pagamento, status, observacoes, data_venda, cliente_id, veiculo_id, vendedor_id, data_cadastro, data_alteracao) VALUES
 (1, 48000.00, 48000.00, NULL, 1, 2, 'Pagamento à vista com desconto especial', '2024-09-15 10:30:00', 15, 3, 1, NOW(), NOW()),
 (2, 39000.00, 9000.00, 12, 3, 2, 'Financiamento 12x - cliente aprovado', '2024-09-14 14:15:00', 8, 17, 2, NOW(), NOW()),
@@ -1977,7 +1976,6 @@ INSERT INTO vendas (id, valor_venda, valor_entrada, numero_parcelas, forma_pagam
 -- ====================================================================
 -- 7. PARCELAS (Para as vendas 2 e 4 que possuem parcelamento)
 -- ====================================================================
-
 INSERT INTO parcelas (id, venda_id, numero_parcela, valor, data_vencimento, valor_pago, data_pagamento, status, observacoes, data_cadastro, data_alteracao) VALUES
 (1, 2, 1, 2500.00, '2024-10-15', NULL, NULL, 1, 'Primeira parcela', NOW(), NOW()),
 (2, 2, 2, 2500.00, '2024-11-15', NULL, NULL, 1, 'Segunda parcela', NOW(), NOW()),
