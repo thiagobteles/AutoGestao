@@ -1,231 +1,195 @@
-@using AutoGestao.Enumerador
 @using AutoGestao.Enumerador.Veiculo
+@using AutoGestao.Extensions
 @using AutoGestao.Models
 @model VeiculosIndexViewModel
 
-<!-- Visualização em Tabela -->
-<div id="tableView" class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-    <table class="table table-hover mb-0" id="veiculosTable">
-        <thead class="table-dark sticky-top">
-            <tr>
-                <th style="width: 60px;">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-image me-2"></i>
-                    </div>
-                </th>
-                <th style="width: 100px; cursor: pointer;" onclick="sortColumn('Codigo')">
-                    <div class="d-flex align-items-center">
-                        Código
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Codigo" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="cursor: pointer;" onclick="sortColumn('Marca')">
-                    <div class="d-flex align-items-center">
-                        Veículo
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Marca" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 120px; cursor: pointer;" onclick="sortColumn('Ano')">
-                    <div class="d-flex align-items-center">
-                        Ano
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Ano" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 120px;">Placa</th>
-                <th style="width: 130px; cursor: pointer;" onclick="sortColumn('Situacao')">
-                    <div class="d-flex align-items-center">
-                        Situação
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Situacao" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 150px; cursor: pointer;" onclick="sortColumn('Preco')">
-                    <div class="d-flex align-items-center">
-                        Preço
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Preco" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 120px;">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.ListaObjeto != null && Model.ListaObjeto.Any())
-            {
-                @foreach (var item in Model.ListaObjeto)
+@{
+    ViewData["GridType"] = "Veiculos";
+    ViewData["Controller"] = "Veiculos";
+    ViewData["GridId"] = "veiculosTable";
+    ViewData["Columns"] = new List<dynamic> {
+        new { Title = "Código", Style = "width: 100px; text-align: center;", Sortable = true, SortKey = "Codigo" },
+        new { Title = "Veículo", Style = "width: 200px;", Sortable = true, SortKey = "Marca" },
+        new { Title = "Ano", Style = "width: 100px; text-align: center;", Sortable = true, SortKey = "Ano" },
+        new { Title = "Placa", Style = "width: 120px; text-align: center;", Sortable = false, SortKey = "" },
+        new { Title = "Situação", Style = "width: 100px; text-align: center;", Sortable = true, SortKey = "Situacao" },
+        new { Title = "Preço", Style = "width: 140px; text-align: right;", Sortable = true, SortKey = "Preco" }
+    };
+}
+
+<div class="base-grid-container">
+    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+        <table class="table table-hover mb-0 base-grid-table veiculos-grid" id="veiculosTable">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th style="width: 100px; text-align: center;" data-sortable="Codigo">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Código</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Codigo" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Codigo"></i>
+                        </div>
+                    </th>
+                    <th style="width: 200px;" data-sortable="Marca">
+                        <div class="d-flex align-items-center">
+                            <span>Veículo</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Marca" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Marca"></i>
+                        </div>
+                    </th>
+                    <th style="width: 100px; text-align: center;" data-sortable="Ano">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Ano</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Ano" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Ano"></i>
+                        </div>
+                    </th>
+                    <th style="width: 120px; text-align: center;">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Placa</span>
+                        </div>
+                    </th>
+                    <th style="width: 100px; text-align: center;" data-sortable="Situacao">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Situação</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Situacao" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Situacao"></i>
+                        </div>
+                    </th>
+                    <th style="width: 140px; text-align: right;" data-sortable="Preco">
+                        <div class="d-flex align-items-center justify-content-end">
+                            <span>Preço</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Preco" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Preco"></i>
+                        </div>
+                    </th>
+                    <th style="width: 50px; text-align: center;">
+                        <i class="fas fa-cog" title="Ações"></i>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.ListaObjeto != null && Model.ListaObjeto.Any())
                 {
-                    <tr class="veiculo-row">
-                        <td>
-                            <div class="vehicle-thumb">
-                                <i class="fas fa-car fa-2x text-muted"></i>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="fw-bold">@item.Codigo</span>
-                        </td>
-                        <td>
-                            <div>
-                                <div class="fw-semibold">@item.Marca @item.Modelo</div>
-                                <small class="text-muted">@item.Cor • @item.Combustivel</small>
-                            </div>
-                        </td>
-                        <td>@item.AnoFabricacao/@item.AnoModelo</td>
-                        <td>
-                            <span class="badge bg-light text-dark">@item.Placa</span>
-                        </td>
-                        <td>
-                            @switch (item.Situacao)
-                            {
-                                case EnumSituacaoVeiculo.Estoque:
-                                    <span class="badge-modern badge-success">📦 Estoque</span>
-                                    break;
-                                case EnumSituacaoVeiculo.Vendido:
-                                    <span class="badge-modern badge-primary">✅ Vendido</span>
-                                    break;
-                                case EnumSituacaoVeiculo.Reservado:
-                                    <span class="badge-modern badge-warning">🔒 Reservado</span>
-                                    break;
-                                case EnumSituacaoVeiculo.Manutencao:
-                                    <span class="badge-modern badge-danger">🔧 Manutenção</span>
-                                    break;
-                            }
-                        </td>
-                        <td>
-                            <div class="fw-bold text-success">@(item.PrecoVenda?.ToString("C") ?? "N/A")</div>
-                            @if (item.PrecoCompra.HasValue)
-                            {
-                                <small class="text-muted">Compra: @item.PrecoCompra.Value.ToString("C")</small>
-                            }
-                        </td>
-                        <td>
-                            <div class="btn-group">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Detalhes">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-sm btn-outline-danger" onclick="confirmarExclusao(@item.Id)" title="Excluir">
-                                    <i class="fas fa-trash"></i>
+                    @foreach (var item in Model.ListaObjeto)
+                    {
+                        <tr class="grid-row" data-id="@item.Id" data-controller="Veiculos">
+                            <td class="text-center">
+                                <span class="fw-bold text-primary">@item.Codigo</span>
+                            </td>
+                            <td>
+                                <div class="vehicle-info">
+                                    <div class="fw-semibold text-truncate">@item?.Marca?.Descricao @item?.Modelo?.Descricao</div>
+                                    <small class="text-muted text-truncate">@item?.Motorizacao • @item?.Combustivel.GetDescription()</small>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="year-badge">@item?.AnoFabricacao/@item?.AnoModelo</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark">@item?.Placa</span>
+                            </td>
+                            <td class="text-center">
+                                @{
+                                    var (badgeClass, badgeIcon, badgeText) = GetSituacaoBadge(item.Situacao);
+                                }
+                                <span class="badge-compact @badgeClass" title="@badgeText">
+                                    <i class="@badgeIcon"></i>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="price-display">
+                                    <div class="fw-bold text-success">@(item.PrecoVenda?.ToString("C") ?? "Consulte")</div>
+                                    @if (item.PrecoCompra.HasValue)
+                                    {
+                                        <small class="text-muted">Custo: @item.PrecoCompra.Value.ToString("C")</small>
+                                    }
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link p-1 actions-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v text-muted"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="/Veiculos/Details/@item.Id"><i class="fas fa-eye me-2"></i>Visualizar</a></li>
+                                        <li><a class="dropdown-item" href="/Veiculos/Edit/@item.Id"><i class="fas fa-edit me-2"></i>Editar</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        @if (item.Situacao == EnumSituacaoVeiculo.Estoque)
+                                        {
+                                            <li><a class="dropdown-item text-success" href="#" onclick="novaVenda(@item.Id)"><i class="fas fa-handshake me-2"></i>Vender</a></li>
+                                        }
+                                        <li><a class="dropdown-item text-danger" href="#" onclick="confirmarExclusao(@item.Id)"><i class="fas fa-trash me-2"></i>Excluir</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-car fa-3x mb-3"></i>
+                                <p class="mb-3">Nenhum veículo encontrado com os filtros aplicados.</p>
+                                <button class="btn-modern btn-outline-modern" onclick="limparFiltros()">
+                                    <i class="fas fa-times"></i>
+                                    Limpar Filtros
                                 </button>
                             </div>
                         </td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="8" class="text-center py-5">
-                        <div class="text-muted">
-                            <i class="fas fa-car fa-3x mb-3"></i>
-                            <p class="mb-3">Nenhum veículo encontrado com os filtros aplicados.</p>
-                            <button class="btn-modern btn-outline-modern" onclick="limparFiltros()">
-                                <i class="fas fa-times"></i>
-                                Limpar Filtros
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-<!-- Visualização em Grid (Cards) -->
-<div id="gridView" class="d-none p-3" style="max-height: 600px; overflow-y: auto;">
-    <div class="grid-3">
-        @if (Model.ListaObjeto != null && Model.ListaObjeto.Any())
-        {
-            @foreach (var item in Model.ListaObjeto)
-            {
-                <div class="vehicle-card">
-                    <div class="card-modern">
-                        <div class="vehicle-card-header">
-                            <div class="vehicle-image">
-                                <i class="fas fa-car fa-3x text-muted"></i>
-                            </div>
-                            <div class="vehicle-status">
-                                @switch (item.Situacao)
-                                {
-                                    case EnumSituacaoVeiculo.Estoque:
-                                        <span class="badge-modern badge-success">📦 Estoque</span>
-                                        break;
-                                    case EnumSituacaoVeiculo.Vendido:
-                                        <span class="badge-modern badge-primary">✅ Vendido</span>
-                                        break;
-                                    case EnumSituacaoVeiculo.Reservado:
-                                        <span class="badge-modern badge-warning">🔒 Reservado</span>
-                                        break;
-                                    case EnumSituacaoVeiculo.Manutencao:
-                                        <span class="badge-modern badge-danger">🔧 Manutenção</span>
-                                        break;
-                                }
-                            </div>
-                        </div>
-                        <div class="card-body-modern">
-                            <h5 class="mb-2">@item.Marca @item.Modelo</h5>
-                            <div class="vehicle-details mb-3">
-                                <div class="detail-item">
-                                    <i class="fas fa-barcode me-1"></i>
-                                    @item.Codigo
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-calendar me-1"></i>
-                                    @item.AnoFabricacao/@item.AnoModelo
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-id-card me-1"></i>
-                                    @item.Placa
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-palette me-1"></i>
-                                    @item.Cor
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-gas-pump me-1"></i>
-                                    @item.Combustivel
-                                </div>
-                                @if (item.Quilometragem.HasValue)
-                                {
-                                    <div class="detail-item">
-                                        <i class="fas fa-road me-1"></i>
-                                        @item.Quilometragem.Value.ToString("N0") km
-                                    </div>
-                                }
-                            </div>
-                            <div class="vehicle-price mb-3">
-                                <div class="price-main">@(item.PrecoVenda?.ToString("C") ?? "Consulte")</div>
-                                @if (item.PrecoCompra.HasValue)
-                                {
-                                    <div class="price-sub">Compra: @item.PrecoCompra.Value.ToString("C")</div>
-                                }
-                            </div>
-                            <div class="vehicle-actions">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-modern btn-outline-modern btn-sm">
-                                    <i class="fas fa-eye"></i>
-                                    Detalhes
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-modern btn-primary-modern btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                    Editar
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="col-12 text-center py-5">
-                <div class="text-muted">
-                    <i class="fas fa-car fa-3x mb-3"></i>
-                    <p class="mb-3">Nenhum veículo encontrado com os filtros aplicados.</p>
-                    <button class="btn-modern btn-outline-modern" onclick="limparFiltros()">
-                        <i class="fas fa-times"></i>
-                        Limpar Filtros
-                    </button>
-                </div>
-            </div>
-        }
+            </tbody>
+        </table>
     </div>
 </div>
+
+@functions {
+    public (string badgeClass, string badgeIcon, string badgeText) GetSituacaoBadge(EnumSituacaoVeiculo situacao)
+    {
+        return situacao switch
+        {
+            EnumSituacaoVeiculo.Estoque => ("badge-success", "fas fa-warehouse", "Em Estoque"),
+            EnumSituacaoVeiculo.Vendido => ("badge-primary", "fas fa-check-circle", "Vendido"),
+            EnumSituacaoVeiculo.Reservado => ("badge-warning", "fas fa-lock", "Reservado"),
+            EnumSituacaoVeiculo.Manutencao => ("badge-danger", "fas fa-wrench", "Em Manutenção"),
+            _ => ("badge-secondary", "fas fa-question", "Indefinido")
+        };
+    }
+}
+
+<script>
+    // Comportamento de duplo clique para abrir detalhes
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.grid-row');
+
+        rows.forEach(row => {
+            row.addEventListener('dblclick', function(e) {
+                // Evitar conflito com dropdown de ações
+                if (e.target.closest('.dropdown') || e.target.closest('.actions-btn')) {
+                    return;
+                }
+
+                const id = this.getAttribute('data-id');
+                const controller = this.getAttribute('data-controller');
+
+                if (id && controller) {
+                    window.location.href = `/${controller}/Details/${id}`;
+                }
+            });
+        });
+
+        // Configurar ordenação
+        const sortIcons = document.querySelectorAll('.sort-icon');
+        sortIcons.forEach(icon => {
+            icon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const sortKey = this.getAttribute('data-sort');
+                if (typeof sortColumn === 'function') {
+                    sortColumn(sortKey);
+                }
+            });
+        });
+    });
+
+    // Função para nova venda
+    function novaVenda(veiculoId) {
+        window.location.href = `/Vendas/Create?veiculoId=${veiculoId}`;
+    }
+</script>

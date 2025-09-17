@@ -2,162 +2,234 @@
 @using AutoGestao.Models
 @model ClientesIndexViewModel
 
-<div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-    <table class="table table-hover mb-0" id="clientesTable">
-        <thead class="table-dark sticky-top">
-            <tr>
-                <th style="cursor: pointer;" onclick="sortColumn('Nome')">
-                    <div class="d-flex align-items-center">
-                        Cliente
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Nome" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 150px; cursor: pointer;" onclick="sortColumn('Tipo')">
-                    <div class="d-flex align-items-center">
-                        Tipo
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Tipo" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 180px; cursor: pointer;" onclick="sortColumn('Documento')">
-                    <div class="d-flex align-items-center">
-                        Documento
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Documento" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 200px;">Contato</th>
-                <th style="width: 150px; cursor: pointer;" onclick="sortColumn('Cidade')">
-                    <div class="d-flex align-items-center">
-                        Localização
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Cidade" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 100px;">Status</th>
-                <th style="width: 130px; cursor: pointer;" onclick="sortColumn('DataCadastro')">
-                    <div class="d-flex align-items-center">
-                        Cadastro
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "DataCadastro" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
-                <th style="width: 120px;">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.ListaObjeto != null && Model.ListaObjeto.Any())
-            {
-                @foreach (var cliente in Model.ListaObjeto)
+<div class="base-grid-container">
+    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+        <table class="table table-hover mb-0 base-grid-table clientes-grid" id="clientesTable">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th style="width: 250px;" data-sortable="Nome">
+                        <div class="d-flex align-items-center">
+                            <span>Cliente</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Nome" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Nome"></i>
+                        </div>
+                    </th>
+                    <th style="width: 80px; text-align: center;" data-sortable="Tipo">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Tipo</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Tipo" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Tipo"></i>
+                        </div>
+                    </th>
+                    <th style="width: 150px; text-align: center;" data-sortable="Documento">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Documento</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Documento" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Documento"></i>
+                        </div>
+                    </th>
+                    <th style="width: 180px;">
+                        <div class="d-flex align-items-center">
+                            <span>Contato</span>
+                        </div>
+                    </th>
+                    <th style="width: 120px; text-align: center;" data-sortable="Cidade">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Localização</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "Cidade" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="Cidade"></i>
+                        </div>
+                    </th>
+                    <th style="width: 80px; text-align: center;">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Status</span>
+                        </div>
+                    </th>
+                    <th style="width: 120px; text-align: center;" data-sortable="DataCadastro">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span>Cadastro</span>
+                            <i class="fas fa-sort sort-icon ms-1 @(Model.OrderBy == "DataCadastro" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")" data-sort="DataCadastro"></i>
+                        </div>
+                    </th>
+                    <th style="width: 50px; text-align: center;">
+                        <i class="fas fa-cog" title="Ações"></i>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.ListaObjeto != null && Model.ListaObjeto.Any())
                 {
-                    <tr class="cliente-row">
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="cliente-avatar me-3">
+                    @foreach (var cliente in Model.ListaObjeto)
+                    {
+                        <tr class="grid-row" data-id="@cliente.Id" data-controller="Clientes">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="cliente-avatar me-3">
+                                        @if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica)
+                                        {
+                                            <i class="fas fa-user text-primary"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-building text-warning"></i>
+                                        }
+                                    </div>
+                                    <div class="flex-grow-1 min-width-0">
+                                        <div class="fw-semibold text-truncate">@cliente.Nome</div>
+                                        @if (!string.IsNullOrEmpty(cliente.Email))
+                                        {
+                                            <small class="text-muted text-truncate d-block">@cliente.Email</small>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica)
+                                {
+                                    <span class="badge-compact badge-primary" title="Pessoa Física">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge-compact badge-warning" title="Pessoa Jurídica">
+                                        <i class="fas fa-building"></i>
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="documento-display">
                                     @if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica)
                                     {
-                                        <i class="fas fa-user fa-lg text-primary"></i>
+                                        <span class="fw-bold">@cliente.CPF</span>
+                                        @if (!string.IsNullOrEmpty(cliente.RG))
+                                        {
+                                            <br>
+                                            <small class="text-muted">RG: @cliente.RG</small>
+                                        }
                                     }
                                     else
                                     {
-                                        <i class="fas fa-building fa-lg text-warning"></i>
+                                        <span class="fw-bold">@cliente.CNPJ</span>
                                     }
                                 </div>
-                                <div>
-                                    <div class="fw-semibold">@cliente.Nome</div>
-                                    @if (!string.IsNullOrEmpty(cliente.Email))
+                            </td>
+                            <td>
+                                <div class="contato-display">
+                                    @if (!string.IsNullOrEmpty(cliente.Telefone))
                                     {
-                                        <small class="text-muted">@cliente.Email</small>
+                                        <div class="text-truncate"><i class="fas fa-phone me-1"></i>@cliente.Telefone</div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(cliente.Celular))
+                                    {
+                                        <div class="text-truncate"><i class="fas fa-mobile me-1"></i>@cliente.Celular</div>
                                     }
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            @if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica)
-                            {
-                                <span class="badge-modern badge-primary">👤 Pessoa Física</span>
-                            }
-                            else
-                            {
-                                <span class="badge-modern badge-warning">🏢 Pessoa Jurídica</span>
-                            }
-                        </td>
-                        <td>
-                            @if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica)
-                            {
-                                <span class="fw-bold">@cliente.CPF</span>
-                                @if (!string.IsNullOrEmpty(cliente.RG))
+                            </td>
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(cliente.Cidade))
                                 {
-                                    <br>
-                                    <small class="text-muted">RG: @cliente.RG</small>
+                                    <div class="text-truncate">@cliente.Cidade/@cliente.Estado</div>
+                                    @if (!string.IsNullOrEmpty(cliente.CEP))
+                                    {
+                                        <small class="text-muted text-truncate d-block">@cliente.CEP</small>
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                <span class="fw-bold">@cliente.CNPJ</span>
-                            }
-                        </td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(cliente.Telefone))
-                            {
-                                <div><i class="fas fa-phone me-1"></i>@cliente.Telefone</div>
-                            }
-                            @if (!string.IsNullOrEmpty(cliente.Celular))
-                            {
-                                <div><i class="fas fa-mobile me-1"></i>@cliente.Celular</div>
-                            }
-                        </td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(cliente.Cidade))
-                            {
-                                <div>@cliente.Cidade/@cliente.Estado</div>
-                            }
-                            @if (!string.IsNullOrEmpty(cliente.CEP))
-                            {
-                                <small class="text-muted">CEP: @cliente.CEP</small>
-                            }
-                        </td>
-                        <td>
-                            @if (cliente.Ativo)
-                            {
-                                <span class="badge-modern badge-success">✅ Ativo</span>
-                            }
-                            else
-                            {
-                                <span class="badge-modern badge-danger">❌ Inativo</span>
-                            }
-                        </td>
-                        <td>
-                            <div>@cliente.DataCadastro.ToString("dd/MM/yyyy")</div>
-                            <small class="text-muted">@cliente.DataCadastro.ToString("HH:mm")</small>
-                        </td>
-                        <td>
-                            <div class="btn-group">
-                                <a asp-action="Details" asp-route-id="@cliente.Id" class="btn btn-sm btn-outline-info" title="Detalhes">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@cliente.Id" class="btn btn-sm btn-outline-primary" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-sm btn-outline-success" onclick="novaVenda(@cliente.Id)" title="Nova Venda">
-                                    <i class="fas fa-handshake"></i>
+                            </td>
+                            <td class="text-center">
+                                @if (cliente.Ativo)
+                                {
+                                    <span class="badge-compact badge-success" title="Ativo">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge-compact badge-danger" title="Inativo">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="data-display">
+                                    <div>@cliente.DataCadastro.ToString("dd/MM/yyyy")</div>
+                                    <small class="text-muted">@cliente.DataCadastro.ToString("HH:mm")</small>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link p-1 actions-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v text-muted"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="/Clientes/Details/@cliente.Id"><i class="fas fa-eye me-2"></i>Visualizar</a></li>
+                                        <li><a class="dropdown-item" href="/Clientes/Edit/@cliente.Id"><i class="fas fa-edit me-2"></i>Editar</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-success" href="#" onclick="novaVenda(@cliente.Id)"><i class="fas fa-handshake me-2"></i>Nova Venda</a></li>
+                                        <li><a class="dropdown-item text-info" href="#" onclick="novaAvaliacao(@cliente.Id)"><i class="fas fa-clipboard-list me-2"></i>Avaliar Veículo</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-users fa-3x mb-3"></i>
+                                <p class="mb-3">Nenhum cliente encontrado com os filtros aplicados.</p>
+                                <button class="btn-modern btn-outline-modern" onclick="limparFiltros()">
+                                    <i class="fas fa-times"></i>
+                                    Limpar Filtros
                                 </button>
                             </div>
                         </td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="8" class="text-center py-5">
-                        <div class="text-muted">
-                            <i class="fas fa-users fa-3x mb-3"></i>
-                            <p class="mb-3">Nenhum cliente encontrado com os filtros aplicados.</p>
-                            <button class="btn-modern btn-outline-modern" onclick="limparFiltros()">
-                                <i class="fas fa-times"></i>
-                                Limpar Filtros
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<script>
+    // Comportamento de duplo clique para abrir detalhes
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.grid-row');
+
+        rows.forEach(row => {
+            row.addEventListener('dblclick', function(e) {
+                // Evitar conflito com dropdown de ações
+                if (e.target.closest('.dropdown') || e.target.closest('.actions-btn')) {
+                    return;
+                }
+
+                const id = this.getAttribute('data-id');
+                const controller = this.getAttribute('data-controller');
+
+                if (id && controller) {
+                    window.location.href = `/${controller}/Details/${id}`;
+                }
+            });
+        });
+
+        // Configurar ordenação
+        const sortIcons = document.querySelectorAll('.sort-icon');
+        sortIcons.forEach(icon => {
+            icon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const sortKey = this.getAttribute('data-sort');
+                if (typeof sortColumn === 'function') {
+                    sortColumn(sortKey);
+                }
+            });
+        });
+    });
+
+    // Função para nova venda
+    function novaVenda(clienteId) {
+        window.location.href = `/Vendas/Create?clienteId=${clienteId}`;
+    }
+
+    // Função para nova avaliação
+    function novaAvaliacao(clienteId) {
+        window.location.href = `/Avaliacoes/Create?clienteId=${clienteId}`;
+    }
+</script>

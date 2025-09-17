@@ -30,7 +30,7 @@
                 <div class="menu-section">
                     <div class="menu-section-title">Principal</div>
                     <div class="menu-item">
-                        <a href="@Url.Action("Index", "Home")" class="menu-link">
+                        <a href="@Url.Action("Index", "Home")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
                             <i class="fas fa-tachometer-alt"></i>
                             <span class="menu-link-text">Dashboard</span>
                             <div class="menu-tooltip">Dashboard</div>
@@ -41,21 +41,21 @@
                 <div class="menu-section">
                     <div class="menu-section-title">Cadastros</div>
                     <div class="menu-item">
-                        <a href="@Url.Action("Index", "Veiculos")" class="menu-link">
+                        <a href="@Url.Action("Index", "Veiculos")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Veiculos" ? "active" : "")">
                             <i class="fas fa-car"></i>
                             <span class="menu-link-text">Veículos</span>
                             <div class="menu-tooltip">Veículos</div>
                         </a>
                     </div>
                     <div class="menu-item">
-                        <a href="@Url.Action("Index", "Clientes")" class="menu-link">
+                        <a href="@Url.Action("Index", "Clientes")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clientes" ? "active" : "")">
                             <i class="fas fa-users"></i>
                             <span class="menu-link-text">Clientes</span>
                             <div class="menu-tooltip">Clientes</div>
                         </a>
                     </div>
                     <div class="menu-item">
-                        <a href="@Url.Action("Index", "Vendedores")" class="menu-link">
+                        <a href="@Url.Action("Index", "Vendedores")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vendedores" ? "active" : "")">
                             <i class="fas fa-user-tie"></i>
                             <span class="menu-link-text">Vendedores</span>
                             <div class="menu-tooltip">Vendedores</div>
@@ -66,21 +66,21 @@
                 <div class="menu-section">
                     <div class="menu-section-title">Operações</div>
                     <div class="menu-item">
-                        <a href="@Url.Action("Index", "Vendas")" class="menu-link">
+                        <a href="@Url.Action("Index", "Vendas")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vendas" ? "active" : "")">
                             <i class="fas fa-handshake"></i>
                             <span class="menu-link-text">Vendas</span>
                             <div class="menu-tooltip">Vendas</div>
                         </a>
                     </div>
                     <div class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="@Url.Action("Index", "Avaliacoes")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Avaliacoes" ? "active" : "")">
                             <i class="fas fa-clipboard-list"></i>
                             <span class="menu-link-text">Avaliações</span>
                             <div class="menu-tooltip">Avaliações</div>
                         </a>
                     </div>
                     <div class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="@Url.Action("Index", "Financeiro")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Financeiro" ? "active" : "")">
                             <i class="fas fa-coins"></i>
                             <span class="menu-link-text">Financeiro</span>
                             <div class="menu-tooltip">Financeiro</div>
@@ -91,14 +91,14 @@
                 <div class="menu-section">
                     <div class="menu-section-title">Relatórios</div>
                     <div class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="@Url.Action("Vendas", "Relatorios")" class="menu-link">
                             <i class="fas fa-chart-bar"></i>
                             <span class="menu-link-text">Vendas</span>
                             <div class="menu-tooltip">Relatórios de Vendas</div>
                         </a>
                     </div>
                     <div class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="@Url.Action("Estoque", "Relatorios")" class="menu-link">
                             <i class="fas fa-chart-line"></i>
                             <span class="menu-link-text">Estoque</span>
                             <div class="menu-tooltip">Relatórios de Estoque</div>
@@ -152,6 +152,9 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
+        // ===================================================================
+        // SISTEMA DE SIDEBAR E LAYOUT
+        // ===================================================================
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
@@ -168,13 +171,11 @@
                 updateCollapseIcon(true);
             }
 
-            // CORREÇÃO: Botão de colapsar/expandir com debounce
-            sidebarCollapseBtn.addEventListener('click', function(e) {
+            // Botão de colapsar/expandir
+            sidebarCollapseBtn?.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                e.stopImmediatePropagation();
 
-                // Prevenir cliques múltiplos
                 if (isProcessingClick) return;
                 isProcessingClick = true;
 
@@ -190,18 +191,14 @@
                     updateCollapseIcon(true);
                 }
 
-                // Liberar após a transição
                 setTimeout(() => {
                     isProcessingClick = false;
                 }, 400);
             });
 
-            // CORREÇÃO: Toggle sidebar para mobile
-            sidebarToggle.addEventListener('click', function(e) {
+            // Toggle sidebar para mobile
+            sidebarToggle?.addEventListener('click', function(e) {
                 e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-
                 if (window.innerWidth <= 1024) {
                     sidebar.classList.toggle('open');
                     sidebarOverlay.classList.toggle('show');
@@ -209,137 +206,47 @@
             });
 
             // Fechar sidebar ao clicar no overlay (mobile)
-            sidebarOverlay.addEventListener('click', function() {
+            sidebarOverlay?.addEventListener('click', function() {
                 sidebar.classList.remove('open');
                 sidebarOverlay.classList.remove('show');
             });
 
-            // CORREÇÃO PRINCIPAL: Prevenir propagação de eventos nos links do menu
-            document.querySelectorAll('.menu-link').forEach(link => {
-                // Remover qualquer listener anterior
-                link.removeEventListener('click', handleMenuClick);
-
-                // Adicionar novo listener controlado
-                link.addEventListener('click', handleMenuClick, true);
-            });
-
-            function handleMenuClick(e) {
-                // Se estivermos processando um clique do botão collapse, ignore
-                if (isProcessingClick) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    return false;
-                }
-
-                // Para navegação normal, apenas pare a propagação (não previna a navegação)
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-
-                // Permitir navegação normal
-                return true;
-            }
-
-            // CORREÇÃO: Prevenir propagação em toda a área do sidebar no modo colapsado
-            sidebar.addEventListener('click', function(e) {
-                if (sidebar.classList.contains('collapsed')) {
-                    // Se o clique foi no botão de collapse, deixar passar
-                    if (e.target === sidebarCollapseBtn || sidebarCollapseBtn.contains(e.target)) {
-                        return;
-                    }
-
-                    // Se o clique foi em um link de menu, permitir navegação mas parar propagação
-                    const menuLink = e.target.closest('.menu-link');
-                    if (menuLink) {
-                        e.stopPropagation();
-                        return;
-                    }
-
-                    // Para outros cliques, parar propagação
-                    e.stopPropagation();
-                }
-            });
-
-            // Função para atualizar o ícone do botão de colapsar
+            // Atualizar ícone do botão de colapsar
             function updateCollapseIcon(isCollapsed) {
-                const icon = sidebarCollapseBtn.querySelector('i');
-                if (isCollapsed) {
-                    icon.className = 'fas fa-chevron-right';
-                    sidebarCollapseBtn.title = 'Expandir Menu';
-                } else {
-                    icon.className = 'fas fa-chevron-left';
-                    sidebarCollapseBtn.title = 'Recolher Menu';
+                const icon = sidebarCollapseBtn?.querySelector('i');
+                if (icon) {
+                    if (isCollapsed) {
+                        icon.className = 'fas fa-chevron-right';
+                        sidebarCollapseBtn.title = 'Expandir Menu';
+                    } else {
+                        icon.className = 'fas fa-chevron-left';
+                        sidebarCollapseBtn.title = 'Recolher Menu';
+                    }
                 }
             }
-
-            // Marcar item ativo no menu
-            const currentPath = window.location.pathname;
-            const menuLinks = document.querySelectorAll('.menu-link');
-
-            menuLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
-                }
-            });
 
             // Redimensionamento da janela
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 1024) {
                     sidebar.classList.remove('open');
                     sidebarOverlay.classList.remove('show');
-                } else {
-                    if (sidebar.classList.contains('open')) {
-                        sidebar.classList.remove('collapsed');
-                    }
                 }
             });
 
-            // CORREÇÃO: Detectar tecla de atalho com debounce
-            let keyProcessing = false;
+            // Tecla de atalho Ctrl+B
             document.addEventListener('keydown', function(e) {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
                     e.preventDefault();
-
-                    if (keyProcessing) return;
-                    keyProcessing = true;
-
                     if (window.innerWidth > 1024) {
-                        sidebarCollapseBtn.click();
+                        sidebarCollapseBtn?.click();
                     }
-
-                    setTimeout(() => {
-                        keyProcessing = false;
-                    }, 400);
                 }
-            });
-
-            // Debug: Mostrar largura disponível no console
-            function logAvailableWidth() {
-                const isCollapsed = sidebar.classList.contains('collapsed');
-                const sidebarWidth = isCollapsed ? 80 : 280;
-                const availableWidth = window.innerWidth - sidebarWidth;
-                console.log(`🖥️ Largura total: ${window.innerWidth}px | Sidebar: ${sidebarWidth}px | Disponível: ${availableWidth}px`);
-            }
-
-            logAvailableWidth();
-            let resizeTimeout;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(logAvailableWidth, 300);
-            });
-
-            // ADICIONAL: Desabilitar transições durante redimensionamento
-            let resizeTimer;
-            window.addEventListener('resize', function() {
-                document.body.classList.add('resize-in-progress');
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                    document.body.classList.remove('resize-in-progress');
-                }, 400);
             });
         });
 
-        // Sistema de Notificações Toast (mantido igual)
+        // ===================================================================
+        // SISTEMA DE NOTIFICAÇÕES TOAST
+        // ===================================================================
         function showToast(message, type = 'info', duration = 5000) {
             const container = getToastContainer();
 
@@ -400,7 +307,9 @@
             }, 400);
         }
 
-        // Sistema de Modo Escuro (mantido igual)
+        // ===================================================================
+        // SISTEMA DE MODO ESCURO
+        // ===================================================================
         function initThemeToggle() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -441,556 +350,622 @@
             }
         }
 
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            initThemeToggle();
+        // Inicializar tema
+        document.addEventListener('DOMContentLoaded', initThemeToggle);
+    </script>
 
-            setTimeout(() => {
-                if (window.innerWidth > 1024 && !localStorage.getItem('sidebarTipShown')) {
-                    localStorage.setItem('sidebarTipShown', 'true');
-                }
-            }, 2000);
-        });
-
-        // Animações de entrada em elementos
-        function observeElements() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('slide-in-up');
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            document.querySelectorAll('.card-modern').forEach(card => {
-                observer.observe(card);
-            });
-        }
-
-                // ===================================================================
-        // OTIMIZAÇÃO AUTOMÁTICA DO LAYOUT
-        // Adicione este script no final da página ou em um arquivo separado
+    <!-- Sistema de Grid Unificado -->
+    <script>
+        // ===================================================================
+        // FUNÇÕES GLOBAIS PARA GRID - Adicionar ao _Layout.cshtml
         // ===================================================================
 
         document.addEventListener('DOMContentLoaded', function() {
+            // ===================================================================
+            // SISTEMA DE GRID UNIFICADO
+            // ===================================================================
+
+            // Variáveis globais para controle da grid
+            let isLoadingVisible = false;
+            let loadingTimeout = null;
 
             // ===================================================================
-            // FUNÇÃO PARA OTIMIZAR ALTURA DA TABELA
+            // FUNÇÃO PARA CONTROLAR LOADING
             // ===================================================================
-            function optimizeTableHeight() {
-                const tableContainer = document.querySelector('.table-responsive');
-                if (!tableContainer) return;
+            window.showLoading = function(show) {
+                const overlay = document.getElementById('loadingOverlay');
 
-                // Calcular altura disponível
-                const windowHeight = window.innerHeight;
-                const topbarHeight = document.querySelector('.topbar')?.offsetHeight || 60;
-                const headerHeight = document.querySelector('.dashboard-container > .d-flex:first-child')?.offsetHeight || 80;
-                const filtersHeight = document.querySelector('.card-modern:has([id*="filtro"])')?.offsetHeight || 120;
-                const listHeaderHeight = document.querySelector('.card-header-modern')?.offsetHeight || 50;
-                const paginationHeight = document.querySelector('.pagination')?.parentElement?.offsetHeight || 60;
-                const padding = 40; // Padding extra para respirar
-
-                const availableHeight = windowHeight - topbarHeight - headerHeight - filtersHeight - listHeaderHeight - paginationHeight - padding;
-
-                // Aplicar altura otimizada
-                const minHeight = Math.max(300, Math.min(availableHeight, 600));
-                tableContainer.style.maxHeight = `${availableHeight}px`;
-                tableContainer.style.minHeight = `${minHeight}px`;
-
-                console.log(`📊 Altura da tabela otimizada: ${availableHeight}px (min: ${minHeight}px)`);
-            }
-
-            // ===================================================================
-            // FUNÇÃO PARA COMPACTAR CABEÇALHO
-            // ===================================================================
-            function compactHeader() {
-                const headerContainer = document.querySelector('.dashboard-container > .d-flex:first-child');
-                if (!headerContainer) return;
-
-                // Adicionar classe para controle
-                headerContainer.classList.add('header-optimized');
-
-                // Otimizar botões
-                const buttons = headerContainer.querySelectorAll('.btn-modern');
-                buttons.forEach(btn => {
-                    btn.classList.add('btn-compact');
-                });
-
-                console.log('🎯 Cabeçalho otimizado');
-            }
-
-            // ===================================================================
-            // FUNÇÃO PARA OTIMIZAR CARDS DE FILTROS
-            // ===================================================================
-            function optimizeFilters() {
-                const filterCards = document.querySelectorAll('.card-modern');
-                filterCards.forEach(card => {
-                    const header = card.querySelector('.card-header-modern');
-                    if (header && header.textContent.includes('Filtros')) {
-                        card.classList.add('filter-compact');
-
-                        // Tornar colapsável se não for
-                        if (!header.hasAttribute('data-bs-toggle')) {
-                            header.style.cursor = 'pointer';
-                            header.addEventListener('click', function() {
-                                const body = card.querySelector('.card-body-modern');
-                                if (body) {
-                                    body.style.display = body.style.display === 'none' ? 'block' : 'none';
-                                    header.classList.toggle('collapsed');
-                                }
-                            });
-                        }
-                    }
-                });
-
-                console.log('🔧 Filtros otimizados');
-            }
-
-            // ===================================================================
-            // FUNÇÃO PARA MONITORAR MUDANÇAS DE LAYOUT
-            // ===================================================================
-            function setupLayoutMonitoring() {
-                // Observer para mudanças no DOM
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                            // Re-otimizar quando conteúdo mudar
-                            setTimeout(() => {
-                                optimizeTableHeight();
-                            }, 100);
-                        }
-                    });
-                });
-
-                // Observar mudanças no container da grid
-                const gridContainer = document.getElementById('gridContainer');
-                if (gridContainer) {
-                    observer.observe(gridContainer, {
-                        childList: true,
-                        subtree: true
-                    });
+                if (!overlay) {
+                    console.warn('Loading overlay não encontrado');
+                    return;
                 }
 
-                console.log('👁️ Monitoramento de layout ativo');
-            }
+                // Limpar timeout anterior
+                if (loadingTimeout) {
+                    clearTimeout(loadingTimeout);
+                    loadingTimeout = null;
+                }
 
-            // ===================================================================
-            // FUNÇÃO PARA REDIMENSIONAMENTO RESPONSIVO
-            // ===================================================================
-            let resizeTimeout;
-            function handleResize() {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    optimizeTableHeight();
+                if (show) {
+                    isLoadingVisible = true;
+                    overlay.classList.remove('d-none');
+                    overlay.style.display = 'flex';
+                    overlay.style.opacity = '1';
+                    overlay.style.visibility = 'visible';
 
-                    // Adicionar classe de redimensionamento
-                    document.body.classList.add('resizing');
+                    // Adicionar classe loading à tabela
+                    const table = document.querySelector('.base-grid-table');
+                    if (table) {
+                        table.classList.add('loading');
+                    }
+
+                    // Timeout de segurança - forçar esconder após 15 segundos
+                    loadingTimeout = setTimeout(() => {
+                        console.warn('Loading forçado a esconder após timeout');
+                        showLoading(false);
+                    }, 15000);
+
+                } else {
+                    isLoadingVisible = false;
+                    overlay.style.opacity = '0';
+
+                    // Remover classe loading da tabela
+                    const table = document.querySelector('.base-grid-table');
+                    if (table) {
+                        table.classList.remove('loading');
+                    }
+
+                    // Aguardar transição antes de esconder completamente
                     setTimeout(() => {
-                        document.body.classList.remove('resizing');
+                        overlay.classList.add('d-none');
+                        overlay.style.display = 'none';
+                        overlay.style.visibility = 'hidden';
                     }, 300);
-
-                }, 150);
-            }
-
-            // ===================================================================
-            // FUNÇÃO PARA DETECTAR SIDEBAR COLAPSADO
-            // ===================================================================
-            function handleSidebarChange() {
-                const sidebar = document.getElementById('sidebar');
-                if (!sidebar) return;
-
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                            setTimeout(() => {
-                                optimizeTableHeight();
-                                console.log('📱 Layout ajustado para mudança do sidebar');
-                            }, 350); // Aguardar transição
-                        }
-                    });
-                });
-
-                observer.observe(sidebar, {
-                    attributes: true,
-                    attributeFilter: ['class']
-                });
-            }
-
-            // ===================================================================
-            // INICIALIZAÇÃO
-            // ===================================================================
-            function initLayoutOptimizer() {
-                // Aplicar otimizações iniciais
-                compactHeader();
-                optimizeFilters();
-
-                // Aguardar renderização completa
-                setTimeout(() => {
-                    optimizeTableHeight();
-                }, 100);
-
-                // Configurar monitoramento
-                setupLayoutMonitoring();
-                handleSidebarChange();
-
-                // Configurar redimensionamento
-                window.addEventListener('resize', handleResize);
-
-                // Otimizar após carregamento completo
-                window.addEventListener('load', () => {
-                    setTimeout(optimizeTableHeight, 200);
-                });
-            }
-
-            window.forceOptimize = function() {
-                optimizeTableHeight();
+                }
             };
 
-            // Inicializar
-            initLayoutOptimizer();
-        });
+            // Função para forçar esconder loading (emergência)
+            window.forceHideLoading = function() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    isLoadingVisible = false;
+                    overlay.classList.add('d-none');
+                    overlay.style.display = 'none';
+                    overlay.style.opacity = '0';
+                    overlay.style.visibility = 'hidden';
 
-        // ===================================================================
-        // CSS ADICIONAL VIA JAVASCRIPT
-        // ===================================================================
-        const additionalCSS = `
-        /* Estilos aplicados via JavaScript */
-        .header-optimized {
-            margin-bottom: 1rem !important;
-            padding: 0.75rem 0 !important;
-        }
+                    const table = document.querySelector('.base-grid-table');
+                    if (table) {
+                        table.classList.remove('loading');
+                    }
 
-        .btn-compact {
-            padding: 0.5rem 1rem !important;
-            font-size: 0.875rem !important;
-        }
-
-        .filter-compact .card-header-modern {
-            padding: 0.875rem 1.25rem !important;
-        }
-
-        .filter-compact .card-body-modern {
-            padding: 1rem 1.25rem !important;
-        }
-
-        .resizing * {
-            transition: none !important;
-        }
-
-        /* Melhorar scroll da tabela */
-        .table-responsive {
-            scroll-behavior: smooth;
-        }
-
-        .table-responsive::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        .table-responsive::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
-        }
-
-        .table-responsive::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .table-responsive::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        `;
-
-        // Aplicar CSS adicional
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = additionalCSS;
-        document.head.appendChild(styleSheet);
-
-
-
-                // ===================================================================
-        // CORREÇÃO DEFINITIVA - SISTEMA DE MENU ATIVO
-        // Substitua todo o JavaScript anterior por este
-        // ===================================================================
-
-        document.addEventListener('DOMContentLoaded', function() {
+                    if (loadingTimeout) {
+                        clearTimeout(loadingTimeout);
+                        loadingTimeout = null;
+                    }
+                }
+            };
 
             // ===================================================================
-            // SISTEMA DE DETECÇÃO DE MENU ATIVO CORRIGIDO
+            // FUNÇÃO GENÉRICA PARA APLICAR FILTROS
             // ===================================================================
-            function setCorrectActiveMenu() {
-                const currentPath = window.location.pathname.toLowerCase().trim();
-                const menuLinks = document.querySelectorAll('.sidebar .menu-link');
+            window.aplicarFiltros = function(page = 1) {
+                // Prevenir múltiplas requisições
+                if (isLoadingVisible) {
+                    console.log('Já carregando, ignorando nova requisição');
+                    return;
+                }
 
-                console.log('🔍 URL detectada:', currentPath);
+                showLoading(true);
 
-                // PRIMEIRO: Remover TODAS as classes active
-                menuLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
+                const formData = new FormData(document.getElementById('filtrosForm'));
+                const pageSize = document.getElementById('pageSizeSelector')?.value || 50;
 
-                // SEGUNDO: Detectar o menu correto baseado na URL
-                let menuFound = false;
+                const params = new URLSearchParams();
+                params.append('page', page);
+                params.append('pageSize', pageSize);
 
-                // Mapeamento exato de URLs
-                const exactMatches = {
-                    '/': 'Dashboard',
-                    '/home': 'Dashboard',
-                    '/home/index': 'Dashboard',
-                    '/veiculos': 'Veículos',
-                    '/veiculos/index': 'Veículos',
-                    '/clientes': 'Clientes',
-                    '/clientes/index': 'Clientes',
-                    '/vendedores': 'Vendedores',
-                    '/vendedores/index': 'Vendedores',
-                    '/vendas': 'Vendas',
-                    '/vendas/index': 'Vendas'
-                };
-
-                // Tentar correspondência exata primeiro
-                for (const [url, menuName] of Object.entries(exactMatches)) {
-                    if (currentPath === url || currentPath.endsWith(url)) {
-                        menuLinks.forEach(link => {
-                            const linkText = link.querySelector('.menu-link-text')?.textContent?.trim();
-                            if (linkText === menuName) {
-                                link.classList.add('active');
-                                menuFound = true;
-                                console.log('✅ Menu ativo (exato):', menuName);
-                                return;
-                            }
-                        });
-                        if (menuFound) break;
+                // Adicionar filtros
+                for (let [key, value] of formData.entries()) {
+                    if (value && value.trim() !== '') {
+                        params.append(key, value);
                     }
                 }
 
-                // Se não encontrou correspondência exata, tentar por segmento
-                if (!menuFound) {
-                    const pathSegments = currentPath.split('/').filter(s => s.length > 0);
-                    const mainSegment = pathSegments[0] || 'home';
+                // Determinar URL baseado na página atual
+                const currentPath = window.location.pathname.toLowerCase();
+                let ajaxUrl;
 
-                    console.log('🔍 Tentando por segmento:', mainSegment);
+                if (currentPath.includes('veiculos')) {
+                    ajaxUrl = '/Veiculos/GetVeiculosAjax';
+                } else if (currentPath.includes('clientes')) {
+                    ajaxUrl = '/Clientes/GetClientesAjax';
+                } else {
+                    console.error('URL Ajax não identificada para:', currentPath);
+                    forceHideLoading();
+                    return;
+                }
 
-                    const segmentMatches = {
-                        'home': 'Dashboard',
-                        'veiculos': 'Veículos',
-                        'clientes': 'Clientes',
-                        'vendedores': 'Vendedores',
-                        'vendas': 'Vendas'
-                    };
+                console.log(`Fazendo requisição para: ${ajaxUrl}?${params.toString()}`);
 
-                    const targetMenu = segmentMatches[mainSegment] || segmentMatches['home'];
-
-                    menuLinks.forEach(link => {
-                        const linkText = link.querySelector('.menu-link-text')?.textContent?.trim();
-                        if (linkText === targetMenu) {
-                            link.classList.add('active');
-                            menuFound = true;
-                            console.log('✅ Menu ativo (segmento):', targetMenu);
+                fetch(`${ajaxUrl}?${params.toString()}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                    });
-                }
+                        return response.text();
+                    })
+                    .then(html => {
+                        const gridContainer = document.getElementById('gridContainer');
+                        if (gridContainer) {
+                            gridContainer.innerHTML = html;
+                            updateUrl(params);
 
-                // Se ainda não encontrou, verificar pelo href do link
-                if (!menuFound) {
-                    console.log('🔍 Tentando por href dos links...');
+                            // Reinicializar eventos após atualizar a grid
+                            initializeGridEvents();
 
-                    menuLinks.forEach(link => {
-                        const href = link.getAttribute('href')?.toLowerCase();
-                        if (href) {
-                            // Extrair a parte relevante do href
-                            const hrefPath = href.split('/').pop() || '';
-                            const currentSegment = currentPath.split('/').pop() || '';
-
-                            if (hrefPath === currentSegment && currentSegment !== '') {
-                                link.classList.add('active');
-                                menuFound = true;
-                                console.log('✅ Menu ativo (href):', link.querySelector('.menu-link-text')?.textContent?.trim());
-                            }
+                            console.log('Grid atualizada com sucesso');
+                        } else {
+                            console.error('Grid container não encontrado');
                         }
-                    });
-                }
-
-                // Log final
-                if (!menuFound) {
-                    console.warn('⚠️ Nenhum menu correspondente encontrado para:', currentPath);
-                }
-            }
-
-            // ===================================================================
-            // CORRIGIR CLIQUES NOS MENUS
-            // ===================================================================
-            function setupMenuClicks() {
-                const menuLinks = document.querySelectorAll('.sidebar .menu-link');
-
-                menuLinks.forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        // Não remover todos os active aqui - deixar para a próxima página
-                        console.log('🖱️ Menu clicado:', this.querySelector('.menu-link-text')?.textContent?.trim());
-
-                        // Apenas adicionar uma classe temporária para feedback visual
-                        this.classList.add('clicking');
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar dados:', error);
+                        showToast('Erro ao carregar dados: ' + error.message, 'error');
+                    })
+                    .finally(() => {
+                        // Sempre esconder loading
                         setTimeout(() => {
-                            this.classList.remove('clicking');
-                        }, 150);
+                            showLoading(false);
+                        }, 300); // Pequeno delay para UX melhor
                     });
-                });
-            }
+            };
 
             // ===================================================================
-            // REMOVER PSEUDO-ELEMENTOS PROBLEMÁTICOS
+            // FUNÇÃO PARA MUDAR PÁGINA
             // ===================================================================
-            function removePseudoElements() {
-                // Criar style para forçar remoção
-                let style = document.getElementById('pseudo-remover');
-                if (!style) {
-                    style = document.createElement('style');
-                    style.id = 'pseudo-remover';
-                    document.head.appendChild(style);
+            window.changePage = function(page) {
+                aplicarFiltros(page);
+            };
+
+            // ===================================================================
+            // FUNÇÃO PARA ATUALIZAR URL
+            // ===================================================================
+            window.updateUrl = function(params) {
+                try {
+                    const newUrl = `${window.location.pathname}?${params.toString()}`;
+                    window.history.replaceState({}, '', newUrl);
+                } catch (error) {
+                    console.error('Erro ao atualizar URL:', error);
+                }
+            };
+
+            // ===================================================================
+            // FUNÇÃO PARA LIMPAR FILTROS
+            // ===================================================================
+            window.limparFiltros = function() {
+                const form = document.getElementById('filtrosForm');
+                if (form) {
+                    form.reset();
                 }
 
-                style.textContent = `
-                    .sidebar.collapsed::after,
-                    .sidebar.collapsed::before,
-                    .sidebar::after,
-                    .sidebar::before {
-                        display: none !important;
-                        content: none !important;
-                        visibility: hidden !important;
-                        opacity: 0 !important;
-                        width: 0 !important;
-                        height: 0 !important;
-                    }
-
-                    /* Estilo temporário para clique */
-                    .menu-link.clicking {
-                        background-color: rgba(245, 158, 11, 0.3) !important;
-                    }
-                `;
-            }
-
-            // ===================================================================
-            // CORRIGIR ESPAÇAMENTO DA SIDEBAR
-            // ===================================================================
-            function fixSidebarSpacing() {
-                const sidebar = document.getElementById('sidebar');
-                const mainArea = document.querySelector('.main-area');
-
-                if (!sidebar || !mainArea) return;
-
-                function applySpacing() {
-                    if (window.innerWidth <= 1024) {
-                        // Mobile - sem margem
-                        mainArea.style.marginLeft = '0px';
-                        mainArea.style.width = '100vw';
-                    } else {
-                        // Desktop
-                        const isCollapsed = sidebar.classList.contains('collapsed');
-                        const marginLeft = isCollapsed ? '80px' : '280px';
-                        const width = isCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 280px)';
-
-                        mainArea.style.marginLeft = marginLeft;
-                        mainArea.style.width = width;
-
-                        console.log('📐 Espaçamento aplicado:', { marginLeft, width, collapsed: isCollapsed });
-                    }
+                const pageSize = document.getElementById('pageSizeSelector');
+                if (pageSize) {
+                    pageSize.value = '50';
                 }
 
-                // Aplicar imediatamente
-                applySpacing();
-
-                // Monitorar mudanças na sidebar
-                const observer = new MutationObserver(() => {
-                    setTimeout(applySpacing, 50);
-                });
-
-                observer.observe(sidebar, {
-                    attributes: true,
-                    attributeFilter: ['class']
-                });
-
-                // Monitorar redimensionamento
-                window.addEventListener('resize', () => {
-                    setTimeout(applySpacing, 100);
-                });
-            }
+                aplicarFiltros(1);
+            };
 
             // ===================================================================
-            // INICIALIZAÇÃO
+            // FUNÇÃO PARA ORDENAÇÃO DE COLUNAS
             // ===================================================================
-            function initialize() {
-                console.log('🚀 Iniciando correção do menu ativo...');
+            window.sortColumn = function(column) {
+                // Buscar campos hidden de ordenação (se existirem)
+                let orderBy = document.getElementById('orderBy');
+                let orderDirection = document.getElementById('orderDirection');
 
-                // Remover elementos problemáticos primeiro
-                removePseudoElements();
+                // Se não existirem, criar dinamicamente
+                if (!orderBy) {
+                    orderBy = document.createElement('input');
+                    orderBy.type = 'hidden';
+                    orderBy.id = 'orderBy';
+                    orderBy.name = 'orderBy';
+                    orderBy.value = 'Nome';
+                    document.getElementById('filtrosForm').appendChild(orderBy);
+                }
 
-                // Aguardar um pouco para garantir que o DOM está pronto
+                if (!orderDirection) {
+                    orderDirection = document.createElement('input');
+                    orderDirection.type = 'hidden';
+                    orderDirection.id = 'orderDirection';
+                    orderDirection.name = 'orderDirection';
+                    orderDirection.value = 'asc';
+                    document.getElementById('filtrosForm').appendChild(orderDirection);
+                }
+
+                const currentOrder = orderBy.value;
+                const currentDirection = orderDirection.value;
+
+                // Se já está ordenando por esta coluna, inverte a direção
+                if (currentOrder === column) {
+                    orderDirection.value = currentDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    orderBy.value = column;
+                    orderDirection.value = 'asc';
+                }
+
+                aplicarFiltros();
+            };
+
+            // ===================================================================
+            // FUNÇÃO PARA CONFIRMAR EXCLUSÃO
+            // ===================================================================
+            window.confirmarExclusao = function(id) {
+                if (confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
+                    const currentPath = window.location.pathname.toLowerCase();
+                    let controller = '';
+
+                    if (currentPath.includes('veiculos')) {
+                        controller = 'Veiculos';
+                    } else if (currentPath.includes('clientes')) {
+                        controller = 'Clientes';
+                    }
+
+                    if (controller) {
+                        showLoading(true);
+                        window.location.href = `/${controller}/Delete/${id}`;
+                    }
+                }
+            };
+
+            // ===================================================================
+            // FUNÇÃO PARA EXPORTAR EXCEL
+            // ===================================================================
+            window.exportarExcel = function() {
+                showToast('Preparando exportação...', 'info', 2000);
+
+                // Implementar lógica de exportação aqui
                 setTimeout(() => {
-                    // Corrigir o menu ativo
-                    setCorrectActiveMenu();
+                    showToast('Exportação concluída!', 'success');
+                }, 2000);
+            };
 
-                    // Configurar cliques
-                    setupMenuClicks();
-
-                    // Corrigir espaçamento
-                    fixSidebarSpacing();
-
-                }, 100);
-
-                // Re-aplicar após carregamento completo
-                window.addEventListener('load', () => {
-                    setTimeout(() => {
-                        setCorrectActiveMenu();
-                        fixSidebarSpacing();
-                    }, 200);
+            // ===================================================================
+            // INICIALIZAÇÃO DOS EVENTOS DA GRID
+            // ===================================================================
+            window.initializeGridEvents = function() {
+                // Duplo clique nas linhas
+                const rows = document.querySelectorAll('.grid-row');
+                rows.forEach(row => {
+                    // Remover eventos anteriores para evitar duplicação
+                    row.removeEventListener('dblclick', handleRowDoubleClick);
+                    row.addEventListener('dblclick', handleRowDoubleClick);
                 });
 
-                console.log('✅ Sistema de menu ativo inicializado');
+                // Ordenação das colunas
+                const sortIcons = document.querySelectorAll('.sort-icon');
+                sortIcons.forEach(icon => {
+                    icon.removeEventListener('click', handleSortClick);
+                    icon.addEventListener('click', handleSortClick);
+                });
+            };
+
+            // ===================================================================
+            // HANDLERS DE EVENTOS
+            // ===================================================================
+            function handleRowDoubleClick(e) {
+                // Evitar conflito com dropdown de ações
+                if (e.target.closest('.dropdown') || e.target.closest('.actions-btn')) {
+                    return;
+                }
+
+                const id = this.getAttribute('data-id');
+                const controller = this.getAttribute('data-controller');
+
+                if (id && controller) {
+                    showLoading(true);
+                    window.location.href = `/${controller}/Details/${id}`;
+                }
+            }
+
+            function handleSortClick(e) {
+                e.stopPropagation();
+                const sortKey = this.getAttribute('data-sort');
+                if (sortKey) {
+                    sortColumn(sortKey);
+                }
+            }
+
+            // ===================================================================
+            // CONFIGURAÇÃO INICIAL DOS FILTROS
+            // ===================================================================
+            function initializeFilters() {
+                // Filtros com debounce para busca
+                let searchTimeout;
+                const searchInputs = [
+                    'searchInput', 'searchClientes', 'searchVeiculos'
+                ];
+
+                searchInputs.forEach(inputId => {
+                    const element = document.getElementById(inputId);
+                    if (element) {
+                        element.addEventListener('input', function() {
+                            clearTimeout(searchTimeout);
+                            searchTimeout = setTimeout(() => {
+                                aplicarFiltros(1);
+                            }, 600); // 600ms de delay
+                        });
+                    }
+                });
+
+                // Outros filtros aplicam imediatamente
+                const immediateFilters = [
+                    'filterSituacao', 'filterTipo', 'filterStatus',
+                    'filterMarca', 'filterAno', 'filterCombustivel'
+                ];
+
+                immediateFilters.forEach(filterId => {
+                    const element = document.getElementById(filterId);
+                    if (element) {
+                        element.addEventListener('change', () => aplicarFiltros(1));
+                    }
+                });
+
+                // Seletor de tamanho de página
+                const pageSizeSelector = document.getElementById('pageSizeSelector');
+                if (pageSizeSelector) {
+                    pageSizeSelector.addEventListener('change', function() {
+                        aplicarFiltros(1);
+                    });
+                }
+            }
+
+            // ===================================================================
+            // PREVENÇÃO DE LOADING INFINITO
+            // ===================================================================
+            function setupLoadingProtection() {
+                // Esconder loading inicial
+                setTimeout(forceHideLoading, 1000);
+
+                // Event listener para detectar quando a página termina de carregar
+                window.addEventListener('load', function() {
+                    setTimeout(forceHideLoading, 1500);
+                });
+
+                // Prevenir loading infinito em caso de erro de JavaScript
+                window.addEventListener('error', function(event) {
+                    console.error('Erro JavaScript detectado:', event.error);
+                    forceHideLoading();
+                });
+
+                // Detectar mudanças de visibilidade da página
+                document.addEventListener('visibilitychange', function() {
+                    if (document.visibilityState === 'visible' && isLoadingVisible) {
+                        setTimeout(() => {
+                            if (isLoadingVisible) {
+                                console.warn('Loading ainda visível após mudança de visibilidade, forçando esconder');
+                                forceHideLoading();
+                            }
+                        }, 3000);
+                    }
+                });
             }
 
             // ===================================================================
             // UTILITÁRIOS DE DEBUG
             // ===================================================================
-            window.debugMenu = function() {
-                const currentPath = window.location.pathname;
-                const activeMenus = document.querySelectorAll('.menu-link.active');
+            window.debugGrid = function() {
+                const overlay = document.getElementById('loadingOverlay');
+                const table = document.querySelector('.base-grid-table');
+                const rows = document.querySelectorAll('.grid-row');
 
-                console.log('=== DEBUG MENU ===');
-                console.log('URL atual:', currentPath);
-                console.log('Menus ativos encontrados:', activeMenus.length);
-
-                activeMenus.forEach((menu, index) => {
-                    const text = menu.querySelector('.menu-link-text')?.textContent?.trim();
-                    console.log(`Menu ativo ${index + 1}:`, text);
+                console.log('=== GRID DEBUG ===');
+                console.log('Loading overlay:', {
+                    exists: !!overlay,
+                    visible: isLoadingVisible,
+                    classes: overlay?.className,
+                    style: overlay?.style.cssText
+                });
+                console.log('Table:', {
+                    exists: !!table,
+                    classes: table?.className,
+                    rows: rows.length
+                });
+                console.log('Grid state:', {
+                    isLoadingVisible,
+                    hasTimeout: !!loadingTimeout
                 });
             };
 
-            window.fixMenuManually = function() {
-                removePseudoElements();
-                setCorrectActiveMenu();
-                fixSidebarSpacing();
-            };
-
-            // INICIALIZAR
-            initialize();
-
             // ===================================================================
-            // VERIFICAÇÃO PERIÓDICA (OPCIONAL - REMOVE SE CAUSAR PROBLEMAS)
+            // MELHORIAS DE ACESSIBILIDADE
             // ===================================================================
-            /*
-            setInterval(() => {
-                const activeMenus = document.querySelectorAll('.menu-link.active');
-                if (activeMenus.length > 1) {
-                    console.log('🔄 Múltiplos menus ativos detectados, corrigindo...');
-                    setCorrectActiveMenu();
+            function setupAccessibility() {
+                // Adicionar ARIA labels e roles
+                const table = document.querySelector('.base-grid-table');
+                if (table) {
+                    table.setAttribute('role', 'grid');
+                    table.setAttribute('aria-label', 'Tabela de dados com filtros e ordenação');
                 }
-            }, 10000); // A cada 10 segundos
-            */
+
+                // Headers ordenáveis
+                const sortableHeaders = document.querySelectorAll('[data-sortable]');
+                sortableHeaders.forEach(header => {
+                    header.setAttribute('role', 'columnheader');
+                    header.setAttribute('tabindex', '0');
+                    header.setAttribute('aria-sort', 'none');
+
+                    // Permitir ordenação via teclado
+                    header.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            const sortKey = this.getAttribute('data-sortable');
+                            if (sortKey) {
+                                sortColumn(sortKey);
+                            }
+                        }
+                    });
+                });
+
+                // Linhas da grid
+                const rows = document.querySelectorAll('.grid-row');
+                rows.forEach((row, index) => {
+                    row.setAttribute('role', 'row');
+                    row.setAttribute('tabindex', '0');
+                    row.setAttribute('aria-rowindex', index + 2); // +2 porque header é 1
+
+                    // Navegação por teclado
+                    row.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            this.dispatchEvent(new MouseEvent('dblclick'));
+                        }
+                    });
+                });
+            }
+
+            // ===================================================================
+            // INICIALIZAÇÃO PRINCIPAL
+            // ===================================================================
+            function initializeGrid() {
+                console.log('🚀 Inicializando sistema de grid unificado...');
+
+                // Configurar proteção de loading
+                setupLoadingProtection();
+
+                // Inicializar filtros
+                initializeFilters();
+
+                // Inicializar eventos da grid
+                initializeGridEvents();
+
+                // Configurar acessibilidade
+                setupAccessibility();
+
+                // Forçar esconder loading inicial
+                forceHideLoading();
+
+                console.log('✅ Sistema de grid inicializado com sucesso');
+            }
+
+            // ===================================================================
+            // AUTO-INICIALIZAÇÃO
+            // ===================================================================
+
+            // Inicializar quando DOM estiver pronto
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeGrid);
+            } else {
+                initializeGrid();
+            }
+
+            // Re-inicializar após AJAX
+            document.addEventListener('gridUpdated', initializeGridEvents);
+
+            // Exposer funções globais para debug
+            window.gridUtils = {
+                showLoading,
+                forceHideLoading,
+                aplicarFiltros,
+                changePage,
+                updateUrl,
+                limparFiltros,
+                sortColumn,
+                debugGrid,
+                initializeGridEvents
+            };
         });
 
+        // ===================================================================
+        // FUNÇÕES ESPECÍFICAS PARA DIFERENTES CONTROLADORES
+        // ===================================================================
 
+        // Nova venda (Clientes)
+        window.novaVenda = function(clienteId) {
+            if (clienteId) {
+                window.location.href = `/Vendas/Create?clienteId=${clienteId}`;
+            } else {
+                window.location.href = '/Vendas/Create';
+            }
+        };
 
-        document.addEventListener('DOMContentLoaded', observeElements);
+        // Nova avaliação (Clientes)
+        window.novaAvaliacao = function(clienteId) {
+            if (clienteId) {
+                window.location.href = `/Avaliacoes/Create?clienteId=${clienteId}`;
+            } else {
+                window.location.href = '/Avaliacoes/Create';
+            }
+        };
+
+        // Vender veículo (Veículos)
+        window.venderVeiculo = function(veiculoId) {
+            if (veiculoId) {
+                window.location.href = `/Vendas/Create?veiculoId=${veiculoId}`;
+            }
+        };
+
+        // ===================================================================
+        // OTIMIZAÇÕES DE PERFORMANCE
+        // ===================================================================
+
+        // Debounce helper
+        function debounce(func, wait, immediate) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    timeout = null;
+                    if (!immediate) func(...args);
+                };
+                const callNow = immediate && !timeout;
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+                if (callNow) func(...args);
+            };
+        }
+
+        // Throttle helper
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            }
+        }
+
+        // ===================================================================
+        // OBSERVADOR DE INTERSECÇÃO PARA LAZY LOADING
+        // ===================================================================
+        function setupIntersectionObserver() {
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate-in');
+                        }
+                    });
+                }, {
+                    threshold: 0.1,
+                    rootMargin: '50px'
+                });
+
+                // Observar cards e elementos da grid
+                document.querySelectorAll('.card-modern, .grid-row').forEach(el => {
+                    observer.observe(el);
+                });
+            }
+        }
+
+        // Inicializar observer após carregamento
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(setupIntersectionObserver, 500);
+        });
+        @Html.Raw(System.IO.File.ReadAllText(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "js", "grid-system.js")))
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

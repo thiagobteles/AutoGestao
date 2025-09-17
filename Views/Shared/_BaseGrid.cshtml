@@ -1,0 +1,274 @@
+@using AutoGestao.Enumerador
+@using AutoGestao.Enumerador.Veiculo
+@using AutoGestao.Models
+@model dynamic
+
+@{
+    // Configurações dinâmicas baseadas no tipo de modelo
+    var isVeiculoGrid = ViewData["GridType"]?.ToString() == "Veiculos";
+    var isClienteGrid = ViewData["GridType"]?.ToString() == "Clientes";
+    var baseController = ViewData["Controller"]?.ToString() ?? "";
+
+    // Configurações das colunas
+    var columns = ViewData["Columns"] as List<dynamic> ?? new List<dynamic>();
+
+    // Dados do modelo
+    var items = Model?.ListaObjeto ?? new List<object>();
+    var totalRecords = Model?.TotalRecords ?? 0;
+    var hasItems = items?.Any() ?? false;
+}
+
+<div class="base-grid-container">
+    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+        <table class="table table-hover mb-0 base-grid-table" id="@(ViewData["GridId"] ?? "baseTable")">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    @foreach (var column in columns)
+                    {
+                        <th style="@column.Style" @(column.Sortable ? $"data-sortable=\"{column.SortKey}\"" : "")>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span>@column.Title</span>
+                                @if (column.Sortable)
+                                {
+                                    <i class="fas fa-sort sort-icon ms-1" data-sort="@column.SortKey"></i>
+                                }
+                            </div>
+                        </th>
+                    }
+                    <!-- Coluna de ações sempre no final -->
+                    <th style="width: 50px; text-align: center;">
+                        <i class="fas fa-cog" title="Ações"></i>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (hasItems)
+                {
+                    @if (isVeiculoGrid)
+                    {
+                        @foreach (var item in (IEnumerable<dynamic>)items)
+                        {
+                            <tr class="grid-row" data-id="@item.Id" data-controller="@baseController">
+                                <td class="text-center">
+                                    <span class="fw-bold text-primary">@item.Codigo</span>
+                                </td>
+                                <td>
+                                    <div class="vehicle-info">
+                                        <div class="fw-semibold text-truncate">@item.Marca @item.Modelo</div>
+                                        <small class="text-muted text-truncate">@item.Motorizacao • @item.Combustivel</small>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="year-badge">@item.AnoFabricacao/@item.AnoModelo</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark">@item.Placa</span>
+                                </td>
+                                <td class="text-center">
+                                    @{
+                                        var situacao = (EnumSituacaoVeiculo)item.Situacao;
+                                        var (badgeClass, badgeIcon, badgeText) = GetSituacaoBadge(situacao);
+                                    }
+                                    <span class="badge-compact @badgeClass" title="@badgeText">
+                                        <i class="@badgeIcon"></i>
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="price-display">
+                                        <div class="fw-bold text-success">@(item.PrecoVenda?.ToString("C") ?? "N/A")</div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-link p-1 actions-btn" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v text-muted"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="/@baseController/Details/@item.Id"><i class="fas fa-eye me-2"></i>Visualizar</a></li>
+                                            <li><a class="dropdown-item" href="/@baseController/Edit/@item.Id"><i class="fas fa-edit me-2"></i>Editar</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="confirmarExclusao(@item.Id)"><i class="fas fa-trash me-2"></i>Excluir</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else if (isClienteGrid)
+                    {
+                        @foreach (var item in (IEnumerable<dynamic>)items)
+                        {
+                            <tr class="grid-row" data-id="@item.Id" data-controller="@baseController">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="cliente-avatar me-3">
+                                            @if (item.TipoCliente == EnumTipoPessoa.PessoaFisica)
+                                            {
+                                                <i class="fas fa-user text-primary"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-building text-warning"></i>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1 min-width-0">
+                                            <div class="fw-semibold text-truncate">@item.Nome</div>
+                                            @if (!string.IsNullOrEmpty(item.Email))
+                                            {
+                                                <small class="text-muted text-truncate d-block">@item.Email</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.TipoCliente == EnumTipoPessoa.PessoaFisica)
+                                    {
+                                        <span class="badge-compact badge-primary" title="Pessoa Física">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-compact badge-warning" title="Pessoa Jurídica">
+                                            <i class="fas fa-building"></i>
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="documento-display">
+                                        @if (item.TipoCliente == EnumTipoPessoa.PessoaFisica)
+                                        {
+                                            <span class="fw-bold">@item.CPF</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold">@item.CNPJ</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="contato-display">
+                                        @if (!string.IsNullOrEmpty(item.Telefone))
+                                        {
+                                            <div class="text-truncate"><i class="fas fa-phone me-1"></i>@item.Telefone</div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.Celular))
+                                        {
+                                            <div class="text-truncate"><i class="fas fa-mobile me-1"></i>@item.Celular</div>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @if (!string.IsNullOrEmpty(item.Cidade))
+                                    {
+                                        <div class="text-truncate">@item.Cidade/@item.Estado</div>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Ativo)
+                                    {
+                                        <span class="badge-compact badge-success" title="Ativo">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-compact badge-danger" title="Inativo">
+                                            <i class="fas fa-times"></i>
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="data-display">
+                                        <div>@item.DataCadastro.ToString("dd/MM/yyyy")</div>
+                                        <small class="text-muted">@item.DataCadastro.ToString("HH:mm")</small>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-link p-1 actions-btn" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v text-muted"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="/@baseController/Details/@item.Id"><i class="fas fa-eye me-2"></i>Visualizar</a></li>
+                                            <li><a class="dropdown-item" href="/@baseController/Edit/@item.Id"><i class="fas fa-edit me-2"></i>Editar</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-success" href="#" onclick="novaVenda(@item.Id)"><i class="fas fa-handshake me-2"></i>Nova Venda</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="@(columns.Count + 1)" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <p class="mb-3">Nenhum registro encontrado com os filtros aplicados.</p>
+                                <button class="btn-modern btn-outline-modern" onclick="limparFiltros()">
+                                    <i class="fas fa-times"></i>
+                                    Limpar Filtros
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@functions {
+    public (string badgeClass, string badgeIcon, string badgeText) GetSituacaoBadge(EnumSituacaoVeiculo situacao)
+    {
+        return situacao switch
+        {
+            EnumSituacaoVeiculo.Estoque => ("badge-success", "fas fa-warehouse", "Estoque"),
+            EnumSituacaoVeiculo.Vendido => ("badge-primary", "fas fa-check-circle", "Vendido"),
+            EnumSituacaoVeiculo.Reservado => ("badge-warning", "fas fa-lock", "Reservado"),
+            EnumSituacaoVeiculo.Manutencao => ("badge-danger", "fas fa-wrench", "Manutenção"),
+            _ => ("badge-secondary", "fas fa-question", "Indefinido")
+        };
+    }
+}
+
+<script>
+    // Comportamento de duplo clique para abrir detalhes
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.grid-row');
+
+        rows.forEach(row => {
+            row.addEventListener('dblclick', function(e) {
+                // Evitar conflito com dropdown de ações
+                if (e.target.closest('.dropdown') || e.target.closest('.actions-btn')) {
+                    return;
+                }
+
+                const id = this.getAttribute('data-id');
+                const controller = this.getAttribute('data-controller');
+
+                if (id && controller) {
+                    window.location.href = `/${controller}/Details/${id}`;
+                }
+            });
+
+            // Adicionar cursor pointer para indicar que é clicável
+            row.style.cursor = 'pointer';
+        });
+
+        // Configurar ordenação
+        const sortIcons = document.querySelectorAll('.sort-icon');
+        sortIcons.forEach(icon => {
+            icon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const sortKey = this.getAttribute('data-sort');
+                if (typeof sortColumn === 'function') {
+                    sortColumn(sortKey);
+                }
+            });
+        });
+    });
+</script>

@@ -3889,3 +3889,1079 @@ html body .sidebar.collapsed::before {
         display: none !important;
     }
 }
+
+/* ===================================================================
+   ANIMAÇÕES E TRANSIÇÕES PARA GRID - Adicionar ao final do custom.css
+   =================================================================== */
+
+/* ===================================================================
+   ANIMAÇÕES DE ENTRADA
+   =================================================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+/* ===================================================================
+   CLASSES DE ANIMAÇÃO
+   =================================================================== */
+
+.animate-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.scale-in {
+    animation: scaleIn 0.4s ease-out;
+}
+
+/* ===================================================================
+   ANIMAÇÕES ESPECÍFICAS DA GRID
+   =================================================================== */
+
+/* Animação das linhas da tabela ao carregar */
+.base-grid-table tbody tr {
+    animation: fadeInUp 0.4s ease-out;
+    animation-fill-mode: both;
+}
+
+    .base-grid-table tbody tr:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .base-grid-table tbody tr:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .base-grid-table tbody tr:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .base-grid-table tbody tr:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+
+    .base-grid-table tbody tr:nth-child(5) {
+        animation-delay: 0.3s;
+    }
+
+    .base-grid-table tbody tr:nth-child(n+6) {
+        animation-delay: 0.35s;
+    }
+
+/* ===================================================================
+   LOADING SKELETON
+   =================================================================== */
+
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.base-grid-table.loading tbody tr {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.base-grid-table.loading .badge-compact,
+.base-grid-table.loading .cliente-avatar {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+    color: transparent;
+}
+
+/* ===================================================================
+   HOVER ANIMATIONS
+   =================================================================== */
+
+.base-grid-table tbody tr {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .base-grid-table tbody tr:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+.badge-compact {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .badge-compact:hover {
+        transform: scale(1.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+.actions-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .actions-btn:hover {
+        transform: scale(1.2) rotate(90deg);
+        background-color: rgba(55, 65, 81, 0.15) !important;
+    }
+
+/* ===================================================================
+   SORT ANIMATIONS
+   =================================================================== */
+
+.sort-icon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .sort-icon:hover {
+        transform: scale(1.2);
+    }
+
+    .sort-icon.fa-sort-up {
+        animation: sortUp 0.3s ease-out;
+    }
+
+    .sort-icon.fa-sort-down {
+        animation: sortDown 0.3s ease-out;
+    }
+
+@keyframes sortUp {
+    0% {
+        transform: translateY(2px);
+    }
+
+    50% {
+        transform: translateY(-2px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes sortDown {
+    0% {
+        transform: translateY(-2px);
+    }
+
+    50% {
+        transform: translateY(2px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* ===================================================================
+   DROPDOWN ANIMATIONS
+   =================================================================== */
+
+.dropdown-menu {
+    animation: dropdownShow 0.2s ease-out;
+    transform-origin: top;
+}
+
+@keyframes dropdownShow {
+    0% {
+        opacity: 0;
+        transform: scaleY(0.8) translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scaleY(1) translateY(0);
+    }
+}
+
+.dropdown-item {
+    transition: all 0.2s ease;
+    transform: translateX(0);
+}
+
+    .dropdown-item:hover {
+        transform: translateX(4px);
+    }
+
+/* ===================================================================
+   TOAST ANIMATIONS MELHORADAS
+   =================================================================== */
+
+.toast-modern {
+    animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .toast-modern.hide {
+        animation: toastSlideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+@keyframes toastSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(100%) scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes toastSlideOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(100%) scale(0.8);
+    }
+}
+
+/* ===================================================================
+   CARD ANIMATIONS
+   =================================================================== */
+
+.card-modern {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .card-modern:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+/* ===================================================================
+   BUTTON ANIMATIONS
+   =================================================================== */
+
+.btn-modern {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-modern:active {
+        transform: translateY(0);
+        transition: all 0.1s;
+    }
+
+/* ===================================================================
+   LOADING OVERLAY ANIMATIONS
+   =================================================================== */
+
+#loadingOverlay {
+    transition: all 0.3s ease;
+}
+
+    #loadingOverlay:not(.d-none) {
+        animation: loadingFadeIn 0.3s ease;
+    }
+
+@keyframes loadingFadeIn {
+    0% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+
+    100% {
+        opacity: 1;
+        backdrop-filter: blur(2px);
+    }
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* ===================================================================
+   MICRO-INTERACTIONS
+   =================================================================== */
+
+/* Ripple effect para botões */
+.btn-modern {
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-modern::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-modern:active::after {
+        width: 300px;
+        height: 300px;
+    }
+
+/* Efeito de foco melhorado */
+.form-control-modern:focus,
+.form-select-modern:focus {
+    transform: scale(1.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===================================================================
+   SCROLL ANIMATIONS
+   =================================================================== */
+
+.table-responsive {
+    scroll-behavior: smooth;
+}
+
+    /* Custom scrollbar com animação */
+    .table-responsive::-webkit-scrollbar-thumb {
+        transition: background-color 0.3s ease;
+    }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background-color: var(--primary-color);
+        }
+
+/* ===================================================================
+   SIDEBAR ANIMATIONS MELHORADAS
+   =================================================================== */
+
+.sidebar {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .sidebar.collapsed .menu-link i {
+        animation: iconBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+@keyframes iconBounce {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* ===================================================================
+   RESPONSIVE ANIMATIONS
+   =================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ===================================================================
+   HIGH CONTRAST MODE
+   =================================================================== */
+
+@media (prefers-contrast: high) {
+    .base-grid-table tbody tr:hover {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
+
+    .badge-compact {
+        border: 2px solid currentColor;
+    }
+}
+
+/* ===================================================================
+   DARK THEME ANIMATIONS
+   =================================================================== */
+
+[data-theme="dark"] .base-grid-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .loading-skeleton,
+[data-theme="dark"] .base-grid-table.loading .badge-compact,
+[data-theme="dark"] .base-grid-table.loading .cliente-avatar {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200px 100%;
+}
+
+/* ===================================================================
+   PERFORMANCE OPTIMIZATIONS
+   =================================================================== */
+
+.base-grid-table,
+.base-grid-table *,
+.btn-modern,
+.card-modern {
+    will-change: transform;
+}
+
+    /* Usar transform3d para forçar aceleração de hardware */
+    .base-grid-table tbody tr:hover {
+        transform: translate3d(4px, 0, 0);
+    }
+
+    .card-modern:hover {
+        transform: translate3d(0, -4px, 0);
+    }
+
+/* ===================================================================
+   PRINT STYLES
+   =================================================================== */
+
+@media print {
+    .base-grid-table tbody tr,
+    .card-modern,
+    .btn-modern {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ===================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   =================================================================== */
+
+/* Indicador visual para elementos focáveis via teclado */
+.base-grid-table tbody tr:focus,
+.sort-icon:focus,
+.actions-btn:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    animation: focusPulse 2s infinite;
+}
+
+@keyframes focusPulse {
+    0%, 100% {
+        outline-color: var(--accent-color);
+    }
+
+    50% {
+        outline-color: transparent;
+    }
+}
+
+/* ===================================================================
+   ESTADOS DE ERRO E SUCESSO
+   =================================================================== */
+
+.grid-row-error {
+    animation: errorShake 0.5s ease-in-out;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.grid-row-success {
+    animation: successPulse 0.8s ease-in-out;
+    background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+@keyframes errorShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-2px);
+    }
+
+    20%, 40%, 60%, 80% {
+        transform: translateX(2px);
+    }
+}
+
+@keyframes successPulse {
+    0% {
+        background-color: rgba(16, 185, 129, 0.3);
+    }
+
+    100% {
+        background-color: rgba(16, 185, 129, 0.1);
+    }
+}
+
+/* ===================================================================
+   LOADING STATES MAIS SOFISTICADOS
+   =================================================================== */
+
+.grid-loading-skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+    .grid-loading-skeleton::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        animation: shimmer 2s infinite;
+        content: '';
+    }
+
+/* ===================================================================
+   FINALIZAÇÕES E POLIMENTOS
+   =================================================================== */
+
+/* Suavizar todas as transições */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Otimizar performance do scroll */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Melhorar a renderização de texto */
+.base-grid-table {
+    text-rendering: optimizeLegibility;
+}
+
+
+/* ===================================================================
+   ESTILOS PARA GRID BASE - Adicionar ao final do custom.css
+   =================================================================== */
+
+/* ===================================================================
+   GRID BASE - ESTILOS GERAIS
+   =================================================================== */
+
+.base-grid-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.base-grid-table {
+    width: 100%;
+    table-layout: fixed; /* Força larguras fixas */
+}
+
+    /* ===================================================================
+   CABEÇALHO DA GRID
+   =================================================================== */
+
+    .base-grid-table thead th {
+        background: var(--primary-dark) !important;
+        color: white !important;
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 1rem 0.75rem;
+        border: none;
+        white-space: nowrap;
+        vertical-align: middle;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+/* Ícones de ordenação */
+.sort-icon {
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+    .sort-icon:hover {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+    .sort-icon.fa-sort-up,
+    .sort-icon.fa-sort-down {
+        opacity: 1;
+        color: var(--accent-color);
+    }
+
+/* ===================================================================
+   LINHAS DA GRID
+   =================================================================== */
+
+.base-grid-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+    .base-grid-table tbody tr:hover {
+        background-color: rgba(55, 65, 81, 0.05);
+        transform: translateX(2px);
+    }
+
+    .base-grid-table tbody tr.grid-row {
+        cursor: pointer;
+    }
+
+        .base-grid-table tbody tr.grid-row:hover {
+            background-color: rgba(55, 65, 81, 0.08);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+/* ===================================================================
+   CÉLULAS DA GRID
+   =================================================================== */
+
+.base-grid-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border: none;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+    /* Campos que podem quebrar linha controladamente */
+    .base-grid-table td .vehicle-info,
+    .base-grid-table td .contato-display,
+    .base-grid-table td .data-display {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+        .base-grid-table td .vehicle-info div,
+        .base-grid-table td .contato-display div,
+        .base-grid-table td .documento-display {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+/* ===================================================================
+   BADGES COMPACTOS
+   =================================================================== */
+
+.badge-compact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: default;
+}
+
+    .badge-compact.badge-primary {
+        background-color: rgba(55, 65, 81, 0.15);
+        color: var(--primary-color);
+    }
+
+    .badge-compact.badge-success {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: var(--success-color);
+    }
+
+    .badge-compact.badge-warning {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: var(--warning-color);
+    }
+
+    .badge-compact.badge-danger {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: var(--danger-color);
+    }
+
+    .badge-compact.badge-secondary {
+        background-color: rgba(156, 163, 175, 0.15);
+        color: var(--secondary-color);
+    }
+
+/* ===================================================================
+   AVATAR DE CLIENTE
+   =================================================================== */
+
+.cliente-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(55, 65, 81, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+}
+
+/* ===================================================================
+   BOTÃO DE AÇÕES
+   =================================================================== */
+
+.actions-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0.25rem !important;
+    line-height: 1 !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+    .actions-btn:hover {
+        background-color: rgba(55, 65, 81, 0.1) !important;
+        transform: scale(1.1) !important;
+    }
+
+    .actions-btn:focus {
+        box-shadow: 0 0 0 2px rgba(55, 65, 81, 0.2) !important;
+    }
+
+/* ===================================================================
+   DROPDOWN DE AÇÕES
+   =================================================================== */
+
+.dropdown-menu {
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0;
+    min-width: 150px;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+    .dropdown-item:hover {
+        background-color: var(--light-color);
+        color: var(--primary-dark);
+    }
+
+    .dropdown-item i {
+        width: 16px;
+        font-size: 0.75rem;
+    }
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+/* ===================================================================
+   ELEMENTOS DE EXIBIÇÃO ESPECÍFICOS
+   =================================================================== */
+
+/* Badge de ano */
+.year-badge {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+/* Exibição de preços */
+.price-display {
+    text-align: right;
+}
+
+    .price-display .fw-bold {
+        font-size: 0.9rem;
+    }
+
+/* Exibição de dados com limite de largura */
+.min-width-0 {
+    min-width: 0;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE DA GRID
+   =================================================================== */
+
+/* Larguras específicas das colunas para diferentes grids */
+
+/* Grid de Veículos */
+.base-grid-table.veiculos-grid th:nth-child(1) {
+    width: 100px;
+}
+/* Código */
+.base-grid-table.veiculos-grid th:nth-child(2) {
+    width: 200px;
+}
+/* Veículo */
+.base-grid-table.veiculos-grid th:nth-child(3) {
+    width: 100px;
+}
+/* Ano */
+.base-grid-table.veiculos-grid th:nth-child(4) {
+    width: 120px;
+}
+/* Placa */
+.base-grid-table.veiculos-grid th:nth-child(5) {
+    width: 100px;
+}
+/* Situação */
+.base-grid-table.veiculos-grid th:nth-child(6) {
+    width: 140px;
+}
+/* Preço */
+.base-grid-table.veiculos-grid th:nth-child(7) {
+    width: 50px;
+}
+/* Ações */
+
+/* Grid de Clientes */
+.base-grid-table.clientes-grid th:nth-child(1) {
+    width: 250px;
+}
+/* Cliente */
+.base-grid-table.clientes-grid th:nth-child(2) {
+    width: 80px;
+}
+/* Tipo */
+.base-grid-table.clientes-grid th:nth-child(3) {
+    width: 150px;
+}
+/* Documento */
+.base-grid-table.clientes-grid th:nth-child(4) {
+    width: 180px;
+}
+/* Contato */
+.base-grid-table.clientes-grid th:nth-child(5) {
+    width: 120px;
+}
+/* Localização */
+.base-grid-table.clientes-grid th:nth-child(6) {
+    width: 80px;
+}
+/* Status */
+.base-grid-table.clientes-grid th:nth-child(7) {
+    width: 120px;
+}
+/* Cadastro */
+.base-grid-table.clientes-grid th:nth-child(8) {
+    width: 50px;
+}
+/* Ações */
+
+/* ===================================================================
+   RESPONSIVIDADE MOBILE
+   =================================================================== */
+
+@media (max-width: 768px) {
+    .base-grid-table {
+        font-size: 0.8rem;
+    }
+
+        .base-grid-table td {
+            padding: 0.5rem 0.375rem;
+        }
+
+        .base-grid-table thead th {
+            padding: 0.75rem 0.375rem;
+            font-size: 0.8rem;
+        }
+
+        /* Ocultar algumas colunas em mobile */
+        .base-grid-table th:nth-child(3),
+        .base-grid-table td:nth-child(3),
+        .base-grid-table th:nth-child(5),
+        .base-grid-table td:nth-child(5) {
+            display: none;
+        }
+
+    .cliente-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .badge-compact {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ===================================================================
+   LOADING STATE
+   =================================================================== */
+
+.base-grid-table.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+    .base-grid-table.loading tbody tr {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ===================================================================
+   MODO ESCURO
+   =================================================================== */
+
+[data-theme="dark"] .base-grid-table thead th {
+    background: #0f172a !important;
+}
+
+[data-theme="dark"] .base-grid-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .base-grid-table tbody tr.grid-row:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .cliente-avatar {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .actions-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: #374151;
+    color: #f9fafb;
+}
+
+/* ===================================================================
+   ESTADOS DE HOVER MELHORADOS
+   =================================================================== */
+
+.base-grid-table tbody tr:hover .badge-compact {
+    transform: scale(1.1);
+}
+
+.base-grid-table tbody tr:hover .actions-btn {
+    opacity: 1;
+}
+
+/* Tornar o botão de ações mais visível apenas no hover da linha */
+.actions-btn {
+    opacity: 0.6;
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.base-grid-table tbody tr:hover .actions-btn {
+    opacity: 1;
+}
+
+/* ===================================================================
+   INDICADOR DE LINHA SELECIONADA/ATIVA
+   =================================================================== */
+
+.base-grid-table tbody tr.selected {
+    background-color: rgba(55, 65, 81, 0.1) !important;
+    border-left: 3px solid var(--accent-color);
+}
+
+[data-theme="dark"] .base-grid-table tbody tr.selected {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}

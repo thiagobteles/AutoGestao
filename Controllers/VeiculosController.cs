@@ -25,15 +25,17 @@ namespace AutoGestao.Controllers
         {
             var query = _context.Veiculos
                 .Include(v => v.Proprietario)
+                .Include(v => v.Marca)
+                .Include(v => v.Modelo)
                 .AsQueryable();
 
             // Aplicar filtros
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(v =>
-                    v.Marca.GetDescription().Contains(search) ||
+                    v.Marca.Descricao.Contains(search) ||
                     v.Modelo.Descricao.Contains(search) ||
-                    v.Placa.Contains(search) ||
+                    v.Placa.ToLower().Contains(search.ToLower()) ||
                     v.Codigo.Contains(search) ||
                     v.Proprietario != null && v.Proprietario.Nome.Contains(search));
             }
@@ -46,6 +48,9 @@ namespace AutoGestao.Controllers
             // Aplicar ordenação
             query = orderBy?.ToLower() switch
             {
+                "mara" => orderDirection == "desc"
+                    ? query.OrderByDescending(v => v.Marca).ThenBy(v => v.Modelo)
+                    : query.OrderBy(v => v.Marca).ThenBy(v => v.Modelo),
                 "preco" => orderDirection == "desc"
                     ? query.OrderByDescending(v => v.PrecoVenda)
                     : query.OrderBy(v => v.PrecoVenda),
