@@ -48,9 +48,9 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model.Veiculos != null && Model.Veiculos.Any())
+            @if (Model.ListaObjeto != null && Model.ListaObjeto.Any())
             {
-                @foreach (var item in Model.Veiculos)
+                @foreach (var item in Model.ListaObjeto)
                 {
                     <tr class="veiculo-row">
                         <td>
@@ -133,9 +133,9 @@
 <!-- Visualização em Grid (Cards) -->
 <div id="gridView" class="d-none p-3" style="max-height: 600px; overflow-y: auto;">
     <div class="grid-3">
-        @if (Model.Veiculos != null && Model.Veiculos.Any())
+        @if (Model.ListaObjeto != null && Model.ListaObjeto.Any())
         {
-            @foreach (var item in Model.Veiculos)
+            @foreach (var item in Model.ListaObjeto)
             {
                 <div class="vehicle-card">
                     <div class="card-modern">

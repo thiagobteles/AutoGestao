@@ -1,19 +1,21 @@
+using AutoGestao.Enumerador;
+
 namespace AutoGestao.Entidades
 {
-    public class Parcela
+    public class Parcela : BaseEntidade
     {
-        public int Id { get; set; }
-        public int NumeroParcela { get; set; }
-        public decimal Valor { get; set; }
+        public required int NumeroParcela { get; set; }
+        public required decimal Valor { get; set; }
         public DateTime DataVencimento { get; set; }
         public DateTime? DataPagamento { get; set; }
         public decimal? ValorPago { get; set; }
-        public string Status { get; set; } = "Pendente"; // Pendente, Paga, Vencida
+        public EnumStatusParcela Status { get; set; } = EnumStatusParcela.Pendente;
+        public string? Observacoes {  get; set; }
 
         // Foreign Keys
         public int VendaId { get; set; }
 
         // Navigation properties
-        public virtual Venda Venda { get; set; } = null!;
+        public virtual required Venda Venda { get; set; }
     }
 }

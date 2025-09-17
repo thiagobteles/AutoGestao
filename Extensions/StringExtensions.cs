@@ -12,5 +12,92 @@ namespace AutoGestao.Extensions
             var startUnderscores = System.Text.RegularExpressions.Regex.Match(input, @"^_+");
             return startUnderscores + System.Text.RegularExpressions.Regex.Replace(input, @"([a-z0-9])([A-Z])", "$1_$2").ToLower();
         }
+
+        public static bool CpfValido(this string cpf)
+        {
+            if (string.IsNullOrEmpty(cpf) || cpf.Length != 11)
+            {
+                return false;
+            }
+
+            // Verificar se todos os dígitos são iguais
+            if (cpf.All(c => c == cpf[0]))
+            {
+                return false;
+            }
+
+            // Validar dígitos verificadores
+            var numbers = cpf.Select(c => int.Parse(c.ToString())).ToArray();
+
+            var sum = 0;
+            for (var i = 0; i < 9; i++)
+            {
+                sum += numbers[i] * (10 - i);
+            }
+
+            var remainder = sum % 11;
+            var digit1 = remainder < 2 ? 0 : 11 - remainder;
+
+            if (numbers[9] != digit1)
+            {
+                return false;
+            }
+
+            sum = 0;
+            for (var i = 0; i < 10; i++)
+            {
+                sum += numbers[i] * (11 - i);
+            }
+
+            remainder = sum % 11;
+            var digit2 = remainder < 2 ? 0 : 11 - remainder;
+
+            return numbers[10] == digit2;
+        }
+
+        public static bool CnpjValido(this string cnpj)
+        {
+            if (string.IsNullOrEmpty(cnpj) || cnpj.Length != 14)
+            {
+                return false;
+            }
+
+            // Verificar se todos os dígitos são iguais
+            if (cnpj.All(c => c == cnpj[0]))
+            {
+                return false;
+            }
+
+            var numbers = cnpj.Select(c => int.Parse(c.ToString())).ToArray();
+
+            // Primeiro dígito verificador
+            var sequence1 = new int[] { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+            var sum = 0;
+            for (var i = 0; i < 12; i++)
+            {
+                sum += numbers[i] * sequence1[i];
+            }
+
+            var remainder = sum % 11;
+            var digit1 = remainder < 2 ? 0 : 11 - remainder;
+
+            if (numbers[12] != digit1)
+            {
+                return false;
+            }
+
+            // Segundo dígito verificador
+            var sequence2 = new int[] { 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+            sum = 0;
+            for (var i = 0; i < 13; i++)
+            {
+                sum += numbers[i] * sequence2[i];
+            }
+
+            remainder = sum % 11;
+            var digit2 = remainder < 2 ? 0 : 11 - remainder;
+
+            return numbers[13] == digit2;
+        }
     }
 }

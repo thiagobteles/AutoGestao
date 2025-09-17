@@ -1,12 +1,13 @@
+using AutoGestao.Enumerador;
+
 namespace AutoGestao.Entidades
 {
-    public class Tarefa
+    public class Tarefa : BaseEntidade
     {
-        public int Id { get; set; }
-        public string Titulo { get; set; } = string.Empty;
+        public required string Titulo { get; set; }
         public string? Descricao { get; set; }
-        public string Status { get; set; } = "Pendente"; // Pendente, EmAndamento, Concluida, Cancelada
-        public string Prioridade { get; set; } = "Media"; // Baixa, Media, Alta, Critica
+        public EnumStatusTarefa Status { get; set; } = EnumStatusTarefa.Pendente;
+        public EnumPrioridade Prioridade { get; set; } = EnumPrioridade.Media;
         public DateTime DataCriacao { get; set; }
         public DateTime? DataVencimento { get; set; }
         public DateTime? DataConclusao { get; set; }

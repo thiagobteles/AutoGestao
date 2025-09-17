@@ -1,8 +1,7 @@
-namespace AutoGestao.Entidades
+namespace AutoGestao.Entidades.Veiculos
 {
-    public class VeiculoFoto
+    public class VeiculoFoto : BaseEntidade
     {
-        public int Id { get; set; }
         public string NomeArquivo { get; set; } = string.Empty;
         public string CaminhoArquivo { get; set; } = string.Empty;
         public string? Descricao { get; set; }

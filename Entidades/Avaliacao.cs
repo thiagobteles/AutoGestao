@@ -1,23 +1,27 @@
+using AutoGestao.Entidades.Veiculos;
+using AutoGestao.Enumerador;
+
 namespace AutoGestao.Entidades
 {
-    public class Avaliacao
+    public class Avaliacao : BaseEntidade
     {
-        public int Id { get; set; }
-        public string MarcaVeiculo { get; set; } = string.Empty;
-        public string ModeloVeiculo { get; set; } = string.Empty;
         public int AnoVeiculo { get; set; }
         public string? PlacaVeiculo { get; set; }
         public decimal? ValorOferecido { get; set; }
-        public string StatusAvaliacao { get; set; } = "Pendente"; // Pendente, Aprovada, Rejeitada
         public string? Observacoes { get; set; }
         public DateTime DataAvaliacao { get; set; }
+        public EnumStatusAvaliacao StatusAvaliacao { get; set; } = EnumStatusAvaliacao.Pendente;
 
         // Foreign Keys
         public int? ClienteId { get; set; }
         public int? VendedorResponsavelId { get; set; }
+        public int? VeiculoMarcaId { get; set; }
+        public int? VeiculoMarcaModeloId { get; set; }
 
         // Navigation properties
         public virtual Cliente? Cliente { get; set; }
         public virtual Vendedor? VendedorResponsavel { get; set; }
+        public virtual VeiculoMarca? VeiculoMarca { get; set; }
+        public virtual VeiculoMarcaModelo? VeiculoMarcaModelo { get; set; }
     }
 }

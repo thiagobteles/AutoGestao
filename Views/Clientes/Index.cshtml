@@ -1,3 +1,4 @@
+@using AutoGestao.Enumerador
 @using AutoGestao.Models
 @model ClientesIndexViewModel
 @{
@@ -47,16 +48,16 @@
                         <label class="form-label-modern">Tipo</label>
                         <select name="tipoCliente" id="filterTipo" class="form-select-modern">
                             <option value="">Todos</option>
-                            <option value="PessoaFisica" selected="@(Model.TipoCliente == "PessoaFisica")">👤 Pessoa Física</option>
-                            <option value="PessoaJuridica" selected="@(Model.TipoCliente == "PessoaJuridica")">🏢 Pessoa Jurídica</option>
+                            <option value="PessoaFisica" selected="@(Model.TipoCliente == EnumTipoPessoa.PessoaFisica)">👤 Pessoa Física</option>
+                            <option value="PessoaJuridica" selected="@(Model.TipoCliente == EnumTipoPessoa.PessoaJuridica)">🏢 Pessoa Jurídica</option>
                         </select>
                     </div>
                     <div class="form-group-modern">
                         <label class="form-label-modern">Status</label>
                         <select name="status" id="filterStatus" class="form-select-modern">
                             <option value="">Todos</option>
-                            <option value="Ativo" selected="@(Model.Status == "Ativo")">✅ Ativo</option>
-                            <option value="Inativo" selected="@(Model.Status == "Inativo")">❌ Inativo</option>
+                            <option value="Ativo" selected="@(Model.Ativo)">✅ Ativo</option>
+                            <option value="Inativo" selected="@(!Model.Ativo)">❌ Inativo</option>
                         </select>
                     </div>
                 </div>

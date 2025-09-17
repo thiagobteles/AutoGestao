@@ -1,3 +1,4 @@
+@using AutoGestao.Enumerador
 @using AutoGestao.Models
 @model ClientesIndexViewModel
 
@@ -41,15 +42,15 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model.Clientes != null && Model.Clientes.Any())
+            @if (Model.ListaObjeto != null && Model.ListaObjeto.Any())
             {
-                @foreach (var cliente in Model.Clientes)
+                @foreach (var cliente in Model.ListaObjeto)
                 {
                     <tr class="cliente-row">
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="cliente-avatar me-3">
-                                    @if (cliente.TipoCliente == "PessoaFisica")
+                                    @if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica)
                                     {
                                         <i class="fas fa-user fa-lg text-primary"></i>
                                     }
@@ -68,7 +69,7 @@
                             </div>
                         </td>
                         <td>
-                            @if (cliente.TipoCliente == "PessoaFisica")
+                            @if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica)
                             {
                                 <span class="badge-modern badge-primary">👤 Pessoa Física</span>
                             }
@@ -78,7 +79,7 @@
                             }
                         </td>
                         <td>
-                            @if (cliente.TipoCliente == "PessoaFisica")
+                            @if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica)
                             {
                                 <span class="fw-bold">@cliente.CPF</span>
                                 @if (!string.IsNullOrEmpty(cliente.RG))
@@ -113,7 +114,7 @@
                             }
                         </td>
                         <td>
-                            @if (cliente.Status == "Ativo")
+                            @if (cliente.Ativo)
                             {
                                 <span class="badge-modern badge-success">✅ Ativo</span>
                             }

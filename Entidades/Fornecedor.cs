@@ -1,11 +1,10 @@
-using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
 
 namespace AutoGestao.Entidades
 {
-    public class Cliente : BaseEntidade
+    public class Fornecedor : BaseEntidade
     {
-        public EnumTipoPessoa TipoCliente { get; set; } = EnumTipoPessoa.Nenhum;
+        public EnumTipoPessoa TipoFornecedor { get; set; } = EnumTipoPessoa.Nenhum;
         public string Nome { get; set; } = string.Empty;
         public string? CPF { get; set; }
         public string? CNPJ { get; set; }
@@ -23,10 +22,5 @@ namespace AutoGestao.Entidades
         public string? Bairro { get; set; } 
         public bool Ativo { get; set; } = true;
         public string? Observacoes { get; set; }
-
-        // Navigation properties
-        public virtual ICollection<Veiculo> Veiculos { get; set; } = [];
-        public virtual ICollection<Venda> Vendas { get; set; } = [];
-        public virtual ICollection<Avaliacao> Avaliacoes { get; set; } = [];
     }
 }
