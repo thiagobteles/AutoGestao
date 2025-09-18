@@ -307,49 +307,6 @@
             }, 400);
         }
 
-        // ===================================================================
-        // SISTEMA DE MODO ESCURO
-        // ===================================================================
-        function initThemeToggle() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-
-            if (!document.querySelector('.theme-toggle')) {
-                const themeButton = document.createElement('button');
-                themeButton.className = 'theme-toggle';
-                themeButton.innerHTML = '<i class="fas fa-moon"></i>';
-                themeButton.title = 'Alternar modo escuro';
-                themeButton.onclick = toggleTheme;
-
-                const topbarRight = document.querySelector('.topbar-right');
-                if (topbarRight) {
-                    topbarRight.insertBefore(themeButton, topbarRight.firstChild);
-                }
-            }
-
-            updateThemeIcon();
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon();
-
-            showToast(`Modo ${newTheme === 'dark' ? 'escuro' : 'claro'} ativado!`, 'info', 2000);
-        }
-
-        function updateThemeIcon() {
-            const themeButton = document.querySelector('.theme-toggle i');
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-
-            if (themeButton) {
-                themeButton.className = currentTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-            }
-        }
-
         // Inicializar tema
         document.addEventListener('DOMContentLoaded', initThemeToggle);
     </script>
@@ -357,7 +314,7 @@
     <!-- Sistema de Grid Unificado -->
     <script>
         // ===================================================================
-        // FUNÇÕES GLOBAIS PARA GRID - Adicionar ao _Layout.cshtml
+        // FUNÇÕES GLOBAIS PARA GRID
         // ===================================================================
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -486,8 +443,6 @@
                     return;
                 }
 
-                console.log(`Fazendo requisição para: ${ajaxUrl}?${params.toString()}`);
-
                 fetch(`${ajaxUrl}?${params.toString()}`)
                     .then(response => {
                         if (!response.ok) {
@@ -503,8 +458,6 @@
 
                             // Reinicializar eventos após atualizar a grid
                             initializeGridEvents();
-
-                            console.log('Grid atualizada com sucesso');
                         } else {
                             console.error('Grid container não encontrado');
                         }
