@@ -4492,3 +4492,335 @@
 
 }));
 //# sourceMappingURL=bootstrap.js.map
+
+
+/**
+ * SOLUÇÃO DEFINITIVA DROPDOWN EM TABELAS BOOTSTRAP 5
+ * Baseada nas melhores práticas da comunidade 2024
+ * Inclua este script após o Bootstrap JS
+ */
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ===================================================================
+    // 1. CONFIGURAÇÃO AVANÇADA DE DROPDOWNS EM TABELAS
+    // ===================================================================
+
+    /**
+     * Aplica configuração especial para dropdowns em tabelas responsivas
+     * DESABILITA POPPER.JS COMPLETAMENTE PARA FORÇAR POSITION STATIC
+     */
+    function initTableDropdowns() {
+        const tableDropdowns = document.querySelectorAll('.table-responsive .dropdown-toggle');
+
+        tableDropdowns.forEach(function (dropdownToggle) {
+            // DESABILITA POPPER.JS COMPLETAMENTE - SOLUÇÃO DEFINITIVA
+            const dropdown = new bootstrap.Dropdown(dropdownToggle, {
+                popperConfig: function () {
+                    return null; // DESABILITA POPPER.JS
+                }
+            });
+
+            // Event listeners específicos para garantir position static
+            dropdownToggle.addEventListener('show.bs.dropdown', function (event) {
+                const menu = dropdownToggle.nextElementSibling;
+                if (menu && menu.classList.contains('dropdown-menu')) {
+                    // FORÇA STATIC QUANDO ABRIR
+                    menu.style.position = 'static';
+                    menu.style.transform = 'none';
+                    menu.style.top = 'auto';
+                    menu.style.left = 'auto';
+                    menu.style.right = 'auto';
+                    menu.style.bottom = 'auto';
+                }
+            });
+
+            dropdownToggle.addEventListener('shown.bs.dropdown', function (event) {
+                const menu = dropdownToggle.nextElementSibling;
+                if (menu && menu.classList.contains('dropdown-menu')) {
+                    // GARANTE QUE CONTINUE STATIC APÓS ABRIR
+                    menu.style.position = 'static';
+                    menu.style.transform = 'none';
+                }
+            });
+        });
+    }
+
+    // ===================================================================
+    // 2. MANIPULAÇÃO DINÂMICA DE OVERFLOW
+    // ===================================================================
+
+    /**
+     * Gerencia overflow da tabela quando dropdown abre/fecha
+     * E FORÇA POSITION STATIC DINAMICAMENTE
+     */
+    function setupOverflowManagement() {
+        // Event listeners GLOBAIS para todos os dropdowns
+        document.addEventListener('show.bs.dropdown', function (event) {
+            const tableResponsive = event.target.closest('.table-responsive');
+            if (tableResponsive) {
+                // FORÇA STATIC IMEDIATAMENTE
+                const menu = event.target.nextElementSibling;
+                if (menu && menu.classList.contains('dropdown-menu')) {
+                    menu.style.position = 'static';
+                    menu.style.transform = 'none';
+                    menu.style.inset = 'auto';
+                }
+
+                // Temporarily remove overflow to allow dropdown to show
+                tableResponsive.style.overflow = 'visible';
+                tableResponsive.classList.add('dropdown-active');
+            }
+        });
+
+        document.addEventListener('shown.bs.dropdown', function (event) {
+            const tableResponsive = event.target.closest('.table-responsive');
+            if (tableResponsive) {
+                // GARANTE QUE CONTINUE STATIC APÓS ANIMAÇÃO
+                const menu = event.target.nextElementSibling;
+                if (menu && menu.classList.contains('dropdown-menu')) {
+                    menu.style.position = 'static';
+                    menu.style.transform = 'none';
+                    menu.style.inset = 'auto';
+                }
+            }
+        });
+
+        document.addEventListener('hide.bs.dropdown', function (event) {
+            const tableResponsive = event.target.closest('.table-responsive');
+            if (tableResponsive) {
+                // Restore overflow after dropdown closes
+                setTimeout(() => {
+                    tableResponsive.style.overflow = 'auto';
+                    tableResponsive.classList.remove('dropdown-active');
+                }, 100);
+            }
+        });
+
+        // MUTATION OBSERVER para dropdowns adicionados dinamicamente
+        const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.nodeType === 1) { // Element node
+                        const newDropdowns = node.querySelectorAll ? node.querySelectorAll('.table-responsive .dropdown-toggle') : [];
+                        newDropdowns.forEach(function (dropdown) {
+                            // Re-aplicar configuração para novos dropdowns
+                            if (!dropdown.hasAttribute('data-table-dropdown-init')) {
+                                dropdown.setAttribute('data-table-dropdown-init', 'true');
+                                const dropdownInstance = new bootstrap.Dropdown(dropdown, {
+                                    popperConfig: function () { return null; }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    // ===================================================================
+    // 3. DETECÇÃO RESPONSIVA E TOGGLE DE COMPONENTES
+    // ===================================================================
+
+    /**
+     * Monitora mudanças de tamanho da tela e ajusta componentes
+     */
+    function setupResponsiveToggle() {
+        function toggleComponents() {
+            const isMobile = window.innerWidth <= 768;
+
+            // Desktop components
+            const desktopDropdowns = document.querySelectorAll('.dropdown-desktop-only');
+            const mobileComponents = document.querySelectorAll('.mobile-action-trigger, .mobile-modal-only');
+
+            desktopDropdowns.forEach(dropdown => {
+                dropdown.style.display = isMobile ? 'none' : 'block';
+            });
+
+            mobileComponents.forEach(component => {
+                component.style.display = isMobile ? 'block' : 'none';
+            });
+        }
+
+        // Initial check
+        toggleComponents();
+
+        // Listen for resize events
+        let resizeTimeout;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(toggleComponents, 150);
+        });
+    }
+
+    // ===================================================================
+    // 4. FUNCIONALIDADES ESPECÍFICAS DO SISTEMA
+    // ===================================================================
+
+    /**
+     * Funções específicas para ações dos clientes
+     */
+    window.novaVenda = function (clienteId) {
+        if (clienteId) {
+            window.location.href = `/Vendas/Create?clienteId=${clienteId}`;
+        } else {
+            console.error('ID do cliente não fornecido para nova venda');
+        }
+    };
+
+    window.novaAvaliacao = function (clienteId) {
+        if (clienteId) {
+            window.location.href = `/Avaliacoes/Create?clienteId=${clienteId}`;
+        } else {
+            console.error('ID do cliente não fornecido para nova avaliação');
+        }
+    };
+
+    window.confirmarExclusao = function (clienteId) {
+        if (!clienteId) {
+            console.error('ID do cliente não fornecido para exclusão');
+            return;
+        }
+
+        if (confirm('Tem certeza que deseja inativar este cliente?\n\nEsta ação pode ser revertida posteriormente.')) {
+            // Show loading if available
+            if (typeof showLoading === 'function') {
+                showLoading(true);
+            }
+
+            window.location.href = `/Clientes/Delete/${clienteId}`;
+        }
+    };
+
+    // ===================================================================
+    // 5. MELHORIAS DE ACESSIBILIDADE
+    // ===================================================================
+
+    /**
+     * Adiciona suporte a teclado e ARIA
+     */
+    function setupAccessibility() {
+        // Keyboard navigation for dropdowns
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                // Close open dropdowns
+                const openDropdowns = document.querySelectorAll('.dropdown-menu.show');
+                openDropdowns.forEach(dropdown => {
+                    const toggle = dropdown.previousElementSibling;
+                    if (toggle && toggle.classList.contains('dropdown-toggle')) {
+                        bootstrap.Dropdown.getInstance(toggle)?.hide();
+                    }
+                });
+            }
+        });
+
+        // Improve ARIA labels
+        const actionButtons = document.querySelectorAll('.actions-btn, .mobile-action-trigger');
+        actionButtons.forEach((button, index) => {
+            if (!button.getAttribute('aria-label')) {
+                const row = button.closest('tr');
+                const clientName = row?.querySelector('td:first-child .fw-semibold')?.textContent || `item ${index + 1}`;
+                button.setAttribute('aria-label', `Ações para ${clientName}`);
+            }
+        });
+    }
+
+    // ===================================================================
+    // 6. DEBUGGING E MONITORAMENTO
+    // ===================================================================
+
+    /**
+     * Função de debug para troubleshooting
+     */
+    window.debugTableDropdowns = function () {
+        console.group('🔍 Table Dropdowns Debug');
+
+        const tableResponsive = document.querySelector('.table-responsive');
+        const dropdowns = document.querySelectorAll('.dropdown');
+        const openDropdowns = document.querySelectorAll('.dropdown-menu.show');
+
+        console.log('Table Responsive:', {
+            element: tableResponsive,
+            overflow: tableResponsive?.style.overflow || 'default',
+            hasDropdownActive: tableResponsive?.classList.contains('dropdown-active')
+        });
+
+        console.log('Dropdowns:', {
+            total: dropdowns.length,
+            open: openDropdowns.length,
+            desktop: document.querySelectorAll('.dropdown-desktop-only').length,
+            mobile: document.querySelectorAll('.mobile-action-trigger').length
+        });
+
+        console.log('Screen:', {
+            width: window.innerWidth,
+            isMobile: window.innerWidth <= 768
+        });
+
+        console.groupEnd();
+    };
+
+    // ===================================================================
+    // 7. INICIALIZAÇÃO
+    // ===================================================================
+
+    try {
+        // Initialize all features
+        initTableDropdowns();
+        setupOverflowManagement();
+        setupResponsiveToggle();
+        setupAccessibility();
+
+        console.log('✅ Table Dropdowns initialized successfully');
+
+        // Debug info in development
+        if (window.location.hostname === 'localhost' || window.location.hostname.includes('dev')) {
+            console.log('🛠️ Debug mode: Run debugTableDropdowns() to troubleshoot');
+        }
+
+    } catch (error) {
+        console.error('❌ Error initializing Table Dropdowns:', error);
+    }
+
+    // ===================================================================
+    // 8. FALLBACK PARA COMPATIBILITY
+    // ===================================================================
+
+    /**
+     * Fallback para casos onde a solução principal não funciona
+     */
+    setTimeout(() => {
+        const problematicDropdowns = document.querySelectorAll('.table-responsive .dropdown-menu');
+
+        problematicDropdowns.forEach(menu => {
+            // Se ainda estiver com problemas de posicionamento
+            if (menu.offsetParent && menu.getBoundingClientRect().bottom < 0) {
+                console.warn('Dropdown positioning issue detected, applying fallback');
+                menu.style.position = 'fixed';
+                menu.style.zIndex = '1080';
+            }
+        });
+    }, 1000);
+});
+
+// ===================================================================
+// 9. EXPORT PARA USO EXTERNO (SE NECESSÁRIO)
+// ===================================================================
+
+window.TableDropdownManager = {
+    init: function () {
+        // Re-initialize if needed
+        document.dispatchEvent(new Event('DOMContentLoaded'));
+    },
+
+    debug: function () {
+        if (typeof window.debugTableDropdowns === 'function') {
+            window.debugTableDropdowns();
+        }
+    }
+};

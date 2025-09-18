@@ -573,21 +573,10 @@
             };
 
             // ===================================================================
-            // FUNÇÃO PARA EXPORTAR EXCEL
-            // ===================================================================
-            window.exportarExcel = function() {
-                showToast('Preparando exportação...', 'info', 2000);
-
-                // Implementar lógica de exportação aqui
-                setTimeout(() => {
-                    showToast('Exportação concluída!', 'success');
-                }, 2000);
-            };
-
-            // ===================================================================
             // INICIALIZAÇÃO DOS EVENTOS DA GRID
             // ===================================================================
             window.initializeGridEvents = function() {
+
                 // Duplo clique nas linhas
                 const rows = document.querySelectorAll('.grid-row');
                 rows.forEach(row => {
