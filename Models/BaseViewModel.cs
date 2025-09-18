@@ -19,6 +19,7 @@ namespace AutoGestao.Models
         public string? OrderDirection { get; set; } = "asc";
 
         // Propriedades calculadas
+        public bool HasFilters => Search != null && !string.IsNullOrEmpty(Search);
         public bool HasPreviousPage => CurrentPage > 1;
         public bool HasNextPage => CurrentPage < TotalPages;
         public int StartRecord => PageSize == -1 ? 1 : (CurrentPage - 1) * PageSize + 1;

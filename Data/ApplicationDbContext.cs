@@ -77,7 +77,7 @@ namespace AutoGestao.Data
                 entity.Property(e => e.Celular).HasMaxLength(20);
                 entity.Property(e => e.Endereco).HasMaxLength(500);
                 entity.Property(e => e.Cidade).HasMaxLength(100);
-                entity.Property(e => e.Estado).HasMaxLength(2);
+                entity.Property(e => e.Estado).IsRequired();
                 entity.Property(e => e.CEP).HasMaxLength(10);
                 entity.Property(e => e.Numero).HasMaxLength(20);
                 entity.Property(e => e.Complemento).HasMaxLength(150);

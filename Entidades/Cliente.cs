@@ -16,7 +16,7 @@ namespace AutoGestao.Entidades
         public string? Celular { get; set; }
         public string? Endereco { get; set; }
         public string? Cidade { get; set; }
-        public string? Estado { get; set; }
+        public EnumEstado Estado { get; set; } = EnumEstado.Nenhum;
         public string? CEP { get; set; }
         public string? Numero { get; set; }
         public string? Complemento { get; set; }

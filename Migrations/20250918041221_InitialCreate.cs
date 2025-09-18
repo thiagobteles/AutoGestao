@@ -29,7 +29,7 @@ namespace AutoGestao.Migrations
                     celular = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     endereco = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     cidade = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    estado = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: true),
+                    estado = table.Column<int>(type: "integer", nullable: false),
                     cep = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
                     numero = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     complemento = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
@@ -37,7 +37,7 @@ namespace AutoGestao.Migrations
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(2631))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(2291))
                 },
                 constraints: table =>
                 {
@@ -52,7 +52,7 @@ namespace AutoGestao.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     descricao = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(9655))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 549, DateTimeKind.Utc).AddTicks(272))
                 },
                 constraints: table =>
                 {
@@ -84,7 +84,7 @@ namespace AutoGestao.Migrations
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(4492))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(3787))
                 },
                 constraints: table =>
                 {
@@ -166,7 +166,7 @@ namespace AutoGestao.Migrations
                     meta = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(3315))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(2951))
                 },
                 constraints: table =>
                 {
@@ -210,7 +210,7 @@ namespace AutoGestao.Migrations
                     data_conclusao = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     responsavel_id = table.Column<int>(type: "integer", nullable: true),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 346, DateTimeKind.Utc).AddTicks(36))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 549, DateTimeKind.Utc).AddTicks(735))
                 },
                 constraints: table =>
                 {
@@ -240,7 +240,7 @@ namespace AutoGestao.Migrations
                     veiculo_marca_id = table.Column<int>(type: "integer", nullable: true),
                     veiculo_marca_modelo_id = table.Column<int>(type: "integer", nullable: true),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(8907))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(7838))
                 },
                 constraints: table =>
                 {
@@ -299,7 +299,7 @@ namespace AutoGestao.Migrations
                     observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     opcionais = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     data_saida = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(5916)),
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(5032)),
                     proprietario_id = table.Column<int>(type: "integer", nullable: true),
                     veiculo_cor_id = table.Column<int>(type: "integer", nullable: true),
                     veiculo_filial_id = table.Column<int>(type: "integer", nullable: true),
@@ -364,7 +364,7 @@ namespace AutoGestao.Migrations
                     despesa_tipo_id = table.Column<int>(type: "integer", nullable: false),
                     fornecedor_id = table.Column<int>(type: "integer", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(9375))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(9658))
                 },
                 constraints: table =>
                 {
@@ -402,7 +402,7 @@ namespace AutoGestao.Migrations
                     data_upload = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     veiculo_id = table.Column<int>(type: "integer", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(7449))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(6499))
                 },
                 constraints: table =>
                 {
@@ -428,7 +428,7 @@ namespace AutoGestao.Migrations
                     principal = table.Column<bool>(type: "boolean", nullable: false),
                     veiculo_id = table.Column<int>(type: "integer", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(7040))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(6130))
                 },
                 constraints: table =>
                 {
@@ -458,7 +458,7 @@ namespace AutoGestao.Migrations
                     veiculo_id = table.Column<int>(type: "integer", nullable: false),
                     vendedor_id = table.Column<int>(type: "integer", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(7933))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(6910))
                 },
                 constraints: table =>
                 {
@@ -498,7 +498,7 @@ namespace AutoGestao.Migrations
                     observacoes = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
                     venda_id = table.Column<int>(type: "integer", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 17, 12, 6, 34, 345, DateTimeKind.Utc).AddTicks(8477))
+                    data_alteracao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2025, 9, 18, 4, 12, 21, 548, DateTimeKind.Utc).AddTicks(7370))
                 },
                 constraints: table =>
                 {
