@@ -196,13 +196,28 @@
                 }, 400);
             });
 
-            // Toggle sidebar para mobile
             sidebarToggle?.addEventListener('click', function(e) {
                 e.preventDefault();
-                if (window.innerWidth <= 1024) {
-                    sidebar.classList.toggle('open');
-                    sidebarOverlay.classList.toggle('show');
+                e.stopPropagation();
+
+                if (isProcessingClick) return;
+                isProcessingClick = true;
+
+                const isCollapsed = sidebar.classList.contains('collapsed');
+
+                if (isCollapsed) {
+                    sidebar.classList.remove('collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                    updateCollapseIcon(false);
+                } else {
+                    sidebar.classList.add('collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                    updateCollapseIcon(true);
                 }
+
+                setTimeout(() => {
+                    isProcessingClick = false;
+                }, 400);
             });
 
             // Fechar sidebar ao clicar no overlay (mobile)
@@ -230,16 +245,6 @@
                 if (window.innerWidth > 1024) {
                     sidebar.classList.remove('open');
                     sidebarOverlay.classList.remove('show');
-                }
-            });
-
-            // Tecla de atalho Ctrl+B
-            document.addEventListener('keydown', function(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
-                    e.preventDefault();
-                    if (window.innerWidth > 1024) {
-                        sidebarCollapseBtn?.click();
-                    }
                 }
             });
         });

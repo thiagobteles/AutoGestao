@@ -206,7 +206,6 @@ body {
 
 /* Indicador de tecla de atalho */
 .sidebar-collapse-btn::after {
-    content: 'Ctrl+B';
     position: absolute;
     bottom: -25px;
     left: 50%;
