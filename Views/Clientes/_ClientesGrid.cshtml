@@ -24,24 +24,14 @@
                         <i class="fas fa-sort ms-1 @(Model.OrderBy == "Documento" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
                     </div>
                 </th>
-                <th style="cursor: pointer;" onclick="sortColumn('Contato')">
-                    <div class="d-flex align-items-center">
-                        Contato
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Contato" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
+                <th>Contato</th>
                 <th style="cursor: pointer;" onclick="sortColumn('Cidade')">
                     <div class="d-flex align-items-center">
                         Localização
                         <i class="fas fa-sort ms-1 @(Model.OrderBy == "Cidade" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
                     </div>
                 </th>
-                <th style="cursor: pointer;" onclick="sortColumn('Status')">
-                    <div class="d-flex align-items-center">
-                        Status
-                        <i class="fas fa-sort ms-1 @(Model.OrderBy == "Status" ? (Model.OrderDirection == "asc" ? "fa-sort-up" : "fa-sort-down") : "")"></i>
-                    </div>
-                </th>
+                <th>Status</th>
                 <th style="cursor: pointer;" onclick="sortColumn('DataCadastro')">
                     <div class="d-flex align-items-center">
                         Cadastro
@@ -201,7 +191,6 @@
     </table>
 </div>
 
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         initializeDropdowns();
@@ -346,6 +335,8 @@
 
     // Função para ordenação
     function sortColumn(column) {
+        console.log('Ordenar por:', column);
+        // Implementar ordenação se necessário
     }
 
     window.sortColumn = sortColumn;
@@ -364,9 +355,9 @@
         flex-shrink: 0;
     }
 
-    .cliente-avatar i {
-        font-size: 0.7rem;
-    }
+        .cliente-avatar i {
+            font-size: 0.7rem;
+        }
 
     .cliente-row:hover {
         background-color: rgba(55, 65, 81, 0.02) !important;
