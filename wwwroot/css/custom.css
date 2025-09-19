@@ -183,6 +183,7 @@ body {
     transition: all 0.3s ease;
     font-size: 0.9rem;
     z-index: 10;
+    visibility: hidden !important;
 }
 
     .sidebar-collapse-btn:hover {
@@ -5826,4 +5827,24 @@ body .dropdown-menu {
 /* Garante que dropdowns apareçam sobre elementos sticky */
 .dropdown-menu {
     z-index: 1071 !important;
+}
+
+.status-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-danger {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.status-secondary {
+    background: #f3f4f6;
+    color: #6b7280;
 }

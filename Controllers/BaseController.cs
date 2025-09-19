@@ -9,10 +9,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AutoGestao.Controllers
 {
-    public class BaseController(ApplicationDbContext context) : Controller
+    public class BaseController() : Controller
     {
-        private readonly ApplicationDbContext _context = context;
-
         public SelectList CreateEnumSelectList<T>(T? selectedValue = null) where T : struct, Enum
         {
             var enumDictionary = EnumExtension.GetEnumDictionary<T>();

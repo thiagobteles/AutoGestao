@@ -1,3 +1,4 @@
+using AutoGestao.Controllers;
 using AutoGestao.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,9 @@ builder.Services.AddControllersWithViews();
 // Add Entity Framework com PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+//builder.Services.AddScoped(typeof(StandardGridController<>));
 
 var app = builder.Build();
 

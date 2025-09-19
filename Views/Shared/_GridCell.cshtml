@@ -1,0 +1,85 @@
+@model GridCellViewModel
+@using AutoGestao.Models
+@using AutoGestao.Extensions
+
+@{
+    var itemType = Model.Item.GetType();
+    var propertyInfo = itemType.GetProperty(Model.Column.Name);
+    var value = propertyInfo?.GetValue(Model.Item);
+}
+
+@switch (Model.Column.Type)
+{
+    case GridColumnType.Actions:
+        
+
+        @if (Model.Actions != null && Model.Actions.Any())
+        {
+            <div class="dropdown">
+                <button class="btn-actions dropdown-toggle" data-bs-toggle="dropdown">
+                    Ações
+                </button>
+                <ul class="dropdown-menu">
+                    @foreach (var action in Model.Actions)
+                    {
+                        var itemId = itemType.GetProperty("Id")?.GetValue(Model.Item)?.ToString();
+                        var actionUrl = action.Url?.Replace("{id}", itemId);
+
+                        <li>
+                            <a class="dropdown-item" href="@actionUrl">
+                                <i class="@action.Icon"></i> @action.DisplayName
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Details", new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
+                   class="icon-button" title="Visualizar">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </div>
+        }
+        break;
+
+    case GridColumnType.Badge:
+        @if (Model.Column.Name.ToLower().Contains("ativo"))
+        {
+            var isActive = Convert.ToBoolean(value ?? false);
+            <span class="status-badge @(isActive ? "status-active" : "status-inactive")">
+                <i class="fas @(isActive ? "fa-check" : "fa-times")"></i>
+                @(isActive ? "Ativo" : "Inativo")
+            </span>
+        }
+        else if (Model.Column.Name.ToLower().Contains("tipo"))
+        {
+            var displayText = value?.ToString();
+            if (value is Enum enumValue)
+            {
+                displayText = enumValue.GetDescription();
+            }
+            <span class="person-type">@displayText</span>
+        }
+        else
+        {
+            @value
+        }
+        break;
+
+    default:
+        @if (Model.Column.Name.ToLower() == "nome")
+        {
+            <a href="@Url.Action("Details", new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
+               class="text-decoration-none text-primary fw-medium">
+                @value
+            </a>
+        }
+        else
+        {
+            @(value ?? "-")
+        }
+        break;
+}

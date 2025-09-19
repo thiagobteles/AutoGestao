@@ -3,121 +3,213 @@ using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
-    public class ClientesController(ApplicationDbContext context) : Controller
+    public class ClientesController(ApplicationDbContext context) : StandardGridController<Cliente>(context)
     {
-        private readonly ApplicationDbContext _context = context;
-
-        [HttpGet]
-        public async Task<IActionResult> Index(
-            string? search = null,
-            EnumTipoPessoa? tipoCliente = null,
-            bool? status = null,
-            string? orderBy = "Nome",
-            string? orderDirection = "asc",
-            int pageSize = 50,
-            int page = 1)
+        protected override IQueryable<Cliente> GetBaseQuery()
         {
-            var query = _context.Clientes.AsQueryable();
+            return _context.Clientes.AsQueryable();
+        }
 
-            // Aplicar filtros
-            if (!string.IsNullOrEmpty(search))
+        protected override StandardGridViewModel ConfigureGrid()
+        {
+            return new StandardGridViewModel
             {
-                query = query.Where(c =>
-                    c.Nome.Contains(search) ||
-                    c.CPF != null && c.CPF.Contains(search) ||
-                    c.CNPJ != null && c.CNPJ.Contains(search) ||
-                    c.Email != null && c.Email.Contains(search) ||
-                    c.Telefone != null && c.Telefone.Contains(search) ||
-                    c.Celular != null && c.Celular.Contains(search));
+                Title = "Clientes",
+                SubTitle = "",
+                EntityName = "Clientes",
+                ControllerName = "Clientes",
+
+                // Configuração das colunas
+                Columns =
+                [
+                    new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true},
+                    new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Pessoa", Type = GridColumnType.Badge, Sortable = true },
+                    new() { Name = nameof(Cliente.Nome), DisplayName = "Nome Completo", Sortable = true },
+                    new() { Name = nameof(Cliente.CPF), DisplayName = "CPF/CNPJ", Sortable = true },
+                    new() { Name = nameof(Cliente.Celular), DisplayName = "Telefone", Sortable = true },
+                    new() { Name = nameof(Cliente.Ativo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true },
+                    new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false }
+                ],
+
+                // Configuração dos filtros
+                Filters =
+                [
+                    new()
+                    {
+                        Name = "search",
+                        DisplayName = "Buscar",
+                        Type = GridFilterType.Text,
+                        Placeholder = "Busque por Nome, CPF, Telefone, Email..."
+                    },
+                    new()
+                    {
+                        Name = "coodigo",
+                        DisplayName = "Codigo",
+                        Type = GridFilterType.Number,
+                        Placeholder = "Informe o código..."
+                    },
+                    new()
+                    {
+                        Name = "status",
+                        DisplayName = "Status - Todos",
+                        Type = GridFilterType.Select,
+                        Options =
+                        [
+                            new() { Value = "", Text = "Status - Todos", Selected = true },
+                            new() { Value = "true", Text = "Ativo" },
+                            new() { Value = "false", Text = "Inativo" }
+                        ]
+                    }
+                ],
+
+                // Ações do cabeçalho
+                HeaderActions =
+                [
+                    new()
+                    {
+                        Name = "Create",
+                        DisplayName = "Novo",
+                        Icon = "fas fa-plus",
+                        CssClass = "btn-new",
+                        Url = Url.Action("Create", "Clientes")
+                    }
+                ],
+
+                // Ações das linhas
+                RowActions =
+                [
+                    new()
+                    {
+                        Name = "Details",
+                        DisplayName = "Visualizar",
+                        Icon = "fas fa-eye",
+                        Url = "/Clientes/Details/{id}"
+                    },
+                    new()
+                    {
+                        Name = "Edit",
+                        DisplayName = "Alterar",
+                        Icon = "fas fa-edit",
+                        Url = "/Clientes/Edit/{id}"
+                    },
+                    new()
+                    {
+                        Name = "ToggleStatus",
+                        DisplayName = "Inativar",
+                        Icon = "fas fa-ban",
+                        Url = "/Clientes/ToggleStatus/{id}",
+                        ShowCondition = (x) => ((Cliente)x).Ativo == true
+                    },
+                    new()
+                    {
+                        Name = "ToggleStatus",
+                        DisplayName = "Ativar",
+                        Icon = "fas fa-check",
+                        Url = "/Clientes/ToggleStatus/{id}",
+                        ShowCondition = (item) => ((Cliente)item).Ativo == false
+                    }
+                ]
+            };
+        }
+
+        protected override IQueryable<Cliente> ApplyFilters(IQueryable<Cliente> query, Dictionary<string, object> filters)
+        {
+            foreach (var filter in filters)
+            {
+                switch (filter.Key.ToLower())
+                {
+                    case "search":
+                        var searchTerm = filter.Value.ToString();
+                        if (!string.IsNullOrEmpty(searchTerm))
+                        {
+                            query = query.Where(c =>
+                                c.Nome.Contains(searchTerm) ||
+                                (c.CPF != null && c.CPF.Contains(searchTerm)) ||
+                                (c.CNPJ != null && c.CNPJ.Contains(searchTerm)) ||
+                                (c.Email != null && c.Email.Contains(searchTerm)) ||
+                                (c.Telefone != null && c.Telefone.Contains(searchTerm)) ||
+                                (c.Celular != null && c.Celular.Contains(searchTerm)));
+                        }
+                        break;
+
+                    case "status":
+                        if (bool.TryParse(filter.Value.ToString(), out bool status))
+                        {
+                            query = query.Where(c => c.Ativo == status);
+                        }
+                        break;
+
+                    case "tipocliente":
+                        if (Enum.TryParse<EnumTipoPessoa>(filter.Value.ToString(), out EnumTipoPessoa tipoCliente))
+                        {
+                            query = query.Where(c => c.TipoCliente == tipoCliente);
+                        }
+                        break;
+
+                    case "estado":
+                        if (Enum.TryParse<EnumEstado>(filter.Value.ToString(), out EnumEstado estado))
+                        {
+                            query = query.Where(c => c.Estado == estado);
+                        }
+                        break;
+
+                    case "cidade":
+                        var cidade = filter.Value.ToString();
+                        if (!string.IsNullOrEmpty(cidade))
+                        {
+                            query = query.Where(c => c.Cidade != null && c.Cidade.Contains(cidade));
+                        }
+                        break;
+
+                    case "datacadastro":
+                        if (DateTime.TryParse(filter.Value.ToString(), out DateTime dataCadastro))
+                        {
+                            query = query.Where(c => c.DataCadastro.Date == dataCadastro.Date);
+                        }
+                        break;
+                }
             }
 
-            if (tipoCliente != null)
-            {
-                query = query.Where(c => c.TipoCliente == tipoCliente);
-            }
+            return query;
+        }
 
-            if (status != null)
-            {
-                query = query.Where(c => c.Ativo == status);
-            }
-
-            // Aplicar ordenação
-            query = orderBy?.ToLower() switch
+        protected override IQueryable<Cliente> ApplySort(IQueryable<Cliente> query, string orderBy, string orderDirection)
+        {
+            return orderBy?.ToLower() switch
             {
                 "nome" => orderDirection == "desc"
                     ? query.OrderByDescending(c => c.Nome)
                     : query.OrderBy(c => c.Nome),
-                "tipo" => orderDirection == "desc"
+                "tipocliente" => orderDirection == "desc"
                     ? query.OrderByDescending(c => c.TipoCliente)
                     : query.OrderBy(c => c.TipoCliente),
-                "documento" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.CPF ?? c.CNPJ)
-                    : query.OrderBy(c => c.CPF ?? c.CNPJ),
-                "cidade" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.Cidade)
-                    : query.OrderBy(c => c.Cidade),
                 "datacadastro" => orderDirection == "desc"
                     ? query.OrderByDescending(c => c.DataCadastro)
                     : query.OrderBy(c => c.DataCadastro),
-                _ => query.OrderBy(c => c.Nome)
+                "cidade" => orderDirection == "desc"
+                    ? query.OrderByDescending(c => c.Cidade)
+                    : query.OrderBy(c => c.Cidade),
+                _ => query.OrderByDescending(c => c.DataCadastro) // Default: últimos cadastros
             };
-
-            // Obter total de registros
-            var totalRecords = await query.CountAsync();
-
-            // Aplicar paginação
-            List<Cliente> clientes;
-            if (pageSize == -1) // "Todos"
-            {
-                clientes = await query.ToListAsync();
-            }
-            else
-            {
-                clientes = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-            }
-
-            var viewModel = new ClientesIndexViewModel
-            {
-                ListaObjeto = clientes,
-                TotalRecords = totalRecords,
-                CurrentPage = page,
-                PageSize = pageSize,
-                Search = search,
-                TipoCliente = tipoCliente,
-                Ativo = status,
-                OrderBy = orderBy,
-                OrderDirection = orderDirection,
-                TotalPages = pageSize == -1 ? 1 : (int)Math.Ceiling((double)totalRecords / pageSize)
-            };
-
-            return View(viewModel);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetClientesAjax(
-            string? search = null,
-            EnumTipoPessoa? tipoCliente = null,
-            bool? status = null,
-            string? orderBy = "Nome",
-            string? orderDirection = "asc",
-            int pageSize = 50,
-            int page = 1)
+        // Ações específicas
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(int id)
         {
-            var result = await Index(search, tipoCliente, status, orderBy, orderDirection, pageSize, page);
-
-            if (result is ViewResult viewResult && viewResult.Model is ClientesIndexViewModel model)
+            var cliente = await _context.Clientes.FindAsync(id);
+            if (cliente != null)
             {
-                return PartialView("_ClientesGrid", model);
+                cliente.Ativo = !cliente.Ativo;
+                cliente.DataAlteracao = DateTime.Now;
+                await _context.SaveChangesAsync();
             }
-
-            return BadRequest();
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -133,12 +225,7 @@ namespace AutoGestao.Controllers
                 .Include(c => c.Avaliacoes)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            return View(cliente);
+            return cliente == null ? NotFound() : View(cliente);
         }
 
         public IActionResult Create()
@@ -153,6 +240,7 @@ namespace AutoGestao.Controllers
             if (ModelState.IsValid)
             {
                 cliente.DataCadastro = DateTime.Now;
+                cliente.DataAlteracao = DateTime.Now;
                 _context.Add(cliente);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -168,12 +256,9 @@ namespace AutoGestao.Controllers
             }
 
             var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            return View(cliente);
+            return cliente == null 
+                ? NotFound()
+                : View(cliente);
         }
 
         [HttpPost]
@@ -189,6 +274,7 @@ namespace AutoGestao.Controllers
             {
                 try
                 {
+                    cliente.DataAlteracao = DateTime.Now;
                     _context.Update(cliente);
                     await _context.SaveChangesAsync();
                 }
@@ -204,36 +290,6 @@ namespace AutoGestao.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(cliente);
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var cliente = await _context.Clientes
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            return View(cliente);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente != null)
-            {
-                _context.Clientes.Remove(cliente);
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction(nameof(Index));
         }
 
         private bool ClienteExists(int id)
