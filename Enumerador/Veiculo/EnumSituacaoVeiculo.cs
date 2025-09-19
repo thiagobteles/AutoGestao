@@ -17,6 +17,9 @@ namespace AutoGestao.Enumerador.Veiculo
         Reservado = 3,
         
         [Description("Manutenção")]
-        Manutencao = 4
+        Manutencao = 4,
+
+        [Description("Transferido")]
+        Transferido = 5
     }
 }

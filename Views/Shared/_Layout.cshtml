@@ -912,7 +912,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(setupIntersectionObserver, 500);
         });
-        @Html.Raw(System.IO.File.ReadAllText(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "js", "grid-system.js")))
+
+        @Html.Raw(System.IO.File.ReadAllText(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "js", "grid-enhanced.js")))
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

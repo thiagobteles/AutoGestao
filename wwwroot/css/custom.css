@@ -1923,7 +1923,6 @@ th:hover .fa-sort {
 .d-flex,
 .dashboard-container > .d-flex,
 .card-header-modern.d-flex {
-    width: 100%;
     max-width: none;
 }
 

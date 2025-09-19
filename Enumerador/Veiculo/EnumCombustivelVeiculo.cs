@@ -7,8 +7,8 @@ namespace AutoGestao.Enumerador.Veiculo
         [Description("Nenhum")] 
         Nenhum = 0,
         
-        [Description("Alcool")]
-        Alcool = 1,
+        [Description("Etanol")]
+        Etanol = 1,
 
         [Description("AVGAS")]
         Avgas = 2,

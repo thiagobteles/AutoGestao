@@ -11,28 +11,44 @@
 @switch (Model.Column.Type)
 {
     case GridColumnType.Actions:
-        
+
 
         @if (Model.Actions != null && Model.Actions.Any())
         {
-            <div class="dropdown">
-                <button class="btn-actions dropdown-toggle" data-bs-toggle="dropdown">
-                    Ações
-                </button>
-                <ul class="dropdown-menu">
-                    @foreach (var action in Model.Actions)
-                    {
-                        var itemId = itemType.GetProperty("Id")?.GetValue(Model.Item)?.ToString();
-                        var actionUrl = action.Url?.Replace("{id}", itemId);
+            // Filtrar ações baseado na ShowCondition
+            var visibleActions = Model.Actions.Where(action =>
+                action.ShowCondition == null || action.ShowCondition(Model.Item)).ToList();
 
-                        <li>
-                            <a class="dropdown-item" href="@actionUrl">
-                                <i class="@action.Icon"></i> @action.DisplayName
-                            </a>
-                        </li>
-                    }
-                </ul>
-            </div>
+            @if (visibleActions.Any())
+            {
+                <div class="dropdown">
+                    <button class="btn-actions dropdown-toggle" data-bs-toggle="dropdown">
+                        Ações
+                    </button>
+                    <ul class="dropdown-menu">
+                        @foreach (var action in visibleActions)
+                        {
+                            var itemId = itemType.GetProperty("Id")?.GetValue(Model.Item)?.ToString();
+                            var actionUrl = action.Url?.Replace("{id}", itemId);
+
+                            <li>
+                                <a class="dropdown-item" href="@actionUrl">
+                                    <i class="@action.Icon"></i> @action.DisplayName
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("Details", new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
+                       class="icon-button" title="Visualizar">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                </div>
+            }
         }
         else
         {
@@ -66,6 +82,64 @@
         else
         {
             @value
+        }
+        break;
+
+    case GridColumnType.Currency:
+        @if (value != null && decimal.TryParse(value.ToString(), out decimal currencyValue))
+        {
+            @currencyValue.ToString("C")
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case GridColumnType.Date:
+        @if (value != null && DateTime.TryParse(value.ToString(), out DateTime dateValue))
+        {
+            @dateValue.ToString("dd/MM/yyyy")
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case GridColumnType.Number:
+        @if (value != null && decimal.TryParse(value.ToString(), out decimal numberValue))
+        {
+            @numberValue.ToString("N0")
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case GridColumnType.Boolean:
+        @if (value != null && bool.TryParse(value.ToString(), out bool boolValue))
+        {
+            <span class="status-badge @(boolValue ? "status-active" : "status-inactive")">
+                <i class="fas @(boolValue ? "fa-check" : "fa-times")"></i>
+                @(boolValue ? "Sim" : "Não")
+            </span>
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case GridColumnType.Custom:
+        @if (Model.Column.CustomRender != null)
+        {
+            @Html.Raw(Model.Column.CustomRender(Model.Item))
+        }
+        else
+        {
+            @(value ?? "-")
         }
         break;
 
