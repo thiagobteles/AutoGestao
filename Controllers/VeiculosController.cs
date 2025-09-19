@@ -1,9 +1,10 @@
 using AutoGestao.Data;
+using AutoGestao.Entidades;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Veiculo;
-using AutoGestao.Models;
 using AutoGestao.Extensions;
+using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -31,20 +32,8 @@ namespace AutoGestao.Controllers
                 EntityName = "Veiculos",
                 ControllerName = "Veiculos",
 
-                // Configuração das colunas
-                Columns =
-                [
-                    new() { Name = nameof(Veiculo.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true, Width = "70px"},
-                    new() { Name = nameof(Veiculo.Codigo), DisplayName = "Código", Sortable = true, Width = "100px" },
-                    new() { Name = "MarcaModelo", DisplayName = "Marca/Modelo", Sortable = false, CustomRender = RenderMarcaModelo },
-                    new() { Name = nameof(Veiculo.AnoFabricacao), DisplayName = "Ano", Type = GridColumnType.Number, Sortable = true, Width = "80px" },
-                    new() { Name = nameof(Veiculo.Placa), DisplayName = "Placa", Sortable = true, Width = "100px" },
-                    new() { Name = nameof(Veiculo.KmSaida), DisplayName = "KM", Type = GridColumnType.Number, Sortable = true, Width = "100px" },
-                    new() { Name = nameof(Veiculo.PrecoVenda), DisplayName = "Preço", Type = GridColumnType.Currency, Sortable = true, Width = "120px" },
-                    new() { Name = nameof(Veiculo.Situacao), DisplayName = "Situação", Type = GridColumnType.Badge, Sortable = true, Width = "110px" },
-                    new() { Name = nameof(Veiculo.StatusVeiculo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true, Width = "110px" },
-                    new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "150px" }
-                ],
+                // Ações do cabeçalho
+                HeaderActions = ObterHeaderActionsPadrao("Veiculos"),
 
                 // Configuração dos filtros
                 Filters =
@@ -62,77 +51,21 @@ namespace AutoGestao.Controllers
                         DisplayName = "Situação",
                         Type = GridFilterType.Select,
                         Options = GetSituacaoOptions()
-                    },
-                    new()
-                    {
-                        Name = "marca",
-                        DisplayName = "Marca",
-                        Type = GridFilterType.Select,
-                        Options = GetMarcaOptions()
-                    },
-                    new()
-                    {
-                        Name = "ano",
-                        DisplayName = "Ano",
-                        Type = GridFilterType.Number,
-                        Placeholder = "Ex: 2023"
-                    },
-                    new()
-                    {
-                        Name = "combustivel",
-                        DisplayName = "Combustível",
-                        Type = GridFilterType.Select,
-                        Options = GetCombustivelOptions()
-                    },
-                    new()
-                    {
-                        Name = "preco_min",
-                        DisplayName = "Preço Mín",
-                        Type = GridFilterType.Number,
-                        Placeholder = "R$ 0,00"
-                    },
-                    new()
-                    {
-                        Name = "preco_max",
-                        DisplayName = "Preço Máx",
-                        Type = GridFilterType.Number,
-                        Placeholder = "R$ 999.999,99"
-                    },
-                    new()
-                    {
-                        Name = "periodo_cadastro",
-                        DisplayName = "Período de Cadastro",
-                        Type = GridFilterType.DateRange
                     }
                 ],
 
-                // Ações do cabeçalho
-                HeaderActions =
+                // Configuração das colunas
+                Columns =
                 [
-                    new()
-                    {
-                        Name = "Create",
-                        DisplayName = "Novo Veículo",
-                        Icon = "fas fa-plus",
-                        CssClass = "btn-new",
-                        Url = Url.Action("Create", "Veiculos")
-                    },
-                    new()
-                    {
-                        Name = "Import",
-                        DisplayName = "Importar",
-                        Icon = "fas fa-upload",
-                        CssClass = "btn-modern btn-outline-modern",
-                        Url = Url.Action("Import", "Veiculos")
-                    },
-                    new()
-                    {
-                        Name = "Export",
-                        DisplayName = "Exportar",
-                        Icon = "fas fa-download",
-                        CssClass = "btn-modern btn-outline-modern",
-                        Url = Url.Action("Export", "Veiculos")
-                    }
+                    new() { Name = nameof(Veiculo.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true},
+                    new() { Name = "MarcaModelo", DisplayName = "Marca/Modelo", Sortable = false, Type = GridColumnType.Custom, CustomRender = RenderMarcaModelo },
+                    new() { Name = nameof(Veiculo.AnoFabricacao), DisplayName = "Ano", Type = GridColumnType.Integer, Sortable = true},
+                    new() { Name = nameof(Veiculo.Placa), DisplayName = "Placa", Sortable = true },
+                    new() { Name = nameof(Veiculo.KmSaida), DisplayName = "KM", Type = GridColumnType.Number, Sortable = true },
+                    new() { Name = nameof(Veiculo.PrecoVenda), DisplayName = "Preço", Type = GridColumnType.Currency, Sortable = true },
+                    new() { Name = nameof(Veiculo.Situacao), DisplayName = "Situação", Type = GridColumnType.Badge, Sortable = true },
+                    new() { Name = nameof(Veiculo.StatusVeiculo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true },
+                    new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "100px" }
                 ],
 
                 // Ações das linhas
@@ -151,21 +84,13 @@ namespace AutoGestao.Controllers
                         DisplayName = "Editar",
                         Icon = "fas fa-edit",
                         Url = "/Veiculos/Edit/{id}",
-                        ShowCondition = (x) => ((Veiculo)x).Situacao != EnumSituacaoVeiculo.Vendido
                     },
                     new()
                     {
-                        Name = "Photos",
-                        DisplayName = "Fotos",
-                        Icon = "fas fa-camera",
-                        Url = "/Veiculos/Photos/{id}"
-                    },
-                    new()
-                    {
-                        Name = "Documents",
-                        DisplayName = "Documentos",
-                        Icon = "fas fa-file-alt",
-                        Url = "/Veiculos/Documents/{id}"
+                        Name = "Delete",
+                        DisplayName = "Excluir",
+                        Icon = "fas fa-trash",
+                        Url = "/Veiculos/Delete/{id}"
                     },
                     new()
                     {
@@ -216,15 +141,15 @@ namespace AutoGestao.Controllers
                         break;
 
                     case "situacao":
-                        query = ApplyEnumFilter<EnumSituacaoVeiculo>(query, filters, filter.Key, v => v.Situacao);
+                        query = ApplyEnumFilter(query, filters, filter.Key, v => (EnumSituacaoVeiculo)v.Situacao);
                         break;
 
                     case "status":
-                        query = ApplyEnumFilter<EnumStatusVeiculo>(query, filters, filter.Key, v => v.StatusVeiculo);
+                        query = ApplyEnumFilter(query, filters, filter.Key, v => (EnumStatusVeiculo)v.StatusVeiculo);
                         break;
 
                     case "combustivel":
-                        query = ApplyEnumFilter<EnumCombustivelVeiculo>(query, filters, filter.Key, v => v.Combustivel);
+                        query = ApplyEnumFilter(query, filters, filter.Key, v => (EnumCombustivelVeiculo)v.Combustivel);
                         break;
 
                     case "marca":
@@ -280,7 +205,6 @@ namespace AutoGestao.Controllers
 
             // Aplicar filtro de período usando o helper
             query = ApplyDateRangeFilter(query, filters, "periodo_cadastro", v => v.DataCadastro);
-
             return query;
         }
 
@@ -321,13 +245,9 @@ namespace AutoGestao.Controllers
 
         #region Métodos Auxiliares para Filtros
 
-        private List<SelectListItem> GetSituacaoOptions()
+        private static List<SelectListItem> GetSituacaoOptions()
         {
-            var options = new List<SelectListItem>
-            {
-                new() { Value = "", Text = "Todas as Situações", Selected = true }
-            };
-
+            var options = new List<SelectListItem>();
             var enumDictionary = EnumExtension.GetEnumDictionary<EnumSituacaoVeiculo>();
             
             foreach (var item in enumDictionary.Where(x => x.Key != 0))
@@ -344,11 +264,7 @@ namespace AutoGestao.Controllers
 
         private List<SelectListItem> GetMarcaOptions()
         {
-            var options = new List<SelectListItem>
-            {
-                new() { Value = "", Text = "Todas as Marcas", Selected = true }
-            };
-
+            var options = new List<SelectListItem>();
             var marcas = _context.VeiculoMarcas
                 .OrderBy(m => m.Descricao)
                 .Select(m => new { m.Id, m.Descricao })
@@ -366,13 +282,9 @@ namespace AutoGestao.Controllers
             return options;
         }
 
-        private List<SelectListItem> GetCombustivelOptions()
+        private static List<SelectListItem> GetCombustivelOptions()
         {
-            var options = new List<SelectListItem>
-            {
-                new() { Value = "", Text = "Todos os Combustíveis", Selected = true }
-            };
-
+            var options = new List<SelectListItem>();
             var enumDictionary = EnumExtension.GetEnumDictionary<EnumCombustivelVeiculo>();
             
             foreach (var item in enumDictionary.Where(x => x.Key != 0))
@@ -387,18 +299,20 @@ namespace AutoGestao.Controllers
             return options;
         }
 
-        private string GetSituacaoIcon(EnumSituacaoVeiculo situacao)
+        private static string GetSituacaoIcon(EnumSituacaoVeiculo situacao)
         {
             return situacao switch
             {
                 EnumSituacaoVeiculo.Estoque => "📦",
                 EnumSituacaoVeiculo.Vendido => "✅",
+                EnumSituacaoVeiculo.Reservado => "✅",
+                EnumSituacaoVeiculo.Manutencao => "✅",
                 EnumSituacaoVeiculo.Transferido => "🔄",
                 _ => "❓"
             };
         }
 
-        private string GetCombustivelIcon(EnumCombustivelVeiculo combustivel)
+        private static string GetCombustivelIcon(EnumCombustivelVeiculo combustivel)
         {
             return combustivel switch
             {
@@ -412,7 +326,7 @@ namespace AutoGestao.Controllers
             };
         }
 
-        private string RenderMarcaModelo(object item)
+        private static string RenderMarcaModelo(object item)
         {
             var veiculo = (Veiculo)item;
             var marca = veiculo.Marca?.Descricao ?? "N/A";
@@ -490,14 +404,6 @@ namespace AutoGestao.Controllers
             return veiculo == null ? NotFound() : View(veiculo);
         }
 
-        public IActionResult Create()
-        {
-            ViewBag.Marcas = GetMarcasSelectList();
-            ViewBag.Cores = GetCoresSelectList();
-            ViewBag.Proprietarios = GetProprietariosSelectList();
-            return View();
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Veiculo veiculo)
@@ -544,23 +450,12 @@ namespace AutoGestao.Controllers
             return View(veiculo);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Create()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var veiculo = await _context.Veiculos.FindAsync(id);
-            if (veiculo == null)
-            {
-                return NotFound();
-            }
-
             ViewBag.Marcas = GetMarcasSelectList();
             ViewBag.Cores = GetCoresSelectList();
             ViewBag.Proprietarios = GetProprietariosSelectList();
-            return View(veiculo);
+            return View();
         }
 
         [HttpPost]
@@ -624,6 +519,76 @@ namespace AutoGestao.Controllers
             return View(veiculo);
         }
 
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var veiculo = await _context.Veiculos.FindAsync(id);
+            if (veiculo == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Marcas = GetMarcasSelectList();
+            ViewBag.Cores = GetCoresSelectList();
+            ViewBag.Proprietarios = GetProprietariosSelectList();
+            return View(veiculo);
+        }
+
+        [HttpDelete]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id, Veiculo veiculo)
+        {
+            if (id != veiculo.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Remove(veiculo);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Veículo deletado com sucesso!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!VeiculoExists(veiculo.Id))
+                    {
+                        return NotFound();
+                    }
+                    throw;
+                }
+            }
+            return View(veiculo);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var veiculo = await _context.Veiculos.FindAsync(id);
+            if (veiculo == null)
+            {
+                return NotFound();
+            }
+
+            _context.Remove(veiculo);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Veículo deletado com sucesso!";
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpGet]
         public async Task<IActionResult> Export()
         {
@@ -665,6 +630,13 @@ namespace AutoGestao.Controllers
                 TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Import()
+        {
+            TempData["ErrorMessage"] = $"Operação ainda não implementada!";
+            return RedirectToAction(nameof(Index));
         }
 
         #endregion Ações Específicas

@@ -4,13 +4,28 @@ namespace AutoGestao.Models
 {
     public class StandardGridViewModel
     {
+        public StandardGridViewModel()
+        {
+        }
+
+        public StandardGridViewModel(string titulo, string subTitulo, string nomeEntidade)
+        {
+            Title = titulo;
+            SubTitle = subTitulo;
+            EntityName = nomeEntidade;
+            ControllerName = nomeEntidade;
+
+            HeaderActions = ObterHeaderActionsPadrao(nomeEntidade);
+            RowActions = ObterRowActionsPadrao(nomeEntidade);
+        }
+
         public List<object> Items { get; set; } = [];
         public int TotalRecords { get; set; }
         public int CurrentPage { get; set; } = 1;
         public int PageSize { get; set; } = 50;
         public int TotalPages => PageSize == -1 ? 1 : (int)Math.Ceiling((double)TotalRecords / PageSize);
         public string? Search { get; set; }
-        public string? OrderBy { get; set; }
+        public string? OrderBy { get; set; } = "id";
         public string? OrderDirection { get; set; } = "asc";
 
         // Grid Configuration
@@ -22,6 +37,65 @@ namespace AutoGestao.Models
         public List<GridFilter> Filters { get; set; } = [];
         public List<GridAction> HeaderActions { get; set; } = [];
         public List<GridAction> RowActions { get; set; } = [];
+
+        public List<GridAction> ObterHeaderActionsPadrao(string controllerNome)
+        {
+            return
+                [
+                    new()
+                    {
+                        Name = "Import",
+                        DisplayName = "Importar",
+                        Icon = "fas fa-upload",
+                        CssClass = "btn-modern btn-outline-modern",
+                        Url = "/" + controllerNome + "/Import"
+                    },
+                    new()
+                    {
+                        Name = "Export",
+                        DisplayName = "Exportar",
+                        Icon = "fas fa-download",
+                        CssClass = "btn-modern btn-outline-modern",
+                        Url = "/" + controllerNome + "/Export"
+                    },
+                    new()
+                    {
+                        Name = "Create",
+                        DisplayName = "Novo ",
+                        Icon = "fas fa-plus",
+                        CssClass = "btn-new",
+                        Url = "/" + controllerNome + "/Create"
+                    }
+                ];
+        }
+
+        public List<GridAction> ObterRowActionsPadrao(string controllerNome)
+        {
+            return
+                [
+                    new()
+                    {
+                        Name = "Details",
+                        DisplayName = "Visualizar",
+                        Icon = "fas fa-eye",
+                        Url = "/" + controllerNome + "/Details/{id}"
+                    },
+                    new()
+                    {
+                        Name = "Edit",
+                        DisplayName = "Editar",
+                        Icon = "fas fa-edit",
+                        Url = "/" + controllerNome + "/Edit/{id}"
+                    },
+                    new()
+                    {
+                        Name = "Delete",
+                        DisplayName = "Excluir",
+                        Icon = "fas fa-trash",
+                        Url = "/" + controllerNome + "/Delete/{id}"
+                    },
+                ];
+        }
     }
 
     public class GridColumn
@@ -67,7 +141,7 @@ namespace AutoGestao.Models
 
     public enum GridColumnType
     {
-        Text, Number, Currency, Date, Badge, Boolean, Custom, Actions
+        Text, Number, Integer, Currency, Date, Badge, Boolean, Custom, Actions
     }
 
     public enum GridFilterType

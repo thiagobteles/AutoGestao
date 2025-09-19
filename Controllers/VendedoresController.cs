@@ -10,25 +10,17 @@ namespace AutoGestao.Controllers
 {
     public class VendedoresController(ApplicationDbContext context) : StandardGridController<Vendedor>(context)
     {
-        #region Implementação Obrigatória (4 métodos apenas!)
+        #region Implementação Obrigatória
 
         protected override IQueryable<Vendedor> GetBaseQuery()
         {
-            // 1️⃣ Query base - apenas definir includes se necessário
             return _context.Vendedores.AsQueryable();
         }
 
         protected override StandardGridViewModel ConfigureGrid()
         {
-            // 2️⃣ Configuração da grid - copiar e personalizar
-            return new StandardGridViewModel
+            var retorno = new StandardGridViewModel ("Vendedores", "Gerencie todos os vendedores do sistema", "Vendedores")
             {
-                Title = "Vendedores",
-                SubTitle = "Gerencie todos os vendedores do sistema",
-                EntityName = "Vendedores",
-                ControllerName = "Vendedores",
-
-                // ✨ Colunas (5 minutos para configurar)
                 Columns =
                 [
                     new() { Name = nameof(Vendedor.Id), DisplayName = "Cód", Type = GridColumnType.Number, Sortable = true, Width = "70px"},
@@ -36,13 +28,10 @@ namespace AutoGestao.Controllers
                     new() { Name = nameof(Vendedor.CPF), DisplayName = "CPF", Sortable = true, Width = "130px" },
                     new() { Name = nameof(Vendedor.Email), DisplayName = "Email", Sortable = true },
                     new() { Name = nameof(Vendedor.Celular), DisplayName = "Celular", Sortable = true, Width = "130px" },
-                    new() { Name = nameof(Vendedor.PercentualComissao), DisplayName = "Comissão %", Type = GridColumnType.Number, Sortable = true, Width = "110px" },
-                    new() { Name = nameof(Vendedor.Meta), DisplayName = "Meta", Type = GridColumnType.Currency, Sortable = true, Width = "120px" },
                     new() { Name = nameof(Vendedor.Ativo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true, Width = "100px" },
                     new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "120px" }
                 ],
 
-                // 🔍 Filtros (3 minutos para configurar)
                 Filters =
                 [
                     new()
@@ -63,46 +52,12 @@ namespace AutoGestao.Controllers
                             new() { Value = "true", Text = "✅ Ativo" },
                             new() { Value = "false", Text = "❌ Inativo" }
                         ]
-                    },
-                    new()
-                    {
-                        Name = "meta_min",
-                        DisplayName = "Meta Mínima",
-                        Type = GridFilterType.Number,
-                        Placeholder = "R$ 0,00"
                     }
                 ],
+            };
 
-                // 🎯 Ações do cabeçalho (1 minuto)
-                HeaderActions =
+            retorno.RowActions.AddRange(
                 [
-                    new()
-                    {
-                        Name = "Create",
-                        DisplayName = "Novo Vendedor",
-                        Icon = "fas fa-plus",
-                        CssClass = "btn-new",
-                        Url = Url.Action("Create", "Vendedores")
-                    }
-                ],
-
-                // ⚡ Ações das linhas (2 minutos) - COM CONDIÇÕES!
-                RowActions =
-                [
-                    new()
-                    {
-                        Name = "Details",
-                        DisplayName = "Visualizar",
-                        Icon = "fas fa-eye",
-                        Url = "/Vendedores/Details/{id}"
-                    },
-                    new()
-                    {
-                        Name = "Edit",
-                        DisplayName = "Editar",
-                        Icon = "fas fa-edit",
-                        Url = "/Vendedores/Edit/{id}"
-                    },
                     new()
                     {
                         Name = "Sales",
@@ -127,13 +82,13 @@ namespace AutoGestao.Controllers
                         Url = "/Vendedores/ToggleStatus/{id}",
                         ShowCondition = (x) => ((Vendedor)x).Ativo == false
                     }
-                ]
-            };
+                ]);
+
+            return retorno;
         }
 
         protected override IQueryable<Vendedor> ApplyFilters(IQueryable<Vendedor> query, Dictionary<string, object> filters)
         {
-            // 3️⃣ Filtros (3 minutos para implementar)
             foreach (var filter in filters)
             {
                 switch (filter.Key.ToLower())
@@ -142,7 +97,6 @@ namespace AutoGestao.Controllers
                         var searchTerm = filter.Value.ToString();
                         if (!string.IsNullOrEmpty(searchTerm))
                         {
-                            // 🚀 Usar helper para múltiplas propriedades
                             query = ApplyTextFilter(query, searchTerm,
                                 v => v.Nome,
                                 v => v.CPF,
@@ -173,7 +127,6 @@ namespace AutoGestao.Controllers
 
         protected override IQueryable<Vendedor> ApplySort(IQueryable<Vendedor> query, string orderBy, string orderDirection)
         {
-            // 4️⃣ Ordenação (2 minutos para implementar)
             return orderBy?.ToLower() switch
             {
                 "id" => orderDirection == "desc"
@@ -203,7 +156,7 @@ namespace AutoGestao.Controllers
 
         #endregion
 
-        #region Ações Específicas (Opcionais - adicionar conforme necessário)
+        #region Ações Específicas
 
         [HttpPost]
         public async Task<IActionResult> ToggleStatus(int id)
@@ -227,7 +180,10 @@ namespace AutoGestao.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
 
             var vendedor = await _context.Vendedores
                 .Include(v => v.Vendas)
@@ -236,11 +192,6 @@ namespace AutoGestao.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             return vendedor == null ? NotFound() : View(vendedor);
-        }
-
-        public IActionResult Create()
-        {
-            return View();
         }
 
         [HttpPost]
@@ -268,19 +219,19 @@ namespace AutoGestao.Controllers
             return View(vendedor);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Create()
         {
-            if (id == null) return NotFound();
-
-            var vendedor = await _context.Vendedores.FindAsync(id);
-            return vendedor == null ? NotFound() : View(vendedor);
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Vendedor vendedor)
         {
-            if (id != vendedor.Id) return NotFound();
+            if (id != vendedor.Id)
+            {
+                return NotFound();
+            }
 
             if (ModelState.IsValid)
             {
@@ -304,11 +255,118 @@ namespace AutoGestao.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!VendedorExists(vendedor.Id))
+                    {
                         return NotFound();
+                    }
+
                     throw;
                 }
             }
             return View(vendedor);
+        }
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var vendedor = await _context.Vendedores.FindAsync(id);
+            return vendedor == null ? NotFound() : View(vendedor);
+        }
+
+        [HttpDelete]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id, Vendedor vendedor)
+        {
+            if (id != vendedor.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Remove(vendedor);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Vendedor deletado com sucesso!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!VendedorExists(vendedor.Id))
+                    {
+                        return NotFound();
+                    }
+                    throw;
+                }
+            }
+            return View(vendedor);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var vendedor = await _context.Vendedores.FindAsync(id);
+            if (vendedor == null)
+            {
+                return NotFound();
+            }
+
+            _context.Remove(vendedor);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Vendedor deletado com sucesso!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Export()
+        {
+            try
+            {
+                var vendedores = await _context.Vendedores
+                    .OrderBy(c => c.Nome)
+                    .ToListAsync();
+
+                var csv = new System.Text.StringBuilder();
+                csv.AppendLine("ID,Nome,CPF,Email,Telefone,Celular,Status,Data Cadastro");
+
+                foreach (var vendedor in vendedores)
+                {
+                    csv.AppendLine($"{vendedor.Id}," +
+                                  $"\"{vendedor.Nome}\"," +
+                                  $"{vendedor.CPF}," +
+                                  $"{vendedor.Email}," +
+                                  $"{vendedor.Telefone}," +
+                                  $"{vendedor.Celular}," +
+                                  $"{(vendedor.Ativo ? "Ativo" : "Inativo")}," +
+                                  $"{vendedor.DataCadastro:dd/MM/yyyy}");
+                }
+
+                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+                var fileName = $"vendedores_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Import()
+        {
+            TempData["ErrorMessage"] = $"Operação ainda não implementada!";
+            return RedirectToAction();
         }
 
         private bool VendedorExists(int id)

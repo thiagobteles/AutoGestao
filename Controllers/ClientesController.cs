@@ -1,8 +1,9 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
+using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
-using AutoGestao.Models;
 using AutoGestao.Extensions;
+using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,139 +19,55 @@ namespace AutoGestao.Controllers
 
         protected override StandardGridViewModel ConfigureGrid()
         {
-            return new StandardGridViewModel
+            var retorno = new StandardGridViewModel("Clientes", "Gerencie todos os clientes do sistema", "Clientes")
             {
-                Title = "Clientes",
-                SubTitle = "Gerencie todos os clientes do sistema",
-                EntityName = "Clientes",
-                ControllerName = "Clientes",
-
-                // Configuração das colunas
-                Columns =
-                [
-                    new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true, Width = "80px"},
-                    new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Tipo", Type = GridColumnType.Badge, Sortable = true, Width = "120px" },
-                    new() { Name = nameof(Cliente.Nome), DisplayName = "Nome/Razão Social", Sortable = true },
-                    new() { Name = nameof(Cliente.CPF), DisplayName = "CPF/CNPJ", Sortable = true, Width = "150px" },
-                    new() { Name = nameof(Cliente.Celular), DisplayName = "Telefone", Sortable = true, Width = "130px" },
-                    new() { Name = nameof(Cliente.Cidade), DisplayName = "Cidade", Sortable = true, Width = "150px" },
-                    new() { Name = nameof(Cliente.Estado), DisplayName = "UF", Sortable = true, Width = "60px" },
-                    new() { Name = nameof(Cliente.DataCadastro), DisplayName = "Cadastro", Type = GridColumnType.Date, Sortable = true, Width = "110px" },
-                    new() { Name = nameof(Cliente.Ativo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true, Width = "100px" },
-                    new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "120px" }
-                ],
-
-                // Configuração dos filtros
                 Filters =
-                [
-                    new()
-                    {
-                        Name = "search",
-                        DisplayName = "Busca Geral",
-                        Type = GridFilterType.Text,
-                        Placeholder = "Nome, CPF, CNPJ, Email, Telefone..."
-                    },
-                    new()
-                    {
-                        Name = "codigo",
-                        DisplayName = "Código",
-                        Type = GridFilterType.Number,
-                        Placeholder = "ID do cliente"
-                    },
-                    new()
-                    {
-                        Name = "tipocliente",
-                        DisplayName = "Tipo de Pessoa",
-                        Type = GridFilterType.Select,
-                        Options = GetTipoClienteOptions()
-                    },
-                    new()
-                    {
-                        Name = "estado",
-                        DisplayName = "Estado",
-                        Type = GridFilterType.Select,
-                        Options = GetEstadoOptions()
-                    },
-                    new()
-                    {
-                        Name = "cidade",
-                        DisplayName = "Cidade",
-                        Type = GridFilterType.Text,
-                        Placeholder = "Nome da cidade"
-                    },
-                    new()
-                    {
-                        Name = "status",
-                        DisplayName = "Status",
-                        Type = GridFilterType.Select,
-                        Options =
-                        [
-                            new() { Value = "", Text = "Todos os Status", Selected = true },
-                            new() { Value = "true", Text = "✅ Ativo" },
-                            new() { Value = "false", Text = "❌ Inativo" }
-                        ]
-                    },
-                    new()
-                    {
-                        Name = "datacadastro",
-                        DisplayName = "Data de Cadastro",
-                        Type = GridFilterType.Date
-                    },
-                    new()
-                    {
-                        Name = "periodo",
-                        DisplayName = "Período de Cadastro",
-                        Type = GridFilterType.DateRange
-                    }
-                ],
+                    [
+                        new()
+                        {
+                            Name = "search",
+                            DisplayName = "Busca Geral",
+                            Type = GridFilterType.Text,
+                            Placeholder = "Nome, CPF, CNPJ, Email, Telefone..."
+                        },
+                        new()
+                        {
+                            Name = "tipocliente",
+                            DisplayName = "Tipo de Pessoa",
+                            Type = GridFilterType.Select,
+                            Placeholder = "Tipo Pessoa...",
+                            Options = GetTipoClienteOptions()
+                        },
+                        new()
+                        {
+                            Name = "status",
+                            DisplayName = "Status",
+                            Type = GridFilterType.Select,
+                            Placeholder = "Status cliente...",
+                            Options =
+                            [
+                                new() { Value = "true", Text = "✅ Ativo" },
+                                new() { Value = "false", Text = "❌ Inativo" }
+                            ]
+                        }
+                    ],
 
-                // Ações do cabeçalho
-                HeaderActions =
-                [
-                    new()
-                    {
-                        Name = "Create",
-                        DisplayName = "Novo Cliente",
-                        Icon = "fas fa-plus",
-                        CssClass = "btn-new",
-                        Url = Url.Action("Create", "Clientes")
-                    },
-                    new()
-                    {
-                        Name = "Export",
-                        DisplayName = "Exportar",
-                        Icon = "fas fa-download",
-                        CssClass = "btn-modern btn-outline-modern",
-                        Url = Url.Action("Export", "Clientes")
-                    }
-                ],
+                Columns =
+                    [
+                        new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true, Width = "80px"},
+                        new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Tipo", Type = GridColumnType.Badge, Sortable = true, Width = "60px" },
+                        new() { Name = nameof(Cliente.Nome), DisplayName = "Nome/Razão Social", Sortable = true },
+                        new() { Name = "Documento", DisplayName = "CPF/CNPJ", Sortable = true, Type = GridColumnType.Custom, CustomRender = RenderDocumento},
+                        new() { Name = nameof(Cliente.Celular), DisplayName = "Telefone", Sortable = true, Width = "130px" },
+                        new() { Name = nameof(Cliente.Cidade), DisplayName = "Cidade", Sortable = true, Width = "150px" },
+                        new() { Name = nameof(Cliente.Estado), DisplayName = "UF", Type = GridColumnType.Badge, Sortable = true, Width = "60px" },
+                        new() { Name = nameof(Cliente.Ativo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true, Width = "100px" },
+                        new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "120px" }
+                    ]
+            };
 
-                // Ações das linhas
-                //RowActions = [
-                //        new() {
-                //            Name = "Delete",
-                //            DisplayName = "Excluir",
-                //            Icon = "fas fa-trash",
-                //            Url = "/Clientes/Delete/{id}",
-                //            ShowCondition = (x) => User.IsInRole("Admin") // Apenas admins
-                //        }
-                //    ]
-                RowActions =
+            retorno.RowActions.AddRange(
                 [
-                    new()
-                    {
-                        Name = "Details",
-                        DisplayName = "Visualizar",
-                        Icon = "fas fa-eye",
-                        Url = "/Clientes/Details/{id}"
-                    },
-                    new()
-                    {
-                        Name = "Edit",
-                        DisplayName = "Editar",
-                        Icon = "fas fa-edit",
-                        Url = "/Clientes/Edit/{id}"
-                    },
                     new()
                     {
                         Name = "NewSale",
@@ -183,8 +100,9 @@ namespace AutoGestao.Controllers
                         Url = "/Clientes/ToggleStatus/{id}",
                         ShowCondition = (item) => ((Cliente)item).Ativo == false
                     }
-                ]
-            };
+                ]);
+
+            return retorno;
         }
 
         protected override IQueryable<Cliente> ApplyFilters(IQueryable<Cliente> query, Dictionary<string, object> filters)
@@ -291,16 +209,12 @@ namespace AutoGestao.Controllers
 
         #region Métodos Auxiliares para Filtros
 
-        private List<SelectListItem> GetTipoClienteOptions()
+        private static List<SelectListItem> GetTipoClienteOptions()
         {
-            var options = new List<SelectListItem>
-            {
-                new() { Value = "", Text = "Todos os Tipos", Selected = true }
-            };
-
+            var options = new List<SelectListItem>();
             var enumDictionary = EnumExtension.GetEnumDictionary<EnumTipoPessoa>();
 
-            foreach (var item in enumDictionary.Where(x => x.Key != 0)) // Remove "Nenhum"
+            foreach (var item in enumDictionary.Where(x => x.Key != 0))
             {
                 options.Add(new SelectListItem
                 {
@@ -312,28 +226,7 @@ namespace AutoGestao.Controllers
             return options;
         }
 
-        private List<SelectListItem> GetEstadoOptions()
-        {
-            var options = new List<SelectListItem>
-            {
-                new() { Value = "", Text = "Todos os Estados", Selected = true }
-            };
-
-            var enumDictionary = EnumExtension.GetEnumDictionary<EnumEstado>();
-
-            foreach (var item in enumDictionary.Where(x => x.Key != 0)) // Remove "Nenhum"
-            {
-                options.Add(new SelectListItem
-                {
-                    Value = ((EnumEstado)item.Key).ToString(),
-                    Text = item.Value
-                });
-            }
-
-            return options.OrderBy(x => x.Text).ToList();
-        }
-
-        private string GetTipoIcon(EnumTipoPessoa tipo)
+        private static string GetTipoIcon(EnumTipoPessoa tipo)
         {
             return tipo switch
             {
@@ -341,6 +234,16 @@ namespace AutoGestao.Controllers
                 EnumTipoPessoa.PessoaJuridica => "🏢",
                 _ => "❓"
             };
+        }
+
+        private static string RenderDocumento(object item)
+        {
+            var cliente = (Cliente)item;
+            var documento = cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica 
+                ? cliente.CNPJ.AplicarMascaraCnpj()
+                : cliente.CPF.AplicarMascaraCpf();
+
+            return $@"{documento}";
         }
 
         #endregion
@@ -381,11 +284,6 @@ namespace AutoGestao.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             return cliente == null ? NotFound() : View(cliente);
-        }
-
-        public IActionResult Create()
-        {
-            return View();
         }
 
         [HttpPost]
@@ -439,17 +337,9 @@ namespace AutoGestao.Controllers
             return View(cliente);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Create()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var cliente = await _context.Clientes.FindAsync(id);
-            return cliente == null
-                ? NotFound()
-                : View(cliente);
+            return View();
         }
 
         [HttpPost]
@@ -517,6 +407,77 @@ namespace AutoGestao.Controllers
             return View(cliente);
         }
 
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var cliente = await _context.Clientes.FindAsync(id);
+            return cliente == null
+                ? NotFound()
+                : View(cliente);
+        }
+
+        [HttpDelete]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id, Cliente cliente)
+        {
+            if (id != cliente.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Remove(cliente);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Cliente deletado com sucesso!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ClienteExists(cliente.Id))
+                    {
+                        return NotFound();
+                    }
+                    throw;
+                }
+            }
+            return View(cliente);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var cliente = await _context.Clientes.FindAsync(id);
+            if (cliente == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                _context.Remove(cliente);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Cliente deletado com sucesso!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> Export()
         {
@@ -555,6 +516,13 @@ namespace AutoGestao.Controllers
                 TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Import()
+        {
+            TempData["ErrorMessage"] = $"Operação ainda não implementada!";
+            return RedirectToAction(nameof(Index));
         }
 
         private bool ClienteExists(int id)

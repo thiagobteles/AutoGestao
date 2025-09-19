@@ -11,14 +11,10 @@
 @switch (Model.Column.Type)
 {
     case GridColumnType.Actions:
-
-
         @if (Model.Actions != null && Model.Actions.Any())
         {
             // Filtrar ações baseado na ShowCondition
-            var visibleActions = Model.Actions.Where(action =>
-                action.ShowCondition == null || action.ShowCondition(Model.Item)).ToList();
-
+            var visibleActions = Model.Actions.Where(action => action.ShowCondition == null || action.ShowCondition(Model.Item)).ToList();
             @if (visibleActions.Any())
             {
                 <div class="dropdown">
@@ -75,13 +71,25 @@
             var displayText = value?.ToString();
             if (value is Enum enumValue)
             {
-                displayText = enumValue.GetDescription();
+                displayText = enumValue.GetCategory() ?? enumValue.GetDescription();
             }
             <span class="person-type">@displayText</span>
         }
         else
         {
-            @value
+            try
+            {
+                var displayText = value?.ToString();
+                if (value is Enum enumValue)
+                {
+                    displayText = enumValue.GetCategory() ?? enumValue.GetDescription();
+                }
+                <span class="person-type">@displayText</span>
+            }
+            catch
+            {
+                @value   
+            }
         }
         break;
 
@@ -111,6 +119,17 @@
         @if (value != null && decimal.TryParse(value.ToString(), out decimal numberValue))
         {
             @numberValue.ToString("N0")
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case GridColumnType.Integer:
+        @if (value != null && long.TryParse(value.ToString(), out long integerValue))
+        {
+            @integerValue.ToString()
         }
         else
         {

@@ -643,6 +643,356 @@ function setupIntersectionObserver() {
     }
 }
 
+function changePage(page) {
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.location = url;
+}
+
+document.getElementById('pageSizeSelector')?.addEventListener('change', function () {
+    const url = new URL(window.location);
+    url.searchParams.set('pageSize', this.value);
+    url.searchParams.set('page', '1');
+    window.location = url;
+});
+
+// Sortable headers
+document.querySelectorAll('.sortable-header').forEach(header => {
+    header.addEventListener('click', function () {
+        const sortColumn = this.dataset.sortable;
+        const url = new URL(window.location);
+
+        let newDirection = 'asc';
+        if (url.searchParams.get('orderBy') === sortColumn && url.searchParams.get('orderDirection') === 'asc') {
+            newDirection = 'desc';
+        }
+
+        url.searchParams.set('orderBy', sortColumn);
+        url.searchParams.set('orderDirection', newDirection);
+        url.searchParams.set('page', '1');
+
+        window.location = url;
+    });
+});
+
+// ===================================================================
+// CORREÇÕES DE LAYOUT PARA GRID COMPACTA
+// ===================================================================
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ===================================================================
+    // 1. CORREÇÃO DE Z-INDEX DINÂMICA
+    // ===================================================================
+
+    function fixGridZIndex() {
+        // Encontrar o header principal da aplicação
+        const headers = document.querySelectorAll('.navbar, .header, .topbar, .page-header, .app-header');
+        const gridContainers = document.querySelectorAll('.data-grid, .table-responsive');
+        const gridHeaders = document.querySelectorAll('.base-grid-table thead');
+
+        // Definir z-index do header principal como máximo
+        headers.forEach((header, index) => {
+            header.style.zIndex = (1100 + index).toString();
+            header.style.position = header.style.position || 'relative';
+        });
+
+        // Definir z-index da grid como baixo
+        gridContainers.forEach(container => {
+            container.style.zIndex = '1';
+            container.style.position = 'relative';
+        });
+
+        // Definir z-index do header da tabela como médio
+        gridHeaders.forEach(header => {
+            header.style.zIndex = '5';
+            header.style.position = 'sticky';
+            header.style.top = '0';
+        });
+    }
+
+    // ===================================================================
+    // 2. CORREÇÃO DE DROPDOWNS
+    // ===================================================================
+
+    function fixDropdownZIndex() {
+        const dropdowns = document.querySelectorAll('.dropdown-menu');
+        dropdowns.forEach(dropdown => {
+            dropdown.style.zIndex = '1050';
+            dropdown.style.position = 'absolute';
+        });
+
+        // Observer para dropdowns que são criados dinamicamente
+        const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.nodeType === 1) { // Element node
+                        const newDropdowns = node.querySelectorAll('.dropdown-menu');
+                        newDropdowns.forEach(dropdown => {
+                            dropdown.style.zIndex = '1050';
+                            dropdown.style.position = 'absolute';
+                        });
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    // ===================================================================
+    // 3. AJUSTE DINÂMICO DA ALTURA DA GRID
+    // ===================================================================
+
+    function adjustGridHeight() {
+        const tableContainers = document.querySelectorAll('.table-responsive');
+
+        tableContainers.forEach(container => {
+            // Calcular altura disponível
+            const windowHeight = window.innerHeight;
+            const headerHeight = getHeaderHeight();
+            const filtersHeight = getFiltersHeight();
+            const controlsHeight = getControlsHeight();
+            const paginationHeight = getPaginationHeight();
+            const padding = 120; // Padding adicional para respiração
+
+            const availableHeight = windowHeight - headerHeight - filtersHeight - controlsHeight - paginationHeight - padding;
+
+            // Definir altura mínima e máxima
+            const minHeight = 300;
+            const maxHeight = Math.max(availableHeight, minHeight);
+
+            container.style.maxHeight = maxHeight + 'px';
+            container.style.minHeight = minHeight + 'px';
+        });
+    }
+
+    function getHeaderHeight() {
+        const pageHeader = document.querySelector('.page-header');
+        const appHeader = document.querySelector('.navbar, .header, .topbar, .app-header');
+
+        let height = 0;
+        if (pageHeader) height += pageHeader.offsetHeight;
+        if (appHeader) height += appHeader.offsetHeight;
+
+        return height;
+    }
+
+    function getFiltersHeight() {
+        const filters = document.querySelector('.search-filters');
+        return filters ? filters.offsetHeight : 0;
+    }
+
+    function getControlsHeight() {
+        const controls = document.querySelector('.grid-controls');
+        return controls ? controls.offsetHeight : 0;
+    }
+
+    function getPaginationHeight() {
+        const pagination = document.querySelector('.pagination-container');
+        return pagination ? pagination.offsetHeight : 0;
+    }
+
+    // ===================================================================
+    // 4. OTIMIZAÇÃO DE PERFORMANCE PARA SCROLL
+    // ===================================================================
+
+    function optimizeTableScroll() {
+        const tableContainers = document.querySelectorAll('.table-responsive');
+
+        tableContainers.forEach(container => {
+            // Adicionar smooth scrolling
+            container.style.scrollBehavior = 'smooth';
+
+            // Throttle scroll events para melhor performance
+            let scrollTimeout;
+            container.addEventListener('scroll', function () {
+                if (scrollTimeout) {
+                    clearTimeout(scrollTimeout);
+                }
+                scrollTimeout = setTimeout(function () {
+                    // Aqui você pode adicionar lógica adicional se necessário
+                }, 100);
+            });
+        });
+    }
+
+    // ===================================================================
+    // 5. CORREÇÃO DE LARGURAS DE COLUNAS EM TELAS PEQUENAS
+    // ===================================================================
+
+    function adjustColumnWidths() {
+        const table = document.querySelector('.base-grid-table');
+        if (!table) return;
+
+        const screenWidth = window.innerWidth;
+
+        if (screenWidth < 768) {
+            // Mobile: ocultar colunas menos importantes
+            const columnsToHide = [3, 4, 7]; // Índices das colunas (baseado em 1)
+
+            columnsToHide.forEach(colIndex => {
+                const headerCells = table.querySelectorAll(`th:nth-child(${colIndex})`);
+                const bodyCells = table.querySelectorAll(`td:nth-child(${colIndex})`);
+
+                [...headerCells, ...bodyCells].forEach(cell => {
+                    cell.style.display = 'none';
+                });
+            });
+
+        } else {
+            // Desktop: mostrar todas as colunas
+            const allCells = table.querySelectorAll('th, td');
+            allCells.forEach(cell => {
+                cell.style.display = '';
+            });
+        }
+    }
+
+    // ===================================================================
+    // 6. DEBOUNCE PARA RESIZE
+    // ===================================================================
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // ===================================================================
+    // 7. INICIALIZAÇÃO E EVENT LISTENERS
+    // ===================================================================
+
+    // Executar correções iniciais
+    fixGridZIndex();
+    fixDropdownZIndex();
+    adjustGridHeight();
+    optimizeTableScroll();
+    adjustColumnWidths();
+
+    // Executar correções no resize da janela
+    const debouncedResize = debounce(() => {
+        adjustGridHeight();
+        adjustColumnWidths();
+    }, 250);
+
+    window.addEventListener('resize', debouncedResize);
+
+    // ===================================================================
+    // 8. CORREÇÃO PARA CASOS ESPECÍFICOS
+    // ===================================================================
+
+    // Se houver problemas com elementos que aparecem dinamicamente
+    setTimeout(() => {
+        fixGridZIndex();
+        adjustGridHeight();
+    }, 500);
+
+    // Observar mudanças no DOM para elementos dinâmicos
+    const globalObserver = new MutationObserver(function (mutations) {
+        let needsUpdate = false;
+
+        mutations.forEach(function (mutation) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.nodeType === 1 &&
+                        (node.classList.contains('data-grid') ||
+                            node.classList.contains('table-responsive') ||
+                            node.classList.contains('dropdown-menu'))) {
+                        needsUpdate = true;
+                    }
+                });
+            }
+        });
+
+        if (needsUpdate) {
+            setTimeout(() => {
+                fixGridZIndex();
+                fixDropdownZIndex();
+                adjustGridHeight();
+            }, 100);
+        }
+    });
+
+    globalObserver.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // ===================================================================
+    // 9. FUNÇÃO PARA FORÇAR RECÁLCULO (caso necessário)
+    // ===================================================================
+
+    // Expor função global para recálculo manual se necessário
+    window.recalculateGridLayout = function () {
+        fixGridZIndex();
+        fixDropdownZIndex();
+        adjustGridHeight();
+        optimizeTableScroll();
+        adjustColumnWidths();
+    };
+
+    console.log('Grid layout fixes initialized successfully');
+});
+
+// ===================================================================
+// 10. CSS ADICIONAL VIA JAVASCRIPT (caso necessário)
+// ===================================================================
+
+// Adicionar estilos críticos via JavaScript se não puderem ser aplicados via CSS
+function addCriticalStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+            /* Estilos críticos que devem ser aplicados imediatamente */
+            .table-responsive {
+                position: relative !important;
+                z-index: 1 !important;
+            }
+
+            .base-grid-table thead {
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 5 !important;
+            }
+
+            .dropdown-menu {
+                z-index: 1050 !important;
+                position: absolute !important;
+            }
+
+            /* Prevenir flash de conteúdo não estilizado */
+            .data-grid {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .data-grid.loaded {
+                opacity: 1;
+            }
+        `;
+
+    document.head.appendChild(style);
+
+    // Marcar grids como carregadas após um breve delay
+    setTimeout(() => {
+        document.querySelectorAll('.data-grid').forEach(grid => {
+            grid.classList.add('loaded');
+        });
+    }, 100);
+}
+
+// Executar estilos críticos imediatamente
+addCriticalStyles();
+
 // Inicializar observer após carregamento
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(setupIntersectionObserver, 500);

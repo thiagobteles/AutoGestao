@@ -7,14 +7,9 @@ namespace AutoGestao.Extensions
     {
         public static Dictionary<int, string> GetEnumDictionary<T>()
         {
-            if (!typeof(T).IsEnum)
-            {
-                throw new ArgumentException("T não é do tipo Enum");
-            }
-
-            return Enum.GetValues(typeof(T))
-                .Cast<T>()
-                .ToDictionary(t => (int)(object)t, t => t.GetDescription());
+            return !typeof(T).IsEnum
+                ? throw new ArgumentException("T não é do tipo Enum")
+                : Enum.GetValues(typeof(T)).Cast<T>().ToDictionary(t => (int)(object)t, t => t.GetDescription());
         }
 
         public static List<T> GetEnumList<T>()
@@ -22,11 +17,6 @@ namespace AutoGestao.Extensions
             var array = (T[])Enum.GetValues(typeof(T));
             var list = new List<T>(array);
             return list;
-        }
-
-        public static EnumNaoSim ToEnumNaoSim(this bool aValor)
-        {
-            return aValor ? EnumNaoSim.Sim : EnumNaoSim.Nao;
         }
 
         public static T ToEnum<T>(this int aValor)
@@ -42,7 +32,7 @@ namespace AutoGestao.Extensions
 
         public static string GetDescription<T>(this T source)
         {
-            var field = source.GetType().GetField(source.ToString());
+            var field = source.GetType().GetField(source?.ToString());
             var attributes = (DescriptionAttribute[])field.GetCustomAttributes(typeof(DescriptionAttribute), false);
             return attributes != null && attributes.Length > 0 ? attributes[0].Description : source.ToString();
         }

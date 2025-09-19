@@ -6,15 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
-    public abstract class StandardGridController<T> : BaseController where T : BaseEntidade
+    public abstract class StandardGridController<T>(ApplicationDbContext context) : Controller() where T : BaseEntidade
     {
-        protected readonly ApplicationDbContext _context;
-
-        protected StandardGridController(ApplicationDbContext context) : base()
-        {
-            _context = context;
-        }
-
+        protected readonly ApplicationDbContext _context = context;
         protected abstract IQueryable<T> GetBaseQuery();
         protected abstract StandardGridViewModel ConfigureGrid();
         protected abstract IQueryable<T> ApplyFilters(IQueryable<T> query, Dictionary<string, object> filters);
@@ -34,13 +28,17 @@ namespace AutoGestao.Controllers
             // Aplicar filtros
             var filters = ExtractFiltersFromRequest();
             if (!string.IsNullOrEmpty(search))
+            {
                 filters["search"] = search;
+            }
 
             query = ApplyFilters(query, filters);
 
             // Aplicar ordenação
             if (!string.IsNullOrEmpty(orderBy))
+            {
                 query = ApplySort(query, orderBy, orderDirection);
+            }
 
             // Obter total de registros
             var totalRecords = await query.CountAsync();
@@ -71,7 +69,7 @@ namespace AutoGestao.Controllers
             // Atualizar valores dos filtros
             UpdateFilterValues(gridConfig.Filters, filters);
 
-            return View("_StandardGrid", gridConfig);
+            return View("_StandardGridContent", gridConfig);
         }
 
         /// <summary>
@@ -91,13 +89,17 @@ namespace AutoGestao.Controllers
             // Aplicar filtros
             var filters = ExtractFiltersFromRequest();
             if (!string.IsNullOrEmpty(search))
+            {
                 filters["search"] = search;
+            }
 
             query = ApplyFilters(query, filters);
 
             // Aplicar ordenação
             if (!string.IsNullOrEmpty(orderBy))
+            {
                 query = ApplySort(query, orderBy, orderDirection);
+            }
 
             // Obter total de registros
             var totalRecords = await query.CountAsync();
@@ -250,7 +252,9 @@ namespace AutoGestao.Controllers
             params System.Linq.Expressions.Expression<Func<T, string?>>[] properties)
         {
             if (string.IsNullOrEmpty(searchTerm) || properties.Length == 0)
+            {
                 return query;
+            }
 
             var parameter = System.Linq.Expressions.Expression.Parameter(typeof(T), "x");
             System.Linq.Expressions.Expression? condition = null;
@@ -319,7 +323,7 @@ namespace AutoGestao.Controllers
             if (filters.ContainsKey(filterName))
             {
                 var value = filters[filterName].ToString();
-                if (TryConvertToNumeric<TProperty>(value, out TProperty numericValue))
+                if (TryConvertToNumeric(value, out TProperty numericValue))
                 {
                     var parameter = System.Linq.Expressions.Expression.Parameter(typeof(T), "x");
                     var property = System.Linq.Expressions.Expression.Property(parameter, ((System.Linq.Expressions.MemberExpression)propertyExpression.Body).Member.Name);
@@ -334,7 +338,7 @@ namespace AutoGestao.Controllers
             return query;
         }
 
-        private bool TryConvertToNumeric<TProperty>(string value, out TProperty result)
+        private static bool TryConvertToNumeric<TProperty>(string value, out TProperty result)
         {
             result = default(TProperty);
 
@@ -347,6 +351,65 @@ namespace AutoGestao.Controllers
             {
                 return false;
             }
+        }
+
+        public List<GridAction> ObterHeaderActionsPadrao(string controllerNome)
+        {
+            return
+                [
+                    new()
+                    {
+                        Name = "Import",
+                        DisplayName = "Importar",
+                        Icon = "fas fa-upload",
+                        CssClass = "btn-modern btn-outline-modern",
+                        Url = Url.Action("Import", controllerNome)
+                    },
+                    new()
+                    {
+                        Name = "Export",
+                        DisplayName = "Exportar",
+                        Icon = "fas fa-download",
+                        CssClass = "btn-modern btn-outline-modern",
+                        Url = Url.Action("Export", controllerNome)
+                    },
+                    new()
+                    {
+                        Name = "Create",
+                        DisplayName = "Novo ",
+                        Icon = "fas fa-plus",
+                        CssClass = "btn-new",
+                        Url = Url.Action("Create", controllerNome)
+                    }
+                ];
+        }
+
+        public List<GridAction> ObterRowActionsPadrao(string controllerNome)
+        {
+            return
+                [
+                    new()
+                    {
+                        Name = "Details",
+                        DisplayName = "Visualizar",
+                        Icon = "fas fa-eye",
+                        Url = "/" + controllerNome + "/Details/{id}"
+                    },
+                    new()
+                    {
+                        Name = "Edit",
+                        DisplayName = "Editar",
+                        Icon = "fas fa-edit",
+                        Url = "/" + controllerNome + "/Edit/{id}"
+                    },
+                    new()
+                    {
+                        Name = "Delete",
+                        DisplayName = "Excluir",
+                        Icon = "fas fa-trash",
+                        Url = "/" + controllerNome + "/Delete/{id}"
+                    },
+                ];
         }
     }
 }

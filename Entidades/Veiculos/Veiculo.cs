@@ -5,19 +5,20 @@ namespace AutoGestao.Entidades.Veiculos
     public class Veiculo : BaseEntidade
     {
         public string Codigo { get; set; } = string.Empty;
-        public EnumCombustivelVeiculo Combustivel { get; set; } = EnumCombustivelVeiculo.Nenhum;
-        public EnumCambioVeiculo Cambio { get; set; } = EnumCambioVeiculo.Nenhum;
-        public EnumSituacaoVeiculo Situacao { get; set; } = EnumSituacaoVeiculo.Estoque;
-        public EnumStatusVeiculo StatusVeiculo { get; set; } = EnumStatusVeiculo.Nenhum;
-        public EnumTipoVeiculo TipoVeiculo { get; set; } = EnumTipoVeiculo.Nenhum;
-        public EnumEspecieVeiculo Especie { get; set; } = EnumEspecieVeiculo.Automovel;
-        public EnumPortasVeiculo Portas { get; set; } = EnumPortasVeiculo.Nenhuma;
-        public EnumPericiaCautelarVeiculo PericiaCautelar { get; set; } = EnumPericiaCautelarVeiculo.Nenhuma;
-        public string Motorizacao { get; set; } = "2.0";
-        public int AnoFabricacao { get; set; }
-        public int AnoModelo { get; set; }
-        public string Placa { get; set; } = string.Empty;
-        public long KmSaida { get; set; }
+        public EnumCombustivelVeiculo? Combustivel { get; set; }
+        public EnumCambioVeiculo? Cambio { get; set; }
+        public EnumSituacaoVeiculo? Situacao { get; set; }
+        public EnumStatusVeiculo? StatusVeiculo { get; set; }
+        public EnumTipoVeiculo? TipoVeiculo { get; set; }
+        public EnumEspecieVeiculo? Especie { get; set; }
+        public EnumPortasVeiculo? Portas { get; set; }
+        public EnumPericiaCautelarVeiculo? PericiaCautelar { get; set; }
+        public EnumOrigemVeiculo? OrigemVeiculo { get; set; }
+        public string? Motorizacao { get; set; }
+        public int? AnoFabricacao { get; set; }
+        public int? AnoModelo { get; set; }
+        public string? Placa { get; set; }
+        public long? KmSaida { get; set; }
         public string? Chassi { get; set; }
         public string? Renavam { get; set; }
         public int? Quilometragem { get; set; }
@@ -26,7 +27,6 @@ namespace AutoGestao.Entidades.Veiculos
         public string? Observacoes { get; set; }
         public string? Opcionais { get; set; }
         public DateTime? DataSaida { get; set; }
-        public DateTime? DataAlteracao { get; set; }
 
         // Foreign Keys
         public int? ProprietarioId { get; set; }
