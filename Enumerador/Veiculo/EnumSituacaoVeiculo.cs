@@ -17,15 +17,15 @@ namespace AutoGestao.Enumerador.Veiculo
         [Description("Vendido")]
         Vendido = 2,
 
-        [Icone("❓")]
+        [Icone("🔒")]
         [Description("Reservado")]
         Reservado = 3,
 
-        [Icone("🔄")]
+        [Icone("🔧")]
         [Description("Manutenção")]
         Manutencao = 4,
 
-        [Icone("🔀")]
+        [Icone("🔄")]
         [Description("Transferido")]
         Transferido = 5
     }

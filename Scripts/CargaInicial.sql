@@ -12,7 +12,9 @@ INSERT INTO veiculo_filiais (id, descricao, data_cadastro, data_alteracao) VALUE
 
 INSERT INTO veiculo_localizacoes (id, descricao, data_cadastro, data_alteracao) VALUES
 (1, 'Pátio', NOW(), NOW()),
-(2, 'Cliente', NOW(), NOW());
+(2, 'Showroom', NOW(), NOW()),
+(3, 'Oficina', NOW(), NOW()),
+(4, 'Externa', NOW(), NOW());
 
 INSERT INTO veiculo_cores (id, descricao, data_cadastro, data_alteracao) VALUES
 (1, 'Amarelo', NOW(), NOW()),
@@ -1907,9 +1909,9 @@ INSERT INTO vendedores (id, nome, cpf, email, telefone, celular, percentual_comi
 -- 4. VEÍCULOS ALEATÓRIOS (50 registros)
 -- ====================================================================
 INSERT INTO veiculos (id, codigo, combustivel, cambio, situacao, status_veiculo, tipo_veiculo, especie, portas, pericia_cautelar, motorizacao, ano_fabricacao, ano_modelo, placa, km_saida, chassi, renavam, quilometragem, preco_compra, preco_venda, observacoes, opcionais, data_saida, proprietario_id, veiculo_cor_id, veiculo_filial_id, veiculo_localizacao_id, veiculo_marca_id, veiculo_marca_modelo_id, data_cadastro, data_alteracao) VALUES
-(1, 'VEI001', 1, 1, 1, 1, 1, 2, 4, 1, '1.0', 2018, 2019, 'ABC1234', 0, '12345678901234567', '12345678901', 45000, 35000.00, 42000.00, 'Veículo em excelente estado', 'Ar condicionado, direção hidráulica', NULL, 1, 5, 1, 1, 1, 1, NOW(), NOW()),
-(2, 'VEI002', 2, 2, 1, 1, 1, 2, 4, 1, '1.6', 2020, 2021, 'DEF5678', 0, '23456789012345678', '23456789012', 32000, 48000.00, 55000.00, 'Veículo completo', 'Central multimídia, câmera de ré', NULL, 2, 19, 1, 1, 2, 14, NOW(), NOW()),
-(3, 'VEI003', 1, 1, 1, 1, 1, 2, 2, 1, '1.4', 2019, 2020, 'GHI9012', 0, '34567890123456789', '34567890123', 38000, 42000.00, 48000.00, 'Economico', 'Vidro elétrico, trava elétrica', NULL, 3, 8, 1, 1, 3, 48, NOW(), NOW()),
+(1, 'VEI001', 1, 1, 1, 1, 1, 2, 4, 1, '1.0', 2018, 2019, 'ABC1234', 0, '12345678901234567', '12345678901', 45000, 35000.00, 42000.00, 'Veículo em excelente estado', 'Ar condicionado, direção hidráulica', NULL, 1, 5, 1, 2, 1, 1, NOW(), NOW()),
+(2, 'VEI002', 2, 2, 1, 1, 1, 2, 4, 1, '1.6', 2020, 2021, 'DEF5678', 0, '23456789012345678', '23456789012', 32000, 48000.00, 55000.00, 'Veículo completo', 'Central multimídia, câmera de ré', NULL, 2, 19, 1, 3, 2, 14, NOW(), NOW()),
+(3, 'VEI003', 1, 1, 1, 1, 1, 2, 2, 1, '1.4', 2019, 2020, 'GHI9012', 0, '34567890123456789', '34567890123', 38000, 42000.00, 48000.00, 'Economico', 'Vidro elétrico, trava elétrica', NULL, 3, 8, 1, 4, 3, 48, NOW(), NOW()),
 (4, 'VEI004', 3, 1, 1, 1, 2, 2, 4, 1, '2.0', 2021, 2022, 'JKL3456', 0, '45678901234567890', '45678901234', 25000, 65000.00, 72000.00, 'SUV flex', 'Bancos de couro, teto solar', NULL, 4, 12, 1, 1, 4, 125, NOW(), NOW()),
 (5, 'VEI005', 1, 2, 1, 1, 1, 2, 4, 1, '1.0', 2017, 2018, 'MNO7890', 0, '56789012345678901', '56789012345', 52000, 28000.00, 33000.00, 'Primeiro carro', 'Básico', NULL, 5, 15, 1, 1, 1, 2, NOW(), NOW()),
 (6, 'VEI006', 4, 1, 1, 1, 2, 2, 4, 1, '1.8', 2022, 2023, 'PQR1234', 0, '67890123456789012', '67890123456', 18000, 72000.00, 78000.00, 'Híbrido', 'Full opcional', NULL, 6, 18, 1, 1, 5, 91, NOW(), NOW()),

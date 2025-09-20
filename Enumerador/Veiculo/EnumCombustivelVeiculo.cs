@@ -9,11 +9,11 @@ namespace AutoGestao.Enumerador.Veiculo
         [Description("Nenhum")] 
         Nenhum = 0,
 
-        [Icone("🌽")]
+        [Icone("🌱")]
         [Description("Etanol")]
         Etanol = 1,
 
-        [Icone("")]
+        [Icone("💨")]
         [Description("AVGAS")]
         Avgas = 2,
 
@@ -33,7 +33,7 @@ namespace AutoGestao.Enumerador.Veiculo
         [Description("Gasolina")]
         Gasolina = 6,
 
-        [Icone("")]
+        [Icone("💨")]
         [Description("GNV")]
         Gnv = 7,
 
@@ -41,7 +41,7 @@ namespace AutoGestao.Enumerador.Veiculo
         [Description("Híbrido")]
         Hibrido = 8,
 
-        [Icone("")]
+        [Icone("🌽")]
         [Description("JET A-1")]
         JET_A1 = 9,
 
