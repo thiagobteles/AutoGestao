@@ -59,8 +59,8 @@
         {
             ["page"] = page,
             ["pageSize"] = Model.PageSize,
-            ["orderBy"] = Model.OrderBy,
-            ["orderDirection"] = Model.OrderDirection
+            ["orderBy"] = Model.OrderBy ?? "id",
+            ["orderDirection"] = Model.OrderDirection ?? "asc"
         };
         
         // Adicionar filtros ativos

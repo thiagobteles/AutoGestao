@@ -1,5 +1,7 @@
+using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace AutoGestao.Extensions
 {
@@ -42,6 +44,13 @@ namespace AutoGestao.Extensions
             var field = source.GetType().GetField(source.ToString());
             var attributes = (CategoryAttribute[])field.GetCustomAttributes(typeof(CategoryAttribute), false);
             return attributes != null && attributes.Length > 0 ? attributes[0].Category : source.ToString();
+        }
+
+        public static string GetIcone<T>(this T source)
+        {
+            var field = source.GetType().GetField(source.ToString());
+            var attributes = (IconeAttribute[])field.GetCustomAttributes(typeof(IconeAttribute), false);
+            return attributes != null && attributes.Length > 0 ? attributes[0].Icone : source.ToString();
         }
 
     }

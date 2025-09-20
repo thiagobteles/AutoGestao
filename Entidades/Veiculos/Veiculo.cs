@@ -5,15 +5,15 @@ namespace AutoGestao.Entidades.Veiculos
     public class Veiculo : BaseEntidade
     {
         public string Codigo { get; set; } = string.Empty;
-        public EnumCombustivelVeiculo? Combustivel { get; set; }
-        public EnumCambioVeiculo? Cambio { get; set; }
-        public EnumSituacaoVeiculo? Situacao { get; set; }
-        public EnumStatusVeiculo? StatusVeiculo { get; set; }
-        public EnumTipoVeiculo? TipoVeiculo { get; set; }
-        public EnumEspecieVeiculo? Especie { get; set; }
-        public EnumPortasVeiculo? Portas { get; set; }
-        public EnumPericiaCautelarVeiculo? PericiaCautelar { get; set; }
-        public EnumOrigemVeiculo? OrigemVeiculo { get; set; }
+        public EnumCombustivelVeiculo Combustivel { get; set; }
+        public EnumCambioVeiculo Cambio { get; set; }
+        public EnumSituacaoVeiculo Situacao { get; set; }
+        public EnumStatusVeiculo StatusVeiculo { get; set; }
+        public EnumTipoVeiculo TipoVeiculo { get; set; }
+        public EnumEspecieVeiculo Especie { get; set; }
+        public EnumPortasVeiculo Portas { get; set; }
+        public EnumPericiaCautelarVeiculo PericiaCautelar { get; set; }
+        public EnumOrigemVeiculo OrigemVeiculo { get; set; }
         public string? Motorizacao { get; set; }
         public int? AnoFabricacao { get; set; }
         public int? AnoModelo { get; set; }

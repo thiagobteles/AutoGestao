@@ -1836,7 +1836,8 @@ INSERT INTO clientes (id, tipo_cliente, nome, cpf, cnpj, rg, email, telefone, ce
 (47, 1, 'Isabela Pereira Costa', '67890123459', NULL, '6789012348', 'isabela.costa@email.com', '5311112222', '53321098765', 'Av. Ipiranga, 369', 'Porto Alegre', 21, '90160093', '369', 'Sala 1205', 'Centro', true, 'Contadora', NOW(), NOW()),
 (48, 1, 'Vinícius Lima Santos', '78901234570', NULL, '7890123459', 'vinicius.santos@email.com', '5422223333', '54210987654', 'Rua Pinheiro Machado, 741', 'Santa Maria', 21, '97010001', '741', NULL, 'Centro', true, NULL, NOW(), NOW()),
 (49, 1, 'Larissa Santos Lima', '89012345681', NULL, '8901234570', 'larissa.lima@email.com', '5533334444', '55109876543', 'Av. Brasil, 852', 'Pelotas', 21, '96010610', '852', 'Casa 23', 'Centro', true, 'Veterinária', NOW(), NOW()),
-(50, 1, 'Gabriel Costa Pereira', '90123456782', NULL, '9012345681', 'gabriel.pereira@email.com', '5144445555', '51098765432', 'Rua da Praia, 963', 'Porto Alegre', 21, '90010001', '963', NULL, 'Centro Histórico', true, 'Jornalista', NOW(), NOW());
+(50, 1, 'Gabriel Costa Pereira', '90123456782', NULL, '9012345681', 'gabriel.pereira@email.com', '5144445555', '51098765432', 'Rua da Praia, 963', 'Porto Alegre', 21, '90010001', '963', NULL, 'Centro Histórico', true, 'Jornalista', NOW(), NOW()),
+(51, 1, 'Gabriel Costa Pereira_2', '90123436281', NULL, '9012345682', 'gabriel.pereira2@email.com', '5144445553', '51098765434', 'Rua da Praia, 962', 'Porto Alegre', 21, '90010001', '963', NULL, 'Centro Histórico', true, 'Jornalista', NOW(), NOW());
 
 -- ====================================================================
 -- 2. FORNECEDORES (50 registros)
@@ -1891,7 +1892,8 @@ INSERT INTO fornecedores (id, tipo_fornecedor, nome, cpf, cnpj, rg, email, telef
 (47, 2, 'GPS & Multimídia Automotiva', NULL, '33333333003333', NULL, 'gps@multimidia.com.br', '8522229777', '85977777770', 'Rua da Tecnologia, 4700', 'Fortaleza', 6, '60000000', '4700', 'Loja tech', 'Aldeota', true, 'Centrais multimídia', NOW(), NOW()),
 (48, 1, 'Raimundo Eletricista Cearense', '17171717171', NULL, '1717171717', 'raimundo.eletricista@email.com', '8533330888', '85988888881', 'Av. da Corrente, 4800', 'Fortaleza', 6, '61000000', '4800', 'Oficina', 'Centro', true, 'Eletricista automotivo', NOW(), NOW()),
 (49, 2, 'Insulfilm & Películas CE', NULL, '34343434003434', NULL, 'insulfilm@peliculas.com.br', '8544441999', '85999999992', 'Rua da Proteção Solar, 4900', 'Fortaleza', 6, '62000000', '4900', NULL, 'Messejana', true, 'Películas automotivas', NOW(), NOW()),
-(50, 2, 'Lavagem Ecológica Bahia', NULL, '35353535003535', NULL, 'lavagem@ecologica.com.br', '7155552000', '71900000004', 'Av. da Sustentabilidade, 5000', 'Salvador', 5, '40000000', '5000', 'Eco Wash', 'Barra', true, 'Lavagem sem água', NOW(), NOW());
+(50, 2, 'Lavagem Ecológica Bahia', NULL, '35353535003535', NULL, 'lavagem@ecologica.com.br', '7155552000', '71900000004', 'Av. da Sustentabilidade, 5000', 'Salvador', 5, '40000000', '5000', 'Eco Wash', 'Barra', true, 'Lavagem sem água', NOW(), NOW()),
+(51, 2, 'Lavagem Ecológica Bahia_2', NULL, '35353525033535', NULL, 'lavagem@ecologica.com.br', '7155552000', '71900000004', 'Av. da Sustentabilidade, 5000', 'Salvador', 5, '40000000', '5000', 'Eco Wash', 'Barra', true, 'Lavagem sem água', NOW(), NOW());
 
 -- ====================================================================
 -- 3. VENDEDORES (3 registros)
@@ -2009,6 +2011,11 @@ INSERT INTO parcelas (id, venda_id, numero_parcela, valor, data_vencimento, valo
 (30, 4, 18, 2222.24, '2026-03-13', NULL, NULL, 1, 'Décima oitava parcela (ajuste centavos)', NOW(), NOW());
 
 -- ====================================================================
--- 8. ATUALIZAÇÃO DO STATUS DOS VEÍCULOS VENDIDOS
+-- ATUALIZAÇÃO DO STATUS DOS VEÍCULOS VENDIDOS
 -- ====================================================================
-UPDATE veiculos SET situacao = 3, data_saida = NOW() WHERE id IN (SELECT veiculo_id FROM vendas);
+UPDATE veiculos SET situacao = 2, data_saida = NOW() WHERE id IN (SELECT veiculo_id FROM vendas);
+
+-- ====================================================================
+-- ATUALIZAÇÃO DO STATUS DOS VEÍCULOS RESERVADOS
+-- ====================================================================
+UPDATE veiculos SET situacao = 3, data_saida = NOW() WHERE id IN (50, 51);

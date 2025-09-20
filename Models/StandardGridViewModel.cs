@@ -106,7 +106,9 @@ namespace AutoGestao.Models
         public bool Sortable { get; set; } = true;
         public string? CssClass { get; set; }
         public GridColumnType Type { get; set; } = GridColumnType.Text;
+        public EnumRenderType? EnumRender { get; set; }
         public string? Format { get; set; }
+        public string? UrlAction { get; set; }
         public Func<object, string>? CustomRender { get; set; }
     }
 
@@ -141,11 +143,16 @@ namespace AutoGestao.Models
 
     public enum GridColumnType
     {
-        Text, Number, Integer, Currency, Date, Badge, Boolean, Custom, Actions
+        Text, Number, Integer, Currency, Date, Enumerador, Boolean, Custom, Actions
     }
 
     public enum GridFilterType
     {
         Text, Select, Date, DateRange, Number
+    }
+
+    public enum EnumRenderType
+    {
+        Icon, Description, IconDescription, DescriptionIcon
     }
 }

@@ -1,7 +1,8 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
-using AutoGestao.Models;
+using AutoGestao.Enumerador;
 using AutoGestao.Extensions;
+using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -19,17 +20,17 @@ namespace AutoGestao.Controllers
 
         protected override StandardGridViewModel ConfigureGrid()
         {
-            var retorno = new StandardGridViewModel ("Vendedores", "Gerencie todos os vendedores do sistema", "Vendedores")
+            var retorno = new StandardGridViewModel ("Vendedores", "Gerencie todos os vendedores", "Vendedores")
             {
                 Columns =
                 [
-                    new() { Name = nameof(Vendedor.Id), DisplayName = "Cód", Type = GridColumnType.Number, Sortable = true, Width = "70px"},
+                    new() { Name = nameof(Vendedor.Id), DisplayName = "Cód", Type = GridColumnType.Number, Sortable = true, Width = "65px" },
                     new() { Name = nameof(Vendedor.Nome), DisplayName = "Nome Completo", Sortable = true },
-                    new() { Name = nameof(Vendedor.CPF), DisplayName = "CPF", Sortable = true, Width = "130px" },
+                    new() { Name = nameof(Vendedor.CPF), DisplayName = "CPF", Sortable = true, Type = GridColumnType.Custom, CustomRender = RenderDocumento },
                     new() { Name = nameof(Vendedor.Email), DisplayName = "Email", Sortable = true },
-                    new() { Name = nameof(Vendedor.Celular), DisplayName = "Celular", Sortable = true, Width = "130px" },
-                    new() { Name = nameof(Vendedor.Ativo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true, Width = "100px" },
-                    new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "120px" }
+                    new() { Name = nameof(Vendedor.Celular), DisplayName = "Celular", Sortable = true },
+                    new() { Name = nameof(Vendedor.Ativo), DisplayName = "Ativo", Type = GridColumnType.Enumerador, Sortable = true, Width = "65px" },
+                    new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "100px" }
                 ],
 
                 Filters =
@@ -155,6 +156,12 @@ namespace AutoGestao.Controllers
         }
 
         #endregion
+
+        private static string RenderDocumento(object item)
+        {
+            var vendedor = (Vendedor)item;
+            return vendedor.CPF.AplicarMascaraCpf();
+        }
 
         #region Ações Específicas
 

@@ -25,16 +25,8 @@ namespace AutoGestao.Controllers
 
         protected override StandardGridViewModel ConfigureGrid()
         {
-            return new StandardGridViewModel
+            var retorno = new StandardGridViewModel("Veículos", "Gerencie o estoque de veículos", "Veiculos")
             {
-                Title = "Veículos",
-                SubTitle = "Gerencie o estoque de veículos",
-                EntityName = "Veiculos",
-                ControllerName = "Veiculos",
-
-                // Ações do cabeçalho
-                HeaderActions = ObterHeaderActionsPadrao("Veiculos"),
-
                 // Configuração dos filtros
                 Filters =
                 [
@@ -50,6 +42,7 @@ namespace AutoGestao.Controllers
                         Name = "situacao",
                         DisplayName = "Situação",
                         Type = GridFilterType.Select,
+                        Placeholder = "Situação do veiculo...",
                         Options = GetSituacaoOptions()
                     }
                 ],
@@ -57,41 +50,20 @@ namespace AutoGestao.Controllers
                 // Configuração das colunas
                 Columns =
                 [
-                    new() { Name = nameof(Veiculo.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true},
+                    new() { Name = nameof(Veiculo.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true, Width = "65px" },
                     new() { Name = "MarcaModelo", DisplayName = "Marca/Modelo", Sortable = false, Type = GridColumnType.Custom, CustomRender = RenderMarcaModelo },
                     new() { Name = nameof(Veiculo.AnoFabricacao), DisplayName = "Ano", Type = GridColumnType.Integer, Sortable = true},
                     new() { Name = nameof(Veiculo.Placa), DisplayName = "Placa", Sortable = true },
                     new() { Name = nameof(Veiculo.KmSaida), DisplayName = "KM", Type = GridColumnType.Number, Sortable = true },
                     new() { Name = nameof(Veiculo.PrecoVenda), DisplayName = "Preço", Type = GridColumnType.Currency, Sortable = true },
-                    new() { Name = nameof(Veiculo.Situacao), DisplayName = "Situação", Type = GridColumnType.Badge, Sortable = true },
-                    new() { Name = nameof(Veiculo.StatusVeiculo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true },
+                    new() { Name = nameof(Veiculo.Situacao), DisplayName = "Situação", Type = GridColumnType.Enumerador, EnumRender = EnumRenderType.IconDescription, Sortable = true },
+                    new() { Name = nameof(Veiculo.StatusVeiculo), DisplayName = "Status", Type = GridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true },
                     new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "100px" }
                 ],
+            };
 
-                // Ações das linhas
-                RowActions =
+            retorno.RowActions.AddRange(
                 [
-                    new()
-                    {
-                        Name = "Details",
-                        DisplayName = "Visualizar",
-                        Icon = "fas fa-eye",
-                        Url = "/Veiculos/Details/{id}"
-                    },
-                    new()
-                    {
-                        Name = "Edit",
-                        DisplayName = "Editar",
-                        Icon = "fas fa-edit",
-                        Url = "/Veiculos/Edit/{id}",
-                    },
-                    new()
-                    {
-                        Name = "Delete",
-                        DisplayName = "Excluir",
-                        Icon = "fas fa-trash",
-                        Url = "/Veiculos/Delete/{id}"
-                    },
                     new()
                     {
                         Name = "Sell",
@@ -116,8 +88,9 @@ namespace AutoGestao.Controllers
                         Url = "/Veiculos/Unreserve/{id}",
                         ShowCondition = (x) => ((Veiculo)x).Situacao == EnumSituacaoVeiculo.Reservado
                     }
-                ]
-            };
+                ]);
+
+            return retorno;
         }
 
         protected override IQueryable<Veiculo> ApplyFilters(IQueryable<Veiculo> query, Dictionary<string, object> filters)
@@ -141,15 +114,15 @@ namespace AutoGestao.Controllers
                         break;
 
                     case "situacao":
-                        query = ApplyEnumFilter(query, filters, filter.Key, v => (EnumSituacaoVeiculo)v.Situacao);
+                        query = ApplyEnumFilter(query, filters, filter.Key, v => v.Situacao);
                         break;
 
                     case "status":
-                        query = ApplyEnumFilter(query, filters, filter.Key, v => (EnumStatusVeiculo)v.StatusVeiculo);
+                        query = ApplyEnumFilter(query, filters, filter.Key, v => v.StatusVeiculo);
                         break;
 
                     case "combustivel":
-                        query = ApplyEnumFilter(query, filters, filter.Key, v => (EnumCombustivelVeiculo)v.Combustivel);
+                        query = ApplyEnumFilter(query, filters, filter.Key, v => v.Combustivel);
                         break;
 
                     case "marca":
@@ -255,7 +228,7 @@ namespace AutoGestao.Controllers
                 options.Add(new SelectListItem
                 {
                     Value = ((EnumSituacaoVeiculo)item.Key).ToString(),
-                    Text = $"{GetSituacaoIcon((EnumSituacaoVeiculo)item.Key)} {item.Value}"
+                    Text = $"{((EnumSituacaoVeiculo)item.Key).GetIcone()} {item.Value}"
                 });
             }
 
@@ -292,38 +265,11 @@ namespace AutoGestao.Controllers
                 options.Add(new SelectListItem
                 {
                     Value = ((EnumCombustivelVeiculo)item.Key).ToString(),
-                    Text = $"{GetCombustivelIcon((EnumCombustivelVeiculo)item.Key)} {item.Value}"
+                    Text = $"{((EnumCombustivelVeiculo)item.Key).GetIcone()} {item.Value}"
                 });
             }
 
             return options;
-        }
-
-        private static string GetSituacaoIcon(EnumSituacaoVeiculo situacao)
-        {
-            return situacao switch
-            {
-                EnumSituacaoVeiculo.Estoque => "📦",
-                EnumSituacaoVeiculo.Vendido => "✅",
-                EnumSituacaoVeiculo.Reservado => "✅",
-                EnumSituacaoVeiculo.Manutencao => "✅",
-                EnumSituacaoVeiculo.Transferido => "🔄",
-                _ => "❓"
-            };
-        }
-
-        private static string GetCombustivelIcon(EnumCombustivelVeiculo combustivel)
-        {
-            return combustivel switch
-            {
-                EnumCombustivelVeiculo.Gasolina => "⛽",
-                EnumCombustivelVeiculo.Etanol => "🌽",
-                EnumCombustivelVeiculo.Flex => "🔀",
-                EnumCombustivelVeiculo.Diesel => "🚛",
-                EnumCombustivelVeiculo.Eletrico => "🔋",
-                EnumCombustivelVeiculo.Hibrido => "🔋⛽",
-                _ => "❓"
-            };
         }
 
         private static string RenderMarcaModelo(object item)

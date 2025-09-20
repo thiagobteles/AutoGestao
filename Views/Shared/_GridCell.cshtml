@@ -57,39 +57,43 @@
         }
         break;
 
-    case GridColumnType.Badge:
-        @if (Model.Column.Name.ToLower().Contains("ativo"))
-        {
-            var isActive = Convert.ToBoolean(value ?? false);
-            <span class="status-badge @(isActive ? "status-active" : "status-inactive")">
-                <i class="fas @(isActive ? "fa-check" : "fa-times")"></i>
-                @(isActive ? "Ativo" : "Inativo")
-            </span>
-        }
-        else if (Model.Column.Name.ToLower().Contains("tipo"))
+    case GridColumnType.Enumerador:
+        @try
         {
             var displayText = value?.ToString();
             if (value is Enum enumValue)
             {
-                displayText = enumValue.GetCategory() ?? enumValue.GetDescription();
+                var icone = enumValue.GetIcone();
+                if (Model.Column.EnumRender == EnumRenderType.Icon)
+                {
+                    displayText = icone ?? (string)value;
+                }
+                else if (Model.Column.EnumRender == EnumRenderType.IconDescription)
+                {
+                    displayText = $"{icone} {enumValue.GetDescription()}";
+                }
+                else if (Model.Column.EnumRender == EnumRenderType.DescriptionIcon)
+                {
+                    displayText = $"{enumValue.GetDescription()} {icone}";
+                }
+                else
+                {
+                    displayText = enumValue.GetDescription();
+                }
             }
+            else if (value != null && bool.TryParse(value.ToString(), out bool enumBoolValue))
+            {
+                <span class="status-badge @(enumBoolValue ? "status-active" : "status-inactive")">
+                    @(enumBoolValue ? "✅" : "❌")
+                </span>
+                break;
+            }
+
             <span class="person-type">@displayText</span>
         }
-        else
+        catch
         {
-            try
-            {
-                var displayText = value?.ToString();
-                if (value is Enum enumValue)
-                {
-                    displayText = enumValue.GetCategory() ?? enumValue.GetDescription();
-                }
-                <span class="person-type">@displayText</span>
-            }
-            catch
-            {
-                @value   
-            }
+            @value   
         }
         break;
 
@@ -163,9 +167,9 @@
         break;
 
     default:
-        @if (Model.Column.Name.ToLower() == "nome")
+        @if (!string.IsNullOrEmpty(Model.Column.UrlAction))
         {
-            <a href="@Url.Action("Details", new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
+            <a href="@Url.Action(Model.Column.UrlAction, new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
                class="text-decoration-none text-primary fw-medium">
                 @value
             </a>

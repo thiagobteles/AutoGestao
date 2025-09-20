@@ -30,7 +30,15 @@
                     var xClasse = "col-md-4";
                     if (Model.Filters.Count == 1)
                     {
-                        xClasse = "col-md-11";
+                        xClasse = "col-md-10";
+                    }
+                    else if (Model.Filters.Count == 2)
+                    {
+                        xClasse = "col-md-5";
+                    }
+                    else if (Model.Filters.Count == 3)
+                    {
+                        xClasse = "col-md-3";
                     }
 
                     <div class="@xClasse">
@@ -100,12 +108,10 @@
                             {
                                 <div class="sortable-header" data-sortable="@column.Name" role="button" tabindex="0">
                                     <span>@column.DisplayName</span>
-                                    <i class="sort-icon fas @(Model.OrderBy == column.Name ?
-                                                                                    (Model.OrderDirection == "desc" ? "fa-sort-down" : "fa-sort-up") :
-                                                                                    "fa-sort")"
-                               data-sort="@column.Name"></i>
-                        </div>
-                                                }
+                                    <i class="sort-icon fas @(Model.OrderBy == column.Name ? (Model.OrderDirection == "desc" ? "fa-sort-down" : "fa-sort-up") : "fa-sort")"
+                                       data-sort="@column.Name"></i>
+                                </div>
+                            }
                             else
                             {
                                 @column.DisplayName
@@ -135,8 +141,7 @@
                                         Item = item,
                                         Column = column,
                                         Actions = column.Type == GridColumnType.Actions ?
-                                        Model.RowActions?.Where(a => a.ShowCondition == null || a.ShowCondition(item)).ToList() :
-                                        null
+                                        Model.RowActions?.Where(a => a.ShowCondition == null || a.ShowCondition(item)).ToList() : null
                                     })
                                 </td>
                             }
@@ -173,7 +178,6 @@
                 <div class="d-flex align-items-center gap-2">
                     <label class="form-label-small mb-0">Itens por página:</label>
                     <select id="pageSizeSelector" class="form-select form-select-sm" style="width: auto;">
-                        <option value="25" selected="@(Model.PageSize == 25)">25</option>
                         <option value="50" selected="@(Model.PageSize == 50)">50</option>
                         <option value="100" selected="@(Model.PageSize == 100)">100</option>
                         <option value="200" selected="@(Model.PageSize == 200)">200</option>

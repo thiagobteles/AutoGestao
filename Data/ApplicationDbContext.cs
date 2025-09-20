@@ -138,15 +138,15 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Veiculo>(entity =>
             {
                 entity.Property(e => e.Codigo).HasMaxLength(50).IsRequired();
-                entity.Property(e => e.Combustivel).IsRequired(false);
-                entity.Property(e => e.Cambio).IsRequired(false);
-                entity.Property(e => e.Situacao).IsRequired(false);
-                entity.Property(e => e.StatusVeiculo).IsRequired(false);
-                entity.Property(e => e.TipoVeiculo).IsRequired(false);
-                entity.Property(e => e.Especie).IsRequired(false);
-                entity.Property(e => e.Portas).IsRequired(false);
-                entity.Property(e => e.PericiaCautelar).IsRequired(false);
-                entity.Property(e => e.OrigemVeiculo).IsRequired(false);
+                entity.Property(e => e.Combustivel).IsRequired();
+                entity.Property(e => e.Cambio).IsRequired();
+                entity.Property(e => e.Situacao).IsRequired();
+                entity.Property(e => e.StatusVeiculo).IsRequired();
+                entity.Property(e => e.TipoVeiculo).IsRequired();
+                entity.Property(e => e.Especie).IsRequired();
+                entity.Property(e => e.Portas).IsRequired();
+                entity.Property(e => e.PericiaCautelar).IsRequired();
+                entity.Property(e => e.OrigemVeiculo).IsRequired();
                 entity.Property(e => e.Motorizacao).HasMaxLength(50).IsRequired(false);
                 entity.Property(e => e.AnoFabricacao).IsRequired(false);
                 entity.Property(e => e.AnoModelo).IsRequired(false);

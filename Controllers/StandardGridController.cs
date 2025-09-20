@@ -1,5 +1,6 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
+using AutoGestao.Extensions;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -351,65 +352,6 @@ namespace AutoGestao.Controllers
             {
                 return false;
             }
-        }
-
-        public List<GridAction> ObterHeaderActionsPadrao(string controllerNome)
-        {
-            return
-                [
-                    new()
-                    {
-                        Name = "Import",
-                        DisplayName = "Importar",
-                        Icon = "fas fa-upload",
-                        CssClass = "btn-modern btn-outline-modern",
-                        Url = Url.Action("Import", controllerNome)
-                    },
-                    new()
-                    {
-                        Name = "Export",
-                        DisplayName = "Exportar",
-                        Icon = "fas fa-download",
-                        CssClass = "btn-modern btn-outline-modern",
-                        Url = Url.Action("Export", controllerNome)
-                    },
-                    new()
-                    {
-                        Name = "Create",
-                        DisplayName = "Novo ",
-                        Icon = "fas fa-plus",
-                        CssClass = "btn-new",
-                        Url = Url.Action("Create", controllerNome)
-                    }
-                ];
-        }
-
-        public List<GridAction> ObterRowActionsPadrao(string controllerNome)
-        {
-            return
-                [
-                    new()
-                    {
-                        Name = "Details",
-                        DisplayName = "Visualizar",
-                        Icon = "fas fa-eye",
-                        Url = "/" + controllerNome + "/Details/{id}"
-                    },
-                    new()
-                    {
-                        Name = "Edit",
-                        DisplayName = "Editar",
-                        Icon = "fas fa-edit",
-                        Url = "/" + controllerNome + "/Edit/{id}"
-                    },
-                    new()
-                    {
-                        Name = "Delete",
-                        DisplayName = "Excluir",
-                        Icon = "fas fa-trash",
-                        Url = "/" + controllerNome + "/Delete/{id}"
-                    },
-                ];
         }
     }
 }

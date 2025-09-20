@@ -1,3 +1,4 @@
+using AutoGestao.Atributes;
 using System.ComponentModel;
 
 namespace AutoGestao.Enumerador
@@ -7,11 +8,11 @@ namespace AutoGestao.Enumerador
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Category("👤")]
+        [Icone("👤")]
         [Description("Pessoa física")]
         PessoaFisica = 1,
 
-        [Category("🏢")]
+        [Icone("🏢")]
         [Description("Pessoa Jurídica")]
         PessoaJuridica = 2
     }

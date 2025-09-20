@@ -19,7 +19,7 @@ namespace AutoGestao.Controllers
 
         protected override StandardGridViewModel ConfigureGrid()
         {
-            var retorno = new StandardGridViewModel("Clientes", "Gerencie todos os clientes do sistema", "Clientes")
+            var retorno = new StandardGridViewModel("Clientes", "Gerencie todos os clientes", "Clientes")
             {
                 Filters =
                     [
@@ -54,15 +54,15 @@ namespace AutoGestao.Controllers
 
                 Columns =
                     [
-                        new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true, Width = "80px"},
-                        new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Tipo", Type = GridColumnType.Badge, Sortable = true, Width = "60px" },
-                        new() { Name = nameof(Cliente.Nome), DisplayName = "Nome/Razão Social", Sortable = true },
+                        new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true, Width = "65px" },
+                        new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Tipo", Type = GridColumnType.Enumerador, EnumRender = EnumRenderType.Icon, Sortable = true, Width = "65px"},
+                        new() { Name = nameof(Cliente.Nome), DisplayName = "Nome/Razão Social", Sortable = true, Type = GridColumnType.Text, UrlAction = "Details" },
                         new() { Name = "Documento", DisplayName = "CPF/CNPJ", Sortable = true, Type = GridColumnType.Custom, CustomRender = RenderDocumento},
-                        new() { Name = nameof(Cliente.Celular), DisplayName = "Telefone", Sortable = true, Width = "130px" },
-                        new() { Name = nameof(Cliente.Cidade), DisplayName = "Cidade", Sortable = true, Width = "150px" },
-                        new() { Name = nameof(Cliente.Estado), DisplayName = "UF", Type = GridColumnType.Badge, Sortable = true, Width = "60px" },
-                        new() { Name = nameof(Cliente.Ativo), DisplayName = "Status", Type = GridColumnType.Badge, Sortable = true, Width = "100px" },
-                        new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "120px" }
+                        new() { Name = nameof(Cliente.Celular), DisplayName = "Telefone", Sortable = true },
+                        new() { Name = nameof(Cliente.Cidade), DisplayName = "Cidade", Sortable = true },
+                        new() { Name = nameof(Cliente.Estado), DisplayName = "UF", Type = GridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true, Width = "65px"},
+                        new() { Name = nameof(Cliente.Ativo), DisplayName = "Ativo", Type = GridColumnType.Enumerador, Sortable = true, Width = "65px" },
+                        new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "100px" }
                     ]
             };
 
@@ -140,11 +140,11 @@ namespace AutoGestao.Controllers
                         break;
 
                     case "tipocliente":
-                        query = ApplyEnumFilter<EnumTipoPessoa>(query, filters, filter.Key, c => c.TipoCliente);
+                        query = ApplyEnumFilter(query, filters, filter.Key, c => c.TipoCliente);
                         break;
 
                     case "estado":
-                        query = ApplyEnumFilter<EnumEstado>(query, filters, filter.Key, c => c.Estado);
+                        query = ApplyEnumFilter(query, filters, filter.Key, c => c.Estado);
                         break;
 
                     case "cidade":
@@ -219,21 +219,11 @@ namespace AutoGestao.Controllers
                 options.Add(new SelectListItem
                 {
                     Value = ((EnumTipoPessoa)item.Key).ToString(),
-                    Text = $"{GetTipoIcon((EnumTipoPessoa)item.Key)} {item.Value}"
+                    Text = $"{((EnumTipoPessoa)item.Key).GetIcone()} {item.Value}"
                 });
             }
 
             return options;
-        }
-
-        private static string GetTipoIcon(EnumTipoPessoa tipo)
-        {
-            return tipo switch
-            {
-                EnumTipoPessoa.PessoaFisica => "👤",
-                EnumTipoPessoa.PessoaJuridica => "🏢",
-                _ => "❓"
-            };
         }
 
         private static string RenderDocumento(object item)

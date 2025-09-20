@@ -102,7 +102,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("VendedorResponsavelId")
                         .HasDatabaseName("ix_avaliacoes_vendedor_responsavel_id");
 
-                    b.ToTable("avaliacoes");
+                    b.ToTable("avaliacoes", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Cliente", b =>
@@ -228,7 +228,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Nome")
                         .HasDatabaseName("ix_cliente_nome");
 
-                    b.ToTable("clientes");
+                    b.ToTable("clientes", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Despesa", b =>
@@ -301,7 +301,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("VeiculoId")
                         .HasDatabaseName("ix_despesas_veiculo_id");
 
-                    b.ToTable("despesas");
+                    b.ToTable("despesas", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.DespesaTipo", b =>
@@ -335,7 +335,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Descricao")
                         .IsUnique();
 
-                    b.ToTable("despesa_tipos");
+                    b.ToTable("despesa_tipos", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Fornecedor", b =>
@@ -459,7 +459,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Nome")
                         .HasDatabaseName("ix_fornecedor_nome");
 
-                    b.ToTable("fornecedores");
+                    b.ToTable("fornecedores", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Parcela", b =>
@@ -527,7 +527,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("DataVencimento", "Status")
                         .HasDatabaseName("ix_parcela_vencimento_status");
 
-                    b.ToTable("parcelas");
+                    b.ToTable("parcelas", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Tarefa", b =>
@@ -594,7 +594,7 @@ namespace AutoGestao.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("tarefas");
+                    b.ToTable("tarefas", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.Veiculo", b =>
@@ -782,7 +782,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Situacao", "VeiculoMarcaId")
                         .HasDatabaseName("ix_veiculo_situacao_marca");
 
-                    b.ToTable("veiculos");
+                    b.ToTable("veiculos", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoCor", b =>
@@ -814,7 +814,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Descricao")
                         .IsUnique();
 
-                    b.ToTable("veiculo_cores");
+                    b.ToTable("veiculo_cores", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoDocumento", b =>
@@ -872,7 +872,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("VeiculoId")
                         .HasDatabaseName("ix_veiculo_documentos_veiculo_id");
 
-                    b.ToTable("veiculo_documentos");
+                    b.ToTable("veiculo_documentos", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoFilial", b =>
@@ -904,7 +904,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Descricao")
                         .IsUnique();
 
-                    b.ToTable("veiculo_filiais");
+                    b.ToTable("veiculo_filiais", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoFoto", b =>
@@ -961,7 +961,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("VeiculoId")
                         .HasDatabaseName("ix_veiculo_fotos_veiculo_id");
 
-                    b.ToTable("veiculo_fotos");
+                    b.ToTable("veiculo_fotos", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoLocalizacao", b =>
@@ -993,7 +993,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Descricao")
                         .IsUnique();
 
-                    b.ToTable("veiculo_localizacoes");
+                    b.ToTable("veiculo_localizacoes", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoMarca", b =>
@@ -1025,7 +1025,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Descricao")
                         .IsUnique();
 
-                    b.ToTable("veiculo_marcas");
+                    b.ToTable("veiculo_marcas", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoMarcaModelo", b =>
@@ -1061,7 +1061,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("VeiculoMarcaId")
                         .HasDatabaseName("ix_veiculo_marca_modelos_veiculo_marca_id");
 
-                    b.ToTable("veiculo_marca_modelos");
+                    b.ToTable("veiculo_marca_modelos", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Venda", b =>
@@ -1143,7 +1143,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("DataVenda", "Status")
                         .HasDatabaseName("ix_venda_data_status");
 
-                    b.ToTable("vendas");
+                    b.ToTable("vendas", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Vendedor", b =>
@@ -1213,7 +1213,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Nome")
                         .HasDatabaseName("ix_vendedor_nome");
 
-                    b.ToTable("vendedores");
+                    b.ToTable("vendedores", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Avaliacao", b =>
