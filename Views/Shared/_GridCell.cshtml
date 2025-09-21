@@ -13,47 +13,45 @@
     case GridColumnType.Actions:
         @if (Model.Actions != null && Model.Actions.Any())
         {
-            // Filtrar ações baseado na ShowCondition
             var visibleActions = Model.Actions.Where(action => action.ShowCondition == null || action.ShowCondition(Model.Item)).ToList();
             @if (visibleActions.Any())
             {
-                <div class="dropdown">
-                    <button class="btn-actions dropdown-toggle" data-bs-toggle="dropdown">
-                        Ações
-                    </button>
-                    <ul class="dropdown-menu">
-                        @foreach (var action in visibleActions)
-                        {
-                            var itemId = itemType.GetProperty("Id")?.GetValue(Model.Item)?.ToString();
-                            var actionUrl = action.Url?.Replace("{id}", itemId);
+                var itemId = itemType.GetProperty("Id")?.GetValue(Model.Item)?.ToString();
 
-                            <li>
-                                <a class="dropdown-item" href="@actionUrl">
-                                    <i class="@action.Icon"></i> @action.DisplayName
-                                </a>
-                            </li>
+                <!-- DROPDOWN CONTAINER -->
+                <div class="action-dropdown-container" data-item-id="@itemId">
+                    <button type="button"
+                            class="btn-actions-enhanced"
+                            data-dropdown-toggle="dropdown-@itemId"
+                            aria-expanded="false"
+                            title="Ações disponíveis">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+
+                    <!-- DROPDOWN ITEMS DATA (Hidden, usado pelo JS) -->
+                    <script type="application/json" class="dropdown-data">
+                        {
+                            "actions": [
+                                @foreach (var action in visibleActions)
+                                {
+                                        var actionUrl = action.Url?.Replace("{id}", itemId);
+                                        <text>{
+                                            "name": "@action.Name",
+                                            "displayName": "@action.DisplayName",
+                                            "icon": "@action.Icon",
+                                            "url": "@actionUrl",
+                                            "cssClass": "@(action.Name.ToLower().Contains("delete") || action.Name.ToLower().Contains("excluir") ? "text-danger" : "")"
+                                        }</text>
+                                        @if (action != visibleActions.Last())
+                                        {
+                                            <text>,</text>
+                                        }
+                                }
+                            ]
                         }
-                    </ul>
+                    </script>
                 </div>
             }
-            else
-            {
-                <div class="d-flex gap-2">
-                    <a href="@Url.Action("Details", new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
-                       class="icon-button" title="Visualizar">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="d-flex gap-2">
-                <a href="@Url.Action("Details", new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
-                   class="icon-button" title="Visualizar">
-                    <i class="fas fa-eye"></i>
-                </a>
-            </div>
         }
         break;
 

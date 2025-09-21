@@ -1192,3 +1192,367 @@ window.addEventListener('load', function () {
 // Exportar instância para debug
 window.StandardGrid = StandardGrid;
 window.gridInstance = gridInstance;
+
+// ===================================================================
+// DROPDOWN PORTAL SYSTEM - SOLUÇÃO DEFINITIVA
+// ===================================================================
+
+class DropdownPortalSystem {
+    constructor() {
+        this.activeDropdown = null;
+        this.dropdownElement = null;
+        this.backdropElement = null;
+        this.portalContainer = null;
+        this.isInitialized = false;
+
+        this.init();
+    }
+
+    init() {
+        if (this.isInitialized) return;
+
+        this.setupPortalContainer();
+        this.setupEventListeners();
+        this.isInitialized = true;
+
+        console.log('✅ Dropdown Portal System initialized');
+    }
+
+    setupPortalContainer() {
+        // Criar container do portal se não existir
+        this.portalContainer = document.getElementById('dropdownPortal');
+        if (!this.portalContainer) {
+            this.portalContainer = document.createElement('div');
+            this.portalContainer.id = 'dropdownPortal';
+            this.portalContainer.className = 'dropdown-portal';
+            document.body.appendChild(this.portalContainer);
+        }
+    }
+
+    setupEventListeners() {
+        // Event delegation para botões de ação
+        document.addEventListener('click', (e) => {
+            const actionBtn = e.target.closest('.btn-actions-enhanced');
+
+            if (actionBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleDropdownToggle(actionBtn);
+            } else if (!e.target.closest('.dropdown-menu-portal')) {
+                this.closeDropdown();
+            }
+        });
+
+        // Fechar no ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.activeDropdown) {
+                this.closeDropdown();
+            }
+        });
+
+        // Fechar no scroll
+        window.addEventListener('scroll', () => {
+            if (this.activeDropdown) {
+                this.closeDropdown();
+            }
+        }, true);
+
+        // Fechar no resize
+        window.addEventListener('resize', () => {
+            if (this.activeDropdown) {
+                this.closeDropdown();
+            }
+        });
+    }
+
+    handleDropdownToggle(button) {
+        const container = button.closest('.action-dropdown-container');
+        const itemId = container?.dataset.itemId;
+
+        if (!container || !itemId) {
+            console.error('Container ou itemId não encontrado');
+            return;
+        }
+
+        // Se é o mesmo dropdown, fechar
+        if (this.activeDropdown === itemId) {
+            this.closeDropdown();
+            return;
+        }
+
+        // Fechar dropdown anterior se existir
+        if (this.activeDropdown) {
+            this.closeDropdown();
+        }
+
+        // Abrir novo dropdown
+        this.openDropdown(button, container, itemId);
+    }
+
+    openDropdown(button, container, itemId) {
+        try {
+            // Calcular posição
+            const position = this.calculateDropdownPosition(button);
+
+            // Obter dados das ações
+            const actionsData = this.getActionsData(container);
+            if (!actionsData || !actionsData.actions) {
+                console.error('Dados de ações não encontrados');
+                return;
+            }
+
+            // Criar dropdown
+            this.createDropdownElement(actionsData.actions, position);
+
+            // Criar backdrop
+            this.createBackdrop();
+
+            // Marcar como ativo
+            this.activeDropdown = itemId;
+            button.setAttribute('aria-expanded', 'true');
+
+            // Adicionar classes CSS
+            const tableContainer = document.querySelector('.table-responsive-enhanced');
+            const actionsCell = button.closest('.actions-cell');
+
+            if (tableContainer) tableContainer.classList.add('dropdown-active');
+            if (actionsCell) actionsCell.classList.add('dropdown-active');
+
+            console.log(`✅ Dropdown aberto para item ${itemId}`);
+
+        } catch (error) {
+            console.error('Erro ao abrir dropdown:', error);
+        }
+    }
+
+    calculateDropdownPosition(button) {
+        const rect = button.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const dropdownHeight = 250; // Altura estimada
+        const dropdownWidth = 180;
+
+        let top = rect.bottom + window.scrollY + 5;
+        let left = rect.right + window.scrollX - dropdownWidth;
+        let direction = 'down';
+
+        // Verificar se cabe embaixo
+        if (rect.bottom + dropdownHeight > viewportHeight) {
+            top = rect.top + window.scrollY - dropdownHeight - 5;
+            direction = 'up';
+        }
+
+        // Verificar se cabe à direita
+        if (left < 10) {
+            left = rect.left + window.scrollX;
+        }
+
+        // Garantir que não saia da tela
+        if (left + dropdownWidth > viewportWidth - 10) {
+            left = viewportWidth - dropdownWidth - 10;
+        }
+
+        return { top, left, direction };
+    }
+
+    getActionsData(container) {
+        try {
+            const dataScript = container.querySelector('.dropdown-data');
+            if (!dataScript) {
+                console.error('Script de dados não encontrado');
+                return null;
+            }
+
+            return JSON.parse(dataScript.textContent);
+        } catch (error) {
+            console.error('Erro ao parsear dados do dropdown:', error);
+            return null;
+        }
+    }
+
+    createDropdownElement(actions, position) {
+        // Remover dropdown anterior se existir
+        if (this.dropdownElement) {
+            this.dropdownElement.remove();
+        }
+
+        // Criar novo dropdown
+        this.dropdownElement = document.createElement('div');
+        this.dropdownElement.className = `dropdown-menu-portal direction-${position.direction}`;
+        this.dropdownElement.style.setProperty('position', 'fixed', 'important');
+        this.dropdownElement.style.setProperty('top', `${position.top - 50}px`, 'important');
+        this.dropdownElement.style.setProperty('left', `${position.left}px`, 'important');
+
+        // Adicionar itens
+        actions.forEach((action, index) => {
+            if (action.name === 'divider') {
+                const divider = document.createElement('hr');
+                divider.className = 'dropdown-divider-portal';
+                this.dropdownElement.appendChild(divider);
+            } else {
+                const item = document.createElement('a');
+                item.href = action.url || '#';
+                item.className = `dropdown-item-portal ${action.cssClass || ''}`;
+                item.innerHTML = `<i class="${action.icon}"></i> ${action.displayName}`;
+
+                // Event listener para ações
+                item.addEventListener('click', (e) => {
+                    if (action.name.toLowerCase().includes('delete') || action.name.toLowerCase().includes('excluir')) {
+                        e.preventDefault();
+                        if (confirm('Tem certeza que deseja excluir este registro?')) {
+                            window.location.href = action.url;
+                        }
+                    } else if (action.url && action.url !== '#') {
+                        // Deixa o comportamento padrão do link
+                        this.closeDropdown();
+                    } else {
+                        e.preventDefault();
+                        console.log(`Ação executada: ${action.name}`);
+                    }
+                });
+
+                this.dropdownElement.appendChild(item);
+            }
+        });
+
+        // Adicionar ao portal
+        this.portalContainer.appendChild(this.dropdownElement);
+
+        // Mostrar com animação
+        setTimeout(() => {
+            this.dropdownElement.classList.add('show');
+            this.dropdownElement.style.setProperty('position', 'fixed', 'important');
+            this.dropdownElement.style.setProperty('top', `${position.top - 50}px`, 'important');
+            this.dropdownElement.style.setProperty('left', `${position.left}px`, 'important');
+        }, 3);
+    }
+
+    createBackdrop() {
+        if (this.backdropElement) {
+            this.backdropElement.remove();
+        }
+
+        this.backdropElement = document.createElement('div');
+        this.backdropElement.className = 'dropdown-backdrop';
+        this.backdropElement.addEventListener('click', () => {
+            this.closeDropdown();
+        });
+
+        document.body.appendChild(this.backdropElement);
+    }
+
+    closeDropdown() {
+        if (!this.activeDropdown) return;
+
+        try {
+            // Remover elementos
+            if (this.dropdownElement) {
+                this.dropdownElement.classList.remove('show');
+                setTimeout(() => {
+                    if (this.dropdownElement) {
+                        this.dropdownElement.remove();
+                        this.dropdownElement = null;
+                    }
+                }, 50);
+            }
+
+            if (this.backdropElement) {
+                this.backdropElement.remove();
+                this.backdropElement = null;
+            }
+
+            // Remover classes CSS
+            const tableContainer = document.querySelector('.table-responsive-enhanced');
+            const actionsCells = document.querySelectorAll('.actions-cell.dropdown-active');
+            const buttons = document.querySelectorAll('.btn-actions-enhanced[aria-expanded="true"]');
+
+            if (tableContainer) tableContainer.classList.remove('dropdown-active');
+            actionsCells.forEach(cell => cell.classList.remove('dropdown-active'));
+            buttons.forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+
+            this.activeDropdown = null;
+
+            console.log('✅ Dropdown fechado');
+
+        } catch (error) {
+            console.error('Erro ao fechar dropdown:', error);
+        }
+    }
+
+    // Método público para forçar fechamento
+    forceClose() {
+        this.closeDropdown();
+    }
+
+    // Método para reinicializar após updates da grid
+    reinitialize() {
+        this.closeDropdown();
+        this.setupPortalContainer();
+    }
+}
+
+// ===================================================================
+// INICIALIZAÇÃO AUTOMÁTICA
+// ===================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar sistema de dropdown
+    window.dropdownPortalSystem = new DropdownPortalSystem();
+
+    // Integrar com sistema de grid existente
+    if (typeof gridInstance !== 'undefined') {
+        gridInstance.dropdownSystem = window.dropdownPortalSystem;
+
+        // Reinicializar após updates da grid
+        document.addEventListener('gridUpdated', () => {
+            window.dropdownPortalSystem.reinitialize();
+        });
+    }
+
+    // Expor métodos globais
+    window.closeAllDropdowns = () => {
+        if (window.dropdownPortalSystem) {
+            window.dropdownPortalSystem.forceClose();
+        }
+    };
+});
+
+// ===================================================================
+// INTEGRAÇÃO COM SISTEMA EXISTENTE
+// ===================================================================
+
+// Override da função de confirmação de exclusão se existir
+if (typeof confirmarExclusao === 'function') {
+    window.confirmarExclusaoOriginal = window.confirmarExclusao;
+}
+
+window.confirmarExclusao = function (id) {
+    // Fechar dropdown primeiro
+    if (window.dropdownPortalSystem) {
+        window.dropdownPortalSystem.forceClose();
+    }
+
+    // Executar confirmação original se existir
+    if (typeof confirmarExclusaoOriginal === 'function') {
+        return window.confirmarExclusaoOriginal(id);
+    }
+
+    // Fallback padrão
+    if (confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
+        const currentPath = window.location.pathname.toLowerCase();
+        let controller = '';
+
+        if (currentPath.includes('veiculos')) {
+            controller = 'Veiculos';
+        } else if (currentPath.includes('clientes')) {
+            controller = 'Clientes';
+        } else if (currentPath.includes('vendedores')) {
+            controller = 'Vendedores';
+        }
+
+        if (controller) {
+            window.showLoading(true);
+            window.location.href = `/${controller}/Delete/${id}`;
+        }
+    }
+};
