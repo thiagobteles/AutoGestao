@@ -100,7 +100,7 @@
     case GridColumnType.Currency:
         @if (value != null && decimal.TryParse(value.ToString(), out decimal currencyValue))
         {
-            @currencyValue.ToString("C")
+            <span class="currency-value">@currencyValue.ToString("C")</span>
         }
         else
         {
@@ -170,13 +170,13 @@
         @if (!string.IsNullOrEmpty(Model.Column.UrlAction))
         {
             <a href="@Url.Action(Model.Column.UrlAction, new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
-               class="text-decoration-none text-primary fw-medium">
+               class="text-decoration-none text-primary fw-medium text-truncate">
                 @value
             </a>
         }
         else
         {
-            @(value ?? "-")
+            <span class="text-truncate" title="@value">@(value ?? "-")</span>
         }
         break;
 }
