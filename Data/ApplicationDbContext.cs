@@ -26,6 +26,8 @@ namespace AutoGestao.Data
         public DbSet<DespesaTipo> DespesaTipos { get; set; }
         public DbSet<Tarefa> Tarefas { get; set; }
 
+        public DbSet<Usuario> Usuarios { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -310,11 +312,11 @@ namespace AutoGestao.Data
             // ===========================================
             // Relacionamentos do Veículo
             modelBuilder.Entity<Veiculo>().HasOne(v => v.Proprietario).WithMany(c => c.Veiculos).HasForeignKey(v => v.ProprietarioId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.Cor).WithMany().HasForeignKey(v => v.VeiculoCorId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.Filial).WithMany().HasForeignKey(v => v.VeiculoFilialId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.Localizacao).WithMany().HasForeignKey(v => v.VeiculoLocalizacaoId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.Marca).WithMany().HasForeignKey(v => v.VeiculoMarcaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.Modelo).WithMany().HasForeignKey(v => v.VeiculoMarcaModeloId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoCor).WithMany().HasForeignKey(v => v.VeiculoCorId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoFilial).WithMany().HasForeignKey(v => v.VeiculoFilialId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoLocalizacao).WithMany().HasForeignKey(v => v.VeiculoLocalizacaoId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoMarca).WithMany().HasForeignKey(v => v.VeiculoMarcaId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoMarcaModelo).WithMany().HasForeignKey(v => v.VeiculoMarcaModeloId).OnDelete(DeleteBehavior.SetNull);
             
             // Relacionamento entre Marca e Modelo
             modelBuilder.Entity<VeiculoMarcaModelo>().HasOne(m => m.Marca).WithMany().HasForeignKey(m => m.VeiculoMarcaId).OnDelete(DeleteBehavior.SetNull);

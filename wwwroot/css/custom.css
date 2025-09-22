@@ -6517,3 +6517,376 @@ body .dropdown-menu {
         display: none !important;
     }
 }
+
+/* ===================================================================
+   NAVEGAÇÃO DE ABAS MODERNA
+   =================================================================== */
+
+.nav - tabs - modern {
+    border - bottom: 2px solid var(--border - color);
+    margin - bottom: 0;
+}
+
+    .nav - tabs - modern.nav - link - modern {
+        border: none;
+        border - radius: 0;
+        color: var(--secondary - color);
+        font - weight: 500;
+        padding: 1rem 1.5rem;
+        position: relative;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+        .nav - tabs - modern.nav - link - modern:hover {
+            border: none;
+            color: var(--primary - color);
+            background: rgba(var(--primary - rgb), 0.05);
+        }
+
+        .nav - tabs - modern.nav - link - modern.active {
+            border: none;
+            color: var(--primary - color);
+            background: white;
+            border - bottom: 3px solid var(--primary - color);
+        }
+
+            .nav - tabs - modern.nav - link - modern.active::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: var(--primary - color);
+            }
+
+/* Loading spinner nas abas */
+.tab - loading {
+    display: inline - block;
+}
+
+/* ===================================================================
+   CONTEÚDO DAS ABAS
+   =================================================================== */
+
+.tab - content {
+    background: white;
+    border: 1px solid var(--border - color);
+    border - top: none;
+    border - radius: 0 0 0.75rem 0.75rem;
+    min - height: 400px;
+}
+
+.tab - pane {
+    padding: 2rem;
+}
+
+.tab - content - wrapper {
+    min - height: 300px;
+}
+
+.tab - loading - placeholder {
+    display: flex;
+    flex - direction: column;
+    align - items: center;
+    justify - content: center;
+    min - height: 200px;
+    color: var(--secondary - color);
+}
+
+/* ===================================================================
+   CARDS DE DOCUMENTOS
+   =================================================================== */
+
+.documento - card {
+    transition: all 0.3s ease;
+    height: 100 %;
+}
+
+    .documento - card:hover {
+        transform: translateY(-2px);
+        box - shadow: var(--shadow - lg);
+    }
+
+.documento - icon {
+    text - align: center;
+    margin - bottom: 1rem;
+}
+
+.documento - nome {
+    font - weight: 600;
+    margin - bottom: 0.5rem;
+    white - space: nowrap;
+    overflow: hidden;
+    text - overflow: ellipsis;
+}
+
+.documento - descricao {
+    font - size: 0.875rem;
+    margin - bottom: 1rem;
+    display: -webkit - box;
+    -webkit - line - clamp: 2;
+    -webkit - box - orient: vertical;
+    overflow: hidden;
+}
+
+/* ===================================================================
+   GALERIA DE FOTOS
+   =================================================================== */
+
+.foto - card {
+    position: relative;
+    border - radius: 0.5rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+    .foto - card:hover {
+        transform: translateY(-2px);
+        box - shadow: var(--shadow - lg);
+    }
+
+.foto - wrapper {
+    position: relative;
+    padding - bottom: 75 %; /* Aspect ratio 4:3 */
+    overflow: hidden;
+}
+
+.foto - thumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100 %;
+    height: 100 %;
+    object - fit: cover;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .foto - thumbnail:hover {
+        transform: scale(1.05);
+    }
+
+.foto - overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align - items: center;
+    justify - content: center;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.foto - wrapper: hover.foto - overlay {
+    opacity: 1;
+}
+
+.foto - info {
+    padding: 1rem;
+    background: white;
+}
+
+.foto - descricao {
+    font - weight: 600;
+    margin - bottom: 0.25rem;
+    white - space: nowrap;
+    overflow: hidden;
+    text - overflow: ellipsis;
+}
+
+/* ===================================================================
+   TABELA FINANCEIRA
+   =================================================================== */
+
+.table - modern {
+    border - radius: 0.5rem;
+    overflow: hidden;
+    box - shadow: var(--shadow - sm);
+}
+
+    .table - modern thead th {
+        background: var(--light - color);
+        border: none;
+        font - weight: 600;
+        color: var(--text - color);
+        padding: 1rem;
+    }
+
+    .table - modern tbody td {
+        border: none;
+        padding: 1rem;
+        vertical - align: middle;
+        border - bottom: 1px solid var(--border - color);
+    }
+
+    .table - modern tbody tr:hover {
+        background: rgba(var(--primary - rgb), 0.05);
+    }
+
+/* Badges de status */
+.badge {
+    font - size: 0.75rem;
+    font - weight: 500;
+    padding: 0.5rem 0.75rem;
+    border - radius: 1rem;
+}
+
+    .badge - warning {
+        background: var(--warning - color);
+        color: white;
+    }
+
+    .badge - success {
+        background: var(--success - color);
+        color: white;
+    }
+
+    .badge - danger {
+        background: var(--danger - color);
+        color: white;
+    }
+
+    .badge - secondary {
+        background: var(--secondary - color);
+        color: white;
+    }
+
+/* ===================================================================
+   ESTADOS VAZIOS
+   =================================================================== */
+
+.empty - state {
+    color: var(--secondary - color);
+}
+
+    .empty - state i {
+        opacity: 0.5;
+    }
+
+    .empty - state h5 {
+        margin - bottom: 1rem;
+    }
+
+    .empty - state p {
+        margin - bottom: 2rem;
+    }
+
+/* ===================================================================
+   MODAIS CUSTOMIZADOS
+   =================================================================== */
+
+.modal - content {
+    border: none;
+    border - radius: 1rem;
+    box - shadow: var(--shadow - xl);
+}
+
+.modal - header {
+    border - bottom: 1px solid var(--border - color);
+    padding: 1.5rem;
+}
+
+.modal - footer {
+    border - top: 1px solid var(--border - color);
+    padding: 1.5rem;
+}
+
+.modal - body {
+    padding: 1.5rem;
+}
+
+/* ===================================================================
+   RESPONSIVIDADE PARA ABAS
+   =================================================================== */
+
+@media(max - width: 768px) {
+    .nav - tabs - modern {
+        flex - direction: column;
+    }
+
+        .nav - tabs - modern.nav - link - modern {
+            text - align: center;
+            border - bottom: 1px solid var(--border - color);
+        }
+
+            .nav - tabs - modern.nav - link - modern.active {
+                border - left: 3px solid var(--primary - color);
+                border - bottom: 1px solid var(--border - color);
+            }
+
+    .tab - pane {
+        padding: 1rem;
+    }
+
+    .foto - card {
+        margin - bottom: 1rem;
+    }
+
+    .documento - card {
+        margin - bottom: 1rem;
+    }
+}
+
+/* ===================================================================
+   ANIMAÇÕES PARA ABAS
+   =================================================================== */
+
+.tab - pane {
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.documento - card,
+.foto - card {
+    animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Delay para animações em sequência */
+.documento - card: nth - child(1),
+.foto - card: nth - child(1) {
+    animation - delay: 0.1s;
+}
+
+.documento - card: nth - child(2),
+.foto - card: nth - child(2) {
+    animation - delay: 0.2s;
+}
+
+.documento - card: nth - child(3),
+.foto - card: nth - child(3) {
+    animation - delay: 0.3s;
+}
+
+.documento - card: nth - child(4),
+.foto - card: nth - child(4) {
+    animation - delay: 0.4s;
+}

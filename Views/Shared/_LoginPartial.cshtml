@@ -1,0 +1,112 @@
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user me-1"></i>
+            @User.Identity.Name
+        </a>
+        <ul class="dropdown-menu">
+            <li><h6 class="dropdown-header">@User.FindFirst("Perfil")?.Value</h6></li>
+            <li><hr class="dropdown-divider"></li>
+            @if (User.IsInRole("Admin"))
+            {
+                <li><a class="dropdown-item" asp-controller="Usuarios" asp-action="Index"><i class="fas fa-users me-2"></i>Gerenciar Usuários</a></li>
+                <li><hr class="dropdown-divider"></li>
+            }
+            <li><a class="dropdown-item" href="#" onclick="alterarSenha()"><i class="fas fa-key me-2"></i>Alterar Senha</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="dropdown-item text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Sair
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Login" asp-action="Index">
+            <i class="fas fa-sign-in-alt me-1"></i>
+            Entrar
+        </a>
+    </li>
+}
+
+<!-- Modal para alterar senha -->
+<div class="modal fade" id="modalAlterarSenha" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-key me-2"></i>Alterar Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAlterarSenha">
+                    <div class="mb-3">
+                        <label class="form-label">Senha Atual</label>
+                        <input type="password" id="senhaAtual" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nova Senha</label>
+                        <input type="password" id="novaSenha" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar Nova Senha</label>
+                        <input type="password" id="confirmarSenha" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarNovaSenha()">Alterar Senha</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function alterarSenha() {
+        new bootstrap.Modal(document.getElementById('modalAlterarSenha')).show();
+    }
+
+    function salvarNovaSenha() {
+        const senhaAtual = document.getElementById('senhaAtual').value;
+        const novaSenha = document.getElementById('novaSenha').value;
+        const confirmarSenha = document.getElementById('confirmarSenha').value;
+
+        if (novaSenha !== confirmarSenha) {
+            alert('As senhas não conferem!');
+            return;
+        }
+
+        // Implementar chamada AJAX para alterar senha
+        fetch('/Usuarios/AlterarSenha', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: @(User.FindFirst("NameIdentifier")?.Value ?? "0"),
+                senhaAtual: senhaAtual,
+                novaSenha: novaSenha,
+                confirmarSenha: confirmarSenha
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                bootstrap.Modal.getInstance(document.getElementById('modalAlterarSenha')).hide();
+                alert('Senha alterada com sucesso!');
+                document.getElementById('formAlterarSenha').reset();
+            } else {
+                alert(data.mensagem);
+            }
+        })
+        .catch(error => {
+            alert('Erro ao alterar senha');
+        });
+    }
+</script>

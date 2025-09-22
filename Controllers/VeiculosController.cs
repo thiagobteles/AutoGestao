@@ -16,11 +16,9 @@ namespace AutoGestao.Controllers
         protected override IQueryable<Veiculo> GetBaseQuery()
         {
             return _context.Veiculos
-                .Include(v => v.Marca)
-                .Include(v => v.Modelo)
-                .Include(v => v.Cor)
-                .Include(v => v.Proprietario)
-                .AsQueryable();
+                .Include(v => v.VeiculoMarca)
+                .Include(v => v.VeiculoMarcaModelo)
+                .Include(v => v.Proprietario);
         }
 
         protected override StandardGridViewModel ConfigureGrid()
@@ -106,8 +104,8 @@ namespace AutoGestao.Controllers
                             query = query.Where(v =>
                                 v.Codigo.Contains(searchTerm) ||
                                 v.Placa.Contains(searchTerm) ||
-                                (v.Marca != null && v.Marca.Descricao.Contains(searchTerm)) ||
-                                (v.Modelo != null && v.Modelo.Descricao.Contains(searchTerm)) ||
+                                (v.VeiculoMarca != null && v.VeiculoMarca.Descricao.Contains(searchTerm)) ||
+                                (v.VeiculoMarcaModelo != null && v.VeiculoMarcaModelo.Descricao.Contains(searchTerm)) ||
                                 (v.Chassi != null && v.Chassi.Contains(searchTerm)) ||
                                 (v.Renavam != null && v.Renavam.Contains(searchTerm)));
                         }
@@ -275,8 +273,8 @@ namespace AutoGestao.Controllers
         private static string RenderMarcaModelo(object item)
         {
             var veiculo = (Veiculo)item;
-            var marca = veiculo.Marca?.Descricao ?? "N/A";
-            var modelo = veiculo.Modelo?.Descricao ?? "N/A";
+            var marca = veiculo.VeiculoMarca?.Descricao ?? "N/A";
+            var modelo = veiculo.VeiculoMarcaModelo?.Descricao ?? "N/A";
             
             return $@"
                 <div class=""vehicle-info"">
@@ -337,9 +335,9 @@ namespace AutoGestao.Controllers
             }
 
             var veiculo = await _context.Veiculos
-                .Include(v => v.Marca)
-                .Include(v => v.Modelo)
-                .Include(v => v.Cor)
+                .Include(v => v.VeiculoMarca)
+                .Include(v => v.VeiculoMarcaModelo)
+                .Include(v => v.VeiculoCor)
                 .Include(v => v.Proprietario)
                 .Include(v => v.Fotos)
                 .Include(v => v.Documentos)
@@ -541,9 +539,9 @@ namespace AutoGestao.Controllers
             try
             {
                 var veiculos = await _context.Veiculos
-                    .Include(v => v.Marca)
-                    .Include(v => v.Modelo)
-                    .Include(v => v.Cor)
+                    .Include(v => v.VeiculoMarca)
+                    .Include(v => v.VeiculoMarcaModelo)
+                    .Include(v => v.VeiculoCor)
                     .OrderBy(v => v.Codigo)
                     .ToListAsync();
 
@@ -554,8 +552,8 @@ namespace AutoGestao.Controllers
                 {
                     csv.AppendLine($"{veiculo.Id}," +
                                   $"{veiculo.Codigo}," +
-                                  $"\"{veiculo.Marca?.Descricao}\"," +
-                                  $"\"{veiculo.Modelo?.Descricao}\"," +
+                                  $"\"{veiculo.VeiculoMarca?.Descricao}\"," +
+                                  $"\"{veiculo.VeiculoMarcaModelo?.Descricao}\"," +
                                   $"{veiculo.AnoFabricacao}," +
                                   $"{veiculo.Placa}," +
                                   $"{veiculo.KmSaida}," +
@@ -626,5 +624,294 @@ namespace AutoGestao.Controllers
         }
 
         #endregion  Métodos Auxiliares
+
+        // ================================================================================================
+        // NOVOS MÉTODOS PARA FORMULÁRIOS DINÂMICOS
+        // ================================================================================================
+
+        protected override List<SelectListItem> GetSelectOptions(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(Veiculo.VeiculoMarcaId) => _context.VeiculoMarcas
+                    .Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Descricao })
+                    .ToList(),
+                nameof(Veiculo.VeiculoMarcaModeloId) => _context.VeiculoMarcaModelos
+                    .Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Descricao })
+                    .ToList(),
+                nameof(Veiculo.ProprietarioId) => _context.Clientes
+                    .Where(c => c.Ativo)
+                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Nome })
+                    .ToList(),
+                nameof(Veiculo.Situacao) => Enum.GetValues<EnumSituacaoVeiculo>()
+                    .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() })
+                    .ToList(),
+                _ => base.GetSelectOptions(propertyName)
+            };
+        }
+
+        protected override Task BeforeCreate(Veiculo entity)
+        {
+            entity.DataCadastro = DateTime.Now;
+            entity.Situacao = EnumSituacaoVeiculo.Estoque;
+
+            // Gerar código se não informado
+            if (string.IsNullOrEmpty(entity.Codigo))
+            {
+                entity.Codigo = GerarCodigoVeiculo();
+            }
+
+            ValidateVeiculo(entity);
+            return base.BeforeCreate(entity);
+        }
+
+        protected override Task BeforeUpdate(Veiculo entity)
+        {
+            entity.DataAlteracao = DateTime.Now;
+            ValidateVeiculo(entity);
+            return base.BeforeUpdate(entity);
+        }
+
+        protected override bool CanDelete(Veiculo entity)
+        {
+            return entity.Situacao != EnumSituacaoVeiculo.Vendido;
+        }
+
+        protected override void ConfigureFormFields(List<FormFieldViewModel> fields, Veiculo entity, string action)
+        {
+            if (action == "Details")
+            {
+                // Adicionar tempo em estoque
+                var tempoEstoque = DateTime.Now - entity.DataCadastro;
+                fields.Add(new FormFieldViewModel
+                {
+                    PropertyName = "TempoEstoque",
+                    DisplayName = "Tempo em Estoque",
+                    Value = $"{tempoEstoque.Days} dias",
+                    ReadOnly = true,
+                    Section = "Informações Adicionais"
+                });
+            }
+        }
+
+        protected override async Task<IActionResult> RenderCustomTab(Veiculo entity, FormTabViewModel tab)
+        {
+            return tab.TabId switch
+            {
+                "arquivos" => await RenderArquivosTab(entity),
+                "midias" => await RenderMidiasTab(entity),
+                "financeiro" => await RenderFinanceiroTab(entity),
+                "resumo" => await RenderResumoTab(entity),
+                _ => await base.RenderCustomTab(entity, tab)
+            };
+        }
+
+        // ================================================================================================
+        // ACTIONS ESPECÍFICAS PARA CRUD DAS ABAS
+        // ================================================================================================
+
+        [HttpPost]
+        public async Task<IActionResult> AdicionarDocumento(int veiculoId, IFormFile arquivo, string descricao)
+        {
+            var veiculo = await _context.Veiculos.FindAsync(veiculoId);
+            if (veiculo == null)
+            {
+                return NotFound();
+            }
+
+            var documento = new VeiculoDocumento
+            {
+                VeiculoId = veiculoId,
+                NomeArquivo = arquivo.FileName,
+                Observacoes = descricao,
+                DataUpload = DateTime.Now
+            };
+
+            // Salvar arquivo e documento
+            SalvarArquivo(arquivo, documento);
+            _context.VeiculoDocumentos.Add(documento);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Documento adicionado com sucesso!" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoverDocumento(int documentoId)
+        {
+            var documento = await _context.VeiculoDocumentos.FindAsync(documentoId);
+            if (documento == null)
+            {
+                return NotFound();
+            }
+
+            _context.VeiculoDocumentos.Remove(documento);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Documento removido com sucesso!" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AdicionarFoto(int veiculoId, IFormFile foto, string descricao)
+        {
+            var veiculo = await _context.Veiculos.FindAsync(veiculoId);
+            if (veiculo == null)
+            {
+                return NotFound();
+            }
+
+            var fotoEntidade = new VeiculoFoto
+            {
+                VeiculoId = veiculoId,
+                NomeArquivo = foto.FileName,
+                Descricao = descricao,
+                DataUpload = DateTime.Now
+            };
+
+            SalvarFoto(foto, fotoEntidade);
+            _context.VeiculoFotos.Add(fotoEntidade);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Foto adicionada com sucesso!" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AdicionarDespesa(int veiculoId, DespesaCreateViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var despesa = new Despesa
+                {
+                    VeiculoId = veiculoId,
+                    FornecedorId = model.FornecedorId,
+                    Descricao = model.Descricao,
+                    Valor = model.Valor,
+                    DataDespesa = model.DataDespesa,
+                    Status = EnumStatusDespesa.Pendente
+                };
+
+                _context.Despesas.Add(despesa);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Despesa adicionada com sucesso!" });
+            }
+
+            return Json(new { success = false, message = "Dados inválidos" });
+        }
+
+        #region Métodos privados
+
+        private void ValidateVeiculo(Veiculo entity)
+        {
+            // Validar placa única
+            var placaExistente = _context.Veiculos.Any(v => v.Id != entity.Id && v.Placa == entity.Placa);
+            if (placaExistente)
+            {
+                ModelState.AddModelError(nameof(entity.Placa), "Placa já cadastrada");
+            }
+
+            // Validar anos
+            if (entity.AnoModelo < entity.AnoFabricacao)
+            {
+                ModelState.AddModelError(nameof(entity.AnoModelo), "Ano do modelo não pode ser menor que ano de fabricação");
+            }
+        }
+
+        private string GerarCodigoVeiculo()
+        {
+            var ultimoCodigo = _context.Veiculos
+                .OrderByDescending(v => v.Id)
+                .Select(v => v.Codigo)
+                .FirstOrDefault();
+
+            if (ultimoCodigo == null)
+            {
+                return "VEI001";
+            }
+
+            // Lógica para gerar próximo código
+            return "VEI" + (int.Parse(ultimoCodigo.Substring(3)) + 1).ToString("D3");
+        }
+
+        private async Task<IActionResult> RenderArquivosTab(Veiculo veiculo)
+        {
+            var documentos = await _context.VeiculoDocumentos
+                .Where(d => d.VeiculoId == veiculo.Id)
+                .ToListAsync();
+
+            return PartialView("_TabArquivos", documentos);
+        }
+
+        private async Task<IActionResult> RenderMidiasTab(Veiculo veiculo)
+        {
+            var fotos = await _context.VeiculoFotos
+                .Where(f => f.VeiculoId == veiculo.Id)
+                .ToListAsync();
+
+            return PartialView("_TabMidias", fotos);
+        }
+
+        private async Task<IActionResult> RenderFinanceiroTab(Veiculo veiculo)
+        {
+            var despesas = await _context.Despesas
+                .Where(d => d.VeiculoId == veiculo.Id)
+                .Include(d => d.Fornecedor)
+                .ToListAsync();
+
+            return PartialView("_TabFinanceiro", despesas);
+        }
+
+        private async Task<IActionResult> RenderResumoTab(Veiculo veiculo)
+        {
+            var resumo = new VeiculoResumoViewModel
+            {
+                Veiculo = veiculo,
+                TotalDespesas = await _context.Despesas
+                    .Where(d => d.VeiculoId == veiculo.Id)
+                    .SumAsync(d => d.Valor),
+                QtdDocumentos = await _context.VeiculoDocumentos
+                    .CountAsync(d => d.VeiculoId == veiculo.Id),
+                QtdFotos = await _context.VeiculoFotos
+                    .CountAsync(f => f.VeiculoId == veiculo.Id)
+            };
+
+            return PartialView("_TabResumo", resumo);
+        }
+
+        private void SalvarArquivo(IFormFile arquivo, VeiculoDocumento documento)
+        {
+            // Implementar lógica de salvamento do arquivo
+            var caminho = Path.Combine("uploads", "documentos", $"{documento.Id}_{arquivo.FileName}");
+            // ... lógica de salvamento
+        }
+
+        private void SalvarFoto(IFormFile foto, VeiculoFoto fotoEntidade)
+        {
+            // Implementar lógica de salvamento da foto
+            var caminho = Path.Combine("uploads", "fotos", $"{fotoEntidade.Id}_{foto.FileName}");
+            // ... lógica de salvamento
+        }
+
+        #endregion Métodos privados
+    }
+
+    // ================================================================================================
+    // VIEWMODELS AUXILIARES
+    // ================================================================================================
+
+    public class VeiculoResumoViewModel
+    {
+        public Veiculo Veiculo { get; set; }
+        public decimal TotalDespesas { get; set; }
+        public int QtdDocumentos { get; set; }
+        public int QtdFotos { get; set; }
+        public List<Despesa> UltimasDespesas { get; set; } = [];
+    }
+
+    public class DespesaCreateViewModel
+    {
+        public int FornecedorId { get; set; }
+        public string Descricao { get; set; } = "";
+        public decimal Valor { get; set; }
+        public DateTime DataDespesa { get; set; } = DateTime.Today;
     }
 }

@@ -207,36 +207,84 @@ namespace AutoGestao.Controllers
             };
         }
 
-        #region Métodos Auxiliares para Filtros
-
-        private static List<SelectListItem> GetTipoClienteOptions()
+        protected override List<SelectListItem> GetSelectOptions(string propertyName)
         {
-            var options = new List<SelectListItem>();
-            var enumDictionary = EnumExtension.GetEnumDictionary<EnumTipoPessoa>();
-
-            foreach (var item in enumDictionary.Where(x => x.Key != 0))
+            return propertyName switch
             {
-                options.Add(new SelectListItem
-                {
-                    Value = ((EnumTipoPessoa)item.Key).ToString(),
-                    Text = $"{((EnumTipoPessoa)item.Key).GetIcone()} {item.Value}"
-                });
-            }
-
-            return options;
+                nameof(Cliente.TipoCliente) =>
+                [
+                    new() { Value = "PessoaFisica", Text = "👤 Pessoa Física" },
+                    new() { Value = "PessoaJuridica", Text = "🏢 Pessoa Jurídica" }
+                ],
+                nameof(Cliente.Estado) => GetEstadosOptions(),
+                _ => base.GetSelectOptions(propertyName)
+            };
         }
 
-        private static string RenderDocumento(object item)
+        protected override Task BeforeCreate(Cliente entity)
         {
-            var cliente = (Cliente)item;
-            var documento = cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica 
-                ? cliente.CNPJ.AplicarMascaraCnpj()
-                : cliente.CPF.AplicarMascaraCpf();
+            entity.DataCadastro = DateTime.Now;
+            ValidateCliente(entity);
+            return base.BeforeCreate(entity);
 
-            return $@"{documento}";
         }
 
-        #endregion
+        protected override Task AfterCreate(Cliente entity)
+        {
+            // Log da criação
+            TempData["Success"] = $"Cliente {entity.Nome} criado com sucesso!";
+            return base.AfterCreate(entity);
+        }
+
+        protected override Task BeforeUpdate(Cliente entity)
+        {
+            entity.DataAlteracao = DateTime.Now;
+            ValidateCliente(entity);
+            return base.BeforeUpdate(entity);
+
+        }
+
+        protected override Task AfterUpdate(Cliente entity)
+        {
+            TempData["Success"] = $"Cliente {entity.Nome} atualizado com sucesso!";
+            return base.AfterUpdate(entity);
+
+        }
+
+        protected override Task BeforeDelete(Cliente entity)
+        {
+            // Verificar se pode deletar
+            var temVendas = _context.Vendas.Any(v => v.ClienteId == entity.Id);
+            return temVendas
+                ? throw new InvalidOperationException("Não é possível excluir cliente com vendas associadas")
+                : base.BeforeDelete(entity);
+        }
+
+        // Só pode editar clientes ativos
+        protected override bool CanEdit(Cliente entity)
+        {
+            return entity.Ativo; 
+        }
+
+        // Só pode deletar clientes que não estão vinculados a compras
+        protected override bool CanDelete(Cliente entity)
+        {
+            var temVendas = _context.Vendas.Any(v => v.ClienteId == entity.Id);
+            return !temVendas;
+        }
+
+        protected override void ConfigureFormFields(List<FormFieldViewModel> fields, Cliente entity, string action)
+        {
+            if (action == "Details")
+            {
+                // Adicionar campos calculados em modo visualização
+                var nomeField = fields.FirstOrDefault(f => f.PropertyName == nameof(Cliente.Nome));
+                if (nomeField != null)
+                {
+                    nomeField.DisplayName = $"Nome do Cliente (#{entity.Id})";
+                }
+            }
+        }
 
         #region Ações Específicas
 
@@ -258,214 +306,6 @@ namespace AutoGestao.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var cliente = await _context.Clientes
-                .Include(c => c.Veiculos)
-                .Include(c => c.Vendas)
-                .Include(c => c.Avaliacoes)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            return cliente == null ? NotFound() : View(cliente);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Cliente cliente)
-        {
-            if (ModelState.IsValid)
-            {
-                // Validações específicas
-                if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(cliente.CPF))
-                {
-                    ModelState.AddModelError("CPF", "CPF é obrigatório para Pessoa Física");
-                }
-
-                if (cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(cliente.CNPJ))
-                {
-                    ModelState.AddModelError("CNPJ", "CNPJ é obrigatório para Pessoa Jurídica");
-                }
-
-                // Verificar duplicidade de CPF/CNPJ
-                if (!string.IsNullOrEmpty(cliente.CPF))
-                {
-                    var existeCPF = await _context.Clientes.AnyAsync(c => c.CPF == cliente.CPF);
-                    if (existeCPF)
-                    {
-                        ModelState.AddModelError("CPF", "Já existe um cliente com este CPF");
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(cliente.CNPJ))
-                {
-                    var existeCNPJ = await _context.Clientes.AnyAsync(c => c.CNPJ == cliente.CNPJ);
-                    if (existeCNPJ)
-                    {
-                        ModelState.AddModelError("CNPJ", "Já existe um cliente com este CNPJ");
-                    }
-                }
-
-                if (ModelState.IsValid)
-                {
-                    cliente.DataCadastro = DateTime.Now;
-                    cliente.DataAlteracao = DateTime.Now;
-                    _context.Add(cliente);
-                    await _context.SaveChangesAsync();
-
-                    TempData["SuccessMessage"] = "Cliente cadastrado com sucesso!";
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-
-            return View(cliente);
-        }
-
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Cliente cliente)
-        {
-            if (id != cliente.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Validações específicas
-                    if (cliente.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(cliente.CPF))
-                    {
-                        ModelState.AddModelError("CPF", "CPF é obrigatório para Pessoa Física");
-                    }
-
-                    if (cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(cliente.CNPJ))
-                    {
-                        ModelState.AddModelError("CNPJ", "CNPJ é obrigatório para Pessoa Jurídica");
-                    }
-
-                    // Verificar duplicidade de CPF/CNPJ (exceto o próprio registro)
-                    if (!string.IsNullOrEmpty(cliente.CPF))
-                    {
-                        var existeCPF = await _context.Clientes.AnyAsync(c => c.CPF == cliente.CPF && c.Id != cliente.Id);
-                        if (existeCPF)
-                        {
-                            ModelState.AddModelError("CPF", "Já existe outro cliente com este CPF");
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(cliente.CNPJ))
-                    {
-                        var existeCNPJ = await _context.Clientes.AnyAsync(c => c.CNPJ == cliente.CNPJ && c.Id != cliente.Id);
-                        if (existeCNPJ)
-                        {
-                            ModelState.AddModelError("CNPJ", "Já existe outro cliente com este CNPJ");
-                        }
-                    }
-
-                    if (ModelState.IsValid)
-                    {
-                        cliente.DataAlteracao = DateTime.Now;
-                        _context.Update(cliente);
-                        await _context.SaveChangesAsync();
-
-                        TempData["SuccessMessage"] = "Cliente atualizado com sucesso!";
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ClienteExists(cliente.Id))
-                    {
-                        return NotFound();
-                    }
-                    throw;
-                }
-            }
-            return View(cliente);
-        }
-
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var cliente = await _context.Clientes.FindAsync(id);
-            return cliente == null
-                ? NotFound()
-                : View(cliente);
-        }
-
-        [HttpDelete]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, Cliente cliente)
-        {
-            if (id != cliente.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Remove(cliente);
-                    await _context.SaveChangesAsync();
-
-                    TempData["SuccessMessage"] = "Cliente deletado com sucesso!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ClienteExists(cliente.Id))
-                    {
-                        return NotFound();
-                    }
-                    throw;
-                }
-            }
-            return View(cliente);
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            try
-            {
-                _context.Remove(cliente);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Cliente deletado com sucesso!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw;
-            }
         }
 
         [HttpGet]
@@ -515,9 +355,67 @@ namespace AutoGestao.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ClienteExists(int id)
+        #endregion
+
+        #region Métodos Auxiliares para Filtros
+
+        private static List<SelectListItem> GetTipoClienteOptions()
         {
-            return _context.Clientes.Any(e => e.Id == id);
+            var options = new List<SelectListItem>();
+            var enumDictionary = EnumExtension.GetEnumDictionary<EnumTipoPessoa>();
+
+            foreach (var item in enumDictionary.Where(x => x.Key != 0))
+            {
+                options.Add(new SelectListItem
+                {
+                    Value = ((EnumTipoPessoa)item.Key).ToString(),
+                    Text = $"{((EnumTipoPessoa)item.Key).GetIcone()} {item.Value}"
+                });
+            }
+
+            return options;
+        }
+
+        private void ValidateCliente(Cliente entity)
+        {
+            // Validações específicas
+            if (entity.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.CPF))
+            {
+                ModelState.AddModelError(nameof(entity.CPF), "CPF é obrigatório para Pessoa Física");
+            }
+
+            if (entity.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(entity.CNPJ))
+            {
+                ModelState.AddModelError(nameof(entity.CNPJ), "CNPJ é obrigatório para Pessoa Jurídica");
+            }
+
+            // Verificar CPF único
+            if (!string.IsNullOrEmpty(entity.CPF))
+            {
+                var cpfExistente = _context.Clientes.Any(c => c.Id != entity.Id && c.CPF == entity.CPF);
+                if (cpfExistente)
+                {
+                    ModelState.AddModelError(nameof(entity.CPF), "CPF já cadastrado");
+                }
+            }
+        }
+
+        private List<SelectListItem> GetEstadosOptions()
+        {
+            return
+            [
+                new() { Value = "", Text = "Selecione o estado..." },         new() { Value = "SP", Text = "São Paulo" },         new() { Value = "RJ", Text = "Rio de Janeiro" },         new() { Value = "MG", Text = "Minas Gerais" },         new() { Value = "RS", Text = "Rio Grande do Sul" },         // ... adicionar todos os estados
+            ];
+        }
+
+        private static string RenderDocumento(object item)
+        {
+            var cliente = (Cliente)item;
+            var documento = cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica
+                ? cliente.CNPJ.AplicarMascaraCnpj()
+                : cliente.CPF.AplicarMascaraCpf();
+
+            return $@"{documento}";
         }
 
         #endregion
