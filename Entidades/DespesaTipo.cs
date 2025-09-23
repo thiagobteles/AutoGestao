@@ -1,5 +1,3 @@
-using AutoGestao.Entidades.Veiculos;
-
 namespace AutoGestao.Entidades
 {
     public class DespesaTipo : BaseEntidade

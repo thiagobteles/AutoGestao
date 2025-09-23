@@ -3,6 +3,7 @@ using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Models.Auth;
 using AutoGestao.Services.Interface;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,10 +12,11 @@ using System.Text;
 
 namespace AutoGestao.Services
 {
-    public class AuthService(ApplicationDbContext context, IConfiguration configuration, ILogger<AuthService> logger) : IAuthService
+    public class AuthService(ApplicationDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger) : IAuthService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IConfiguration _configuration = configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly ILogger<AuthService> _logger = logger;
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -24,6 +26,13 @@ namespace AutoGestao.Services
                 var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower() && u.Ativo);
                 if (usuario == null || !VerifyPassword(request.Senha, usuario.SenhaHash))
                 {
+                    // Log de login falhado
+                    if (usuario != null)
+                    {
+                        var auditService = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
+                        await auditService?.LogLoginAsync(usuario.Id, usuario.Nome, usuario.Email, false, "Senha incorreta");
+                    }
+
                     return new LoginResponse
                     {
                         Sucesso = false,
@@ -34,6 +43,10 @@ namespace AutoGestao.Services
                 // Atualizar último login
                 usuario.UltimoLogin = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
+
+                // Log de login bem-sucedido
+                var auditServiceSuccess = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
+                await auditServiceSuccess?.LogLoginAsync(usuario.Id, usuario.Nome, usuario.Email, true);
 
                 // Gerar token JWT
                 var token = GenerateJwtToken(usuario);

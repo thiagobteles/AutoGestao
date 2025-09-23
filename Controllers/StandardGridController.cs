@@ -717,7 +717,7 @@ namespace AutoGestao.Controllers
         /// <summary>
         /// Constrói o ViewModel do formulário baseado nos atributos da entidade
         /// </summary>
-        private StandardFormViewModel BuildFormViewModel(T entity, string action)
+        public StandardFormViewModel BuildFormViewModel(T entity, string action)
         {
             var formConfig = typeof(T).GetCustomAttribute<FormConfigAttribute>() ?? new FormConfigAttribute();
             var properties = GetFormProperties();

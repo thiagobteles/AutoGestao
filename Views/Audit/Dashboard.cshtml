@@ -1,0 +1,218 @@
+@using AutoGestao.Enumerador.Gerais
+@model dynamic
+@{
+    ViewData["Title"] = "Dashboard de Auditoria";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="fas fa-chart-bar me-2 text-primary"></i>
+            Dashboard de Auditoria
+        </h1>
+        <p class="text-muted mb-0">Visão geral das atividades dos últimos @Model.UltimosDias dias</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-primary">
+            <i class="fas fa-list me-1"></i>
+            Ver Logs
+        </a>
+        <button class="btn btn-info" onclick="atualizarDashboard()">
+            <i class="fas fa-sync-alt me-1"></i>
+            Atualizar
+        </button>
+    </div>
+</div>
+
+<!-- Estatísticas Gerais -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-database fa-3x mb-3"></i>
+                <h2 class="card-title">@Model.TotalOperacoes</h2>
+                <p class="card-text">Total de Operações</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h2 class="card-title">@Model.UsuariosMaisAtivos.Count</h2>
+                <p class="card-text">Usuários Ativos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-table fa-3x mb-3"></i>
+                <h2 class="card-title">@Model.EntidadesMaisAuditadas.Count</h2>
+                <p class="card-text">Entidades Auditadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-3x mb-3"></i>
+                <h2 class="card-title">@Model.UltimosDias</h2>
+                <p class="card-text">Dias Analisados</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="row mb-4">
+    <!-- Operações por Tipo -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Operações por Tipo
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoOperacoes" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Atividade por Dia -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Atividade por Dia
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoAtividade" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rankings -->
+<div class="row">
+    <!-- Usuários Mais Ativos -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-trophy me-2"></i>
+                    Usuários Mais Ativos
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    @foreach (var usuario in Model.UsuariosMaisAtivos)
+                    {
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-circle me-3 text-primary"></i>
+                                <div>
+                                    <div class="fw-bold">@usuario.Usuario</div>
+                                </div>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">@usuario.Total</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entidades Mais Auditadas -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-database me-2"></i>
+                    Entidades Mais Auditadas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    @foreach (var entidade in Model.EntidadesMaisAuditadas)
+                    {
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-table me-3 text-info"></i>
+                                <div>
+                                    <div class="fw-bold">@entidade.Entidade</div>
+                                </div>
+                            </div>
+                            <span class="badge bg-info rounded-pill">@entidade.Total</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts para gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Gráfico de Operações por Tipo
+    const ctxOperacoes = document.getElementById('graficoOperacoes').getContext('2d');
+    new Chart(ctxOperacoes, {
+        type: 'doughnut',
+        data: {
+            labels: [@Html.Raw(string.Join(",", ((List<(EnumTipoOperacaoAuditoria Operacao, int Total)>)Model.EstatisticasPorOperacao).Select(e => $"'{e.Operacao}'")))],
+            datasets: [{
+                data: [@Html.Raw(string.Join(",", ((List<(EnumTipoOperacaoAuditoria Operacao, int Total)>)Model.EstatisticasPorOperacao).Select(e => e.Total)))],
+                backgroundColor: [
+                    '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1', '#fd7e14', '#20c997'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Gráfico de Atividade por Dia
+    const ctxAtividade = document.getElementById('graficoAtividade').getContext('2d');
+    new Chart(ctxAtividade, {
+        type: 'line',
+        data: {
+            labels: [@Html.Raw(string.Join(",", ((List<(DateTime Data, int Total)>)Model.OperacoesPorDia).Select(d => $"'{d.Data:dd/MM}'")))],
+            datasets: [{
+                label: 'Operações',
+                data: [@Html.Raw(string.Join(",", ((List<(DateTime Data, int Total)>)Model.OperacoesPorDia).Select(d => d.Total)))],
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0,123,255,0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    function atualizarDashboard() {
+        location.reload();
+    }
+</script>

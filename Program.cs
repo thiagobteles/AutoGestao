@@ -34,6 +34,12 @@ builder.Services.AddAuthorization();
 // Registrar serviços
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
+
+// Criar um background service para executar limpeza:
+builder.Services.AddHostedService<AuditCleanupBackgroundService>();
 
 var app = builder.Build();
 
@@ -48,6 +54,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Adicionar middleware de auditoria (ANTES de UseAuthentication)
+app.UseMiddleware<AutoGestao.Middleware.AuditMiddleware>();
 
 // 🔧 MIDDLEWARE DE AUTENTICAÇÃO
 app.UseAuthentication();

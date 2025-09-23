@@ -1,0 +1,464 @@
+@model IEnumerable<AutoGestao.Entidades.AuditLog>
+@{
+    ViewData["Title"] = "Auditoria do Sistema";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="fas fa-history me-2 text-primary"></i>
+            Auditoria do Sistema
+        </h1>
+        <p class="text-muted mb-0">Histórico completo de operações realizadas no sistema</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Dashboard" class="btn btn-info">
+            <i class="fas fa-chart-bar me-1"></i>
+            Dashboard
+        </a>
+        <button type="button" class="btn btn-success" onclick="exportarAuditoria()">
+            <i class="fas fa-file-excel me-1"></i>
+            Exportar
+        </button>
+    </div>
+</div>
+
+<!-- Filtros Avançados -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
+            <i class="fas fa-filter me-2"></i>
+            Filtros Avançados
+        </h6>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#filtrosAvancados">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+    <div class="collapse show" id="filtrosAvancados">
+        <div class="card-body">
+            <form method="get" id="filtroForm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-user me-1"></i>
+                            Usuário
+                        </label>
+                        <select name="usuarioId" class="form-select">
+                            <option value="">Todos os usuários</option>
+                            @foreach (var usuario in ViewBag.Usuarios as List<SelectListItem> ?? new List<SelectListItem>())
+                            {
+                                <option value="@usuario.Value" selected="@usuario.Selected">@usuario.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-database me-1"></i>
+                            Entidade
+                        </label>
+                        <select name="entidade" class="form-select">
+                            <option value="">Todas as entidades</option>
+                            @foreach (var entidade in ViewBag.Entidades as List<SelectListItem> ?? new List<SelectListItem>())
+                            {
+                                <option value="@entidade.Value" selected="@entidade.Selected">@entidade.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-cog me-1"></i>
+                            Operação
+                        </label>
+                        <select name="tipoOperacao" class="form-select">
+                            <option value="">Todas as operações</option>
+                            <option value="Create">Criação</option>
+                            <option value="Update">Alteração</option>
+                            <option value="Delete">Exclusão</option>
+                            <option value="Login">Login</option>
+                            <option value="Logout">Logout</option>
+                            <option value="LoginFailed">Login Falhado</option>
+                            <option value="PasswordChange">Alteração de Senha</option>
+                            <option value="View">Visualização</option>
+                            <option value="Export">Exportação</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Status
+                        </label>
+                        <select name="sucesso" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="true">Sucesso</option>
+                            <option value="false">Erro</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            Data Início
+                        </label>
+                        <input type="date" name="dataInicio" class="form-control" value="@ViewBag.DataInicio?.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            Data Fim
+                        </label>
+                        <input type="date" name="dataFim" class="form-control" value="@ViewBag.DataFim?.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-globe me-1"></i>
+                            IP Cliente
+                        </label>
+                        <input type="text" name="ipCliente" class="form-control" placeholder="192.168.1.1" value="@ViewBag.IpCliente">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i>
+                                Filtrar
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                Limpar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas Rápidas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-plus-circle fa-2x text-primary mb-2"></i>
+                <h5 class="card-title">@ViewBag.TotalCriacao</h5>
+                <p class="card-text text-muted">Criações</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <i class="fas fa-edit fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">@ViewBag.TotalAlteracao</h5>
+                <p class="card-text text-muted">Alterações</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-danger">
+            <div class="card-body text-center">
+                <i class="fas fa-trash fa-2x text-danger mb-2"></i>
+                <h5 class="card-title">@ViewBag.TotalExclusao</h5>
+                <p class="card-text text-muted">Exclusões</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <i class="fas fa-sign-in-alt fa-2x text-info mb-2"></i>
+                <h5 class="card-title">@ViewBag.TotalLogin</h5>
+                <p class="card-text text-muted">Logins</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Logs -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            Logs de Auditoria
+            <span class="badge bg-secondary ms-2">@ViewBag.TotalRegistros registros</span>
+        </h6>
+        <div class="d-flex gap-2">
+            <select class="form-select form-select-sm" style="width: auto;" onchange="alterarTamanhoPagina(this.value)">
+                <option value="25" selected="@(ViewBag.PageSize == 25)">25 por página</option>
+                <option value="50" selected="@(ViewBag.PageSize == 50)">50 por página</option>
+                <option value="100" selected="@(ViewBag.PageSize == 100)">100 por página</option>
+            </select>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th width="140">
+                            <i class="fas fa-calendar me-1"></i>
+                            Data/Hora
+                        </th>
+                        <th width="120">
+                            <i class="fas fa-user me-1"></i>
+                            Usuário
+                        </th>
+                        <th width="100">
+                            <i class="fas fa-cog me-1"></i>
+                            Operação
+                        </th>
+                        <th width="120">
+                            <i class="fas fa-database me-1"></i>
+                            Entidade
+                        </th>
+                        <th width="80">
+                            <i class="fas fa-key me-1"></i>
+                            ID
+                        </th>
+                        <th>
+                            <i class="fas fa-list me-1"></i>
+                            Campos Alterados
+                        </th>
+                        <th width="100">
+                            <i class="fas fa-globe me-1"></i>
+                            IP
+                        </th>
+                        <th width="60">
+                            <i class="fas fa-check me-1"></i>
+                            Status
+                        </th>
+                        <th width="60">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model)
+                    {
+                        <tr data-id="@log.Id" style="cursor: pointer;" onclick="verDetalhes(@log.Id)">
+                            <td>
+                                <small class="text-muted">
+                                    @log.DataHora.ToString("dd/MM/yyyy")
+                                </small><br>
+                                <small class="fw-bold">
+                                    @log.DataHora.ToString("HH:mm:ss")
+                                </small>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle me-2 text-muted"></i>
+                                    <div>
+                                        <div class="fw-bold">@log.UsuarioNome</div>
+                                        @if (!string.IsNullOrEmpty(log.UsuarioEmail))
+                                        {
+                                            <small class="text-muted">@log.UsuarioEmail</small>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @{
+                                    var operacaoClass = log.TipoOperacao switch
+                                    {
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "success",
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "warning",
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "danger",
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "info",
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.LoginFailed => "danger",
+                                        _ => "secondary"
+                                    };
+
+                                    var operacaoIcon = log.TipoOperacao switch
+                                    {
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "fa-plus",
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "fa-edit",
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "fa-trash",
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "fa-sign-in-alt",
+                                        AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.LoginFailed => "fa-times-circle",
+                                        _ => "fa-cog"
+                                    };
+                                }
+                                <span class="badge bg-@operacaoClass">
+                                    <i class="fas @operacaoIcon me-1"></i>
+                                    @log.TipoOperacao
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-bold">@(log.EntidadeDisplayName ?? log.EntidadeNome)</div>
+                                @if (!string.IsNullOrEmpty(log.TabelaNome))
+                                {
+                                    <small class="text-muted">@log.TabelaNome</small>
+                                }
+                            </td>
+                            <td>
+                                <code class="small">@log.EntidadeId</code>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(log.CamposAlterados))
+                                {
+                                    <span class="badge bg-light text-dark" title="@log.CamposAlterados">
+                                        @(log.CamposAlterados.Length > 30 ? log.CamposAlterados.Substring(0, 30) + "..." : log.CamposAlterados)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(log.IpCliente))
+                                {
+                                    <code class="small">@log.IpCliente</code>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (log.Sucesso)
+                                {
+                                    <i class="fas fa-check-circle text-success" title="Sucesso"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-times-circle text-danger" title="@log.MensagemErro"></i>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="@Url.Action("Details", new { id = log.Id })" class="btn btn-outline-primary btn-sm" title="Ver Detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if (!string.IsNullOrEmpty(log.EntidadeNome) && !string.IsNullOrEmpty(log.EntidadeId) && log.EntidadeNome != "HttpRequest")
+                                    {
+                                        <button type="button" class="btn btn-outline-info btn-sm" onclick="verEntidade('@log.EntidadeNome', '@log.EntidadeId')" title="Ver Entidade">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (ViewBag.TotalPaginas > 1)
+    {
+        <div class="card-footer">
+            <nav aria-label="Paginação da auditoria">
+                <ul class="pagination justify-content-center mb-0">
+                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.PaginaAtual ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+<!-- Modal de Exportação -->
+<div class="modal fade" id="modalExportar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-excel me-2"></i>
+                    Exportar Auditoria
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formExportar" method="post" action="@Url.Action("ExportarCSV")">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Os filtros aplicados na listagem serão mantidos na exportação.
+                                <strong>Máximo de 10.000 registros.</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data Início</label>
+                            <input type="date" name="dataInicio" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data Fim</label>
+                            <input type="date" name="dataFim" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Formato</label>
+                            <select name="formato" class="form-select">
+                                <option value="csv">CSV (Excel)</option>
+                                <option value="json" disabled>JSON (Em breve)</option>
+                                <option value="pdf" disabled>PDF (Em breve)</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="executarExportacao()">
+                    <i class="fas fa-download me-1"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function verDetalhes(id) {
+        window.location.href = '@Url.Action("Details")/' + id;
+    }
+
+    function verEntidade(entidade, id) {
+        const controllerMap = {
+            'Usuario': 'Usuarios',
+            'Veiculo': 'Veiculos',
+            'Cliente': 'Clientes',
+            'Vendedor': 'Vendedores',
+            'Fornecedor': 'Fornecedores',
+            'Produto': 'Produtos',
+            'Venda': 'Vendas',
+            'Despesa': 'Despesas'
+        };
+
+        const controller = controllerMap[entidade];
+        if (controller) {
+            window.open(`/${controller}/Details/${id}`, '_blank');
+        }
+    }
+
+    function exportarAuditoria() {
+        const modal = new bootstrap.Modal(document.getElementById('modalExportar'));
+        modal.show();
+    }
+
+    function executarExportacao() {
+        document.getElementById('formExportar').submit();
+        bootstrap.Modal.getInstance(document.getElementById('modalExportar')).hide();
+    }
+
+    function alterarTamanhoPagina(tamanho) {
+        const url = new URL(window.location);
+        url.searchParams.set('pageSize', tamanho);
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    }
+
+    // Auto-refresh a cada 30 segundos (opcional)
+    let autoRefresh = false;
+    function toggleAutoRefresh() {
+        autoRefresh = !autoRefresh;
+        if (autoRefresh) {
+            setInterval(() => {
+                if (autoRefresh) {
+                    location.reload();
+                }
+            }, 30000);
+        }
+    }
+</script>

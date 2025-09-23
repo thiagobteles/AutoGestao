@@ -9,14 +9,9 @@ using System.Security.Claims;
 namespace AutoGestao.Controllers
 {
     [AllowAnonymous]
-    public class LoginController : Controller
+    public class LoginController(IAuthService authService) : Controller
     {
-        private readonly IAuthService _authService;
-
-        public LoginController(IAuthService authService)
-        {
-            _authService = authService;
-        }
+        private readonly IAuthService _authService = authService;
 
         [HttpGet]
         public IActionResult Index()

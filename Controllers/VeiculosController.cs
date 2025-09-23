@@ -345,7 +345,16 @@ namespace AutoGestao.Controllers
                 .Include(v => v.Despesas)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            return veiculo == null ? NotFound() : View(veiculo);
+            if (veiculo == null)
+            {
+                return NotFound();
+            }
+
+            // Adicionar histórico de auditoria
+            await this.AddAuditHistoryToViewBag(_context, veiculo);
+
+            var viewModel = BuildFormViewModel(veiculo, "Details");
+            return View(viewModel);
         }
 
         [HttpPost]

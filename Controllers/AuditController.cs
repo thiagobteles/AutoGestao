@@ -1,0 +1,355 @@
+using AutoGestao.Data;
+using AutoGestao.Entidades;
+using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Models;
+using AutoGestao.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+
+namespace AutoGestao.Controllers
+{
+    [Authorize(Roles = "Admin,Gerente")]
+    public class AuditController(ApplicationDbContext context, IAuditService auditService) : StandardGridController<AuditLog>(context)
+    {
+        private readonly IAuditService _auditService = auditService;
+
+        protected override IQueryable<AuditLog> GetBaseQuery()
+        {
+            return _context.AuditLogs
+                .Include(a => a.Usuario)
+                .OrderByDescending(a => a.DataHora);
+        }
+
+        protected override List<SelectListItem> GetSelectOptions(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(AuditLog.TipoOperacao) => Enum.GetValues<EnumTipoOperacaoAuditoria>()
+                    .Select(e => new SelectListItem
+                    {
+                        Value = e.ToString(),
+                        Text = GetOperationDisplayName(e)
+                    }).ToList(),
+                nameof(AuditLog.UsuarioId) => _context.Usuarios
+                    .Where(u => u.Ativo)
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.Id.ToString(),
+                        Text = u.Nome
+                    }).ToList(),
+                "EntidadeNome" => _context.AuditLogs
+                    .Select(a => a.EntidadeNome)
+                    .Distinct()
+                    .OrderBy(e => e)
+                    .Select(e => new SelectListItem { Value = e, Text = e })
+                    .ToList(),
+                _ => base.GetSelectOptions(propertyName)
+            };
+        }
+
+        // Sobrescrever para desabilitar criação, edição e exclusão
+        public override Task<IActionResult> Create()
+        {
+            TempData["ErrorMessage"] = "Logs de auditoria não podem ser criados manualmente.";
+            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        }
+
+        public override Task<IActionResult> Edit(int id)
+        {
+            TempData["ErrorMessage"] = "Logs de auditoria não podem ser editados.";
+            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        }
+
+        public override Task<IActionResult> Delete(int id)
+        {
+            TempData["ErrorMessage"] = "Logs de auditoria não podem ser excluídos.";
+            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        }
+
+        protected override bool CanEdit(AuditLog entity)
+        {
+            return false; // Auditoria é read-only
+        }
+
+        protected override bool CanDelete(AuditLog entity)
+        {
+            return false; // Auditoria é read-only
+        }
+
+        protected override void ConfigureFormFields(List<FormFieldViewModel> fields, AuditLog entity, string action)
+        {
+            // Formatar campos especiais para visualização
+            if (action == "Details")
+            {
+                // Formatar JSON de valores
+                var valoresAntigosField = fields.FirstOrDefault(f => f.PropertyName == nameof(AuditLog.ValoresAntigos));
+                if (valoresAntigosField != null && !string.IsNullOrEmpty(entity.ValoresAntigos))
+                {
+                    valoresAntigosField.Value = FormatJson(entity.ValoresAntigos);
+                }
+
+                var valoresNovosField = fields.FirstOrDefault(f => f.PropertyName == nameof(AuditLog.ValoresNovos));
+                if (valoresNovosField != null && !string.IsNullOrEmpty(entity.ValoresNovos))
+                {
+                    valoresNovosField.Value = FormatJson(entity.ValoresNovos);
+                }
+
+                // Adicionar link para a entidade auditada (se existir)
+                if (!string.IsNullOrEmpty(entity.EntidadeNome) && !string.IsNullOrEmpty(entity.EntidadeId))
+                {
+                    var linkField = new FormFieldViewModel
+                    {
+                        PropertyName = "LinkEntidade",
+                        DisplayName = "Ver Entidade",
+                        Value = GetEntityLink(entity.EntidadeNome, entity.EntidadeId),
+                        ReadOnly = true,
+                        Section = "Navegação",
+                        Icon = "fas fa-external-link-alt"
+                    };
+                    fields.Add(linkField);
+                }
+
+                // Adicionar informações de duração se disponível
+                if (entity.DuracaoMs.HasValue)
+                {
+                    var duracaoField = fields.FirstOrDefault(f => f.PropertyName == nameof(AuditLog.DuracaoMs));
+                    if (duracaoField != null)
+                    {
+                        duracaoField.Value = $"{entity.DuracaoMs}ms";
+                        if (entity.DuracaoMs > 1000)
+                        {
+                            duracaoField.Value += $" ({entity.DuracaoMs / 1000.0:F2}s)";
+                        }
+                    }
+                }
+            }
+        }
+
+        // Ações personalizadas para relatórios
+        [HttpGet]
+        public async Task<IActionResult> Dashboard()
+        {
+            var ultimosDias = 30;
+            var dataInicio = DateTime.UtcNow.AddDays(-ultimosDias);
+
+            var estatisticas = await _context.AuditLogs
+                .Where(a => a.DataHora >= dataInicio)
+                .GroupBy(a => a.TipoOperacao)
+                .Select(g => new {
+                    Operacao = g.Key,
+                    Total = g.Count()
+                })
+                .ToListAsync();
+
+            var operacoesPorDia = await _context.AuditLogs
+                .Where(a => a.DataHora >= dataInicio)
+                .GroupBy(a => a.DataHora.Date)
+                .Select(g => new {
+                    Data = g.Key,
+                    Total = g.Count()
+                })
+                .OrderBy(x => x.Data)
+                .ToListAsync();
+
+            var usuariosMaisAtivos = await _context.AuditLogs
+                .Where(a => a.DataHora >= dataInicio && a.UsuarioId.HasValue)
+                .GroupBy(a => new { a.UsuarioId, a.UsuarioNome })
+                .Select(g => new {
+                    Usuario = g.Key.UsuarioNome,
+                    Total = g.Count()
+                })
+                .OrderByDescending(x => x.Total)
+                .Take(10)
+                .ToListAsync();
+
+            var entidadesMaisAuditadas = await _context.AuditLogs
+                .Where(a => a.DataHora >= dataInicio)
+                .GroupBy(a => a.EntidadeDisplayName ?? a.EntidadeNome)
+                .Select(g => new {
+                    Entidade = g.Key,
+                    Total = g.Count()
+                })
+                .OrderByDescending(x => x.Total)
+                .Take(10)
+                .ToListAsync();
+
+            var viewModel = new
+            {
+                EstatisticasPorOperacao = estatisticas,
+                OperacoesPorDia = operacoesPorDia,
+                UsuariosMaisAtivos = usuariosMaisAtivos,
+                EntidadesMaisAuditadas = entidadesMaisAuditadas,
+                TotalOperacoes = estatisticas.Sum(e => e.Total),
+                UltimosDias = ultimosDias
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RelatorioUsuario(int usuarioId, DateTime? dataInicio = null, DateTime? dataFim = null)
+        {
+            dataInicio ??= DateTime.UtcNow.AddDays(-30);
+            dataFim ??= DateTime.UtcNow;
+
+            var usuario = await _context.Usuarios.FindAsync(usuarioId);
+            if (usuario == null)
+            {
+                return NotFound();
+            }
+
+            var logs = await _auditService.GetLogsAsync(
+                usuarioId: usuarioId,
+                dataInicio: dataInicio,
+                dataFim: dataFim,
+                take: 1000
+            );
+
+            var viewModel = new
+            {
+                Usuario = usuario,
+                DataInicio = dataInicio,
+                DataFim = dataFim,
+                Logs = logs,
+                TotalOperacoes = logs.Count,
+                OperacoesPorTipo = logs.GroupBy(l => l.TipoOperacao).ToDictionary(g => g.Key, g => g.Count()),
+                EntidadesAfetadas = logs.GroupBy(l => l.EntidadeNome).ToDictionary(g => g.Key, g => g.Count())
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ExportarCSV(
+            int? usuarioId = null,
+            string? entidade = null,
+            EnumTipoOperacaoAuditoria? tipoOperacao = null,
+            DateTime? dataInicio = null,
+            DateTime? dataFim = null)
+        {
+            try
+            {
+                var logs = await _auditService.GetLogsAsync(
+                    usuarioId, entidade, tipoOperacao, dataInicio, dataFim, take: 10000
+                );
+
+                var csv = GenerateCSV(logs);
+                var fileName = $"auditoria_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
+
+                // Log da exportação
+                await _auditService.LogAsync(
+                    "AuditLog",
+                    "Export",
+                    EnumTipoOperacaoAuditoria.Export,
+                    valoresNovos: new
+                    {
+                        TotalRegistros = logs.Count,
+                        Filtros = new { usuarioId, entidade, tipoOperacao, dataInicio, dataFim }
+                    }
+                );
+
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        private string FormatJson(string json)
+        {
+            try
+            {
+                var parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+                return Newtonsoft.Json.JsonConvert.SerializeObject(parsed, Newtonsoft.Json.Formatting.Indented);
+            }
+            catch
+            {
+                return json;
+            }
+        }
+
+        private string GetEntityLink(string entidadeNome, string entidadeId)
+        {
+            var controllerMap = new Dictionary<string, string>
+            {
+                { "Usuario", "Usuarios" },
+                { "Veiculo", "Veiculos" },
+                { "Cliente", "Clientes" },
+                { "Vendedor", "Vendedores" },
+                { "Fornecedor", "Fornecedores" },
+                { "Produto", "Produtos" },
+                { "Venda", "Vendas" },
+                { "Despesa", "Despesas" }
+            };
+
+            if (controllerMap.TryGetValue(entidadeNome, out string? controller))
+            {
+                return $"<a href='/{controller}/Details/{entidadeId}' target='_blank' class='btn btn-sm btn-outline-primary'><i class='fas fa-external-link-alt me-1'></i>Ver {entidadeNome}</a>";
+            }
+
+            return $"{entidadeNome} #{entidadeId}";
+        }
+
+        private static string GetOperationDisplayName(EnumTipoOperacaoAuditoria operacao)
+        {
+            return operacao switch
+            {
+                EnumTipoOperacaoAuditoria.Create => "Criação",
+                EnumTipoOperacaoAuditoria.Update => "Alteração",
+                EnumTipoOperacaoAuditoria.Delete => "Exclusão",
+                EnumTipoOperacaoAuditoria.Login => "Login",
+                EnumTipoOperacaoAuditoria.Logout => "Logout",
+                EnumTipoOperacaoAuditoria.LoginFailed => "Login Falhado",
+                EnumTipoOperacaoAuditoria.PasswordChange => "Alteração de Senha",
+                EnumTipoOperacaoAuditoria.View => "Visualização",
+                EnumTipoOperacaoAuditoria.Export => "Exportação",
+                EnumTipoOperacaoAuditoria.Import => "Importação",
+                _ => operacao.ToString()
+            };
+        }
+
+        private string GenerateCSV(List<AuditLog> logs)
+        {
+            var csv = new System.Text.StringBuilder();
+
+            // Header
+            csv.AppendLine("Data/Hora,Usuário,Email,Operação,Entidade,ID Entidade,Campos Alterados,IP Cliente,Sucesso,Erro");
+
+            // Dados
+            foreach (var log in logs)
+            {
+                csv.AppendLine($"{log.DataHora:yyyy-MM-dd HH:mm:ss}," +
+                              $"\"{log.UsuarioNome}\"," +
+                              $"\"{log.UsuarioEmail}\"," +
+                              $"\"{GetOperationDisplayName(log.TipoOperacao)}\"," +
+                              $"\"{log.EntidadeDisplayName ?? log.EntidadeNome}\"," +
+                              $"\"{log.EntidadeId}\"," +
+                              $"\"{log.CamposAlterados}\"," +
+                              $"\"{log.IpCliente}\"," +
+                              $"{(log.Sucesso ? "Sim" : "Não")}," +
+                              $"\"{log.MensagemErro}\"");
+            }
+
+            return csv.ToString();
+        }
+
+        protected override StandardGridViewModel ConfigureGrid()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override IQueryable<AuditLog> ApplyFilters(IQueryable<AuditLog> query, Dictionary<string, object> filters)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override IQueryable<AuditLog> ApplySort(IQueryable<AuditLog> query, string orderBy, string orderDirection)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

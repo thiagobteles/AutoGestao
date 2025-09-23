@@ -1,9 +1,11 @@
 using AutoGestao.Atributes;
+using AutoGestao.Attributes;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoGestao.Entidades
 {
+    [Auditable(EntityDisplayName = "Usuário")]
     [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users", EnableAjaxSubmit = true)]
     public class Usuario : BaseEntidade
     {
@@ -16,6 +18,7 @@ namespace AutoGestao.Entidades
         [FormField(DisplayName = "Email/Login", Icon = "fas fa-envelope", Type = FormFieldType.Email, Required = true, Order = 2, Section = "Dados Básicos")]
         public string Email { get; set; } = "";
 
+        [AuditSensitive(MaskPattern = "***")]
         [Required]
         [FormField(DisplayName = "Senha", Icon = "fas fa-lock", Type = FormFieldType.Password, Required = true, Order = 3, Section = "Dados Básicos")]
         public string SenhaHash { get; set; } = "";
@@ -44,5 +47,10 @@ namespace AutoGestao.Entidades
 
         // Navigation properties
         public virtual ICollection<Tarefa> TarefasResponsavel { get; set; } = [];
+
+        // Navigation properties para auditoria
+        public virtual ICollection<AuditLog> AuditLogs { get; set; } = [];
+        public virtual ICollection<BaseEntidade> EntidadesCriadas { get; set; } = [];
+        public virtual ICollection<BaseEntidade> EntidadesAlteradas { get; set; } = [];
     }
 }
