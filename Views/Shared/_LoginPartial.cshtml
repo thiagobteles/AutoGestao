@@ -36,20 +36,6 @@
                     </span>
                 </li>
 
-                <li>
-                    <span class="dropdown-item-text">
-                        <i class="fas fa-key me-2"></i>
-                        <strong>Permissões:</strong>
-                        <small class="text-muted">
-                            @string.Join(", ", User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).Take(3))
-                            @if (User.Claims.Where(c => c.Type == ClaimTypes.Role).Count() > 3)
-                            {
-                                <text>...</text>
-                            }
-                        </small>
-                    </span>
-                </li>
-
                 <li><hr class="dropdown-divider"></li>
 
                 <li>
