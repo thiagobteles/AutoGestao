@@ -3,34 +3,32 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AUTO-GESTÃO</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - AutoGestão</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    @* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <ul class="navbar-nav ms-auto">
-        <partial name="_LoginPartial" />
-    </ul>
-
     <div class="layout-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
-                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Recolher Menu">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
                 <a href="@Url.Action("Index", "Home")" class="brand-logo">
                     <i class="fas fa-car"></i>
                     <div class="brand-text-content">
-                        <span>Auto Gestão</span>
+                        <span>AutoGestão</span>
                     </div>
                 </a>
+                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Recolher Menu">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
 
             <nav class="sidebar-menu">
+                <!-- Principal -->
                 <div class="menu-section">
                     <div class="menu-section-title">Principal</div>
                     <div class="menu-item">
@@ -41,6 +39,8 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Cadastros -->
                 <div class="menu-section">
                     <div class="menu-section-title">Cadastros</div>
                     <div class="menu-item">
@@ -64,7 +64,16 @@
                             <div class="menu-tooltip">Vendedores</div>
                         </a>
                     </div>
+                    <div class="menu-item">
+                        <a href="@Url.Action("Index", "Fornecedores")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Fornecedores" ? "active" : "")">
+                            <i class="fas fa-truck"></i>
+                            <span class="menu-link-text">Fornecedores</span>
+                            <div class="menu-tooltip">Fornecedores</div>
+                        </a>
+                    </div>
                 </div>
+
+                <!-- Operações -->
                 <div class="menu-section">
                     <div class="menu-section-title">Operações</div>
                     <div class="menu-item">
@@ -81,40 +90,80 @@
                             <div class="menu-tooltip">Avaliações</div>
                         </a>
                     </div>
-                    <div class="menu-item">
-                        <a href="@Url.Action("Index", "Financeiro")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Financeiro" ? "active" : "")">
-                            <i class="fas fa-coins"></i>
-                            <span class="menu-link-text">Financeiro</span>
-                            <div class="menu-tooltip">Financeiro</div>
-                        </a>
-                    </div>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Financeiro"))
+                    {
+                        <div class="menu-item">
+                            <a href="@Url.Action("Index", "Despesas")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Despesas" ? "active" : "")">
+                                <i class="fas fa-credit-card"></i>
+                                <span class="menu-link-text">Despesas</span>
+                                <div class="menu-tooltip">Despesas</div>
+                            </a>
+                        </div>
+                    }
                 </div>
+
+                <!-- Produtos -->
                 <div class="menu-section">
                     <div class="menu-section-title">Produtos</div>
                     <div class="menu-item">
-                        <a class="nav-link" asp-controller="Produtos" asp-action="Index">
-                            <i class="fas fa-box me-1"></i>
-                            Produtos
-                        </a>
-                    </div>
-                </div>
-                <div class="menu-section">
-                    <div class="menu-section-title">Relatórios</div>
-                    <div class="menu-item">
-                        <a href="@Url.Action("Vendas", "Relatorios")" class="menu-link">
-                            <i class="fas fa-chart-bar"></i>
-                            <span class="menu-link-text">Vendas</span>
-                            <div class="menu-tooltip">Relatórios de Vendas</div>
+                        <a href="@Url.Action("Index", "Produtos")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Produtos" ? "active" : "")">
+                            <i class="fas fa-box"></i>
+                            <span class="menu-link-text">Produtos</span>
+                            <div class="menu-tooltip">Produtos</div>
                         </a>
                     </div>
                     <div class="menu-item">
-                        <a href="@Url.Action("Estoque", "Relatorios")" class="menu-link">
-                            <i class="fas fa-chart-line"></i>
-                            <span class="menu-link-text">Estoque</span>
-                            <div class="menu-tooltip">Relatórios de Estoque</div>
+                        <a href="@Url.Action("Index", "ItensVenda")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ItensVenda" ? "active" : "")">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="menu-link-text">Itens de Venda</span>
+                            <div class="menu-tooltip">Itens de Venda</div>
                         </a>
                     </div>
                 </div>
+
+                <!-- Relatórios -->
+                @if (User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Financeiro"))
+                {
+                    <div class="menu-section">
+                        <div class="menu-section-title">Relatórios</div>
+                        <div class="menu-item">
+                            <a href="@Url.Action("Vendas", "Relatorios")" class="menu-link">
+                                <i class="fas fa-chart-bar"></i>
+                                <span class="menu-link-text">Vendas</span>
+                                <div class="menu-tooltip">Relatórios de Vendas</div>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="@Url.Action("Estoque", "Relatorios")" class="menu-link">
+                                <i class="fas fa-chart-line"></i>
+                                <span class="menu-link-text">Estoque</span>
+                                <div class="menu-tooltip">Relatórios de Estoque</div>
+                            </a>
+                        </div>
+                    </div>
+                }
+
+                <!-- Administração -->
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="menu-section">
+                        <div class="menu-section-title">Administração</div>
+                        <div class="menu-item">
+                            <a href="@Url.Action("Index", "Usuarios")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "")">
+                                <i class="fas fa-users-cog"></i>
+                                <span class="menu-link-text">Usuários</span>
+                                <div class="menu-tooltip">Usuários</div>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="@Url.Action("Index", "Configuracoes")" class="menu-link">
+                                <i class="fas fa-cog"></i>
+                                <span class="menu-link-text">Configurações</span>
+                                <div class="menu-tooltip">Configurações</div>
+                            </a>
+                        </div>
+                    </div>
+                }
             </nav>
         </aside>
 
@@ -135,18 +184,7 @@
                     </nav>
                 </div>
                 <div class="topbar-right">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="text-muted">Bem-vindo, Admin</span>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configurações</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
-                            </ul>
-                        </div>
-                    </div>
+                    <partial name="_LoginPartial" />
                 </div>
             </header>
 
@@ -157,8 +195,10 @@
         </div>
     </div>
 
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @* <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> *@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
