@@ -3,6 +3,7 @@ using System;
 using AutoGestao.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoGestao.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250922170839_AddProdutoUsuarioLoginAuth")]
+    partial class AddProdutoUsuarioLoginAuth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,7 +45,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 426, DateTimeKind.Utc).AddTicks(472))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(7507))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataAvaliacao")
@@ -156,7 +159,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 425, DateTimeKind.Utc).AddTicks(5667))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(2253))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -243,7 +246,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 426, DateTimeKind.Utc).AddTicks(867))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(7907))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -316,7 +319,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 426, DateTimeKind.Utc).AddTicks(1080))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(8156))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -389,7 +392,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 425, DateTimeKind.Utc).AddTicks(6873))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(3482))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -474,7 +477,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 426, DateTimeKind.Utc).AddTicks(2452))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 785, DateTimeKind.Utc).AddTicks(4122))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -540,7 +543,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 426, DateTimeKind.Utc).AddTicks(108))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(7075))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -624,7 +627,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 426, DateTimeKind.Utc).AddTicks(1942))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 785, DateTimeKind.Utc).AddTicks(3418))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -673,8 +676,7 @@ namespace AutoGestao.Migrations
                     b.HasIndex("Codigo")
                         .IsUnique();
 
-                    b.HasIndex("Nome")
-                        .HasDatabaseName("ix_produto_nome");
+                    b.HasIndex("Nome");
 
                     b.ToTable("produtos");
                 });
@@ -691,7 +693,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 426, DateTimeKind.Utc).AddTicks(1407))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(8513))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -763,20 +765,19 @@ namespace AutoGestao.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Ativo")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(true)
                         .HasColumnName("ativo");
 
                     b.Property<string>("CPF")
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)")
+                        .HasColumnType("text")
                         .HasColumnName("cpf");
 
+                    b.Property<string>("ConfirmarSenha")
+                        .HasColumnType("text")
+                        .HasColumnName("confirmar_senha");
+
                     b.Property<DateTime>("DataAlteracao")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 426, DateTimeKind.Utc).AddTicks(2924))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -785,19 +786,16 @@ namespace AutoGestao.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)")
+                        .HasColumnType("text")
                         .HasColumnName("email");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)")
+                        .HasColumnType("text")
                         .HasColumnName("nome");
 
                     b.Property<string>("Observacoes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
+                        .HasColumnType("text")
                         .HasColumnName("observacoes");
 
                     b.Property<int>("Perfil")
@@ -806,13 +804,11 @@ namespace AutoGestao.Migrations
 
                     b.Property<string>("SenhaHash")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("text")
                         .HasColumnName("senha_hash");
 
                     b.Property<string>("Telefone")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("text")
                         .HasColumnName("telefone");
 
                     b.Property<DateTime?>("UltimoLogin")
@@ -821,12 +817,6 @@ namespace AutoGestao.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_usuarios");
-
-                    b.HasIndex("CPF")
-                        .IsUnique();
-
-                    b.HasIndex("Email")
-                        .IsUnique();
 
                     b.ToTable("usuarios");
                 });
@@ -870,7 +860,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 425, DateTimeKind.Utc).AddTicks(8070))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(4899))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1069,7 +1059,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 425, DateTimeKind.Utc).AddTicks(9306))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(6257))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1159,7 +1149,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 425, DateTimeKind.Utc).AddTicks(8987))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(5894))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1314,7 +1304,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 425, DateTimeKind.Utc).AddTicks(9676))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(6619))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1407,7 +1397,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 22, 18, 6, 44, 425, DateTimeKind.Utc).AddTicks(6195))
+                        .HasDefaultValue(new DateTime(2025, 9, 22, 17, 8, 38, 783, DateTimeKind.Utc).AddTicks(2814))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")

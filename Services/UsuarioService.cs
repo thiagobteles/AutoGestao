@@ -1,7 +1,6 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Services.Interface;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Services
@@ -13,12 +12,11 @@ namespace AutoGestao.Services
         public async Task<Usuario> CriarUsuarioAsync(Usuario usuario, string senha)
         {
             usuario.SenhaHash = AuthService.HashPassword(senha);
-            usuario.DataCadastro = DateTime.Now;
-            usuario.DataAlteracao = DateTime.Now;
+            usuario.DataCadastro = DateTime.UtcNow;
+            usuario.DataAlteracao = DateTime.UtcNow;
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
-
             return usuario;
         }
 
@@ -47,7 +45,7 @@ namespace AutoGestao.Services
             }
 
             usuario.SenhaHash = AuthService.HashPassword(novaSenha);
-            usuario.DataAlteracao = DateTime.Now;
+            usuario.DataAlteracao = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return true;

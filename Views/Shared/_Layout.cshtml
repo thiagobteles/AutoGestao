@@ -11,6 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <ul class="navbar-nav ms-auto">
+        <partial name="_LoginPartial" />
+    </ul>
+
     <div class="layout-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -37,7 +41,6 @@
                         </a>
                     </div>
                 </div>
-
                 <div class="menu-section">
                     <div class="menu-section-title">Cadastros</div>
                     <div class="menu-item">
@@ -62,7 +65,6 @@
                         </a>
                     </div>
                 </div>
-
                 <div class="menu-section">
                     <div class="menu-section-title">Operações</div>
                     <div class="menu-item">
@@ -87,7 +89,15 @@
                         </a>
                     </div>
                 </div>
-
+                <div class="menu-section">
+                    <div class="menu-section-title">Produtos</div>
+                    <div class="menu-item">
+                        <a class="nav-link" asp-controller="Produtos" asp-action="Index">
+                            <i class="fas fa-box me-1"></i>
+                            Produtos
+                        </a>
+                    </div>
+                </div>
                 <div class="menu-section">
                     <div class="menu-section-title">Relatórios</div>
                     <div class="menu-item">
@@ -916,3 +926,40 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<style>
+    .grid-1 {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+        .form-section h6 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 0.5rem;
+        }
+
+    .btn-action {
+        transition: all 0.3s ease;
+    }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+        }
+</style>

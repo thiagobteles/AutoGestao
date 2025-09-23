@@ -7,7 +7,6 @@ namespace AutoGestao.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
-        // DbSets principais
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Vendedor> Vendedores { get; set; }
         public DbSet<Fornecedor> Fornecedores { get; set; }
@@ -25,8 +24,9 @@ namespace AutoGestao.Data
         public DbSet<Despesa> Despesas { get; set; }
         public DbSet<DespesaTipo> DespesaTipos { get; set; }
         public DbSet<Tarefa> Tarefas { get; set; }
-
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Produto> Produtos { get; set; }
+        public DbSet<ItemVenda> ItensVenda { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -308,6 +308,54 @@ namespace AutoGestao.Data
             });
 
             // ===========================================
+            // CONFIGURAÇÕES DA ENTIDADE PRODUTO
+            // ===========================================
+            modelBuilder.Entity<Produto>(entity =>
+            {
+                entity.Property(e => e.Codigo).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Nome).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.Descricao).HasMaxLength(1000);
+                entity.Property(e => e.PrecoCusto).HasColumnType("decimal(10,2)");
+                entity.Property(e => e.PrecoVenda).HasColumnType("decimal(10,2)").IsRequired();
+                entity.Property(e => e.Observacoes).HasMaxLength(2000);
+                entity.Property(e => e.Ativo).IsRequired().HasDefaultValue(true);
+                entity.Property(e => e.DataCadastro).IsRequired();
+                entity.Property(e => e.DataAlteracao).IsRequired().HasDefaultValue(DateTime.UtcNow);
+            });
+
+            // ===========================================
+            // CONFIGURAÇÕES DA ENTIDADE ITEMVENDA
+            // ===========================================
+            modelBuilder.Entity<ItemVenda>(entity =>
+            {
+                entity.Property(e => e.Quantidade).IsRequired();
+                entity.Property(e => e.ValorUnitario).HasColumnType("decimal(10,2)").IsRequired();
+                entity.Property(e => e.PercentualDesconto).HasColumnType("decimal(5,2)").HasDefaultValue(0);
+                entity.Property(e => e.ValorDesconto).HasColumnType("decimal(10,2)");
+                entity.Property(e => e.ValorTotal).HasColumnType("decimal(10,2)");
+                entity.Property(e => e.Observacoes).HasMaxLength(500);
+                entity.Property(e => e.DataCadastro).IsRequired();
+                entity.Property(e => e.DataAlteracao).IsRequired().HasDefaultValue(DateTime.UtcNow);
+            });
+
+            // ===========================================
+            // CONFIGURAÇÕES DA ENTIDADE USUARIO
+            // ===========================================
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
+                entity.Property(e => e.Email).HasMaxLength(150).IsRequired();
+                entity.Property(e => e.SenhaHash).HasMaxLength(255).IsRequired();
+                entity.Property(e => e.CPF).HasMaxLength(14);
+                entity.Property(e => e.Telefone).HasMaxLength(20);
+                entity.Property(e => e.Perfil).IsRequired();
+                entity.Property(e => e.Ativo).IsRequired().HasDefaultValue(true);
+                entity.Property(e => e.Observacoes).HasMaxLength(2000);
+                entity.Property(e => e.DataCadastro).IsRequired();
+                entity.Property(e => e.DataAlteracao).IsRequired().HasDefaultValue(DateTime.UtcNow);
+            });
+
+            // ===========================================
             // CONFIGURAÇÕES DE RELACIONAMENTOS
             // ===========================================
             // Relacionamentos do Veículo
@@ -348,7 +396,13 @@ namespace AutoGestao.Data
             
             // Relacionamentos das Tarefas
             modelBuilder.Entity<Tarefa>().HasOne(t => t.Responsavel).WithMany(v => v.Tarefas).HasForeignKey(t => t.ResponsavelId).OnDelete(DeleteBehavior.SetNull);
-            
+
+            // Relacionamentos dos Itens Vendas
+            modelBuilder.Entity<ItemVenda>().HasOne(i => i.Venda).WithMany(v => v.Itens).HasForeignKey(i => i.VendaId).OnDelete(DeleteBehavior.Cascade);
+
+            // Não permitir deletar produto se tiver itens de venda
+            modelBuilder.Entity<ItemVenda>().HasOne(i => i.Produto).WithMany(p => p.ItensVenda).HasForeignKey(i => i.ProdutoId).OnDelete(DeleteBehavior.Restrict);
+
             // ===========================================
             // CONFIGURAÇÕES DE ÍNDICES
             // ===========================================
@@ -412,24 +466,30 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Despesa>().HasIndex(d => d.VeiculoId);
             modelBuilder.Entity<Despesa>().HasIndex(d => d.FornecedorId);
 
-            // Índices compostos para consultas comuns
-            modelBuilder.Entity<Veiculo>()
-                .HasIndex(v => new { v.Situacao, v.VeiculoMarcaId })
-                .HasDatabaseName("ix_veiculo_situacao_marca");
+            // Índices - Um produto por venda
+            modelBuilder.Entity<ItemVenda>().HasIndex(e => new { e.VendaId, e.ProdutoId }).IsUnique();
 
-            modelBuilder.Entity<Venda>()
-                .HasIndex(v => new { v.DataVenda, v.Status })
-                .HasDatabaseName("ix_venda_data_status");
-            
-            modelBuilder.Entity<Parcela>()
-                .HasIndex(p => new { p.DataVencimento, p.Status })
-                .HasDatabaseName("ix_parcela_vencimento_status");
-            
+            // Índices - Produto Código Único
+            modelBuilder.Entity<Produto>().HasIndex(e => e.Codigo).IsUnique();
+
+            // Índices
+            modelBuilder.Entity<Usuario>().HasIndex(e => e.Email).IsUnique();
+            modelBuilder.Entity<Usuario>().HasIndex(e => e.CPF).IsUnique();
+
+            // Índices compostos para consultas comuns
+            modelBuilder.Entity<Veiculo>().HasIndex(v => new { v.Situacao, v.VeiculoMarcaId }).HasDatabaseName("ix_veiculo_situacao_marca");
+            modelBuilder.Entity<Venda>().HasIndex(v => new { v.DataVenda, v.Status }).HasDatabaseName("ix_venda_data_status");
+            modelBuilder.Entity<Parcela>().HasIndex(p => new { p.DataVencimento, p.Status }).HasDatabaseName("ix_parcela_vencimento_status");
+
             // Índices para campos de busca textual
             modelBuilder.Entity<Cliente>().HasIndex(c => c.Nome).HasDatabaseName("ix_cliente_nome");
             modelBuilder.Entity<Cliente>().HasIndex(c => c.Email).HasDatabaseName("ix_cliente_email");
             modelBuilder.Entity<Vendedor>().HasIndex(v => v.Nome).HasDatabaseName("ix_vendedor_nome");
             modelBuilder.Entity<Fornecedor>().HasIndex(f => f.Nome).HasDatabaseName("ix_fornecedor_nome");
+            modelBuilder.Entity<Produto>().HasIndex(e => e.Nome).HasDatabaseName("ix_produto_nome");
+
+            // Propriedade não mapeada
+            modelBuilder.Entity<Usuario>().Ignore(e => e.ConfirmarSenha);
         }
     }
 }

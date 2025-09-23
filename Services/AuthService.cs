@@ -21,9 +21,7 @@ namespace AutoGestao.Services
         {
             try
             {
-                var usuario = await _context.Usuarios
-                    .FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower() && u.Ativo);
-
+                var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower() && u.Ativo);
                 if (usuario == null || !VerifyPassword(request.Senha, usuario.SenhaHash))
                 {
                     return new LoginResponse
@@ -34,7 +32,7 @@ namespace AutoGestao.Services
                 }
 
                 // Atualizar último login
-                usuario.UltimoLogin = DateTime.Now;
+                usuario.UltimoLogin = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
                 // Gerar token JWT

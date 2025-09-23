@@ -172,7 +172,7 @@ namespace AutoGestao.Controllers
             if (vendedor != null)
             {
                 vendedor.Ativo = !vendedor.Ativo;
-                vendedor.DataAlteracao = DateTime.Now;
+                vendedor.DataAlteracao = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = $"Vendedor {(vendedor.Ativo ? "ativado" : "inativado")} com sucesso!";
@@ -210,7 +210,7 @@ namespace AutoGestao.Controllers
                 }
 
                 var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-                var fileName = $"vendedores_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                var fileName = $"vendedores_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
                 return File(bytes, "text/csv", fileName);
             }
             catch (Exception ex)

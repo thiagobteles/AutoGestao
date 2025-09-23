@@ -223,7 +223,7 @@ namespace AutoGestao.Controllers
 
         protected override Task BeforeCreate(Cliente entity)
         {
-            entity.DataCadastro = DateTime.Now;
+            entity.DataCadastro = DateTime.UtcNow;
             ValidateCliente(entity);
             return base.BeforeCreate(entity);
 
@@ -238,7 +238,7 @@ namespace AutoGestao.Controllers
 
         protected override Task BeforeUpdate(Cliente entity)
         {
-            entity.DataAlteracao = DateTime.Now;
+            entity.DataAlteracao = DateTime.UtcNow;
             ValidateCliente(entity);
             return base.BeforeUpdate(entity);
 
@@ -295,7 +295,7 @@ namespace AutoGestao.Controllers
             if (cliente != null)
             {
                 cliente.Ativo = !cliente.Ativo;
-                cliente.DataAlteracao = DateTime.Now;
+                cliente.DataAlteracao = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = $"Cliente {(cliente.Ativo ? "ativado" : "inativado")} com sucesso!";
@@ -337,7 +337,7 @@ namespace AutoGestao.Controllers
                 }
 
                 var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-                var fileName = $"clientes_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                var fileName = $"clientes_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
 
                 return File(bytes, "text/csv", fileName);
             }

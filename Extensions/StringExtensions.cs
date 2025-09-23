@@ -112,12 +112,9 @@ namespace AutoGestao.Extensions
             }
 
             var digits = new string(input.Where(char.IsDigit).ToArray());
-            if (digits.Length != 11)
-            {
-                return input.Trim();
-            }
-
-            return $"{digits.Substring(0, 3)}.{digits.Substring(3, 3)}.{digits.Substring(6, 3)}-{digits.Substring(9, 2)}";
+            return digits.Length != 11
+                ? input.Trim()
+                : $"{digits.Substring(0, 3)}.{digits.Substring(3, 3)}.{digits.Substring(6, 3)}-{digits.Substring(9, 2)}";
         }
 
         /// <summary>
@@ -132,12 +129,9 @@ namespace AutoGestao.Extensions
             }
 
             var digits = new string(input.Where(char.IsDigit).ToArray());
-            if (digits.Length != 14)
-            {
-                return input.Trim();
-            }
-
-            return $"{digits.Substring(0, 2)}.{digits.Substring(2, 3)}.{digits.Substring(5, 3)}/{digits.Substring(8, 4)}-{digits.Substring(12, 2)}";
+            return digits.Length != 14
+                ? input.Trim()
+                : $"{digits.Substring(0, 2)}.{digits.Substring(2, 3)}.{digits.Substring(5, 3)}/{digits.Substring(8, 4)}-{digits.Substring(12, 2)}";
         }
     }
 }

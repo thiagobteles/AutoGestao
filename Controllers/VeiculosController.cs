@@ -294,7 +294,7 @@ namespace AutoGestao.Controllers
             if (veiculo != null && veiculo.Situacao == EnumSituacaoVeiculo.Estoque)
             {
                 veiculo.Situacao = EnumSituacaoVeiculo.Reservado;
-                veiculo.DataAlteracao = DateTime.Now;
+                veiculo.DataAlteracao = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
                 
                 TempData["SuccessMessage"] = "Veículo reservado com sucesso!";
@@ -314,7 +314,7 @@ namespace AutoGestao.Controllers
             if (veiculo != null && veiculo.Situacao == EnumSituacaoVeiculo.Reservado)
             {
                 veiculo.Situacao = EnumSituacaoVeiculo.Estoque;
-                veiculo.DataAlteracao = DateTime.Now;
+                veiculo.DataAlteracao = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
                 
                 TempData["SuccessMessage"] = "Reserva do veículo liberada com sucesso!";
@@ -378,8 +378,8 @@ namespace AutoGestao.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    veiculo.DataCadastro = DateTime.Now;
-                    veiculo.DataAlteracao = DateTime.Now;
+                    veiculo.DataCadastro = DateTime.UtcNow;
+                    veiculo.DataAlteracao = DateTime.UtcNow;
                     _context.Add(veiculo);
                     await _context.SaveChangesAsync();
                     
@@ -439,7 +439,7 @@ namespace AutoGestao.Controllers
 
                     if (ModelState.IsValid)
                     {
-                        veiculo.DataAlteracao = DateTime.Now;
+                        veiculo.DataAlteracao = DateTime.UtcNow;
                         _context.Update(veiculo);
                         await _context.SaveChangesAsync();
                         
@@ -565,7 +565,7 @@ namespace AutoGestao.Controllers
                 }
 
                 var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-                var fileName = $"veiculos_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                var fileName = $"veiculos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
                 
                 return File(bytes, "text/csv", fileName);
             }
@@ -652,7 +652,7 @@ namespace AutoGestao.Controllers
 
         protected override Task BeforeCreate(Veiculo entity)
         {
-            entity.DataCadastro = DateTime.Now;
+            entity.DataCadastro = DateTime.UtcNow;
             entity.Situacao = EnumSituacaoVeiculo.Estoque;
 
             // Gerar código se não informado
@@ -667,7 +667,7 @@ namespace AutoGestao.Controllers
 
         protected override Task BeforeUpdate(Veiculo entity)
         {
-            entity.DataAlteracao = DateTime.Now;
+            entity.DataAlteracao = DateTime.UtcNow;
             ValidateVeiculo(entity);
             return base.BeforeUpdate(entity);
         }
@@ -682,7 +682,7 @@ namespace AutoGestao.Controllers
             if (action == "Details")
             {
                 // Adicionar tempo em estoque
-                var tempoEstoque = DateTime.Now - entity.DataCadastro;
+                var tempoEstoque = DateTime.UtcNow - entity.DataCadastro;
                 fields.Add(new FormFieldViewModel
                 {
                     PropertyName = "TempoEstoque",
@@ -724,7 +724,7 @@ namespace AutoGestao.Controllers
                 VeiculoId = veiculoId,
                 NomeArquivo = arquivo.FileName,
                 Observacoes = descricao,
-                DataUpload = DateTime.Now
+                DataUpload = DateTime.UtcNow
             };
 
             // Salvar arquivo e documento
@@ -764,7 +764,7 @@ namespace AutoGestao.Controllers
                 VeiculoId = veiculoId,
                 NomeArquivo = foto.FileName,
                 Descricao = descricao,
-                DataUpload = DateTime.Now
+                DataUpload = DateTime.UtcNow
             };
 
             SalvarFoto(foto, fotoEntidade);

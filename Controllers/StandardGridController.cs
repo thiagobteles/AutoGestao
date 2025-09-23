@@ -212,7 +212,7 @@ namespace AutoGestao.Controllers
         /// </summary>
         protected virtual Task BeforeCreate(T entity)
         {
-            entity.DataCadastro = DateTime.Now;
+            entity.DataCadastro = DateTime.UtcNow;
             return Task.CompletedTask;
         }
 
@@ -230,7 +230,7 @@ namespace AutoGestao.Controllers
         /// </summary>
         protected virtual Task BeforeUpdate(T entity)
         {
-            entity.DataAlteracao = DateTime.Now;
+            entity.DataAlteracao = DateTime.UtcNow;
             return Task.CompletedTask;
 
         }
@@ -500,12 +500,7 @@ namespace AutoGestao.Controllers
             var viewModel = BuildFormViewModel(entity, "Create");
             AddModelStateToViewModel(viewModel);
 
-            if (Request.IsAjaxRequest())
-            {
-                return PartialView("_StandardFormContent", viewModel);
-            }
-
-            return View("_StandardForm", viewModel);
+            return Request.IsAjaxRequest() ? PartialView("_StandardFormContent", viewModel) : View("_StandardForm", viewModel);
         }
 
         /// <summary>
@@ -560,12 +555,7 @@ namespace AutoGestao.Controllers
             var viewModel = BuildFormViewModel(entity, "Edit");
             AddModelStateToViewModel(viewModel);
 
-            if (Request.IsAjaxRequest())
-            {
-                return PartialView("_StandardFormContent", viewModel);
-            }
-
-            return View("_StandardForm", viewModel);
+            return Request.IsAjaxRequest() ? PartialView("_StandardFormContent", viewModel) : View("_StandardForm", viewModel);
         }
 
         /// <summary>
@@ -619,8 +609,110 @@ namespace AutoGestao.Controllers
 
         #endregion
 
-        #region Métodos Privados para Construção do ViewModel
+        #region Métodos para Sistema de Abas
 
+        /// <summary>
+        /// Configurar abas da entidade
+        /// </summary>
+        protected virtual List<FormTabViewModel> ConfigureTabs(T entity)
+        {
+            var tabs = new List<FormTabViewModel>
+            {
+                // Aba principal sempre existe
+                new FormTabViewModel
+                {
+                    TabId = "principal",
+                    TabName = "Dados Principais",
+                    TabIcon = "fas fa-info-circle",
+                    Order = 0,
+                    LazyLoad = false,
+                    IsActive = true
+                }
+            };
+
+            // Buscar abas configuradas via atributos
+            var tabAttributes = typeof(T).GetCustomAttributes<FormTabAttribute>()
+                .OrderBy(t => t.Order)
+                .ToList();
+
+            foreach (var tabAttr in tabAttributes)
+            {
+                var tab = new FormTabViewModel
+                {
+                    TabId = tabAttr.TabId,
+                    TabName = tabAttr.TabName,
+                    TabIcon = tabAttr.TabIcon,
+                    Order = tabAttr.Order,
+                    Controller = tabAttr.Controller,
+                    Action = tabAttr.Action,
+                    LazyLoad = tabAttr.LazyLoad,
+                    HasAccess = HasTabAccess(tabAttr.RequiredRoles)
+                };
+
+                // Adicionar parâmetros para a aba
+                if (entity != null)
+                {
+                    tab.Parameters.Add("id", entity.Id);
+                    tab.Parameters.Add("entityType", typeof(T).Name);
+                }
+
+                tabs.Add(tab);
+            }
+
+            return tabs;
+        }
+
+        /// <summary>
+        /// Verificar se o usuário tem acesso à aba
+        /// </summary>
+        protected virtual bool HasTabAccess(string[] requiredRoles)
+        {
+            return requiredRoles == null || requiredRoles.Length == 0 ? true : requiredRoles.Any(role => User.IsInRole(role));
+        }
+
+        /// <summary>
+        /// Renderizar conteúdo de uma aba específica
+        /// </summary>
+        [HttpGet]
+        public virtual async Task<IActionResult> RenderTab(int id, string tabId)
+        {
+            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            var tabs = ConfigureTabs(entity);
+            var tab = tabs.FirstOrDefault(t => t.TabId == tabId);
+
+            if (tab == null || !tab.HasAccess)
+            {
+                return Forbid();
+            }
+
+            if (tabId == "principal")
+            {
+                // Renderizar formulário principal
+                var viewModel = BuildFormViewModel(entity, "Details");
+                return PartialView("_StandardFormContent", viewModel);
+            }
+
+            // Renderizar aba personalizada
+            return await RenderCustomTab(entity, tab);
+        }
+
+        /// <summary>
+        /// Renderizar aba personalizada (override em controllers específicos)
+        /// </summary>
+        protected virtual Task<IActionResult> RenderCustomTab(T entity, FormTabViewModel tab)
+        {
+            // Implementação padrão - pode ser sobrescrita
+            return Task.FromResult<IActionResult>(PartialView($"_Tab{tab.TabId}", entity));
+        }
+
+        #endregion
+
+        #region Métodos Privados
 
         /// <summary>
         /// Constrói o ViewModel do formulário baseado nos atributos da entidade
@@ -632,7 +724,7 @@ namespace AutoGestao.Controllers
 
             var viewModel = new StandardFormViewModel
             {
-                Title = formConfig.Title ?? GetDefaultTitle(action),
+                Title = formConfig.Title ?? StandardGridController<T>.GetDefaultTitle(action),
                 Subtitle = formConfig.Subtitle ?? GetDefaultSubtitle(action),
                 Icon = formConfig.Icon ?? "fas fa-edit",
                 BackAction = formConfig.BackAction ?? "Index",
@@ -677,7 +769,7 @@ namespace AutoGestao.Controllers
         /// <summary>
         /// Obtém as propriedades que devem aparecer no formulário
         /// </summary>
-        private List<PropertyInfo> GetFormProperties()
+        private static List<PropertyInfo> GetFormProperties()
         {
             return typeof(T).GetProperties()
                 .Where(p => p.CanRead && p.CanWrite)
@@ -720,9 +812,8 @@ namespace AutoGestao.Controllers
             }
 
             // Se não tem atributo, tentar gerar automaticamente
-            if (StandardGridController<T>.ShouldAutoGenerateField(property))
-            {
-                return new FormFieldViewModel
+            return StandardGridController<T>.ShouldAutoGenerateField(property)
+                ? new FormFieldViewModel
                 {
                     PropertyName = property.Name,
                     DisplayName = GetDisplayName(property),
@@ -736,10 +827,8 @@ namespace AutoGestao.Controllers
                     Section = DetermineSection(property),
                     GridColumns = 1,
                     Options = DetermineFieldType(property) == FormFieldType.Select ? GetSelectOptions(property.Name) : []
-                };
-            }
-
-            return null;
+                }
+                : null;
         }
 
         /// <summary>
@@ -768,7 +857,7 @@ namespace AutoGestao.Controllers
         /// <summary>
         /// Determina automaticamente o tipo de campo baseado na propriedade
         /// </summary>
-        private FormFieldType DetermineFieldType(PropertyInfo property)
+        private static FormFieldType DetermineFieldType(PropertyInfo property)
         {
             var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
             var propertyName = property.Name.ToLower();
@@ -911,19 +1000,19 @@ namespace AutoGestao.Controllers
             }
         }
 
-        private bool IsNumericType(Type type)
+        private static bool IsNumericType(Type type)
         {
             return type == typeof(int) || type == typeof(long) || type == typeof(decimal) ||
                    type == typeof(double) || type == typeof(float) || type == typeof(short);
         }
 
-        private bool IsIgnoredProperty(PropertyInfo property)
+        private static bool IsIgnoredProperty(PropertyInfo property)
         {
             return property.GetCustomAttribute<FormFieldAttribute>() == null &&
                    !StandardGridController<T>.ShouldAutoGenerateField(property);
         }
 
-        private int GetPropertyOrder(PropertyInfo property)
+        private static int GetPropertyOrder(PropertyInfo property)
         {
             var formField = property.GetCustomAttribute<FormFieldAttribute>();
             if (formField != null)
@@ -951,7 +1040,7 @@ namespace AutoGestao.Controllers
             };
         }
 
-        private string GetDisplayName(PropertyInfo property)
+        private static string GetDisplayName(PropertyInfo property)
         {
             var display = property.GetCustomAttribute<DisplayAttribute>();
             if (display?.Name != null)
@@ -969,7 +1058,7 @@ namespace AutoGestao.Controllers
             return System.Text.RegularExpressions.Regex.Replace(property.Name, "([a-z])([A-Z])", "$1 $2");
         }
 
-        private string GetDefaultIcon(PropertyInfo property)
+        private static string GetDefaultIcon(PropertyInfo property)
         {
             var propertyName = property.Name.ToLower();
 
@@ -987,7 +1076,7 @@ namespace AutoGestao.Controllers
             };
         }
 
-        private string GetDefaultPlaceholder(PropertyInfo property)
+        private static string GetDefaultPlaceholder(PropertyInfo property)
         {
             var propertyName = property.Name.ToLower();
             var fieldType = DetermineFieldType(property);
@@ -1006,7 +1095,7 @@ namespace AutoGestao.Controllers
             };
         }
 
-        private bool IsRequiredProperty(PropertyInfo property)
+        private static bool IsRequiredProperty(PropertyInfo property)
         {
             if (property.GetCustomAttribute<RequiredAttribute>() != null)
             {
@@ -1018,7 +1107,7 @@ namespace AutoGestao.Controllers
             return !type.IsClass && Nullable.GetUnderlyingType(type) == null;
         }
 
-        private string DetermineSection(PropertyInfo property)
+        private static string DetermineSection(PropertyInfo property)
         {
             var propertyName = property.Name.ToLower();
 
@@ -1033,7 +1122,7 @@ namespace AutoGestao.Controllers
             };
         }
 
-        private string GetSectionIcon(string sectionName)
+        private static string GetSectionIcon(string sectionName)
         {
             return sectionName.ToLower() switch
             {
@@ -1046,7 +1135,7 @@ namespace AutoGestao.Controllers
             };
         }
 
-        private string GetDefaultTitle(string action)
+        private static string GetDefaultTitle(string action)
         {
             var entityName = typeof(T).Name;
             return action switch
@@ -1058,7 +1147,7 @@ namespace AutoGestao.Controllers
             };
         }
 
-        private string GetDefaultSubtitle(string action)
+        private static string GetDefaultSubtitle(string action)
         {
             var entityName = typeof(T).Name.ToLower();
             return action switch
@@ -1082,8 +1171,6 @@ namespace AutoGestao.Controllers
             }
         }
 
-        #endregion
-
         /// <summary>
         /// Construir ViewModel para formulário com abas
         /// </summary>
@@ -1094,7 +1181,7 @@ namespace AutoGestao.Controllers
 
             var viewModel = new TabbedFormViewModel
             {
-                Title = formConfig.Title ?? GetDefaultTitle(action),
+                Title = formConfig.Title ?? StandardGridController<T>.GetDefaultTitle(action),
                 Subtitle = formConfig.Subtitle ?? GetDefaultSubtitle(action),
                 Icon = formConfig.Icon ?? "fas fa-edit",
                 BackAction = formConfig.BackAction ?? "Index",
@@ -1119,112 +1206,6 @@ namespace AutoGestao.Controllers
             viewModel.ModelState = mainFormViewModel.ModelState;
 
             return viewModel;
-        }
-
-        #region Métodos para Sistema de Abas
-
-        /// <summary>
-        /// Configurar abas da entidade
-        /// </summary>
-        protected virtual List<FormTabViewModel> ConfigureTabs(T entity)
-        {
-            var tabs = new List<FormTabViewModel>
-            {
-                // Aba principal sempre existe
-                new FormTabViewModel
-                {
-                    TabId = "principal",
-                    TabName = "Dados Principais",
-                    TabIcon = "fas fa-info-circle",
-                    Order = 0,
-                    LazyLoad = false,
-                    IsActive = true
-                }
-            };
-
-            // Buscar abas configuradas via atributos
-            var tabAttributes = typeof(T).GetCustomAttributes<FormTabAttribute>()
-                .OrderBy(t => t.Order)
-                .ToList();
-
-            foreach (var tabAttr in tabAttributes)
-            {
-                var tab = new FormTabViewModel
-                {
-                    TabId = tabAttr.TabId,
-                    TabName = tabAttr.TabName,
-                    TabIcon = tabAttr.TabIcon,
-                    Order = tabAttr.Order,
-                    Controller = tabAttr.Controller,
-                    Action = tabAttr.Action,
-                    LazyLoad = tabAttr.LazyLoad,
-                    HasAccess = HasTabAccess(tabAttr.RequiredRoles)
-                };
-
-                // Adicionar parâmetros para a aba
-                if (entity != null)
-                {
-                    tab.Parameters.Add("id", entity.Id);
-                    tab.Parameters.Add("entityType", typeof(T).Name);
-                }
-
-                tabs.Add(tab);
-            }
-
-            return tabs;
-        }
-
-        /// <summary>
-        /// Verificar se o usuário tem acesso à aba
-        /// </summary>
-        protected virtual bool HasTabAccess(string[] requiredRoles)
-        {
-            if (requiredRoles == null || requiredRoles.Length == 0)
-            {
-                return true;
-            }
-
-            return requiredRoles.Any(role => User.IsInRole(role));
-        }
-
-        /// <summary>
-        /// Renderizar conteúdo de uma aba específica
-        /// </summary>
-        [HttpGet]
-        public virtual async Task<IActionResult> RenderTab(int id, string tabId)
-        {
-            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-
-            var tabs = ConfigureTabs(entity);
-            var tab = tabs.FirstOrDefault(t => t.TabId == tabId);
-
-            if (tab == null || !tab.HasAccess)
-            {
-                return Forbid();
-            }
-
-            if (tabId == "principal")
-            {
-                // Renderizar formulário principal
-                var viewModel = BuildFormViewModel(entity, "Details");
-                return PartialView("_StandardFormContent", viewModel);
-            }
-
-            // Renderizar aba personalizada
-            return await RenderCustomTab(entity, tab);
-        }
-
-        /// <summary>
-        /// Renderizar aba personalizada (override em controllers específicos)
-        /// </summary>
-        protected virtual Task<IActionResult> RenderCustomTab(T entity, FormTabViewModel tab)
-        {
-            // Implementação padrão - pode ser sobrescrita
-            return Task.FromResult<IActionResult>(PartialView($"_Tab{tab.TabId}", entity));
         }
 
         #endregion

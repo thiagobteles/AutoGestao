@@ -1,22 +1,36 @@
 using AutoGestao.Models.Auth;
 using AutoGestao.Services.Interface;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AutoGestao.Controllers
 {
     [AllowAnonymous]
-    public class LoginController(IAuthService authService) : Controller
+    public class LoginController : Controller
     {
-        private readonly IAuthService _authService = authService;
+        private readonly IAuthService _authService;
+
+        public LoginController(IAuthService authService)
+        {
+            _authService = authService;
+        }
 
         [HttpGet]
         public IActionResult Index()
         {
-            // Se já estiver logado, redirecionar para home
-            return User.Identity?.IsAuthenticated == true 
-                ? RedirectToAction("Index", "Home")
-                : View(new LoginRequest());
+            // 🔧 DEBUG: Verificar estado da autenticação
+            Console.WriteLine($"DEBUG: IsAuthenticated = {User.Identity?.IsAuthenticated}");
+            Console.WriteLine($"DEBUG: User Name = {User.Identity?.Name}");
+
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(new LoginRequest());
         }
 
         [HttpPost]
@@ -28,23 +42,48 @@ namespace AutoGestao.Controllers
                 return View(model);
             }
 
+            // 🔧 VALIDAR CREDENCIAIS DIRETAMENTE NO BANCO
             var result = await _authService.LoginAsync(model);
+
             if (!result.Sucesso)
             {
                 ModelState.AddModelError(string.Empty, result.Mensagem ?? "Erro ao realizar login");
                 return View(model);
             }
 
-            // Salvar token no cookie para autenticação
-            Response.Cookies.Append("auth_token", result.Token!, new CookieOptions
+            // 🔧 CRIAR CLAIMS MANUALMENTE
+            var claims = new List<Claim>
             {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddHours(8)
-            });
+                new Claim(ClaimTypes.NameIdentifier, result.Usuario!.Id.ToString()),
+                new Claim(ClaimTypes.Name, result.Usuario.Nome),
+                new Claim(ClaimTypes.Email, result.Usuario.Email),
+                new Claim("Perfil", result.Usuario.Perfil)
+            };
 
-            TempData["SuccessMessage"] = "Login realizado com sucesso!";
+            // Adicionar roles
+            foreach (var role in result.Usuario.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            // 🔧 FAZER LOGIN NO SISTEMA DE COOKIES
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                claimsPrincipal,
+                new AuthenticationProperties
+                {
+                    IsPersistent = model.LembrarMe,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                });
+
+            // 🔧 DEBUG: Verificar após login
+            Console.WriteLine($"DEBUG: Login efetuado para {result.Usuario.Nome}");
+            Console.WriteLine($"DEBUG: Claims criados: {claims.Count}");
+
+            TempData["SuccessMessage"] = $"Bem-vindo, {result.Usuario.Nome}!";
             return RedirectToAction("Index", "Home");
         }
 
@@ -53,11 +92,12 @@ namespace AutoGestao.Controllers
         {
             if (User.Identity?.IsAuthenticated == true)
             {
-                var usuarioId = int.Parse(User.FindFirst("NameIdentifier")?.Value ?? "0");
+                var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
                 await _authService.LogoutAsync(usuarioId);
             }
 
-            Response.Cookies.Delete("auth_token");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
             TempData["InfoMessage"] = "Logout realizado com sucesso!";
             return RedirectToAction("Index", "Login");
         }

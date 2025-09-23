@@ -15,14 +15,9 @@ namespace AutoGestao.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(IAuthService authService) : ControllerBase
     {
-        private readonly IAuthService _authService;
-
-        public AuthController(IAuthService authService)
-        {
-            _authService = authService;
-        }
+        private readonly IAuthService _authService = authService;
 
         [HttpPost("login")]
         [AllowAnonymous]
@@ -39,12 +34,7 @@ namespace AutoGestao.Controllers
 
             var result = await _authService.LoginAsync(request);
 
-            if (!result.Sucesso)
-            {
-                return Unauthorized(result);
-            }
-
-            return Ok(result);
+            return !result.Sucesso ? (ActionResult<LoginResponse>)Unauthorized(result) : (ActionResult<LoginResponse>)Ok(result);
         }
 
         [HttpPost("logout")]

@@ -23,5 +23,12 @@ namespace AutoGestao.Entidades
         public virtual required Veiculo Veiculo { get; set; }
         public virtual required Vendedor Vendedor { get; set; }
         public virtual ICollection<Parcela> Parcelas { get; set; } = [];
+        public virtual ICollection<ItemVenda> Itens { get; set; } = [];
+
+        // Método para calcular total da venda
+        public decimal CalcularTotal()
+        {
+            return Itens?.Sum(i => i.ValorTotal) ?? 0;
+        }
     }
 }
