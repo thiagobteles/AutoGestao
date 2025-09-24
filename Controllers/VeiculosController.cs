@@ -19,7 +19,8 @@ namespace AutoGestao.Controllers
             return _context.Veiculos
                 .Include(v => v.VeiculoMarca)
                 .Include(v => v.VeiculoMarcaModelo)
-                .Include(v => v.Proprietario);
+                .Include(v => v.Proprietario)
+                .AsQueryable();
         }
 
         protected override StandardGridViewModel ConfigureGrid()
@@ -100,15 +101,15 @@ namespace AutoGestao.Controllers
                 {
                     case "search":
                         var searchTerm = filter.Value.ToString();
-                        if (!string.IsNullOrEmpty(searchTerm))
+                        if (!string.IsNullOrEmpty(searchTerm.ToLower()))
                         {
-                            query = query.Where(v =>
-                                v.Codigo.Contains(searchTerm) ||
-                                v.Placa.Contains(searchTerm) ||
-                                (v.VeiculoMarca != null && v.VeiculoMarca.Descricao.Contains(searchTerm)) ||
-                                (v.VeiculoMarcaModelo != null && v.VeiculoMarcaModelo.Descricao.Contains(searchTerm)) ||
-                                (v.Chassi != null && v.Chassi.Contains(searchTerm)) ||
-                                (v.Renavam != null && v.Renavam.Contains(searchTerm)));
+                            query = ApplyTextFilter(query, searchTerm,
+                                c => c.Codigo.ToLower(),
+                                c => c.Placa.ToLower(),
+                                c => c.VeiculoMarca.Descricao.ToLower(),
+                                c => c.VeiculoMarcaModelo.Descricao.ToLower(),
+                                c => c.Chassi.ToLower(),
+                                c => c.Renavam.ToLower());
                         }
                         break;
 
@@ -251,6 +252,7 @@ namespace AutoGestao.Controllers
             ViewBag.Marcas = GetMarcasSelectList();
             ViewBag.Cores = GetCoresSelectList();
             ViewBag.Proprietarios = GetProprietariosSelectList();
+
             return View(veiculo);
         }
 
@@ -496,9 +498,7 @@ namespace AutoGestao.Controllers
                     .Where(c => c.Ativo)
                     .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Nome })
                     .ToList(),
-                nameof(Veiculo.Situacao) => Enum.GetValues<EnumSituacaoVeiculo>()
-                    .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() })
-                    .ToList(),
+                nameof(Veiculo.Situacao) => EnumExtension.GetSelectListItems<EnumSituacaoVeiculo>(true),
                 _ => base.GetSelectOptions(propertyName)
             };
         }

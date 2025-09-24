@@ -12,13 +12,6 @@ namespace AutoGestao.Controllers
 {
     public class VendedoresController(ApplicationDbContext context) : StandardGridController<Vendedor>(context)
     {
-        #region Implementação Obrigatória
-
-        protected override IQueryable<Vendedor> GetBaseQuery()
-        {
-            return _context.Vendedores.AsQueryable();
-        }
-
         protected override StandardGridViewModel ConfigureGrid()
         {
             var retorno = new StandardGridViewModel ("Vendedores", "Gerencie todos os vendedores", "Vendedores")
@@ -119,8 +112,6 @@ namespace AutoGestao.Controllers
 
             return query;
         }
-
-        #endregion
 
         private static string RenderDocumento(object item)
         {

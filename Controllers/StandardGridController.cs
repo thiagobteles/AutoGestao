@@ -17,38 +17,61 @@ namespace AutoGestao.Controllers
     public abstract class StandardGridController<T>(ApplicationDbContext context) : Controller() where T : BaseEntidade, new()
     {
         protected readonly ApplicationDbContext _context = context;
-        protected abstract IQueryable<T> GetBaseQuery();
-        protected abstract StandardGridViewModel ConfigureGrid();
+
+        protected virtual StandardGridViewModel ConfigureGrid()
+        {
+            var retorno = new StandardGridViewModel($"{typeof(T).Name}s", $"Gerencie todos os {typeof(T).Name}s", $"{typeof(T).Name}s")
+            {
+                Columns =
+                [
+                    new() { Name = "Id", DisplayName = "Cód", Type = EnumGridColumnType.Text, Sortable = true, Width = "65px" },
+                    new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
+                ]
+            };
+
+            return retorno;
+        }
+
+        protected virtual IQueryable<T> GetBaseQuery()
+        {
+            return _context.Set<T>().AsQueryable();
+        }
+
         protected virtual IQueryable<T> ApplyFilters(IQueryable<T> query, Dictionary<string, object> filters)
         {
             var stringProperties = typeof(T).GetProperties()
                .Where(p => p.PropertyType == typeof(string))
                .ToList();
 
-            if (!stringProperties.Any())
+            if (stringProperties.Count == 0)
             {
                 return query;
             }
 
             Expression<Func<T, bool>> searchExpression = null;
-            var parameter = Expression.Parameter(typeof(T), "x");
+            var parameter = Expression.Parameter(typeof(T), typeof(T).Name);
 
-            foreach (var prop in stringProperties)
+            foreach (var filter in filters)
             {
-                var property = Expression.Property(parameter, prop.Name);
-                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
-                var searchValue = Expression.Constant(filters, typeof(string));
-                var nullCheck = Expression.NotEqual(property, Expression.Constant(null));
-                var contains = Expression.Call(property, containsMethod, searchValue);
-                var condition = Expression.AndAlso(nullCheck, contains);
+                foreach (var prop in stringProperties)
+                {
+                    var property = Expression.Property(parameter, prop.Name);
+                    var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
+                    var searchValue = Expression.Constant(filters, typeof(string));
+                    var nullCheck = Expression.NotEqual(property, Expression.Constant(null));
+                    var contains = Expression.Call(property, containsMethod, searchValue);
+                    var condition = Expression.AndAlso(nullCheck, contains);
 
-                searchExpression = searchExpression == null
-                    ? Expression.Lambda<Func<T, bool>>(condition, parameter)
-                    : Expression.Lambda<Func<T, bool>>(
-                        Expression.OrElse(searchExpression.Body, condition), parameter);
+                    searchExpression = searchExpression == null
+                        ? Expression.Lambda<Func<T, bool>>(condition, parameter)
+                        : Expression.Lambda<Func<T, bool>>(
+                            Expression.OrElse(searchExpression.Body, condition), parameter);
+                }
             }
 
-            return searchExpression != null ? query.Where(searchExpression) : query;
+            return searchExpression != null 
+                ? query.Where(searchExpression)
+                : query;
         }
 
         protected virtual IQueryable<T> ApplySort(IQueryable<T> query, string orderBy, string orderDirection)
@@ -69,6 +92,8 @@ namespace AutoGestao.Controllers
 
             return query.Provider.CreateQuery<T>(resultExp);
         }
+
+        #region Helpers para aplicar filtros
 
         /// <summary>
         /// Helper para aplicar filtros de data range
@@ -179,8 +204,7 @@ namespace AutoGestao.Controllers
             string filterName,
             Expression<Func<T, TEnum>> propertyExpression) where TEnum : struct, Enum
         {
-            if (filters.ContainsKey(filterName) &&
-                Enum.TryParse<TEnum>(filters[filterName].ToString(), out TEnum enumValue))
+            if (filters.TryGetValue(filterName, out var value) && Enum.TryParse<TEnum>(value.ToString(), out TEnum enumValue))
             {
                 var parameter = Expression.Parameter(typeof(T), "x");
                 var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
@@ -203,10 +227,9 @@ namespace AutoGestao.Controllers
             string filterName,
             Expression<Func<T, TProperty>> propertyExpression) where TProperty : struct, IComparable<TProperty>
         {
-            if (filters.ContainsKey(filterName))
+            if (filters.TryGetValue(filterName, out var value))
             {
-                var value = filters[filterName].ToString();
-                if (TryConvertToNumeric(value, out TProperty numericValue))
+                if (TryConvertToNumeric(value.ToString(), out TProperty numericValue))
                 {
                     var parameter = Expression.Parameter(typeof(T), "x");
                     var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
@@ -221,6 +244,7 @@ namespace AutoGestao.Controllers
             return query;
         }
 
+        #endregion Helpers para aplicar filtros
 
         #region Métodos Virtuais para Formulários (podem ser sobrescritos)
 
@@ -233,81 +257,51 @@ namespace AutoGestao.Controllers
         }
 
         /// <summary>
-        /// Verificar se pode editar a entidade
+        /// Customizar campos do formulário baseado na action
         /// </summary>
+        protected virtual void ConfigureFormFields(List<FormFieldViewModel> fields, T entity, string action)
+        {
+        }
+
         protected virtual bool CanEdit(T entity)
         {
             return true;
         }
 
-        /// <summary>
-        /// Verificar se pode deletar a entidade
-        /// </summary>
         protected virtual bool CanDelete(T entity)
         {
             return true;
         }
 
-        /// <summary>
-        /// Customizar campos do formulário baseado na action
-        /// </summary>
-        protected virtual void ConfigureFormFields(List<FormFieldViewModel> fields, T entity, string action)
-        {
-            // Override para customizações específicas
-        }
-
-        /// <summary>
-        /// Executado antes de criar a entidade
-        /// </summary>
         protected virtual Task BeforeCreate(T entity)
         {
             entity.DataCadastro = DateTime.UtcNow;
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Executado após criar a entidade
-        /// </summary>
         protected virtual Task AfterCreate(T entity)
         {
-            // Override para ações pós-criação
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Executado antes de atualizar a entidade
-        /// </summary>
         protected virtual Task BeforeUpdate(T entity)
         {
             entity.DataAlteracao = DateTime.UtcNow;
             return Task.CompletedTask;
-
         }
 
-        /// <summary>
-        /// Executado após atualizar a entidade
-        /// </summary>
         protected virtual Task AfterUpdate(T entity)
         {
-            // Override para ações pós-atualização
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Executado antes de deletar a entidade
-        /// </summary>
         protected virtual Task BeforeDelete(T entity)
         {
-            // Override para validações antes da exclusão
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Executado após deletar a entidade
-        /// </summary>
         protected virtual Task AfterDelete(T entity)
         {
-            // Override para ações pós-exclusão
             return Task.CompletedTask;
         }
 
@@ -469,7 +463,7 @@ namespace AutoGestao.Controllers
             {
                 try
                 {
-                    await  BeforeCreate(entity);
+                    await BeforeCreate(entity);
                     _context.Set<T>().Add(entity);
                     await _context.SaveChangesAsync();
                     await AfterCreate(entity);
@@ -669,8 +663,7 @@ namespace AutoGestao.Controllers
             var tabs = new List<FormTabViewModel>
             {
                 // Aba principal sempre existe
-                new FormTabViewModel
-                {
+                new() {
                     TabId = "principal",
                     TabName = "Dados Principais",
                     TabIcon = "fas fa-info-circle",
@@ -791,7 +784,7 @@ namespace AutoGestao.Controllers
             var fieldsBySection = properties
                 .Select(p => CreateFieldFromProperty(p, entity, action))
                 .Where(f => f != null)
-                .GroupBy(f => f.Section ?? "Dados Básicos")
+                .GroupBy(f => f.Section ?? "Não Informado")
                 .ToList();
 
             foreach (var sectionGroup in fieldsBySection)
@@ -800,11 +793,11 @@ namespace AutoGestao.Controllers
                 {
                     Name = sectionGroup.Key,
                     Icon = GetSectionIcon(sectionGroup.Key),
-                    Fields = sectionGroup.OrderBy(f => f.Order).ToList()
+                    Fields = [.. sectionGroup.OrderBy(f => f.Order)]
                 };
 
                 // Determinar quantas colunas a seção deve ter
-                section.GridColumns = section.Fields.Any() ? section.Fields.Max(f => f.GridColumns) : 1;
+                section.GridColumns = section.Fields.Count != 0 ? section.Fields.Max(f => f.GridColumns) : 1;
 
                 viewModel.Sections.Add(section);
             }
@@ -856,7 +849,7 @@ namespace AutoGestao.Controllers
                     CssClass = formFieldAttr.CssClass,
                     DataList = formFieldAttr.DataList,
                     Order = formFieldAttr.Order,
-                    Section = formFieldAttr.Section ?? "Dados Básicos",
+                    Section = formFieldAttr.Section ?? "Não Informado",
                     Options = formFieldAttr.Type == EnumFormFieldType.Select ? GetSelectOptions(property.Name) : []
                 };
             }
@@ -874,8 +867,8 @@ namespace AutoGestao.Controllers
                     ReadOnly = action == "Details",
                     Value = property.GetValue(entity),
                     Order = GetPropertyOrder(property),
-                    Section = DetermineSection(property),
-                    GridColumns = 1,
+                    Section = "Não Informado",
+                    GridColumns = 2,
                     Options = DetermineFieldType(property) == EnumFormFieldType.Select ? GetSelectOptions(property.Name) : []
                 }
                 : null;
@@ -1155,21 +1148,6 @@ namespace AutoGestao.Controllers
             // Convenção: tipos não-nullable são obrigatórios (exceto string)
             var type = property.PropertyType;
             return !type.IsClass && Nullable.GetUnderlyingType(type) == null;
-        }
-
-        private static string DetermineSection(PropertyInfo property)
-        {
-            var propertyName = property.Name.ToLower();
-
-            return propertyName switch
-            {
-                var name when name.Contains("email") || name.Contains("telefone") || name.Contains("celular") => "Contato",
-                var name when name.Contains("endereco") || name.Contains("cep") || name.Contains("cidade") ||
-                                name.Contains("estado") || name.Contains("bairro") => "Endereço",
-                var name when name.Contains("valor") || name.Contains("preco") || name.Contains("custo") => "Financeiro",
-                var name when name.Contains("observa") || name.Contains("descricao") || name.Contains("nota") => "Observações",
-                _ => "Dados Básicos"
-            };
         }
 
         private static string GetSectionIcon(string sectionName)

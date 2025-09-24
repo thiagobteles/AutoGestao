@@ -1,4 +1,6 @@
+using AutoGestao.Atributes;
 using AutoGestao.Attributes;
+using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Interfaces;
 
 namespace AutoGestao.Entidades

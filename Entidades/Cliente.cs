@@ -15,7 +15,7 @@ namespace AutoGestao.Entidades
 
         [StringLength(100, MinimumLength = 3)]
         [Required(ErrorMessage = "Nome é obrigatório")]
-        [FormField(DisplayName = "Nome Completo", Icon = "fas fa-signature", Type = EnumFormFieldType.Text, Required = true, Order = 10, Section = "Dados Básicos", Placeholder = "Digite o nome completo")]
+        [FormField(Order = 10, DisplayName = "Nome Completo", Icon = "fas fa-signature", Type = EnumFormFieldType.Text, Required = true,  Section = "Dados Básicos", Placeholder = "Digite o nome completo")]
         public string Nome { get; set; } = "";
 
         [FormField(DisplayName = "CPF", Icon = "fas fa-fingerprint", Type = EnumFormFieldType.Cpf, Required = false, Order = 11, Section = "Dados Básicos", ConditionalField = "TipoCliente", ConditionalValue = "PessoaFisica", GridColumns = 2)]

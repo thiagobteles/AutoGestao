@@ -11,16 +11,16 @@
 
     <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
 
-    @foreach (var section in Model.Sections)
+    @foreach (var itemSection in Model.Sections)
     {
         <div class="card-modern mb-4">
             <div class="card-header-modern">
-                <i class="section.Icon"></i>
-                section.Name
+                <i class="@itemSection.Icon"></i>
+                @itemSection.Name
             </div>
             <div class="card-body-modern">
-                <div class="grid-@(section.GridColumns)">
-                    @foreach (var field in section.Fields)
+                <div class="grid-@(itemSection.GridColumns)">
+                    @foreach (var field in itemSection.Fields)
                     {
                         <div class="form-group-modern @field.CssClass" 
                              data-conditional-field="@field.ConditionalField"
@@ -67,6 +67,16 @@
                                            value="@field.Value" 
                                            class="form-control-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                            placeholder="@field.Placeholder"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFormFieldType.Decimal:
+                                    <input type="number"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           class="form-control-modern currency-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "0,00" : field.Placeholder)"
                                            @(field.Required && !Model.IsDetailsMode ? "required" : "")
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
@@ -172,6 +182,16 @@
                                            value="@field.Value" 
                                            class="form-control-modern currency-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                            placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "R$ 0,00" : field.Placeholder)"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFormFieldType.Percentage:
+                                    <input type="text"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           class="form-control-modern percentage-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "1,50%" : field.Placeholder)"
                                            @(field.Required && !Model.IsDetailsMode ? "required" : "")
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;

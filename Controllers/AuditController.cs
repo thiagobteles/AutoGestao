@@ -29,19 +29,18 @@ namespace AutoGestao.Controllers
             return propertyName switch
             {
                 nameof(AuditLog.TipoOperacao) => EnumExtension.GetSelectListItems<EnumTipoOperacaoAuditoria>(),
-                nameof(AuditLog.UsuarioId) => _context.Usuarios
+                nameof(AuditLog.UsuarioId) => [.. _context.Usuarios
                     .Where(u => u.Ativo)
                     .Select(u => new SelectListItem
                     {
                         Value = u.Id.ToString(),
                         Text = u.Nome
-                    }).ToList(),
-                "EntidadeNome" => _context.AuditLogs
+                    })],
+                "EntidadeNome" => [.. _context.AuditLogs
                     .Select(a => a.EntidadeNome)
                     .Distinct()
                     .OrderBy(e => e)
-                    .Select(e => new SelectListItem { Value = e, Text = e })
-                    .ToList(),
+                    .Select(e => new SelectListItem { Value = e, Text = e })],
                 _ => base.GetSelectOptions(propertyName)
             };
         }
@@ -238,7 +237,7 @@ namespace AutoGestao.Controllers
             }
         }
 
-        private string FormatJson(string json)
+        private static string FormatJson(string json)
         {
             try
             {
@@ -251,7 +250,7 @@ namespace AutoGestao.Controllers
             }
         }
 
-        private string GetEntityLink(string entidadeNome, string entidadeId)
+        private static string GetEntityLink(string entidadeNome, string entidadeId)
         {
             var controllerMap = new Dictionary<string, string>
             {
@@ -265,15 +264,12 @@ namespace AutoGestao.Controllers
                 { "Despesa", "Despesas" }
             };
 
-            if (controllerMap.TryGetValue(entidadeNome, out string? controller))
-            {
-                return $"<a href='/{controller}/Details/{entidadeId}' target='_blank' class='btn btn-sm btn-outline-primary'><i class='fas fa-external-link-alt me-1'></i>Ver {entidadeNome}</a>";
-            }
-
-            return $"{entidadeNome} #{entidadeId}";
+            return controllerMap.TryGetValue(entidadeNome, out string? controller)
+                ? $"<a href='/{controller}/Details/{entidadeId}' target='_blank' class='btn btn-sm btn-outline-primary'><i class='fas fa-external-link-alt me-1'></i>Ver {entidadeNome}</a>"
+                : $"{entidadeNome} #{entidadeId}";
         }
 
-        private string GenerateCSV(List<AuditLog> logs)
+        private static string GenerateCSV(List<AuditLog> logs)
         {
             var csv = new System.Text.StringBuilder();
 
@@ -296,16 +292,6 @@ namespace AutoGestao.Controllers
             }
 
             return csv.ToString();
-        }
-
-        protected override StandardGridViewModel ConfigureGrid()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override IQueryable<AuditLog> ApplyFilters(IQueryable<AuditLog> query, Dictionary<string, object> filters)
-        {
-            throw new NotImplementedException();
         }
     }
 }

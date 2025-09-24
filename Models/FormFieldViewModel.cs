@@ -21,7 +21,7 @@ namespace AutoGestao.Models
         public string CssClass { get; set; } = "";
         public string DataList { get; set; } = "";
         public int Order { get; set; } = 0;
-        public string Section { get; set; } = "Dados Básicos";
+        public string Section { get; set; } = "Não Informado";
         public List<SelectListItem> Options { get; set; } = [];
     }
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace AutoGestao.Atributes
 {
+    [AttributeUsage(AttributeTargets.All)]
     public class RequiredRolesAttribute(params string[] roles) : Attribute, IAuthorizationFilter
     {
         private readonly string[] _roles = roles;

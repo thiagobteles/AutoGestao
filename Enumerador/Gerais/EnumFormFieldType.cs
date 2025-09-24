@@ -19,6 +19,7 @@ namespace AutoGestao.Enumerador.Gerais
         Cnpj,
         Cep,
         Currency,
-        Percentage
+        Percentage,
+        Decimal
     }
 }

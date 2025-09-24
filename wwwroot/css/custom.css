@@ -1164,6 +1164,14 @@ body {
 
 /* Telas muito grandes */
 @media (min-width: 1400px) {
+    .grid-6 {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .grid-5 {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
     .grid-4 {
         grid-template-columns: repeat(4, 1fr);
     }
@@ -1803,7 +1811,9 @@ th:hover .fa-sort {
 /* Força as grids a usarem todo o espaço */
 .grid-2,
 .grid-3,
-.grid-4 {
+.grid-4,
+.grid-5,
+.grid-6 {
     width: 100% !important;
     max-width: none !important;
 }
@@ -2467,14 +2477,22 @@ body .form-control[type="select-one"] {
 
 /* Desktop grande - 4 colunas */
 @media (min-width: 1400px) {
+    .card-modern .card-body-modern .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
     .card-modern .card-body-modern .grid-3 {
-        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-columns: repeat(3, 1fr) !important;
         gap: 1rem !important;
     }
 }
 
 /* Desktop médio - 3 colunas */
 @media (min-width: 1024px) and (max-width: 1399px) {
+    .card-modern .card-body-modern .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
     .card-modern .card-body-modern .grid-3 {
         grid-template-columns: repeat(3, 1fr) !important;
         gap: 0.875rem !important;
@@ -2843,7 +2861,7 @@ select {
 /* Desktop grande */
 @media (min-width: 1400px) {
     .card-modern .card-body-modern .grid-3 {
-        grid-template-columns: repeat(5, 1fr) !important;
+        grid-template-columns: repeat(3, 1fr) !important;
         gap: 0.75rem !important;
     }
 
@@ -2855,7 +2873,7 @@ select {
 /* Desktop médio */
 @media (min-width: 1024px) and (max-width: 1399px) {
     .card-modern .card-body-modern .grid-3 {
-        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-columns: repeat(3, 1fr) !important;
         gap: 0.625rem !important;
     }
 }

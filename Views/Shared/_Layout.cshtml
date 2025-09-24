@@ -102,25 +102,6 @@
                     }
                 </div>
 
-                <!-- Produtos -->
-                <div class="menu-section">
-                    <div class="menu-section-title">Produtos</div>
-                    <div class="menu-item">
-                        <a href="@Url.Action("Index", "Produtos")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Produtos" ? "active" : "")">
-                            <i class="fas fa-box"></i>
-                            <span class="menu-link-text">Produtos</span>
-                            <div class="menu-tooltip">Produtos</div>
-                        </a>
-                    </div>
-                    <div class="menu-item">
-                        <a href="@Url.Action("Index", "ItensVenda")" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ItensVenda" ? "active" : "")">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span class="menu-link-text">Itens de Venda</span>
-                            <div class="menu-tooltip">Itens de Venda</div>
-                        </a>
-                    </div>
-                </div>
-
                 <!-- Relatórios -->
                 @if (User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Financeiro"))
                 {
@@ -983,15 +964,27 @@
 
 <style>
     .grid-1 {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .grid-2 {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr !important;
     }
 
     .grid-3 {
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr !important;
+    }
+
+    .grid-4 {
+        grid-template-columns: 1fr 1fr 1fr 1fr !important;
+    }
+
+    .grid-5 {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr !important;
+    }
+
+    .grid-6 {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr !important;
     }
 
     .form-section {

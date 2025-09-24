@@ -13,11 +13,6 @@ namespace AutoGestao.Controllers
 {
     public class ClientesController(ApplicationDbContext context) : StandardGridController<Cliente>(context)
     {
-        protected override IQueryable<Cliente> GetBaseQuery()
-        {
-            return _context.Clientes.AsQueryable();
-        }
-
         protected override StandardGridViewModel ConfigureGrid()
         {
             var retorno = new StandardGridViewModel("Clientes", "Gerencie todos os clientes", "Clientes")
@@ -139,9 +134,6 @@ namespace AutoGestao.Controllers
                 }
             }
 
-            // Aplicar filtro de período usando o helper
-            query = ApplyDateRangeFilter(query, filters, "periodo", c => c.DataCadastro);
-
             return query;
         }
 
@@ -161,38 +153,33 @@ namespace AutoGestao.Controllers
 
         protected override Task BeforeCreate(Cliente entity)
         {
-            entity.DataCadastro = DateTime.UtcNow;
             ValidateCliente(entity);
             return base.BeforeCreate(entity);
-
         }
 
         protected override Task AfterCreate(Cliente entity)
         {
-            // Log da criação
             TempData["Success"] = $"Cliente {entity.Nome} criado com sucesso!";
             return base.AfterCreate(entity);
         }
 
         protected override Task BeforeUpdate(Cliente entity)
         {
-            entity.DataAlteracao = DateTime.UtcNow;
             ValidateCliente(entity);
             return base.BeforeUpdate(entity);
-
         }
 
         protected override Task AfterUpdate(Cliente entity)
         {
             TempData["Success"] = $"Cliente {entity.Nome} atualizado com sucesso!";
             return base.AfterUpdate(entity);
-
         }
 
         protected override Task BeforeDelete(Cliente entity)
         {
             // Verificar se pode deletar
             var temVendas = _context.Vendas.Any(v => v.ClienteId == entity.Id);
+
             return temVendas
                 ? throw new InvalidOperationException("Não é possível excluir cliente com vendas associadas")
                 : base.BeforeDelete(entity);
@@ -222,6 +209,40 @@ namespace AutoGestao.Controllers
                     nomeField.DisplayName = $"Nome do Cliente (#{entity.Id})";
                 }
             }
+        }
+
+        private void ValidateCliente(Cliente entity)
+        {
+            // Validações específicas
+            if (entity.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.CPF))
+            {
+                ModelState.AddModelError(nameof(entity.CPF), "CPF é obrigatório para Pessoa Física");
+            }
+
+            if (entity.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(entity.CNPJ))
+            {
+                ModelState.AddModelError(nameof(entity.CNPJ), "CNPJ é obrigatório para Pessoa Jurídica");
+            }
+
+            // Verificar CPF único
+            if (!string.IsNullOrEmpty(entity.CPF))
+            {
+                var cpfExistente = _context.Clientes.Any(c => c.Id != entity.Id && c.CPF == entity.CPF);
+                if (cpfExistente)
+                {
+                    ModelState.AddModelError(nameof(entity.CPF), "CPF já cadastrado");
+                }
+            }
+        }
+
+        private static string RenderDocumento(object item)
+        {
+            var cliente = (Cliente)item;
+            var documento = cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica
+                ? cliente.CNPJ.AplicarMascaraCnpj()
+                : cliente.CPF.AplicarMascaraCpf();
+
+            return $@"{documento}";
         }
 
         #region Ações Específicas
@@ -294,39 +315,5 @@ namespace AutoGestao.Controllers
         }
 
         #endregion
-
-        private void ValidateCliente(Cliente entity)
-        {
-            // Validações específicas
-            if (entity.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.CPF))
-            {
-                ModelState.AddModelError(nameof(entity.CPF), "CPF é obrigatório para Pessoa Física");
-            }
-
-            if (entity.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(entity.CNPJ))
-            {
-                ModelState.AddModelError(nameof(entity.CNPJ), "CNPJ é obrigatório para Pessoa Jurídica");
-            }
-
-            // Verificar CPF único
-            if (!string.IsNullOrEmpty(entity.CPF))
-            {
-                var cpfExistente = _context.Clientes.Any(c => c.Id != entity.Id && c.CPF == entity.CPF);
-                if (cpfExistente)
-                {
-                    ModelState.AddModelError(nameof(entity.CPF), "CPF já cadastrado");
-                }
-            }
-        }
-
-        private static string RenderDocumento(object item)
-        {
-            var cliente = (Cliente)item;
-            var documento = cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica
-                ? cliente.CNPJ.AplicarMascaraCnpj()
-                : cliente.CPF.AplicarMascaraCpf();
-
-            return $@"{documento}";
-        }
     }
 }

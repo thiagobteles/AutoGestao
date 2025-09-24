@@ -59,6 +59,14 @@ function initializeMasks() {
         });
     });
 
+    // Máscara para Porcentagem
+    document.querySelectorAll('.percentage-mask').forEach(function (input) {
+        input.addEventListener('input', function () {
+            let value = this.value.replace(/\D/g, '');
+            this.value = value + "%";
+        });
+    });
+
     // Máscara para CEP
     document.querySelectorAll('.cep-mask').forEach(function (input) {
         input.addEventListener('input', function () {

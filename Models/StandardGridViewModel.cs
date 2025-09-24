@@ -15,7 +15,6 @@ namespace AutoGestao.Models
             SubTitle = subTitulo;
             EntityName = nomeEntidade;
             ControllerName = nomeEntidade;
-
             HeaderActions = ObterHeaderActionsPadrao(nomeEntidade);
             RowActions = ObterRowActionsPadrao(nomeEntidade);
         }

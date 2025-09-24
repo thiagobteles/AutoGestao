@@ -1,6 +1,7 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Extensions;
 using AutoGestao.Models;
 using AutoGestao.Models.Auth;
 using AutoGestao.Services.Interface;
@@ -17,21 +18,11 @@ namespace AutoGestao.Controllers
     {
         private readonly IUsuarioService _usuarioService = usuarioService;
 
-        protected override IQueryable<Usuario> GetBaseQuery()
-        {
-            return _context.Usuarios.AsQueryable();
-        }
-
         protected override List<SelectListItem> GetSelectOptions(string propertyName)
         {
             return propertyName switch
             {
-                nameof(Usuario.Perfil) => Enum.GetValues<EnumPerfilUsuario>()
-                    .Select(e => new SelectListItem
-                    {
-                        Value = e.ToString(),
-                        Text = GetPerfilDisplayName(e)
-                    }).ToList(),
+                nameof(Usuario.Perfil) => EnumExtension.GetSelectListItems<EnumPerfilUsuario>(),
                 _ => base.GetSelectOptions(propertyName)
             };
         }
@@ -192,20 +183,7 @@ namespace AutoGestao.Controllers
             }
         }
 
-        private static string GetPerfilDisplayName(EnumPerfilUsuario perfil)
-        {
-            return perfil switch
-            {
-                EnumPerfilUsuario.Admin => "Administrador",
-                EnumPerfilUsuario.Gerente => "Gerente",
-                EnumPerfilUsuario.Vendedor => "Vendedor",
-                EnumPerfilUsuario.Financeiro => "Financeiro",
-                EnumPerfilUsuario.Visualizador => "Visualizador",
-                _ => perfil.ToString()
-            };
-        }
-
-        private string[] GetRolesByPerfil(string perfil)
+        private static string[] GetRolesByPerfil(string perfil)
         {
             return perfil switch
             {
@@ -228,22 +206,11 @@ namespace AutoGestao.Controllers
             }
 
             var resultado = await _usuarioService.AlterarSenhaAsync(request.UsuarioId, request.SenhaAtual, request.NovaSenha);
-
             return Json(new
             {
                 sucesso = resultado,
                 mensagem = resultado ? "Senha alterada com sucesso" : "Senha atual incorreta"
             });
-        }
-
-        protected override StandardGridViewModel ConfigureGrid()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override IQueryable<Usuario> ApplyFilters(IQueryable<Usuario> query, Dictionary<string, object> filters)
-        {
-            throw new NotImplementedException();
         }
     }
 }
