@@ -143,7 +143,7 @@ namespace AutoGestao.Controllers
                 {
                     PropertyName = "ConfirmarSenha",
                     DisplayName = "Confirmar Senha",
-                    Type = FormFieldType.Password,
+                    Type = EnumFormFieldType.Password,
                     Required = action == "Create",
                     Section = "Dados Básicos",
                     Order = 4,
@@ -242,11 +242,6 @@ namespace AutoGestao.Controllers
         }
 
         protected override IQueryable<Usuario> ApplyFilters(IQueryable<Usuario> query, Dictionary<string, object> filters)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override IQueryable<Usuario> ApplySort(IQueryable<Usuario> query, string orderBy, string orderDirection)
         {
             throw new NotImplementedException();
         }

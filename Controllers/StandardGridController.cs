@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace AutoGestao.Controllers
@@ -18,8 +19,56 @@ namespace AutoGestao.Controllers
         protected readonly ApplicationDbContext _context = context;
         protected abstract IQueryable<T> GetBaseQuery();
         protected abstract StandardGridViewModel ConfigureGrid();
-        protected abstract IQueryable<T> ApplyFilters(IQueryable<T> query, Dictionary<string, object> filters);
-        protected abstract IQueryable<T> ApplySort(IQueryable<T> query, string orderBy, string orderDirection);
+        protected virtual IQueryable<T> ApplyFilters(IQueryable<T> query, Dictionary<string, object> filters)
+        {
+            var stringProperties = typeof(T).GetProperties()
+               .Where(p => p.PropertyType == typeof(string))
+               .ToList();
+
+            if (!stringProperties.Any())
+            {
+                return query;
+            }
+
+            Expression<Func<T, bool>> searchExpression = null;
+            var parameter = Expression.Parameter(typeof(T), "x");
+
+            foreach (var prop in stringProperties)
+            {
+                var property = Expression.Property(parameter, prop.Name);
+                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
+                var searchValue = Expression.Constant(filters, typeof(string));
+                var nullCheck = Expression.NotEqual(property, Expression.Constant(null));
+                var contains = Expression.Call(property, containsMethod, searchValue);
+                var condition = Expression.AndAlso(nullCheck, contains);
+
+                searchExpression = searchExpression == null
+                    ? Expression.Lambda<Func<T, bool>>(condition, parameter)
+                    : Expression.Lambda<Func<T, bool>>(
+                        Expression.OrElse(searchExpression.Body, condition), parameter);
+            }
+
+            return searchExpression != null ? query.Where(searchExpression) : query;
+        }
+
+        protected virtual IQueryable<T> ApplySort(IQueryable<T> query, string orderBy, string orderDirection)
+        {
+            var property = typeof(T).GetProperty(orderBy);
+            if (property == null)
+            {
+                return query;
+            }
+
+            var parameter = Expression.Parameter(typeof(T), "x");
+            var propertyAccess = Expression.MakeMemberAccess(parameter, property);
+            var orderByExp = Expression.Lambda(propertyAccess, parameter);
+
+            var methodName = orderDirection?.ToLower() == "desc" ? "OrderByDescending" : "OrderBy";
+            var resultExp = Expression.Call(typeof(Queryable), methodName,
+                [typeof(T), property.PropertyType], query.Expression, orderByExp);
+
+            return query.Provider.CreateQuery<T>(resultExp);
+        }
 
         /// <summary>
         /// Helper para aplicar filtros de data range
@@ -28,7 +77,7 @@ namespace AutoGestao.Controllers
             IQueryable<T> query,
             Dictionary<string, object> filters,
             string filterName,
-            System.Linq.Expressions.Expression<Func<T, TProperty>> propertyExpression)
+            Expression<Func<T, TProperty>> propertyExpression)
         {
             var inicioKey = $"{filterName}_inicio";
             var fimKey = $"{filterName}_fim";
@@ -48,28 +97,28 @@ namespace AutoGestao.Controllers
 
             if (dataInicio.HasValue || dataFim.HasValue)
             {
-                var parameter = System.Linq.Expressions.Expression.Parameter(typeof(T), "x");
-                var property = System.Linq.Expressions.Expression.Property(parameter, ((System.Linq.Expressions.MemberExpression)propertyExpression.Body).Member.Name);
+                var parameter = Expression.Parameter(typeof(T), "x");
+                var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
 
-                System.Linq.Expressions.Expression? condition = null;
+                Expression? condition = null;
 
                 if (dataInicio.HasValue)
                 {
-                    var inicioConstant = System.Linq.Expressions.Expression.Constant(dataInicio.Value);
-                    var greaterThanOrEqual = System.Linq.Expressions.Expression.GreaterThanOrEqual(property, inicioConstant);
-                    condition = condition == null ? greaterThanOrEqual : System.Linq.Expressions.Expression.AndAlso(condition, greaterThanOrEqual);
+                    var inicioConstant = Expression.Constant(dataInicio.Value);
+                    var greaterThanOrEqual = Expression.GreaterThanOrEqual(property, inicioConstant);
+                    condition = condition == null ? greaterThanOrEqual : Expression.AndAlso(condition, greaterThanOrEqual);
                 }
 
                 if (dataFim.HasValue)
                 {
-                    var fimConstant = System.Linq.Expressions.Expression.Constant(dataFim.Value);
-                    var lessThanOrEqual = System.Linq.Expressions.Expression.LessThanOrEqual(property, fimConstant);
-                    condition = condition == null ? lessThanOrEqual : System.Linq.Expressions.Expression.AndAlso(condition, lessThanOrEqual);
+                    var fimConstant = Expression.Constant(dataFim.Value);
+                    var lessThanOrEqual = Expression.LessThanOrEqual(property, fimConstant);
+                    condition = condition == null ? lessThanOrEqual : Expression.AndAlso(condition, lessThanOrEqual);
                 }
 
                 if (condition != null)
                 {
-                    var lambda = System.Linq.Expressions.Expression.Lambda<Func<T, bool>>(condition, parameter);
+                    var lambda = Expression.Lambda<Func<T, bool>>(condition, parameter);
                     query = query.Where(lambda);
                 }
             }
@@ -83,38 +132,38 @@ namespace AutoGestao.Controllers
         protected IQueryable<T> ApplyTextFilter(
             IQueryable<T> query,
             string searchTerm,
-            params System.Linq.Expressions.Expression<Func<T, string?>>[] properties)
+            params Expression<Func<T, string?>>[] properties)
         {
             if (string.IsNullOrEmpty(searchTerm) || properties.Length == 0)
             {
                 return query;
             }
 
-            var parameter = System.Linq.Expressions.Expression.Parameter(typeof(T), "x");
-            System.Linq.Expressions.Expression? condition = null;
+            var parameter = Expression.Parameter(typeof(T), "x");
+            Expression? condition = null;
 
             foreach (var propertyExpr in properties)
             {
-                var propertyName = ((System.Linq.Expressions.MemberExpression)propertyExpr.Body).Member.Name;
-                var property = System.Linq.Expressions.Expression.Property(parameter, propertyName);
+                var propertyName = ((MemberExpression)propertyExpr.Body).Member.Name;
+                var property = Expression.Property(parameter, propertyName);
 
                 // Verificar se não é null
-                var notNull = System.Linq.Expressions.Expression.NotEqual(property, System.Linq.Expressions.Expression.Constant(null));
+                var notNull = Expression.NotEqual(property, Expression.Constant(null));
 
                 // Aplicar Contains
-                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                var searchConstant = System.Linq.Expressions.Expression.Constant(searchTerm);
-                var containsCall = System.Linq.Expressions.Expression.Call(property, containsMethod!, searchConstant);
+                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
+                var searchConstant = Expression.Constant(searchTerm);
+                var containsCall = Expression.Call(property, containsMethod!, searchConstant);
 
                 // Combinar null check com contains
-                var propertyCondition = System.Linq.Expressions.Expression.AndAlso(notNull, containsCall);
+                var propertyCondition = Expression.AndAlso(notNull, containsCall);
 
-                condition = condition == null ? propertyCondition : System.Linq.Expressions.Expression.OrElse(condition, propertyCondition);
+                condition = condition == null ? propertyCondition : Expression.OrElse(condition, propertyCondition);
             }
 
             if (condition != null)
             {
-                var lambda = System.Linq.Expressions.Expression.Lambda<Func<T, bool>>(condition, parameter);
+                var lambda = Expression.Lambda<Func<T, bool>>(condition, parameter);
                 query = query.Where(lambda);
             }
 
@@ -128,16 +177,16 @@ namespace AutoGestao.Controllers
             IQueryable<T> query,
             Dictionary<string, object> filters,
             string filterName,
-            System.Linq.Expressions.Expression<Func<T, TEnum>> propertyExpression) where TEnum : struct, Enum
+            Expression<Func<T, TEnum>> propertyExpression) where TEnum : struct, Enum
         {
             if (filters.ContainsKey(filterName) &&
                 Enum.TryParse<TEnum>(filters[filterName].ToString(), out TEnum enumValue))
             {
-                var parameter = System.Linq.Expressions.Expression.Parameter(typeof(T), "x");
-                var property = System.Linq.Expressions.Expression.Property(parameter, ((System.Linq.Expressions.MemberExpression)propertyExpression.Body).Member.Name);
-                var constant = System.Linq.Expressions.Expression.Constant(enumValue);
-                var equal = System.Linq.Expressions.Expression.Equal(property, constant);
-                var lambda = System.Linq.Expressions.Expression.Lambda<Func<T, bool>>(equal, parameter);
+                var parameter = Expression.Parameter(typeof(T), "x");
+                var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
+                var constant = Expression.Constant(enumValue);
+                var equal = Expression.Equal(property, constant);
+                var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
 
                 query = query.Where(lambda);
             }
@@ -152,18 +201,18 @@ namespace AutoGestao.Controllers
             IQueryable<T> query,
             Dictionary<string, object> filters,
             string filterName,
-            System.Linq.Expressions.Expression<Func<T, TProperty>> propertyExpression) where TProperty : struct, IComparable<TProperty>
+            Expression<Func<T, TProperty>> propertyExpression) where TProperty : struct, IComparable<TProperty>
         {
             if (filters.ContainsKey(filterName))
             {
                 var value = filters[filterName].ToString();
                 if (TryConvertToNumeric(value, out TProperty numericValue))
                 {
-                    var parameter = System.Linq.Expressions.Expression.Parameter(typeof(T), "x");
-                    var property = System.Linq.Expressions.Expression.Property(parameter, ((System.Linq.Expressions.MemberExpression)propertyExpression.Body).Member.Name);
-                    var constant = System.Linq.Expressions.Expression.Constant(numericValue);
-                    var equal = System.Linq.Expressions.Expression.Equal(property, constant);
-                    var lambda = System.Linq.Expressions.Expression.Lambda<Func<T, bool>>(equal, parameter);
+                    var parameter = Expression.Parameter(typeof(T), "x");
+                    var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
+                    var constant = Expression.Constant(numericValue);
+                    var equal = Expression.Equal(property, constant);
+                    var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
 
                     query = query.Where(lambda);
                 }
@@ -410,9 +459,46 @@ namespace AutoGestao.Controllers
         }
 
         /// <summary>
+        /// POST: Create - Processar criação da entidade
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public virtual async Task<IActionResult> Create(T entity)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await  BeforeCreate(entity);
+                    _context.Set<T>().Add(entity);
+                    await _context.SaveChangesAsync();
+                    await AfterCreate(entity);
+
+                    if (Request.IsAjaxRequest())
+                    {
+                        return Json(new { success = true, message = "Registro criado com sucesso!", redirectUrl = Url.Action("Index") });
+                    }
+
+                    TempData["Success"] = "Registro criado com sucesso!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Erro ao criar registro: {ex.Message}");
+                }
+            }
+
+            var viewModel = BuildFormViewModel(entity, "Create");
+            AddModelStateToViewModel(viewModel);
+
+            return Request.IsAjaxRequest() ? PartialView("_StandardFormContent", viewModel) : View("_StandardForm", viewModel);
+        }
+
+        /// <summary>
         /// GET: Edit - Exibir formulário de edição
         /// </summary>
         [HttpGet]
+
         public virtual async Task<IActionResult> Edit(int id)
         {
             var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
@@ -439,68 +525,6 @@ namespace AutoGestao.Controllers
                 var viewModel = BuildFormViewModel(entity, "Edit");
                 return View("_StandardForm", viewModel);
             }
-        }
-
-        /// <summary>
-        /// GET: Details - Exibir detalhes da entidade
-        /// </summary>
-        [HttpGet]
-        public virtual async Task<IActionResult> Details(int id)
-        {
-            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-
-            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
-
-            if (formTabs?.EnableTabs == true)
-            {
-                var viewModel = BuildTabbedFormViewModel(entity, "Details");
-                return View("_TabbedForm", viewModel);
-            }
-            else
-            {
-                var viewModel = BuildFormViewModel(entity, "Details");
-                return View("_StandardForm", viewModel);
-            }
-        }
-
-        /// <summary>
-        /// POST: Create - Processar criação da entidade
-        /// </summary>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public virtual async Task<IActionResult> Create(T entity)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    BeforeCreate(entity);
-                    _context.Set<T>().Add(entity);
-                    await _context.SaveChangesAsync();
-                    AfterCreate(entity);
-
-                    if (Request.IsAjaxRequest())
-                    {
-                        return Json(new { success = true, message = "Registro criado com sucesso!", redirectUrl = Url.Action("Index") });
-                    }
-
-                    TempData["Success"] = "Registro criado com sucesso!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Erro ao criar registro: {ex.Message}");
-                }
-            }
-
-            var viewModel = BuildFormViewModel(entity, "Create");
-            AddModelStateToViewModel(viewModel);
-
-            return Request.IsAjaxRequest() ? PartialView("_StandardFormContent", viewModel) : View("_StandardForm", viewModel);
         }
 
         /// <summary>
@@ -534,9 +558,9 @@ namespace AutoGestao.Controllers
                     // Atualizar propriedades
                     _context.Entry(existingEntity).CurrentValues.SetValues(entity);
 
-                    BeforeUpdate(existingEntity);
+                    await BeforeUpdate(existingEntity);
                     await _context.SaveChangesAsync();
-                    AfterUpdate(existingEntity);
+                    await AfterUpdate(existingEntity);
 
                     if (Request.IsAjaxRequest())
                     {
@@ -556,6 +580,32 @@ namespace AutoGestao.Controllers
             AddModelStateToViewModel(viewModel);
 
             return Request.IsAjaxRequest() ? PartialView("_StandardFormContent", viewModel) : View("_StandardForm", viewModel);
+        }
+
+        /// <summary>
+        /// GET: Details - Exibir detalhes da entidade
+        /// </summary>
+        [HttpGet]
+        public virtual async Task<IActionResult> Details(int id)
+        {
+            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
+
+            if (formTabs?.EnableTabs == true)
+            {
+                var viewModel = BuildTabbedFormViewModel(entity, "Details");
+                return View("_TabbedForm", viewModel);
+            }
+            else
+            {
+                var viewModel = BuildFormViewModel(entity, "Details");
+                return View("_StandardForm", viewModel);
+            }
         }
 
         /// <summary>
@@ -583,10 +633,10 @@ namespace AutoGestao.Controllers
 
             try
             {
-                BeforeDelete(entity);
+                await BeforeDelete(entity);
                 _context.Set<T>().Remove(entity);
                 await _context.SaveChangesAsync();
-                AfterDelete(entity);
+                await AfterDelete(entity);
 
                 if (Request.IsAjaxRequest())
                 {
@@ -807,7 +857,7 @@ namespace AutoGestao.Controllers
                     DataList = formFieldAttr.DataList,
                     Order = formFieldAttr.Order,
                     Section = formFieldAttr.Section ?? "Dados Básicos",
-                    Options = formFieldAttr.Type == FormFieldType.Select ? GetSelectOptions(property.Name) : []
+                    Options = formFieldAttr.Type == EnumFormFieldType.Select ? GetSelectOptions(property.Name) : []
                 };
             }
 
@@ -826,7 +876,7 @@ namespace AutoGestao.Controllers
                     Order = GetPropertyOrder(property),
                     Section = DetermineSection(property),
                     GridColumns = 1,
-                    Options = DetermineFieldType(property) == FormFieldType.Select ? GetSelectOptions(property.Name) : []
+                    Options = DetermineFieldType(property) == EnumFormFieldType.Select ? GetSelectOptions(property.Name) : []
                 }
                 : null;
         }
@@ -857,7 +907,7 @@ namespace AutoGestao.Controllers
         /// <summary>
         /// Determina automaticamente o tipo de campo baseado na propriedade
         /// </summary>
-        private static FormFieldType DetermineFieldType(PropertyInfo property)
+        private static EnumFormFieldType DetermineFieldType(PropertyInfo property)
         {
             var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
             var propertyName = property.Name.ToLower();
@@ -865,58 +915,58 @@ namespace AutoGestao.Controllers
             // Verificar nome da propriedade primeiro
             if (propertyName.Contains("email"))
             {
-                return FormFieldType.Email;
+                return EnumFormFieldType.Email;
             }
 
             if (propertyName.Contains("telefone") || propertyName.Contains("celular"))
             {
-                return FormFieldType.Phone;
+                return EnumFormFieldType.Phone;
             }
 
             if (propertyName == "cpf")
             {
-                return FormFieldType.Cpf;
+                return EnumFormFieldType.Cpf;
             }
 
             if (propertyName == "cnpj")
             {
-                return FormFieldType.Cnpj;
+                return EnumFormFieldType.Cnpj;
             }
 
             if (propertyName == "cep")
             {
-                return FormFieldType.Cep;
+                return EnumFormFieldType.Cep;
             }
 
             if (propertyName.Contains("senha") || propertyName.Contains("password"))
             {
-                return FormFieldType.Password;
+                return EnumFormFieldType.Password;
             }
 
             // Verificar tipo da propriedade
             if (type == typeof(bool))
             {
-                return FormFieldType.Checkbox;
+                return EnumFormFieldType.Checkbox;
             }
 
             if (type.IsEnum)
             {
-                return FormFieldType.Select;
+                return EnumFormFieldType.Select;
             }
 
             if (type == typeof(DateTime))
             {
-                return FormFieldType.Date;
+                return EnumFormFieldType.Date;
             }
 
             if (type == typeof(decimal) && (propertyName.Contains("valor") || propertyName.Contains("preco")))
             {
-                return FormFieldType.Currency;
+                return EnumFormFieldType.Currency;
             }
 
             if (IsNumericType(type))
             {
-                return FormFieldType.Number;
+                return EnumFormFieldType.Number;
             }
 
             if (type == typeof(string))
@@ -924,11 +974,11 @@ namespace AutoGestao.Controllers
                 var maxLength = property.GetCustomAttribute<MaxLengthAttribute>();
                 if (maxLength?.Length > 255)
                 {
-                    return FormFieldType.TextArea;
+                    return EnumFormFieldType.TextArea;
                 }
             }
 
-            return FormFieldType.Text;
+            return EnumFormFieldType.Text;
         }
 
         private Dictionary<string, object> ExtractFiltersFromRequest()
@@ -967,7 +1017,7 @@ namespace AutoGestao.Controllers
                 }
 
                 // Para filtros de data range, verificar campos específicos
-                if (filter.Type == GridFilterType.DateRange)
+                if (filter.Type == EnumGridFilterType.DateRange)
                 {
                     var inicioKey = $"{filter.Name}_inicio";
                     var fimKey = $"{filter.Name}_fim";
@@ -1083,14 +1133,14 @@ namespace AutoGestao.Controllers
 
             return fieldType switch
             {
-                FormFieldType.Email => "exemplo@email.com",
-                FormFieldType.Phone => "(00) 00000-0000",
-                FormFieldType.Cpf => "000.000.000-00",
-                FormFieldType.Cnpj => "00.000.000/0000-00",
-                FormFieldType.Cep => "00000-000",
-                FormFieldType.Currency => "R$ 0,00",
-                FormFieldType.Date => "dd/mm/aaaa",
-                FormFieldType.TextArea => $"Digite as {GetDisplayName(property).ToLower()}...",
+                EnumFormFieldType.Email => "exemplo@email.com",
+                EnumFormFieldType.Phone => "(00) 00000-0000",
+                EnumFormFieldType.Cpf => "000.000.000-00",
+                EnumFormFieldType.Cnpj => "00.000.000/0000-00",
+                EnumFormFieldType.Cep => "00000-000",
+                EnumFormFieldType.Currency => "R$ 0,00",
+                EnumFormFieldType.Date => "dd/mm/aaaa",
+                EnumFormFieldType.TextArea => $"Digite as {GetDisplayName(property).ToLower()}...",
                 _ => $"Digite {GetDisplayName(property).ToLower()}"
             };
         }

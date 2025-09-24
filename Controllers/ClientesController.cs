@@ -2,6 +2,7 @@ using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -27,22 +28,22 @@ namespace AutoGestao.Controllers
                         {
                             Name = "search",
                             DisplayName = "Busca Geral",
-                            Type = GridFilterType.Text,
+                            Type = EnumGridFilterType.Text,
                             Placeholder = "Nome, CPF, CNPJ, Email, Telefone..."
                         },
                         new()
                         {
                             Name = "tipocliente",
                             DisplayName = "Tipo de Pessoa",
-                            Type = GridFilterType.Select,
+                            Type = EnumGridFilterType.Select,
                             Placeholder = "Tipo Pessoa...",
-                            Options = GetTipoClienteOptions()
+                            Options = EnumExtension.GetSelectListItems<EnumTipoPessoa>(true)
                         },
                         new()
                         {
                             Name = "status",
                             DisplayName = "Status",
-                            Type = GridFilterType.Select,
+                            Type = EnumGridFilterType.Select,
                             Placeholder = "Status cliente...",
                             Options =
                             [
@@ -54,15 +55,15 @@ namespace AutoGestao.Controllers
 
                 Columns =
                     [
-                        new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true, Width = "65px" },
-                        new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Tipo", Type = GridColumnType.Enumerador, EnumRender = EnumRenderType.Icon, Sortable = true, Width = "65px"},
-                        new() { Name = nameof(Cliente.Nome), DisplayName = "Nome/Razão Social", Sortable = true, Type = GridColumnType.Text, UrlAction = "Details" },
-                        new() { Name = "Documento", DisplayName = "CPF/CNPJ", Sortable = true, Type = GridColumnType.Custom, CustomRender = RenderDocumento},
+                        new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = EnumGridColumnType.Text, Sortable = true, Width = "65px" },
+                        new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Tipo", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Icon, Sortable = true, Width = "65px"},
+                        new() { Name = nameof(Cliente.Nome), DisplayName = "Nome/Razão Social", Sortable = true, Type = EnumGridColumnType.Text, UrlAction = "Details" },
+                        new() { Name = "Documento", DisplayName = "CPF/CNPJ", Sortable = true, Type = EnumGridColumnType.Custom, CustomRender = RenderDocumento},
                         new() { Name = nameof(Cliente.Celular), DisplayName = "Telefone", Sortable = true },
                         new() { Name = nameof(Cliente.Cidade), DisplayName = "Cidade", Sortable = true },
-                        new() { Name = nameof(Cliente.Estado), DisplayName = "UF", Type = GridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true, Width = "65px"},
-                        new() { Name = nameof(Cliente.Ativo), DisplayName = "Ativo", Type = GridColumnType.Enumerador, Sortable = true, Width = "65px" },
-                        new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "100px" }
+                        new() { Name = nameof(Cliente.Estado), DisplayName = "UF", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true, Width = "65px"},
+                        new() { Name = nameof(Cliente.Ativo), DisplayName = "Ativo", Type = EnumGridColumnType.Enumerador, Sortable = true, Width = "65px" },
+                        new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
                     ]
             };
 
@@ -86,18 +87,18 @@ namespace AutoGestao.Controllers
                     },
                     new()
                     {
-                        Name = "ToggleStatus",
+                        Name = "AlterarStatus",
                         DisplayName = "Inativar",
                         Icon = "fas fa-ban",
-                        Url = "/Clientes/ToggleStatus/{id}",
+                        Url = "/Clientes/AlterarStatus/{id}",
                         ShowCondition = (x) => ((Cliente)x).Ativo == true
                     },
                     new()
                     {
-                        Name = "ToggleStatus",
+                        Name = "AlterarStatus",
                         DisplayName = "Ativar",
                         Icon = "fas fa-check",
-                        Url = "/Clientes/ToggleStatus/{id}",
+                        Url = "/Clientes/AlterarStatus/{id}",
                         ShowCondition = (item) => ((Cliente)item).Ativo == false
                     }
                 ]);
@@ -125,13 +126,6 @@ namespace AutoGestao.Controllers
                         }
                         break;
 
-                    case "codigo":
-                        if (int.TryParse(filter.Value.ToString(), out int codigo))
-                        {
-                            query = query.Where(c => c.Id == codigo);
-                        }
-                        break;
-
                     case "status":
                         if (bool.TryParse(filter.Value.ToString(), out bool status))
                         {
@@ -142,30 +136,6 @@ namespace AutoGestao.Controllers
                     case "tipocliente":
                         query = ApplyEnumFilter(query, filters, filter.Key, c => c.TipoCliente);
                         break;
-
-                    case "estado":
-                        query = ApplyEnumFilter(query, filters, filter.Key, c => c.Estado);
-                        break;
-
-                    case "cidade":
-                        var cidade = filter.Value.ToString();
-                        if (!string.IsNullOrEmpty(cidade))
-                        {
-                            query = query.Where(c => c.Cidade != null && c.Cidade.Contains(cidade));
-                        }
-                        break;
-
-                    case "datacadastro":
-                        if (DateTime.TryParse(filter.Value.ToString(), out DateTime dataCadastro))
-                        {
-                            query = query.Where(c => c.DataCadastro.Date == dataCadastro.Date);
-                        }
-                        break;
-
-                    case "periodo_inicio":
-                    case "periodo_fim":
-                        // Será tratado pelo helper ApplyDateRangeFilter
-                        break;
                 }
             }
 
@@ -173,38 +143,6 @@ namespace AutoGestao.Controllers
             query = ApplyDateRangeFilter(query, filters, "periodo", c => c.DataCadastro);
 
             return query;
-        }
-
-        protected override IQueryable<Cliente> ApplySort(IQueryable<Cliente> query, string orderBy, string orderDirection)
-        {
-            return orderBy?.ToLower() switch
-            {
-                "id" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.Id)
-                    : query.OrderBy(c => c.Id),
-                "nome" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.Nome)
-                    : query.OrderBy(c => c.Nome),
-                "tipocliente" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.TipoCliente)
-                    : query.OrderBy(c => c.TipoCliente),
-                "cpf" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.CPF)
-                    : query.OrderBy(c => c.CPF),
-                "cidade" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.Cidade)
-                    : query.OrderBy(c => c.Cidade),
-                "estado" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.Estado)
-                    : query.OrderBy(c => c.Estado),
-                "datacadastro" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.DataCadastro)
-                    : query.OrderBy(c => c.DataCadastro),
-                "ativo" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.Ativo)
-                    : query.OrderBy(c => c.Ativo),
-                _ => query.OrderByDescending(c => c.DataCadastro) // Default: Últimos cadastros
-            };
         }
 
         protected override List<SelectListItem> GetSelectOptions(string propertyName)
@@ -216,7 +154,7 @@ namespace AutoGestao.Controllers
                     new() { Value = "PessoaFisica", Text = "👤 Pessoa Física" },
                     new() { Value = "PessoaJuridica", Text = "🏢 Pessoa Jurídica" }
                 ],
-                nameof(Cliente.Estado) => GetEstadosOptions(),
+                nameof(Cliente.Estado) => EnumExtension.GetSelectListItems<EnumEstado>(),
                 _ => base.GetSelectOptions(propertyName)
             };
         }
@@ -263,7 +201,7 @@ namespace AutoGestao.Controllers
         // Só pode editar clientes ativos
         protected override bool CanEdit(Cliente entity)
         {
-            return entity.Ativo; 
+            return entity.Ativo;
         }
 
         // Só pode deletar clientes que não estão vinculados a compras
@@ -289,7 +227,7 @@ namespace AutoGestao.Controllers
         #region Ações Específicas
 
         [HttpPost]
-        public async Task<IActionResult> ToggleStatus(int id)
+        public async Task<IActionResult> AlterarStatus(int id)
         {
             var cliente = await _context.Clientes.FindAsync(id);
             if (cliente != null)
@@ -349,32 +287,13 @@ namespace AutoGestao.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Import()
+        public IActionResult Import()
         {
             TempData["ErrorMessage"] = $"Operação ainda não implementada!";
             return RedirectToAction(nameof(Index));
         }
 
         #endregion
-
-        #region Métodos Auxiliares para Filtros
-
-        private static List<SelectListItem> GetTipoClienteOptions()
-        {
-            var options = new List<SelectListItem>();
-            var enumDictionary = EnumExtension.GetEnumDictionary<EnumTipoPessoa>();
-
-            foreach (var item in enumDictionary.Where(x => x.Key != 0))
-            {
-                options.Add(new SelectListItem
-                {
-                    Value = ((EnumTipoPessoa)item.Key).ToString(),
-                    Text = $"{((EnumTipoPessoa)item.Key).GetIcone()} {item.Value}"
-                });
-            }
-
-            return options;
-        }
 
         private void ValidateCliente(Cliente entity)
         {
@@ -400,14 +319,6 @@ namespace AutoGestao.Controllers
             }
         }
 
-        private List<SelectListItem> GetEstadosOptions()
-        {
-            return
-            [
-                new() { Value = "", Text = "Selecione o estado..." },         new() { Value = "SP", Text = "São Paulo" },         new() { Value = "RJ", Text = "Rio de Janeiro" },         new() { Value = "MG", Text = "Minas Gerais" },         new() { Value = "RS", Text = "Rio Grande do Sul" },         // ... adicionar todos os estados
-            ];
-        }
-
         private static string RenderDocumento(object item)
         {
             var cliente = (Cliente)item;
@@ -417,7 +328,5 @@ namespace AutoGestao.Controllers
 
             return $@"{documento}";
         }
-
-        #endregion
     }
 }

@@ -1,6 +1,6 @@
 namespace AutoGestao.Enumerador.Gerais
 {
-    public enum FormFieldType
+    public enum EnumFormFieldType
     {
         Text,
         Email,

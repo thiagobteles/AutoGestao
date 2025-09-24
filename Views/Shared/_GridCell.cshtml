@@ -1,4 +1,5 @@
 @model GridCellViewModel
+@using AutoGestao.Enumerador.Gerais
 @using AutoGestao.Models
 @using AutoGestao.Extensions
 
@@ -10,7 +11,7 @@
 
 @switch (Model.Column.Type)
 {
-    case GridColumnType.Actions:
+    case EnumGridColumnType.Actions:
         @if (Model.Actions != null && Model.Actions.Any())
         {
             var visibleActions = Model.Actions.Where(action => action.ShowCondition == null || action.ShowCondition(Model.Item)).ToList();
@@ -55,7 +56,7 @@
         }
         break;
 
-    case GridColumnType.Enumerador:
+    case EnumGridColumnType.Enumerador:
         @try
         {
             var displayText = value?.ToString();
@@ -95,7 +96,7 @@
         }
         break;
 
-    case GridColumnType.Currency:
+    case EnumGridColumnType.Currency:
         @if (value != null && decimal.TryParse(value.ToString(), out decimal currencyValue))
         {
             <span class="currency-value">@currencyValue.ToString("C")</span>
@@ -106,7 +107,7 @@
         }
         break;
 
-    case GridColumnType.Date:
+    case EnumGridColumnType.Date:
         @if (value != null && DateTime.TryParse(value.ToString(), out DateTime dateValue))
         {
             @dateValue.ToString("dd/MM/yyyy")
@@ -117,7 +118,7 @@
         }
         break;
 
-    case GridColumnType.Number:
+    case EnumGridColumnType.Number:
         @if (value != null && decimal.TryParse(value.ToString(), out decimal numberValue))
         {
             @numberValue.ToString("N0")
@@ -128,7 +129,7 @@
         }
         break;
 
-    case GridColumnType.Integer:
+    case EnumGridColumnType.Integer:
         @if (value != null && long.TryParse(value.ToString(), out long integerValue))
         {
             @integerValue.ToString()
@@ -139,7 +140,7 @@
         }
         break;
 
-    case GridColumnType.Boolean:
+    case EnumGridColumnType.Boolean:
         @if (value != null && bool.TryParse(value.ToString(), out bool boolValue))
         {
             <span class="status-badge @(boolValue ? "status-active" : "status-inactive")">
@@ -153,7 +154,7 @@
         }
         break;
 
-    case GridColumnType.Custom:
+    case EnumGridColumnType.Custom:
         @if (Model.Column.CustomRender != null)
         {
             @Html.Raw(Model.Column.CustomRender(Model.Item))

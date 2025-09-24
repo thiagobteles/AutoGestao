@@ -10,39 +10,39 @@ namespace AutoGestao.Entidades
     public class Usuario : BaseEntidade
     {
         [Required]
-        [FormField(DisplayName = "Nome Completo", Icon = "fas fa-user", Type = FormFieldType.Text, Required = true, Order = 1, Section = "Dados Básicos")]
+        [FormField(DisplayName = "Nome Completo", Icon = "fas fa-user", Type = EnumFormFieldType.Text, Required = true, Order = 1, Section = "Dados Básicos")]
         public string Nome { get; set; } = "";
 
         [Required]
         [EmailAddress]
-        [FormField(DisplayName = "Email/Login", Icon = "fas fa-envelope", Type = FormFieldType.Email, Required = true, Order = 2, Section = "Dados Básicos")]
+        [FormField(DisplayName = "Email/Login", Icon = "fas fa-envelope", Type = EnumFormFieldType.Email, Required = true, Order = 2, Section = "Dados Básicos")]
         public string Email { get; set; } = "";
 
         [AuditSensitive(MaskPattern = "***")]
         [Required]
-        [FormField(DisplayName = "Senha", Icon = "fas fa-lock", Type = FormFieldType.Password, Required = true, Order = 3, Section = "Dados Básicos")]
+        [FormField(DisplayName = "Senha", Icon = "fas fa-lock", Type = EnumFormFieldType.Password, Required = true, Order = 3, Section = "Dados Básicos")]
         public string SenhaHash { get; set; } = "";
 
-        [FormField(DisplayName = "CPF", Icon = "fas fa-fingerprint", Type = FormFieldType.Cpf, Order = 4, Section = "Dados Básicos")]
+        [FormField(DisplayName = "CPF", Icon = "fas fa-fingerprint", Type = EnumFormFieldType.Cpf, Order = 4, Section = "Dados Básicos")]
         public string? CPF { get; set; }
 
-        [FormField(DisplayName = "Telefone", Icon = "fas fa-phone", Type = FormFieldType.Phone, Order = 5, Section = "Contato")]
+        [FormField(DisplayName = "Telefone", Icon = "fas fa-phone", Type = EnumFormFieldType.Phone, Order = 5, Section = "Contato")]
         public string? Telefone { get; set; }
 
-        [FormField(DisplayName = "Perfil", Icon = "fas fa-user-tag", Type = FormFieldType.Select, Required = true, Order = 10, Section = "Permissões")]
+        [FormField(DisplayName = "Perfil", Icon = "fas fa-user-tag", Type = EnumFormFieldType.Select, Required = true, Order = 10, Section = "Permissões")]
         public EnumPerfilUsuario Perfil { get; set; } = EnumPerfilUsuario.Vendedor;
 
-        [FormField(DisplayName = "Ativo", Icon = "fas fa-toggle-on", Type = FormFieldType.Checkbox, Order = 11, Section = "Permissões")]
+        [FormField(DisplayName = "Ativo", Icon = "fas fa-toggle-on", Type = EnumFormFieldType.Checkbox, Order = 11, Section = "Permissões")]
         public bool Ativo { get; set; } = true;
 
-        [FormField(DisplayName = "Último Login", Icon = "fas fa-clock", Type = FormFieldType.DateTime, ReadOnly = true, Order = 20, Section = "Informações")]
+        [FormField(DisplayName = "Último Login", Icon = "fas fa-clock", Type = EnumFormFieldType.DateTime, ReadOnly = true, Order = 20, Section = "Informações")]
         public DateTime? UltimoLogin { get; set; }
 
-        [FormField(DisplayName = "Observações", Icon = "fas fa-sticky-note", Type = FormFieldType.TextArea, Order = 30, Section = "Observações")]
+        [FormField(DisplayName = "Observações", Icon = "fas fa-sticky-note", Type = EnumFormFieldType.TextArea, Order = 30, Section = "Observações")]
         public string? Observacoes { get; set; }
 
         // Propriedades auxiliares não mapeadas
-        [FormField(DisplayName = "Confirmar Senha", Icon = "fas fa-lock", Type = FormFieldType.Password, Order = 4, Section = "Dados Básicos")]
+        [FormField(DisplayName = "Confirmar Senha", Icon = "fas fa-lock", Type = EnumFormFieldType.Password, Order = 4, Section = "Dados Básicos")]
         public string? ConfirmarSenha { get; set; }
 
         // Navigation properties

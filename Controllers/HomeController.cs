@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace AutoGestao.Controllers
 {
-    [Authorize] // 🔧 REQUER AUTENTICAÇÃO
+    [Authorize]
     public class HomeController(ApplicationDbContext context) : Controller
     {
         private readonly ApplicationDbContext _context = context;
@@ -28,30 +28,6 @@ namespace AutoGestao.Controllers
             };
 
             return View(dashboard);
-        }
-
-        //public IActionResult Index()
-        //{
-        //    // 🔧 DEBUG: Verificar informações do usuário
-        //    ViewBag.UsuarioNome = User.Identity?.Name;
-        //    ViewBag.UsuarioEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-        //    ViewBag.UsuarioPerfil = User.FindFirst("Perfil")?.Value;
-        //    ViewBag.IsAuthenticated = User.Identity?.IsAuthenticated;
-
-        //    return View();
-        //}
-
-        public async Task<IActionResult> TestConnection()
-        {
-            try
-            {
-                var canConnect = await _context.Database.CanConnectAsync();
-                return Json(new { success = canConnect, message = canConnect ? "Conexão OK!" : "Falha na conexão" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
         }
     }
 }

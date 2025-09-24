@@ -8,7 +8,7 @@ namespace AutoGestao.Atributes
         public string DisplayName { get; set; } = "";
         public string Icon { get; set; } = "fas fa-edit";
         public string Placeholder { get; set; } = "";
-        public FormFieldType Type { get; set; } = FormFieldType.Text;
+        public EnumFormFieldType Type { get; set; } = EnumFormFieldType.Text;
         public bool Required { get; set; } = false;
         public bool ReadOnly { get; set; } = false;
         public int Order { get; set; } = 0;

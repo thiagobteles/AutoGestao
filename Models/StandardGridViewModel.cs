@@ -1,3 +1,4 @@
+using AutoGestao.Enumerador.Gerais;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AutoGestao.Models
@@ -42,14 +43,6 @@ namespace AutoGestao.Models
         {
             return
                 [
-                    new()
-                    {
-                        Name = "Import",
-                        DisplayName = "Importar",
-                        Icon = "fas fa-upload",
-                        CssClass = "btn-modern btn-outline-modern",
-                        Url = "/" + controllerNome + "/Import"
-                    },
                     new()
                     {
                         Name = "Export",
@@ -105,7 +98,7 @@ namespace AutoGestao.Models
         public string? Width { get; set; }
         public bool Sortable { get; set; } = true;
         public string? CssClass { get; set; }
-        public GridColumnType Type { get; set; } = GridColumnType.Text;
+        public EnumGridColumnType Type { get; set; } = EnumGridColumnType.Text;
         public EnumRenderType? EnumRender { get; set; }
         public string? Format { get; set; }
         public string? UrlAction { get; set; }
@@ -116,7 +109,7 @@ namespace AutoGestao.Models
     {
         public string Name { get; set; } = "";
         public string DisplayName { get; set; } = "";
-        public GridFilterType Type { get; set; } = GridFilterType.Text;
+        public EnumGridFilterType Type { get; set; } = EnumGridFilterType.Text;
         public object? Value { get; set; }
         public List<SelectListItem>? Options { get; set; }
         public string? Placeholder { get; set; }
@@ -139,20 +132,5 @@ namespace AutoGestao.Models
         public object Item { get; set; } = new();
         public GridColumn Column { get; set; } = new();
         public List<GridAction>? Actions { get; set; }
-    }
-
-    public enum GridColumnType
-    {
-        Text, Number, Integer, Currency, Date, Enumerador, Boolean, Custom, Actions
-    }
-
-    public enum GridFilterType
-    {
-        Text, Select, Date, DateRange, Number
-    }
-
-    public enum EnumRenderType
-    {
-        Icon, Description, IconDescription, DescriptionIcon
     }
 }

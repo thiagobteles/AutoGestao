@@ -1,5 +1,6 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -12,24 +13,6 @@ namespace AutoGestao.Extensions
             return !typeof(T).IsEnum
                 ? throw new ArgumentException("T não é do tipo Enum")
                 : Enum.GetValues(typeof(T)).Cast<T>().ToDictionary(t => (int)(object)t, t => t.GetDescription());
-        }
-
-        public static List<T> GetEnumList<T>()
-        {
-            var array = (T[])Enum.GetValues(typeof(T));
-            var list = new List<T>(array);
-            return list;
-        }
-
-        public static T ToEnum<T>(this int aValor)
-        {
-            var xValorEnum = Enum.ToObject(typeof(T), aValor);
-            return (T)xValorEnum;
-        }
-
-        public static int ToInt(this Enum aValor)
-        {
-            return Convert.ToInt32(aValor);
         }
 
         public static string GetDescription<T>(this T source)
@@ -53,5 +36,34 @@ namespace AutoGestao.Extensions
             return attributes != null && attributes.Length > 0 ? attributes[0].Icone : source.ToString();
         }
 
+        public static List<SelectListItem> GetSelectListItems<TEnum>(bool obterIcone = false) where TEnum : struct, Enum
+        {
+            var options = new List<SelectListItem>();
+            var enumDictionary = GetEnumDictionary<TEnum>();
+
+            foreach (var item in enumDictionary.Where(x => x.Key != 0))
+            {
+                var enumValue = (TEnum)Enum.ToObject(typeof(TEnum), item.Key);
+
+                if (obterIcone)
+                {
+                    options.Add(new SelectListItem
+                    {
+                        Value = enumValue.ToString(),
+                        Text = $"{enumValue.GetIcone()} {item.Value}".Trim()
+                    });
+                }
+                else
+                {
+                    options.Add(new SelectListItem
+                    {
+                        Value = enumValue.ToString(),
+                        Text = item.Value.Trim()
+                    });
+                }
+                
+            }
+            return options;
+        }
     }
 }

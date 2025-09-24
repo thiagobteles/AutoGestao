@@ -1,7 +1,9 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Extensions;
 using AutoGestao.Models;
+using AutoGestao.Models.Auth;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,12 +28,7 @@ namespace AutoGestao.Controllers
         {
             return propertyName switch
             {
-                nameof(AuditLog.TipoOperacao) => Enum.GetValues<EnumTipoOperacaoAuditoria>()
-                    .Select(e => new SelectListItem
-                    {
-                        Value = e.ToString(),
-                        Text = GetOperationDisplayName(e)
-                    }).ToList(),
+                nameof(AuditLog.TipoOperacao) => EnumExtension.GetSelectListItems<EnumTipoOperacaoAuditoria>(),
                 nameof(AuditLog.UsuarioId) => _context.Usuarios
                     .Where(u => u.Ativo)
                     .Select(u => new SelectListItem
@@ -131,61 +128,43 @@ namespace AutoGestao.Controllers
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
-            var ultimosDias = 30;
-            var dataInicio = DateTime.UtcNow.AddDays(-ultimosDias);
-
-            var estatisticas = await _context.AuditLogs
-                .Where(a => a.DataHora >= dataInicio)
-                .GroupBy(a => a.TipoOperacao)
-                .Select(g => new {
-                    Operacao = g.Key,
-                    Total = g.Count()
-                })
-                .ToListAsync();
-
-            var operacoesPorDia = await _context.AuditLogs
-                .Where(a => a.DataHora >= dataInicio)
-                .GroupBy(a => a.DataHora.Date)
-                .Select(g => new {
-                    Data = g.Key,
-                    Total = g.Count()
-                })
-                .OrderBy(x => x.Data)
-                .ToListAsync();
-
-            var usuariosMaisAtivos = await _context.AuditLogs
-                .Where(a => a.DataHora >= dataInicio && a.UsuarioId.HasValue)
-                .GroupBy(a => new { a.UsuarioId, a.UsuarioNome })
-                .Select(g => new {
-                    Usuario = g.Key.UsuarioNome,
-                    Total = g.Count()
-                })
-                .OrderByDescending(x => x.Total)
-                .Take(10)
-                .ToListAsync();
-
-            var entidadesMaisAuditadas = await _context.AuditLogs
-                .Where(a => a.DataHora >= dataInicio)
-                .GroupBy(a => a.EntidadeDisplayName ?? a.EntidadeNome)
-                .Select(g => new {
-                    Entidade = g.Key,
-                    Total = g.Count()
-                })
-                .OrderByDescending(x => x.Total)
-                .Take(10)
-                .ToListAsync();
-
-            var viewModel = new
+            try
             {
-                EstatisticasPorOperacao = estatisticas,
-                OperacoesPorDia = operacoesPorDia,
-                UsuariosMaisAtivos = usuariosMaisAtivos,
-                EntidadesMaisAuditadas = entidadesMaisAuditadas,
-                TotalOperacoes = estatisticas.Sum(e => e.Total),
-                UltimosDias = ultimosDias
-            };
+                var ultimosDias = 30;
+                var dataInicio = DateTime.UtcNow.AddDays(-ultimosDias);
 
-            return View(viewModel);
+                var estatisticas = await _context.AuditLogs
+                    .Where(a => a.DataHora >= dataInicio)
+                    .GroupBy(a => a.TipoOperacao)
+                    .Select(g => new { Operacao = g.Key, Total = g.Count() })
+                    .ToListAsync();
+
+                var operacoesPorDia = await _context.AuditLogs
+                    .Where(a => a.DataHora >= dataInicio)
+                    .GroupBy(a => a.DataHora.Date)
+                    .Select(g => new { Data = g.Key, Total = g.Count() })
+                    .OrderBy(x => x.Data)
+                    .ToListAsync();
+
+                // Converter para ValueTuple após trazer do banco
+                var estatisticasTuple = estatisticas.Select(e => (e.Operacao, e.Total)).ToList();
+                var operacoesPorDiaTuple = operacoesPorDia.Select(o => (o.Data, o.Total)).ToList();
+
+                var viewModel = new DashboardAuditViewModel
+                {
+                    EstatisticasPorOperacao = estatisticasTuple,
+                    OperacoesPorDia = operacoesPorDiaTuple,
+                    TotalOperacoes = estatisticas.Sum(e => e.Total),
+                    UltimosDias = ultimosDias
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao carregar dashboard: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpGet]
@@ -294,24 +273,6 @@ namespace AutoGestao.Controllers
             return $"{entidadeNome} #{entidadeId}";
         }
 
-        private static string GetOperationDisplayName(EnumTipoOperacaoAuditoria operacao)
-        {
-            return operacao switch
-            {
-                EnumTipoOperacaoAuditoria.Create => "Criação",
-                EnumTipoOperacaoAuditoria.Update => "Alteração",
-                EnumTipoOperacaoAuditoria.Delete => "Exclusão",
-                EnumTipoOperacaoAuditoria.Login => "Login",
-                EnumTipoOperacaoAuditoria.Logout => "Logout",
-                EnumTipoOperacaoAuditoria.LoginFailed => "Login Falhado",
-                EnumTipoOperacaoAuditoria.PasswordChange => "Alteração de Senha",
-                EnumTipoOperacaoAuditoria.View => "Visualização",
-                EnumTipoOperacaoAuditoria.Export => "Exportação",
-                EnumTipoOperacaoAuditoria.Import => "Importação",
-                _ => operacao.ToString()
-            };
-        }
-
         private string GenerateCSV(List<AuditLog> logs)
         {
             var csv = new System.Text.StringBuilder();
@@ -325,7 +286,7 @@ namespace AutoGestao.Controllers
                 csv.AppendLine($"{log.DataHora:yyyy-MM-dd HH:mm:ss}," +
                               $"\"{log.UsuarioNome}\"," +
                               $"\"{log.UsuarioEmail}\"," +
-                              $"\"{GetOperationDisplayName(log.TipoOperacao)}\"," +
+                              $"\"{log.TipoOperacao.GetDescription()}\"," +
                               $"\"{log.EntidadeDisplayName ?? log.EntidadeNome}\"," +
                               $"\"{log.EntidadeId}\"," +
                               $"\"{log.CamposAlterados}\"," +
@@ -343,11 +304,6 @@ namespace AutoGestao.Controllers
         }
 
         protected override IQueryable<AuditLog> ApplyFilters(IQueryable<AuditLog> query, Dictionary<string, object> filters)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override IQueryable<AuditLog> ApplySort(IQueryable<AuditLog> query, string orderBy, string orderDirection)
         {
             throw new NotImplementedException();
         }

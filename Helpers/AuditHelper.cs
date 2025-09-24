@@ -37,7 +37,9 @@ namespace AutoGestao.Helpers
             var query = context.AuditLogs.Where(a => a.UsuarioId == userId);
 
             if (since.HasValue)
+            {
                 query = query.Where(a => a.DataHora >= since.Value);
+            }
 
             return await query
                 .OrderByDescending(a => a.DataHora)

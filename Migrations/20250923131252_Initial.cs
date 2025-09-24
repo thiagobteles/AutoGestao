@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -706,7 +706,7 @@ namespace AutoGestao.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_audit_logs_entidade_nome_entidade_id",
                 table: "audit_logs",
-                columns: new[] { "entidade_nome", "entidade_id" });
+                columns: ["entidade_nome", "entidade_id"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_logs_tipo_operacao",
@@ -840,13 +840,13 @@ namespace AutoGestao.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_itens_venda_venda_id_produto_id",
                 table: "itens_venda",
-                columns: new[] { "venda_id", "produto_id" },
+                columns: ["venda_id", "produto_id"],
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_parcela_vencimento_status",
                 table: "parcelas",
-                columns: new[] { "data_vencimento", "status" });
+                columns: ["data_vencimento", "status"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_parcelas_data_vencimento",
@@ -948,7 +948,7 @@ namespace AutoGestao.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_veiculo_situacao_marca",
                 table: "veiculos",
-                columns: new[] { "situacao", "veiculo_marca_id" });
+                columns: ["situacao", "veiculo_marca_id"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_veiculos_chassi",
@@ -1019,7 +1019,7 @@ namespace AutoGestao.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_venda_data_status",
                 table: "vendas",
-                columns: new[] { "data_venda", "status" });
+                columns: ["data_venda", "status"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_vendas_cliente_id",

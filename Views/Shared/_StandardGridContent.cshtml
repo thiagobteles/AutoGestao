@@ -1,4 +1,5 @@
 @model StandardGridViewModel
+@using AutoGestao.Enumerador.Gerais
 @using AutoGestao.Models
 
 <!-- Page Header -->
@@ -42,12 +43,12 @@
                     }
 
                     <div class="@xClasse">
-                        @if (filter.Type == GridFilterType.Text)
+                        @if (filter.Type == EnumGridFilterType.Text)
                         {
                             <input type="text" name="@filter.Name" value="@filter.Value"
                                    class="form-control" placeholder="@filter.Placeholder" />
                         }
-                        else if (filter.Type == GridFilterType.Select)
+                        else if (filter.Type == EnumGridFilterType.Select)
                         {
                             <select name="@filter.Name" class="form-select">
                                 <option value="">@filter.Placeholder</option>
@@ -62,12 +63,12 @@
                                 }
                             </select>
                         }
-                        else if (filter.Type == GridFilterType.Date)
+                        else if (filter.Type == EnumGridFilterType.Date)
                         {
                             <input type="date" name="@filter.Name" value="@filter.Value"
                                    class="form-control" placeholder="@filter.Placeholder" />
                         }
-                        else if (filter.Type == GridFilterType.DateRange)
+                        else if (filter.Type == EnumGridFilterType.DateRange)
                         {
                             <div class="d-flex gap-2">
                                 <input type="date" name="@(filter.Name)_inicio"
@@ -78,7 +79,7 @@
                                        class="form-control" placeholder="Data fim" />
                             </div>
                         }
-                        else if (filter.Type == GridFilterType.Number)
+                        else if (filter.Type == EnumGridFilterType.Number)
                         {
                             <input type="number" name="@filter.Name" value="@filter.Value"
                                    class="form-control" placeholder="@filter.Placeholder" />
@@ -104,7 +105,7 @@
                     @foreach (var column in Model.Columns)
                     {
                         <th width="@column.Width" class="@column.CssClass">
-                            @if (column.Sortable && column.Type != GridColumnType.Actions)
+                            @if (column.Sortable && column.Type != EnumGridColumnType.Actions)
                             {
                                 <div class="sortable-header" data-sortable="@column.Name" role="button" tabindex="0">
                                     <span>@column.DisplayName</span>
@@ -137,13 +138,13 @@
                             tabindex="0">
                             @foreach (var column in Model.Columns)
                             {
-                                <td role="gridcell" class="grid-cell @(column.Type == GridColumnType.Actions ? "actions-cell" : "")">
+                                <td role="gridcell" class="grid-cell @(column.Type == EnumGridColumnType.Actions ? "actions-cell" : "")">
                                     <div class="cell-content">
                                         @await Html.PartialAsync("_GridCell", new GridCellViewModel
                                         {
                                             Item = item,
                                             Column = column,
-                                            Actions = column.Type == GridColumnType.Actions 
+                                            Actions = column.Type == EnumGridColumnType.Actions 
                                                 ? Model.RowActions?.Where(a => a.ShowCondition == null || a.ShowCondition(item)).ToList()
                                                 : null
                                         })

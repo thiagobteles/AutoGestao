@@ -1,6 +1,7 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -24,13 +25,13 @@ namespace AutoGestao.Controllers
             {
                 Columns =
                 [
-                    new() { Name = nameof(Vendedor.Id), DisplayName = "Cód", Type = GridColumnType.Number, Sortable = true, Width = "65px" },
+                    new() { Name = nameof(Vendedor.Id), DisplayName = "Cód", Type = EnumGridColumnType.Number, Sortable = true, Width = "65px" },
                     new() { Name = nameof(Vendedor.Nome), DisplayName = "Nome Completo", Sortable = true },
-                    new() { Name = nameof(Vendedor.CPF), DisplayName = "CPF", Sortable = true, Type = GridColumnType.Custom, CustomRender = RenderDocumento },
+                    new() { Name = nameof(Vendedor.CPF), DisplayName = "CPF", Sortable = true, Type = EnumGridColumnType.Custom, CustomRender = RenderDocumento },
                     new() { Name = nameof(Vendedor.Email), DisplayName = "Email", Sortable = true },
                     new() { Name = nameof(Vendedor.Celular), DisplayName = "Celular", Sortable = true },
-                    new() { Name = nameof(Vendedor.Ativo), DisplayName = "Ativo", Type = GridColumnType.Enumerador, Sortable = true, Width = "65px" },
-                    new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "100px" }
+                    new() { Name = nameof(Vendedor.Ativo), DisplayName = "Ativo", Type = EnumGridColumnType.Enumerador, Sortable = true, Width = "65px" },
+                    new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
                 ],
 
                 Filters =
@@ -39,14 +40,14 @@ namespace AutoGestao.Controllers
                     {
                         Name = "search",
                         DisplayName = "Busca Geral",
-                        Type = GridFilterType.Text,
+                        Type = EnumGridFilterType.Text,
                         Placeholder = "Nome, CPF, Email..."
                     },
                     new()
                     {
                         Name = "status",
                         DisplayName = "Status",
-                        Type = GridFilterType.Select,
+                        Type = EnumGridFilterType.Select,
                         Options =
                         [
                             new() { Value = "", Text = "Todos os Status", Selected = true },
@@ -69,18 +70,18 @@ namespace AutoGestao.Controllers
                     },
                     new()
                     {
-                        Name = "ToggleStatus",
+                        Name = "AlterarStatus",
                         DisplayName = "Inativar",
                         Icon = "fas fa-ban",
-                        Url = "/Vendedores/ToggleStatus/{id}",
+                        Url = "/Vendedores/AlterarStatus/{id}",
                         ShowCondition = (x) => ((Vendedor)x).Ativo == true
                     },
                     new()
                     {
-                        Name = "ToggleStatus",
+                        Name = "AlterarStatus",
                         DisplayName = "Ativar",
                         Icon = "fas fa-check",
-                        Url = "/Vendedores/ToggleStatus/{id}",
+                        Url = "/Vendedores/AlterarStatus/{id}",
                         ShowCondition = (x) => ((Vendedor)x).Ativo == false
                     }
                 ]);
@@ -113,46 +114,10 @@ namespace AutoGestao.Controllers
                             query = query.Where(v => v.Ativo == status);
                         }
                         break;
-
-                    case "meta_min":
-                        if (decimal.TryParse(filter.Value.ToString(), out decimal metaMin))
-                        {
-                            query = query.Where(v => v.Meta >= metaMin);
-                        }
-                        break;
                 }
             }
 
             return query;
-        }
-
-        protected override IQueryable<Vendedor> ApplySort(IQueryable<Vendedor> query, string orderBy, string orderDirection)
-        {
-            return orderBy?.ToLower() switch
-            {
-                "id" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Id)
-                    : query.OrderBy(v => v.Id),
-                "nome" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Nome)
-                    : query.OrderBy(v => v.Nome),
-                "cpf" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.CPF)
-                    : query.OrderBy(v => v.CPF),
-                "email" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Email)
-                    : query.OrderBy(v => v.Email),
-                "percentualcomissao" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.PercentualComissao)
-                    : query.OrderBy(v => v.PercentualComissao),
-                "meta" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Meta)
-                    : query.OrderBy(v => v.Meta),
-                "ativo" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Ativo)
-                    : query.OrderBy(v => v.Ativo),
-                _ => query.OrderBy(v => v.Nome) // Default: ordem alfabética
-            };
         }
 
         #endregion
@@ -166,7 +131,7 @@ namespace AutoGestao.Controllers
         #region Ações Específicas
 
         [HttpPost]
-        public async Task<IActionResult> ToggleStatus(int id)
+        public async Task<IActionResult> AlterarStatus(int id)
         {
             var vendedor = await _context.Vendedores.FindAsync(id);
             if (vendedor != null)
@@ -218,13 +183,6 @@ namespace AutoGestao.Controllers
                 TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Import()
-        {
-            TempData["ErrorMessage"] = $"Operação ainda não implementada!";
-            return RedirectToAction();
         }
 
         #endregion

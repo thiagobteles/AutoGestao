@@ -2,6 +2,7 @@ using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
@@ -32,31 +33,31 @@ namespace AutoGestao.Controllers
                     {
                         Name = "search",
                         DisplayName = "Busca Geral",
-                        Type = GridFilterType.Text,
+                        Type = EnumGridFilterType.Text,
                         Placeholder = "Código, Placa, Marca, Modelo..."
                     },
                     new()
                     {
                         Name = "situacao",
                         DisplayName = "Situação",
-                        Type = GridFilterType.Select,
+                        Type = EnumGridFilterType.Select,
                         Placeholder = "Situação do veiculo...",
-                        Options = GetSituacaoOptions()
+                        Options = EnumExtension.GetSelectListItems<EnumSituacaoVeiculo>(true)
                     }
                 ],
 
                 // Configuração das colunas
                 Columns =
                 [
-                    new() { Name = nameof(Veiculo.Id), DisplayName = "Cód", Type = GridColumnType.Text, Sortable = true, Width = "65px" },
-                    new() { Name = "MarcaModelo", DisplayName = "Marca/Modelo", Sortable = false, Type = GridColumnType.Custom, CustomRender = RenderMarcaModelo },
-                    new() { Name = nameof(Veiculo.AnoFabricacao), DisplayName = "Ano", Type = GridColumnType.Integer, Sortable = true},
+                    new() { Name = nameof(Veiculo.Id), DisplayName = "Cód", Type = EnumGridColumnType.Text, Sortable = true, Width = "65px" },
+                    new() { Name = "MarcaModelo", DisplayName = "Marca/Modelo", Sortable = false, Type = EnumGridColumnType.Custom, CustomRender = RenderMarcaModelo },
+                    new() { Name = nameof(Veiculo.AnoFabricacao), DisplayName = "Ano", Type = EnumGridColumnType.Integer, Sortable = true},
                     new() { Name = nameof(Veiculo.Placa), DisplayName = "Placa", Sortable = true },
-                    new() { Name = nameof(Veiculo.KmSaida), DisplayName = "KM", Type = GridColumnType.Number, Sortable = true },
-                    new() { Name = nameof(Veiculo.PrecoVenda), DisplayName = "Preço", Type = GridColumnType.Currency, Sortable = true },
-                    new() { Name = nameof(Veiculo.Situacao), DisplayName = "Situação", Type = GridColumnType.Enumerador, EnumRender = EnumRenderType.IconDescription, Sortable = true },
-                    new() { Name = nameof(Veiculo.StatusVeiculo), DisplayName = "Status", Type = GridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true },
-                    new() { Name = "Actions", DisplayName = "Ações", Type = GridColumnType.Actions, Sortable = false, Width = "100px" }
+                    new() { Name = nameof(Veiculo.KmSaida), DisplayName = "KM", Type = EnumGridColumnType.Number, Sortable = true },
+                    new() { Name = nameof(Veiculo.PrecoVenda), DisplayName = "Preço", Type = EnumGridColumnType.Currency, Sortable = true },
+                    new() { Name = nameof(Veiculo.Situacao), DisplayName = "Situação", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.IconDescription, Sortable = true },
+                    new() { Name = nameof(Veiculo.StatusVeiculo), DisplayName = "Status", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true },
+                    new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
                 ],
             };
 
@@ -114,160 +115,12 @@ namespace AutoGestao.Controllers
                     case "situacao":
                         query = ApplyEnumFilter(query, filters, filter.Key, v => v.Situacao);
                         break;
-
-                    case "status":
-                        query = ApplyEnumFilter(query, filters, filter.Key, v => v.StatusVeiculo);
-                        break;
-
-                    case "combustivel":
-                        query = ApplyEnumFilter(query, filters, filter.Key, v => v.Combustivel);
-                        break;
-
-                    case "marca":
-                        if (int.TryParse(filter.Value.ToString(), out int marcaId))
-                        {
-                            query = query.Where(v => v.VeiculoMarcaId == marcaId);
-                        }
-                        break;
-
-                    case "modelo":
-                        if (int.TryParse(filter.Value.ToString(), out int modeloId))
-                        {
-                            query = query.Where(v => v.VeiculoMarcaModeloId == modeloId);
-                        }
-                        break;
-
-                    case "ano":
-                        if (int.TryParse(filter.Value.ToString(), out int ano))
-                        {
-                            query = query.Where(v => v.AnoFabricacao == ano || v.AnoModelo == ano);
-                        }
-                        break;
-
-                    case "preco_min":
-                        if (decimal.TryParse(filter.Value.ToString(), out decimal precoMin))
-                        {
-                            query = query.Where(v => v.PrecoVenda >= precoMin);
-                        }
-                        break;
-
-                    case "preco_max":
-                        if (decimal.TryParse(filter.Value.ToString(), out decimal precoMax))
-                        {
-                            query = query.Where(v => v.PrecoVenda <= precoMax);
-                        }
-                        break;
-
-                    case "km_min":
-                        if (int.TryParse(filter.Value.ToString(), out int kmMin))
-                        {
-                            query = query.Where(v => v.KmSaida >= kmMin);
-                        }
-                        break;
-
-                    case "km_max":
-                        if (int.TryParse(filter.Value.ToString(), out int kmMax))
-                        {
-                            query = query.Where(v => v.KmSaida <= kmMax);
-                        }
-                        break;
                 }
             }
 
             // Aplicar filtro de período usando o helper
             query = ApplyDateRangeFilter(query, filters, "periodo_cadastro", v => v.DataCadastro);
             return query;
-        }
-
-        protected override IQueryable<Veiculo> ApplySort(IQueryable<Veiculo> query, string orderBy, string orderDirection)
-        {
-            return orderBy?.ToLower() switch
-            {
-                "id" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Id)
-                    : query.OrderBy(v => v.Id),
-                "codigo" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Codigo)
-                    : query.OrderBy(v => v.Codigo),
-                "placa" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Placa)
-                    : query.OrderBy(v => v.Placa),
-                "anofabricacao" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.AnoFabricacao)
-                    : query.OrderBy(v => v.AnoFabricacao),
-                "kmsaida" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.KmSaida)
-                    : query.OrderBy(v => v.KmSaida),
-                "precovenda" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.PrecoVenda)
-                    : query.OrderBy(v => v.PrecoVenda),
-                "situacao" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.Situacao)
-                    : query.OrderBy(v => v.Situacao),
-                "statusveiculo" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.StatusVeiculo)
-                    : query.OrderBy(v => v.StatusVeiculo),
-                "datacadastro" => orderDirection == "desc"
-                    ? query.OrderByDescending(v => v.DataCadastro)
-                    : query.OrderBy(v => v.DataCadastro),
-                _ => query.OrderByDescending(v => v.DataCadastro) // Default: Últimos cadastros
-            };
-        }
-
-        #region Métodos Auxiliares para Filtros
-
-        private static List<SelectListItem> GetSituacaoOptions()
-        {
-            var options = new List<SelectListItem>();
-            var enumDictionary = EnumExtension.GetEnumDictionary<EnumSituacaoVeiculo>();
-            
-            foreach (var item in enumDictionary.Where(x => x.Key != 0))
-            {
-                options.Add(new SelectListItem
-                {
-                    Value = ((EnumSituacaoVeiculo)item.Key).ToString(),
-                    Text = $"{((EnumSituacaoVeiculo)item.Key).GetIcone()} {item.Value}"
-                });
-            }
-
-            return options;
-        }
-
-        private List<SelectListItem> GetMarcaOptions()
-        {
-            var options = new List<SelectListItem>();
-            var marcas = _context.VeiculoMarcas
-                .OrderBy(m => m.Descricao)
-                .Select(m => new { m.Id, m.Descricao })
-                .ToList();
-
-            foreach (var marca in marcas)
-            {
-                options.Add(new SelectListItem
-                {
-                    Value = marca.Id.ToString(),
-                    Text = marca.Descricao
-                });
-            }
-
-            return options;
-        }
-
-        private static List<SelectListItem> GetCombustivelOptions()
-        {
-            var options = new List<SelectListItem>();
-            var enumDictionary = EnumExtension.GetEnumDictionary<EnumCombustivelVeiculo>();
-            
-            foreach (var item in enumDictionary.Where(x => x.Key != 0))
-            {
-                options.Add(new SelectListItem
-                {
-                    Value = ((EnumCombustivelVeiculo)item.Key).ToString(),
-                    Text = $"{((EnumCombustivelVeiculo)item.Key).GetIcone()} {item.Value}"
-                });
-            }
-
-            return options;
         }
 
         private static string RenderMarcaModelo(object item)
@@ -282,8 +135,6 @@ namespace AutoGestao.Controllers
                     <div class=""text-muted small"">{modelo}</div>
                 </div>";
         }
-
-        #endregion
 
         #region Ações Específicas
 
@@ -583,13 +434,6 @@ namespace AutoGestao.Controllers
                 TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Import()
-        {
-            TempData["ErrorMessage"] = $"Operação ainda não implementada!";
-            return RedirectToAction(nameof(Index));
         }
 
         #endregion Ações Específicas
