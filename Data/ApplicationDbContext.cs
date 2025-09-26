@@ -497,7 +497,7 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoMarcaModelo).WithMany().HasForeignKey(v => v.VeiculoMarcaModeloId).OnDelete(DeleteBehavior.SetNull);
 
             // Relacionamento entre Marca e Modelo
-            modelBuilder.Entity<VeiculoMarcaModelo>().HasOne(m => m.Marca).WithMany().HasForeignKey(m => m.VeiculoMarcaId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<VeiculoMarcaModelo>().HasOne(m => m.VeiculoMarca).WithMany().HasForeignKey(m => m.VeiculoMarcaId).OnDelete(DeleteBehavior.SetNull);
 
             // Relacionamentos das Fotos do Veículo
             modelBuilder.Entity<VeiculoFoto>().HasOne(vf => vf.Veiculo).WithMany(v => v.Fotos).HasForeignKey(vf => vf.VeiculoId).OnDelete(DeleteBehavior.Cascade);

@@ -24,11 +24,10 @@ namespace AutoGestao.Controllers
                 .OrderByDescending(a => a.DataHora);
         }
 
-        protected override List<SelectListItem> GetSelectOptions(string propertyName)
+        protected override List<SelectListItem> GetCustomSelectOptions(string propertyName)
         {
             return propertyName switch
             {
-                nameof(AuditLog.TipoOperacao) => EnumExtension.GetSelectListItems<EnumTipoOperacaoAuditoria>(),
                 nameof(AuditLog.UsuarioId) => [.. _context.Usuarios
                     .Where(u => u.Ativo)
                     .Select(u => new SelectListItem
@@ -36,32 +35,39 @@ namespace AutoGestao.Controllers
                         Value = u.Id.ToString(),
                         Text = u.Nome
                     })],
+
                 "EntidadeNome" => [.. _context.AuditLogs
                     .Select(a => a.EntidadeNome)
                     .Distinct()
                     .OrderBy(e => e)
                     .Select(e => new SelectListItem { Value = e, Text = e })],
-                _ => base.GetSelectOptions(propertyName)
+
+                _ => base.GetCustomSelectOptions(propertyName)
             };
         }
 
         // Sobrescrever para desabilitar criação, edição e exclusão
-        public override Task<IActionResult> Create()
-        {
-            TempData["ErrorMessage"] = "Logs de auditoria não podem ser criados manualmente.";
-            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
-        }
+        //public override Task<IActionResult> Create()
+        //{
+        //    TempData["ErrorMessage"] = "Logs de auditoria não podem ser criados manualmente.";
+        //    return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        //}
 
-        public override Task<IActionResult> Edit(int id)
-        {
-            TempData["ErrorMessage"] = "Logs de auditoria não podem ser editados.";
-            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
-        }
+        //public override Task<IActionResult> Edit(int id)
+        //{
+        //    TempData["ErrorMessage"] = "Logs de auditoria não podem ser editados.";
+        //    return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        //}
 
-        public override Task<IActionResult> Delete(int id)
+        //public override Task<IActionResult> Delete(int id)
+        //{
+        //    TempData["ErrorMessage"] = "Logs de auditoria não podem ser excluídos.";
+        //    return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        //}
+
+        protected override bool CanCreate(AuditLog entity)
         {
-            TempData["ErrorMessage"] = "Logs de auditoria não podem ser excluídos.";
-            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+            return false; // Auditoria é read-only
         }
 
         protected override bool CanEdit(AuditLog entity)
@@ -123,7 +129,8 @@ namespace AutoGestao.Controllers
             }
         }
 
-        // Ações personalizadas para relatórios
+        #region Ações personalizadas
+
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
@@ -237,6 +244,8 @@ namespace AutoGestao.Controllers
             }
         }
 
+        #endregion Ações personalizadas
+        
         private static string FormatJson(string json)
         {
             try

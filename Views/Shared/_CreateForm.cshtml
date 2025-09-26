@@ -1,0 +1,277 @@
+@model StandardFormViewModel
+@using AutoGestao.Enumerador.Gerais
+
+@{
+    Layout = null;
+}
+
+<div class="modal-form-container">
+
+    <!-- Formulário principal -->
+    <form asp-action="Create" method="post" class="needs-validation" novalidate>
+
+        <!-- Incluir validação anti-forgery -->
+        @Html.AntiForgeryToken()
+
+        <!-- Conteúdo do formulário -->
+        <div class="form-content">
+            @await Html.PartialAsync("_StandardFormContent", Model)
+        </div>
+
+        <!-- Botões de ação fixos no rodapé -->
+        <div class="form-actions-footer">
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </button>
+
+                <div class="d-flex gap-2">
+                    @if (!string.IsNullOrEmpty(Model.BackAction) && Model.BackAction != "Index")
+                    {
+                        <a href="@Url.Action(Model.BackAction)" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            @Model.BackText
+                        </a>
+                    }
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-2"></i>
+                        Salvar
+                        <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                            <span class="visually-hidden">Salvando...</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<!-- Estilos específicos para o modal -->
+<style>
+    .modal-form-container {
+        min-height: 400px;
+        max-height: 70vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-content {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .form-actions-footer {
+        flex-shrink: 0;
+        background: #f8f9fa;
+        margin: 0 -1.5rem -1.5rem -1.5rem;
+        padding: 1rem 1.5rem;
+        border-radius: 0 0 12px 12px;
+    }
+
+    /* Customizar seções no modal */
+    .modal-form-container .form-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-form-container .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+    }
+
+        .modal-form-container .section-title i {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+    /* Ajustar campos no modal */
+    .modal-form-container .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .modal-form-container .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-form-container .form-control,
+    .modal-form-container .form-select {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        transition: all 0.2s ease;
+    }
+
+        .modal-form-container .form-control:focus,
+        .modal-form-container .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+
+    /* Scrollbar customizada para o conteúdo */
+    .form-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .form-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .form-content::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+
+        .form-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+    /* Responsividade */
+    @@media (max-width: 768px) {
+        .modal-form-container
+    {
+        min-height: 300px;
+        max-height: 80vh;
+    }
+
+    .form-actions-footer {
+        padding: 0.75rem 1rem;
+    }
+
+        .form-actions-footer .d-flex {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-actions-footer .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+    }
+</style>
+
+<!-- JavaScript específico para o modal -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aplicar máscaras se disponível
+        if (typeof window.applyMasks === 'function') {
+            window.applyMasks();
+        }
+
+        // Validação Bootstrap
+        const form = document.querySelector('.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const spinner = submitBtn?.querySelector('.spinner-border');
+
+                // Mostrar loading no botão
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    if (spinner) {
+                        spinner.classList.remove('d-none');
+                    }
+                }
+
+                // Validação HTML5
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    // Restaurar botão se houver erro
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        if (spinner) {
+                            spinner.classList.add('d-none');
+                        }
+                    }
+
+                    // Scroll para o primeiro erro
+                    const firstError = form.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstError.focus();
+                    }
+                }
+
+                form.classList.add('was-validated');
+            });
+        }
+
+        // Auto-focus no primeiro campo
+        const firstInput = document.querySelector('.modal-form-container input:not([type="hidden"]), .modal-form-container select, .modal-form-container textarea');
+        if (firstInput && !firstInput.disabled && !firstInput.readOnly) {
+            setTimeout(() => firstInput.focus(), 100);
+        }
+
+        // Esc para fechar modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const closeBtn = document.querySelector('[data-bs-dismiss="modal"]');
+                if (closeBtn) {
+                    closeBtn.click();
+                }
+            }
+        });
+
+        // Tratar campos condicionais (se houver)
+        initializeConditionalFields();
+
+        // Re-inicializar reference fields se houver no modal
+        if (window.referenceFieldHandlerInstance) {
+            setTimeout(() => {
+                window.referenceFieldHandlerInstance.bindEvents();
+            }, 100);
+        }
+    });
+
+    // Função para campos condicionais
+    function initializeConditionalFields() {
+        const conditionalFields = document.querySelectorAll('[data-conditional-field]');
+
+        conditionalFields.forEach(field => {
+            const conditionalFieldName = field.dataset.conditionalField;
+            const conditionalValue = field.dataset.conditionalValue;
+            const conditionalElement = document.querySelector(`[name="${conditionalFieldName}"]`);
+
+            if (conditionalElement) {
+                const checkCondition = () => {
+                    const parentRow = field.closest('.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-6, .col-md-12');
+                    const currentValue = conditionalElement.value;
+
+                    if (conditionalValue === '>0') {
+                        // Mostrar se valor > 0
+                        const show = currentValue && currentValue !== '0' && currentValue !== '';
+                        if (parentRow) {
+                            parentRow.style.display = show ? '' : 'none';
+                        }
+                    } else {
+                        // Mostrar se valor igual ao esperado
+                        const show = currentValue === conditionalValue;
+                        if (parentRow) {
+                            parentRow.style.display = show ? '' : 'none';
+                        }
+                    }
+                };
+
+                // Verificar no carregamento
+                checkCondition();
+
+                // Verificar quando valor mudar
+                conditionalElement.addEventListener('change', checkCondition);
+            }
+        });
+    }
+</script>

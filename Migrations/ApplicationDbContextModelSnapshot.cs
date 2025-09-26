@@ -46,7 +46,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 475, DateTimeKind.Utc).AddTicks(2130))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 80, DateTimeKind.Utc).AddTicks(5301))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -184,7 +184,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 471, DateTimeKind.Utc).AddTicks(8215))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 76, DateTimeKind.Utc).AddTicks(9075))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataAvaliacao")
@@ -304,7 +304,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 468, DateTimeKind.Utc).AddTicks(2860))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 72, DateTimeKind.Utc).AddTicks(8802))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -405,7 +405,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 472, DateTimeKind.Utc).AddTicks(2062))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 77, DateTimeKind.Utc).AddTicks(3223))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -485,7 +485,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 472, DateTimeKind.Utc).AddTicks(4666))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 77, DateTimeKind.Utc).AddTicks(7374))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -568,7 +568,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 468, DateTimeKind.Utc).AddTicks(9529))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 73, DateTimeKind.Utc).AddTicks(5782))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -643,81 +643,6 @@ namespace AutoGestao.Migrations
                     b.HasDiscriminator().HasValue("Fornecedor");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.ItemVenda", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AlteradoPorUsuarioId")
-                        .HasColumnType("integer")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<int?>("CriadoPorUsuarioId")
-                        .HasColumnType("integer")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 474, DateTimeKind.Utc).AddTicks(144))
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<string>("Observacoes")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("observacoes");
-
-                    b.Property<decimal>("PercentualDesconto")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(5,2)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("percentual_desconto");
-
-                    b.Property<int>("ProdutoId")
-                        .HasColumnType("integer")
-                        .HasColumnName("produto_id");
-
-                    b.Property<int>("Quantidade")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantidade");
-
-                    b.Property<decimal>("ValorDesconto")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("valor_desconto");
-
-                    b.Property<decimal>("ValorTotal")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("valor_total");
-
-                    b.Property<decimal>("ValorUnitario")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("valor_unitario");
-
-                    b.Property<int>("VendaId")
-                        .HasColumnType("integer")
-                        .HasColumnName("venda_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_itens_venda");
-
-                    b.HasIndex("ProdutoId");
-
-                    b.HasIndex("VendaId", "ProdutoId")
-                        .IsUnique();
-
-                    b.ToTable("itens_venda", (string)null);
-
-                    b.HasDiscriminator().HasValue("ItemVenda");
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.Parcela", b =>
                 {
                     b.Property<int>("Id")
@@ -738,7 +663,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 471, DateTimeKind.Utc).AddTicks(5931))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 76, DateTimeKind.Utc).AddTicks(5229))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -795,99 +720,6 @@ namespace AutoGestao.Migrations
                     b.HasDiscriminator().HasValue("Parcela");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Produto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AlteradoPorUsuarioId")
-                        .HasColumnType("integer")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<bool>("Ativo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("ativo");
-
-                    b.Property<int>("Categoria")
-                        .HasColumnType("integer")
-                        .HasColumnName("categoria");
-
-                    b.Property<string>("Codigo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("codigo");
-
-                    b.Property<int?>("CriadoPorUsuarioId")
-                        .HasColumnType("integer")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 473, DateTimeKind.Utc).AddTicks(6937))
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<string>("Descricao")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("descricao");
-
-                    b.Property<int>("EstoqueAtual")
-                        .HasColumnType("integer")
-                        .HasColumnName("estoque_atual");
-
-                    b.Property<int>("EstoqueMaximo")
-                        .HasColumnType("integer")
-                        .HasColumnName("estoque_maximo");
-
-                    b.Property<int>("EstoqueMinimo")
-                        .HasColumnType("integer")
-                        .HasColumnName("estoque_minimo");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("nome");
-
-                    b.Property<string>("Observacoes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("observacoes");
-
-                    b.Property<decimal?>("PrecoCusto")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("preco_custo");
-
-                    b.Property<decimal>("PrecoVenda")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("preco_venda");
-
-                    b.HasKey("Id")
-                        .HasName("pk_produtos");
-
-                    b.HasIndex("Codigo")
-                        .IsUnique();
-
-                    b.HasIndex("Nome")
-                        .HasDatabaseName("ix_produto_nome");
-
-                    b.ToTable("produtos", (string)null);
-
-                    b.HasDiscriminator().HasValue("Produto");
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.Tarefa", b =>
                 {
                     b.Property<int>("Id")
@@ -908,7 +740,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 472, DateTimeKind.Utc).AddTicks(6774))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 78, DateTimeKind.Utc).AddTicks(1239))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1001,7 +833,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 474, DateTimeKind.Utc).AddTicks(3317))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 79, DateTimeKind.Utc).AddTicks(4450))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1105,7 +937,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 469, DateTimeKind.Utc).AddTicks(3525))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 74, DateTimeKind.Utc).AddTicks(129))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1318,7 +1150,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 471, DateTimeKind.Utc).AddTicks(557))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 75, DateTimeKind.Utc).AddTicks(7905))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1427,7 +1259,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 470, DateTimeKind.Utc).AddTicks(8454))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 75, DateTimeKind.Utc).AddTicks(5721))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1620,7 +1452,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 471, DateTimeKind.Utc).AddTicks(2937))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 76, DateTimeKind.Utc).AddTicks(294))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1720,7 +1552,7 @@ namespace AutoGestao.Migrations
                     b.Property<DateTime>("DataAlteracao")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
-                        .HasDefaultValue(new DateTime(2025, 9, 23, 13, 12, 52, 468, DateTimeKind.Utc).AddTicks(6481))
+                        .HasDefaultValue(new DateTime(2025, 9, 26, 6, 52, 52, 73, DateTimeKind.Utc).AddTicks(2532))
                         .HasColumnName("data_alteracao");
 
                     b.Property<DateTime>("DataCadastro")
@@ -1846,25 +1678,6 @@ namespace AutoGestao.Migrations
                     b.Navigation("Veiculo");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.ItemVenda", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Produto", "Produto")
-                        .WithMany("ItensVenda")
-                        .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Venda", "Venda")
-                        .WithMany("Itens")
-                        .HasForeignKey("VendaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Produto");
-
-                    b.Navigation("Venda");
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.Parcela", b =>
                 {
                     b.HasOne("AutoGestao.Entidades.Venda", "Venda")
@@ -1963,12 +1776,12 @@ namespace AutoGestao.Migrations
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoMarcaModelo", b =>
                 {
-                    b.HasOne("AutoGestao.Entidades.Veiculos.VeiculoMarca", "Marca")
+                    b.HasOne("AutoGestao.Entidades.Veiculos.VeiculoMarca", "VeiculoMarca")
                         .WithMany()
                         .HasForeignKey("VeiculoMarcaId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Marca");
+                    b.Navigation("VeiculoMarca");
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Venda", b =>
@@ -2007,11 +1820,6 @@ namespace AutoGestao.Migrations
                     b.Navigation("Vendas");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Produto", b =>
-                {
-                    b.Navigation("ItensVenda");
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.Usuario", b =>
                 {
                     b.Navigation("AuditLogs");
@@ -2032,8 +1840,6 @@ namespace AutoGestao.Migrations
 
             modelBuilder.Entity("AutoGestao.Entidades.Venda", b =>
                 {
-                    b.Navigation("Itens");
-
                     b.Navigation("Parcelas");
                 });
 

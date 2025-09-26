@@ -1,4 +1,4 @@
-using AutoGestao.Atributes;
+using AutoGestao.Attributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Enumerador.Veiculo;
 using System.ComponentModel.DataAnnotations;
@@ -20,88 +20,93 @@ namespace AutoGestao.Entidades.Veiculos
     public class Veiculo : BaseEntidade
     {
         [Required]
-        [FormField(DisplayName = "Código", Icon = "fas fa-barcode", Type = EnumFormFieldType.Text, Required = true, Order = 1, Section = "Identificação", GridColumns = 2)]
+        [FormField(DisplayName = "Código", Icon = "fas fa-barcode", Type = EnumFieldType.Number, Required = false, ReadOnly = true, Order = 1, Section = "Identificação", GridColumns = 2)]
         public string Codigo { get; set; } = "";
 
         [Required]
-        [FormField(DisplayName = "Placa", Icon = "fas fa-id-card", Type = EnumFormFieldType.Text, Required = true, Order = 2, Section = "Identificação", Placeholder = "XXX-0000 ou XXX0X00", GridColumns = 2)]
+        [FormField(DisplayName = "Placa", Icon = "fas fa-id-card", Type = EnumFieldType.Text, Required = true, Order = 2, Section = "Identificação", Placeholder = "XXX-0000 ou XXX0X00", GridColumns = 2)]
         public string Placa { get; set; } = "";
 
-        [FormField(Order = 14, DisplayName = "Chassi", Type = EnumFormFieldType.Text, Section = "Identificação", GridColumns = 2)]
+        [FormField(Order = 14, DisplayName = "Chassi", Type = EnumFieldType.Text, Section = "Identificação", GridColumns = 2)]
         public string? Chassi { get; set; }
 
-        [FormField(Order = 14, DisplayName = "Renavam", Type = EnumFormFieldType.Text, Section = "Identificação", GridColumns = 2)]
+        [FormField(Order = 14, DisplayName = "Renavam", Type = EnumFieldType.Text, Section = "Identificação", GridColumns = 2)]
         public string? Renavam { get; set; }
 
-        [FormField(DisplayName = "Marca", Icon = "fas fa-tag", Type = EnumFormFieldType.Select, Required = true, Order = 10, Section = "Especificações", GridColumns = 2)]
+        [FormField(DisplayName = "Marca", Icon = "fas fa-car", Order = 10, Section = "Especificações", Required = true, Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarca), Placeholder = "Buscar Marca...")]
         public int VeiculoMarcaId { get; set; }
 
-        [FormField(DisplayName = "Modelo", Icon = "fas fa-car-side", Type = EnumFormFieldType.Select, Required = true, Order = 11, Section = "Especificações", GridColumns = 2)]
+        [FormField(DisplayName = "Modelo", Icon = "fas fa-car-side", Required = true, Order = 11, Section = "Especificações", Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarcaModelo), ConditionalField = nameof(VeiculoMarcaId), Placeholder = "Buscar modelo...")]
         public int VeiculoMarcaModeloId { get; set; }
 
-        [FormField(DisplayName = "Ano Fabricação", Icon = "fas fa-calendar", Type = EnumFormFieldType.Number, Required = true, Order = 12, Section = "Especificações", GridColumns = 2)]
+        [FormField(DisplayName = "Ano Fabricação", Icon = "fas fa-calendar", Type = EnumFieldType.Number, Required = true, Order = 12, Section = "Especificações", GridColumns = 2)]
         public int? AnoFabricacao { get; set; }
 
-        [FormField(DisplayName = "Ano Modelo", Icon = "fas fa-calendar-check", Type = EnumFormFieldType.Number, Required = true, Order = 13, Section = "Especificações", GridColumns = 2)]
+        [FormField(DisplayName = "Ano Modelo", Icon = "fas fa-calendar-check", Type = EnumFieldType.Number, Required = true, Order = 13, Section = "Especificações", GridColumns = 2)]
         public int? AnoModelo { get; set; }
 
-        [FormField(DisplayName = "Cor", Icon = "fas fa-palette", Type = EnumFormFieldType.Select, Order = 14, Section = "Especificações", GridColumns = 2)]
+        [FormField(DisplayName = "Cor", Icon = "fas fa-palette", Order = 14, Section = "Especificações", Type = EnumFieldType.Reference, Reference = typeof(VeiculoCor), Placeholder = "Buscar cor...")]
         public int? VeiculoCorId { get; set; }
 
-        [FormField(Order = 14, DisplayName = "Motorização", Type = EnumFormFieldType.Text, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 14, DisplayName = "Motorização", Type = EnumFieldType.Text, Section = "Especificações", GridColumns = 2)]
         public string? Motorizacao { get; set; }
 
-        [FormField(Order = 14, DisplayName = "Quilometragem", Type = EnumFormFieldType.Text, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 14, DisplayName = "Quilometragem", Type = EnumFieldType.Text, Section = "Especificações", GridColumns = 2)]
         public int? Quilometragem { get; set; }
 
-        [FormField(Order = 15, DisplayName = "Combustível", Type = EnumFormFieldType.Select, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 15, DisplayName = "Combustível", Type = EnumFieldType.Select, Section = "Especificações", GridColumns = 2)]
         public EnumCombustivelVeiculo Combustivel { get; set; }
 
-        [FormField(Order = 16, DisplayName = "Câmbio", Type = EnumFormFieldType.Select, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 16, DisplayName = "Câmbio", Type = EnumFieldType.Select, Section = "Especificações", GridColumns = 2)]
         public EnumCambioVeiculo Cambio { get; set; }
 
-        [FormField(Order = 17, DisplayName = "Tipo", Type = EnumFormFieldType.Select, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 17, DisplayName = "Tipo", Type = EnumFieldType.Select, Section = "Especificações", GridColumns = 2)]
         public EnumTipoVeiculo TipoVeiculo { get; set; }
 
-        [FormField(Order = 18, DisplayName = "Espécie", Type = EnumFormFieldType.Select, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 18, DisplayName = "Espécie", Type = EnumFieldType.Select, Section = "Especificações", GridColumns = 2)]
         public EnumEspecieVeiculo Especie { get; set; }
 
-        [FormField(Order = 19, DisplayName = "Portas", Type = EnumFormFieldType.Select, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 19, DisplayName = "Portas", Type = EnumFieldType.Select, Section = "Especificações", GridColumns = 2)]
         public EnumPortasVeiculo Portas { get; set; }
 
-        [FormField(Order = 20, DisplayName = "Perícia Cautelar", Type = EnumFormFieldType.Select, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 20, DisplayName = "Perícia Cautelar", Type = EnumFieldType.Select, Section = "Especificações", GridColumns = 2)]
         public EnumPericiaCautelarVeiculo PericiaCautelar { get; set; }
 
-        [FormField(Order = 21, DisplayName = "Origem", Type = EnumFormFieldType.Select, Section = "Especificações", GridColumns = 2)]
+        [FormField(Order = 21, DisplayName = "Origem", Type = EnumFieldType.Select, Section = "Especificações", GridColumns = 2)]
         public EnumOrigemVeiculo OrigemVeiculo { get; set; }
 
-        [FormField(DisplayName = "Situação", Icon = "fas fa-info-circle", Type = EnumFormFieldType.Select, Required = true, Order = 30, Section = "Status", GridColumns = 2)]
-        public EnumSituacaoVeiculo Situacao { get; set; }
-
-        [FormField(DisplayName = "Status", Icon = "fas fa-info-circle", Type = EnumFormFieldType.Select, Required = true, Order = 31, Section = "Status", GridColumns = 2)]
-        public EnumStatusVeiculo StatusVeiculo { get; set; }
-
-        [FormField(DisplayName = "Preço de Compra", Icon = "fas fa-money-bill", Type = EnumFormFieldType.Currency, Order = 40, Section = "Financeiro", GridColumns = 2)]
+        [FormField(DisplayName = "Preço de Compra", Icon = "fas fa-money-bill", Type = EnumFieldType.Currency, Order = 40, Section = "Financeiro", GridColumns = 2)]
         public decimal? PrecoCompra { get; set; }
 
-        [FormField(DisplayName = "Preço de Venda", Icon = "fas fa-dollar-sign", Type = EnumFormFieldType.Currency, Order = 41, Section = "Financeiro", GridColumns = 2)]
+        [FormField(DisplayName = "Preço de Venda", Icon = "fas fa-dollar-sign", Type = EnumFieldType.Currency, Order = 41, Section = "Financeiro", GridColumns = 2)]
         public decimal? PrecoVenda { get; set; }
 
-        [FormField(DisplayName = "Proprietário", Icon = "fas fa-user", Type = EnumFormFieldType.Select, Order = 42, Section = "Financeiro", GridColumns = 2)]
+        [FormField(DisplayName = "Proprietário", Icon = "fas fa-user", Type = EnumFieldType.Reference, Reference = typeof(Cliente), Order = 42, Section = "Financeiro", Placeholder = "Buscar cliente...")]
         public int? ProprietarioId { get; set; }
 
-        [FormField(DisplayName = "Observações", Icon = "fas fa-sticky-note", Type = EnumFormFieldType.TextArea, Order = 60, Section = "Observações", GridColumns = 2)]
-        public string? Observacoes { get; set; }
-
-        [FormField(DisplayName = "Opcionais", Icon = "fas fa-sticky-note", Type = EnumFormFieldType.TextArea, Order = 61, Section = "Observações", GridColumns = 2)]
-        public string? Opcionais { get; set; }
-
+        [FormField(DisplayName = "Km saida", Type = EnumFieldType.Number, Order = 43, Section = "Financeiro", GridColumns = 2)]
         public long? KmSaida { get; set; }
+
+        [FormField(DisplayName = "Data saída", Type = EnumFieldType.Date, Order = 44, Section = "Financeiro", GridColumns = 2)]
         public DateTime? DataSaida { get; set; }
 
-        //// Foreign Keys
+        [FormField(DisplayName = "Situação", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true, Order = 30, Section = "Informativo", GridColumns = 2)]
+        public EnumSituacaoVeiculo Situacao { get; set; }
+
+        [FormField(DisplayName = "Status", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true, Order = 31, Section = "Informativo")]
+        public EnumStatusVeiculo StatusVeiculo { get; set; }
+
+        [FormField(DisplayName = "Filial", Order = 32, Section = "Informativo", Type = EnumFieldType.Reference, Reference = typeof(VeiculoFilial), Placeholder = "Buscar filial...")]
         public int? VeiculoFilialId { get; set; }
+
+        [FormField(DisplayName = "Localização", Order = 33, Section = "Informativo", Type = EnumFieldType.Reference, Reference = typeof(VeiculoLocalizacao), Placeholder = "Buscar localização...")]
         public int? VeiculoLocalizacaoId { get; set; }
+
+        [FormField(DisplayName = "Observações", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea, Order = 34, Section = "Informativo")]
+        public string? Observacoes { get; set; }
+
+        [FormField(DisplayName = "Opcionais", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea, Order = 35, Section = "Informativo")]
+        public string? Opcionais { get; set; }
 
         // Propriedades de navegação (serão ignoradas automaticamente)
         public virtual VeiculoMarca? VeiculoMarca { get; set; }

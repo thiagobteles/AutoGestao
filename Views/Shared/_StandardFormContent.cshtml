@@ -20,28 +20,25 @@
             </div>
             <div class="card-body-modern">
                 <div class="grid-@(itemSection.GridColumns)">
-                    @foreach (var field in itemSection.Fields)
+                    @foreach (var field in itemSection.Fields.Where(x => x.Type != EnumFieldType.Hidden))
                     {
                         <div class="form-group-modern @field.CssClass" 
                              data-conditional-field="@field.ConditionalField"
                              data-conditional-value="@field.ConditionalValue"
                              style="@(ShouldHideField(field, Model.Model) ? "display: none;" : "")">
                             
-                            @if (field.Type != EnumFormFieldType.Hidden)
-                            {
-                                <label class="form-label-modern">
-                                    <i class="@field.Icon me-1"></i>
-                                    @field.DisplayName
-                                    @if (field.Required && !Model.IsDetailsMode)
-                                    {
-                                        <span class="text-danger">*</span>
-                                    }
-                                </label>
-                            }
+                            <label class="form-label-modern">
+                                <i class="@field.Icon me-1"></i>
+                                @field.DisplayName
+                                @if (field.Required && !Model.IsDetailsMode)
+                                {
+                                    <span class="text-danger">*</span>
+                                }
+                            </label>
 
                             @switch (field.Type)
                             {
-                                case EnumFormFieldType.Text:
+                                case EnumFieldType.Text:
                                     <input type="text" 
                                            name="@field.PropertyName" 
                                            value="@field.Value" 
@@ -51,7 +48,7 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Email:
+                                case EnumFieldType.Email:
                                     <input type="email" 
                                            name="@field.PropertyName" 
                                            value="@field.Value" 
@@ -61,7 +58,7 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Number:
+                                case EnumFieldType.Number:
                                     <input type="number" 
                                            name="@field.PropertyName" 
                                            value="@field.Value" 
@@ -71,7 +68,7 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Decimal:
+                                case EnumFieldType.Decimal:
                                     <input type="number"
                                            name="@field.PropertyName"
                                            value="@field.Value"
@@ -81,7 +78,7 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Date:
+                                case EnumFieldType.Date:
                                     <input type="date" 
                                            name="@field.PropertyName" 
                                            value="@(field.Value is DateTime dt ? dt.ToString("yyyy-MM-dd") : "")" 
@@ -90,16 +87,17 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.TextArea:
+                                case EnumFieldType.TextArea:
                                     <textarea name="@field.PropertyName" 
                                               class="form-control-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                               placeholder="@field.Placeholder"
-                                              rows="4"
+                                              rows="6"
+                                              style="height: 100px !important"
                                               @(field.Required && !Model.IsDetailsMode ? "required" : "")
                                               @(field.ReadOnly ? "readonly" : string.Empty)>@field.Value</textarea>
                                     break;
 
-                                case EnumFormFieldType.Select:
+                                case EnumFieldType.Select:
                                     <select name="@field.PropertyName" 
                                             class="form-select-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                             @(field.Required && !Model.IsDetailsMode ? "required" : "")
@@ -117,7 +115,7 @@
                                     </select>
                                     break;
 
-                                case EnumFormFieldType.Checkbox:
+                                case EnumFieldType.Checkbox:
                                     <div class="form-check">
                                         <input type="checkbox" 
                                                name="@field.PropertyName" 
@@ -132,7 +130,7 @@
                                     </div>
                                     break;
 
-                                case EnumFormFieldType.Phone:
+                                case EnumFieldType.Phone:
                                     <input type="tel" 
                                            name="@field.PropertyName" 
                                            value="@field.Value" 
@@ -142,7 +140,7 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Cpf:
+                                case EnumFieldType.Cpf:
                                     <input type="text" 
                                            name="@field.PropertyName" 
                                            value="@field.Value" 
@@ -153,7 +151,7 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Cnpj:
+                                case EnumFieldType.Cnpj:
                                     <input type="text" 
                                            name="@field.PropertyName" 
                                            value="@field.Value" 
@@ -164,7 +162,7 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Cep:
+                                case EnumFieldType.Cep:
                                     <input type="text" 
                                            name="@field.PropertyName" 
                                            value="@field.Value" 
@@ -176,7 +174,7 @@
                                            data-cep-auto-fill="true" />
                                     break;
 
-                                case EnumFormFieldType.Currency:
+                                case EnumFieldType.Currency:
                                     <input type="text" 
                                            name="@field.PropertyName" 
                                            value="@field.Value" 
@@ -186,20 +184,79 @@
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Percentage:
+                                case EnumFieldType.Percentage:
+                                    var percentValue = field.Value?.ToString();
+                                    if (!string.IsNullOrEmpty(percentValue) && !percentValue.Contains("%"))
+                                    {
+                                        percentValue += "%";
+                                    }
                                     <input type="text"
                                            name="@field.PropertyName"
-                                           value="@field.Value"
+                                           value="@percentValue"
                                            class="form-control-modern percentage-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                            placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "1,50%" : field.Placeholder)"
                                            @(field.Required && !Model.IsDetailsMode ? "required" : "")
                                            @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
-                                case EnumFormFieldType.Hidden:
-                                    <input type="hidden" 
-                                           name="@field.PropertyName" 
-                                           value="@field.Value" />
+                                case EnumFieldType.Reference:
+                                    @if (Model.IsDetailsMode)
+                                    {
+                                        <div class="form-control-static">
+                                            <span id="@(field.PropertyName)_display">
+                                                @if (field.Value != null && field.Value.ToString() != "0")
+                                                {
+                                                    <span class="text-muted">Carregando...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Não informado</span>
+                                                }
+                                            </span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="reference-search-wrapper">
+                                            <input type="hidden"
+                                                   name="@field.PropertyName"
+                                                   value="@field.Value"
+                                                   id="@(field.PropertyName)_value" />
+
+                                            <div class="input-group">
+                                                <input type="text"
+                                                       class="form-control reference-search-input @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                                       id="@(field.PropertyName)_search"
+                                                       placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "Digite para pesquisar..." : field.Placeholder)"
+                                                       autocomplete="off"
+                                                       data-reference-type="@field.Reference?.Name"
+                                                       data-target-field="@field.PropertyName"
+                                                       @(field.Required ? "required" : "") />
+
+                                                <button type="button"
+                                                        class="btn btn-success reference-create-btn"
+                                                        id="@(field.PropertyName)_create"
+                                                        title="Criar novo registro"
+                                                        data-reference-type="@field.Reference?.Name"
+                                                        data-target-field="@field.PropertyName">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary reference-clear-btn"
+                                                        id="@(field.PropertyName)_clear"
+                                                        title="Limpar seleção">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+
+                                            <div class="reference-dropdown" id="@(field.PropertyName)_dropdown"></div>
+                                        </div>
+                                    }
+                                    break;
+
+                                case EnumFieldType.Hidden:
+                                    // Renderizar fora da estrutura de form-group para não ocupar espaço
                                     break;
                             }
 

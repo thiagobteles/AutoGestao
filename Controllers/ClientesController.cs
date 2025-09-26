@@ -137,23 +137,9 @@ namespace AutoGestao.Controllers
             return query;
         }
 
-        protected override List<SelectListItem> GetSelectOptions(string propertyName)
-        {
-            return propertyName switch
-            {
-                nameof(Cliente.TipoCliente) =>
-                [
-                    new() { Value = "PessoaFisica", Text = "👤 Pessoa Física" },
-                    new() { Value = "PessoaJuridica", Text = "🏢 Pessoa Jurídica" }
-                ],
-                nameof(Cliente.Estado) => EnumExtension.GetSelectListItems<EnumEstado>(),
-                _ => base.GetSelectOptions(propertyName)
-            };
-        }
-
         protected override Task BeforeCreate(Cliente entity)
         {
-            ValidateCliente(entity);
+            ValidarCliente(entity);
             return base.BeforeCreate(entity);
         }
 
@@ -165,7 +151,7 @@ namespace AutoGestao.Controllers
 
         protected override Task BeforeUpdate(Cliente entity)
         {
-            ValidateCliente(entity);
+            ValidarCliente(entity);
             return base.BeforeUpdate(entity);
         }
 
@@ -211,7 +197,7 @@ namespace AutoGestao.Controllers
             }
         }
 
-        private void ValidateCliente(Cliente entity)
+        private void ValidarCliente(Cliente entity)
         {
             // Validações específicas
             if (entity.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.CPF))
@@ -245,7 +231,7 @@ namespace AutoGestao.Controllers
             return $@"{documento}";
         }
 
-        #region Ações Específicas
+        #region ENDPOINTS ESPECÍFICOS
 
         [HttpPost]
         public async Task<IActionResult> AlterarStatus(int id)
@@ -314,6 +300,6 @@ namespace AutoGestao.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        #endregion
+        #endregion ENDPOINTS ESPECÍFICOS
     }
 }

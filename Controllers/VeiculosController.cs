@@ -35,7 +35,7 @@ namespace AutoGestao.Controllers
                         Name = "search",
                         DisplayName = "Busca Geral",
                         Type = EnumGridFilterType.Text,
-                        Placeholder = "Código, Placa, Marca, Modelo..."
+                        Placeholder = "Código, Placa, Chassi, Renavam, Marca, Modelo..."
                     },
                     new()
                     {
@@ -101,15 +101,15 @@ namespace AutoGestao.Controllers
                 {
                     case "search":
                         var searchTerm = filter.Value.ToString();
-                        if (!string.IsNullOrEmpty(searchTerm.ToLower()))
+                        if (!string.IsNullOrEmpty(searchTerm))
                         {
                             query = ApplyTextFilter(query, searchTerm,
-                                c => c.Codigo.ToLower(),
-                                c => c.Placa.ToLower(),
-                                c => c.VeiculoMarca.Descricao.ToLower(),
-                                c => c.VeiculoMarcaModelo.Descricao.ToLower(),
-                                c => c.Chassi.ToLower(),
-                                c => c.Renavam.ToLower());
+                                c => c.Codigo,
+                                c => c.Placa,
+                                //c => c.VeiculoMarca.Descricao,
+                                //c => c.VeiculoMarcaModelo.Descricao,
+                                c => c.Chassi,
+                                c => c.Renavam);
                         }
                         break;
 
@@ -120,387 +120,8 @@ namespace AutoGestao.Controllers
             }
 
             // Aplicar filtro de período usando o helper
-            query = ApplyDateRangeFilter(query, filters, "periodo_cadastro", v => v.DataCadastro);
+            //query = ApplyDateRangeFilter(query, filters, "periodo_cadastro", v => v.DataCadastro);
             return query;
-        }
-
-        private static string RenderMarcaModelo(object item)
-        {
-            var veiculo = (Veiculo)item;
-            var marca = veiculo.VeiculoMarca?.Descricao ?? "N/A";
-            var modelo = veiculo.VeiculoMarcaModelo?.Descricao ?? "N/A";
-            
-            return $@"
-                <div class=""vehicle-info"">
-                    <div class=""fw-semibold"">{marca}</div>
-                    <div class=""text-muted small"">{modelo}</div>
-                </div>";
-        }
-
-        #region Ações Específicas
-
-        [HttpPost]
-        public async Task<IActionResult> Reserve(int id)
-        {
-            var veiculo = await _context.Veiculos.FindAsync(id);
-            if (veiculo != null && veiculo.Situacao == EnumSituacaoVeiculo.Estoque)
-            {
-                veiculo.Situacao = EnumSituacaoVeiculo.Reservado;
-                veiculo.DataAlteracao = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-                
-                TempData["SuccessMessage"] = "Veículo reservado com sucesso!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Não foi possível reservar o veículo!";
-            }
-            
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Unreserve(int id)
-        {
-            var veiculo = await _context.Veiculos.FindAsync(id);
-            if (veiculo != null && veiculo.Situacao == EnumSituacaoVeiculo.Reservado)
-            {
-                veiculo.Situacao = EnumSituacaoVeiculo.Estoque;
-                veiculo.DataAlteracao = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-                
-                TempData["SuccessMessage"] = "Reserva do veículo liberada com sucesso!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Não foi possível liberar a reserva do veículo!";
-            }
-            
-            return RedirectToAction(nameof(Index));
-        }
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var veiculo = await _context.Veiculos
-                .Include(v => v.VeiculoMarca)
-                .Include(v => v.VeiculoMarcaModelo)
-                .Include(v => v.VeiculoCor)
-                .Include(v => v.Proprietario)
-                .Include(v => v.Fotos)
-                .Include(v => v.Documentos)
-                .Include(v => v.Vendas)
-                .Include(v => v.Despesas)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (veiculo == null)
-            {
-                return NotFound();
-            }
-
-            // Adicionar histórico de auditoria
-            await this.AddAuditHistoryToViewBag(_context, veiculo);
-
-            var viewModel = BuildFormViewModel(veiculo, "Details");
-            return View(viewModel);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Veiculo veiculo)
-        {
-            if (ModelState.IsValid)
-            {
-                // Validações específicas
-                var existeCodigo = await _context.Veiculos.AnyAsync(v => v.Codigo == veiculo.Codigo);
-                if (existeCodigo)
-                {
-                    ModelState.AddModelError("Codigo", "Já existe um veículo com este código");
-                }
-
-                var existePlaca = await _context.Veiculos.AnyAsync(v => v.Placa == veiculo.Placa);
-                if (existePlaca)
-                {
-                    ModelState.AddModelError("Placa", "Já existe um veículo com esta placa");
-                }
-
-                if (!string.IsNullOrEmpty(veiculo.Chassi))
-                {
-                    var existeChassi = await _context.Veiculos.AnyAsync(v => v.Chassi == veiculo.Chassi);
-                    if (existeChassi)
-                    {
-                        ModelState.AddModelError("Chassi", "Já existe um veículo com este chassi");
-                    }
-                }
-
-                if (ModelState.IsValid)
-                {
-                    veiculo.DataCadastro = DateTime.UtcNow;
-                    veiculo.DataAlteracao = DateTime.UtcNow;
-                    _context.Add(veiculo);
-                    await _context.SaveChangesAsync();
-                    
-                    TempData["SuccessMessage"] = "Veículo cadastrado com sucesso!";
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-
-            ViewBag.Marcas = GetMarcasSelectList();
-            ViewBag.Cores = GetCoresSelectList();
-            ViewBag.Proprietarios = GetProprietariosSelectList();
-
-            return View(veiculo);
-        }
-
-        public IActionResult Create()
-        {
-            ViewBag.Marcas = GetMarcasSelectList();
-            ViewBag.Cores = GetCoresSelectList();
-            ViewBag.Proprietarios = GetProprietariosSelectList();
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Veiculo veiculo)
-        {
-            if (id != veiculo.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Validações específicas (exceto o próprio registro)
-                    var existeCodigo = await _context.Veiculos.AnyAsync(v => v.Codigo == veiculo.Codigo && v.Id != veiculo.Id);
-                    if (existeCodigo)
-                    {
-                        ModelState.AddModelError("Codigo", "Já existe outro veículo com este código");
-                    }
-
-                    var existePlaca = await _context.Veiculos.AnyAsync(v => v.Placa == veiculo.Placa && v.Id != veiculo.Id);
-                    if (existePlaca)
-                    {
-                        ModelState.AddModelError("Placa", "Já existe outro veículo com esta placa");
-                    }
-
-                    if (!string.IsNullOrEmpty(veiculo.Chassi))
-                    {
-                        var existeChassi = await _context.Veiculos.AnyAsync(v => v.Chassi == veiculo.Chassi && v.Id != veiculo.Id);
-                        if (existeChassi)
-                        {
-                            ModelState.AddModelError("Chassi", "Já existe outro veículo com este chassi");
-                        }
-                    }
-
-                    if (ModelState.IsValid)
-                    {
-                        veiculo.DataAlteracao = DateTime.UtcNow;
-                        _context.Update(veiculo);
-                        await _context.SaveChangesAsync();
-                        
-                        TempData["SuccessMessage"] = "Veículo atualizado com sucesso!";
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!VeiculoExists(veiculo.Id))
-                    {
-                        return NotFound();
-                    }
-                    throw;
-                }
-            }
-
-            ViewBag.Marcas = GetMarcasSelectList();
-            ViewBag.Cores = GetCoresSelectList();
-            ViewBag.Proprietarios = GetProprietariosSelectList();
-            return View(veiculo);
-        }
-
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var veiculo = await _context.Veiculos.FindAsync(id);
-            if (veiculo == null)
-            {
-                return NotFound();
-            }
-
-            ViewBag.Marcas = GetMarcasSelectList();
-            ViewBag.Cores = GetCoresSelectList();
-            ViewBag.Proprietarios = GetProprietariosSelectList();
-            return View(veiculo);
-        }
-
-        [HttpDelete]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, Veiculo veiculo)
-        {
-            if (id != veiculo.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Remove(veiculo);
-                    await _context.SaveChangesAsync();
-
-                    TempData["SuccessMessage"] = "Veículo deletado com sucesso!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!VeiculoExists(veiculo.Id))
-                    {
-                        return NotFound();
-                    }
-                    throw;
-                }
-            }
-            return View(veiculo);
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var veiculo = await _context.Veiculos.FindAsync(id);
-            if (veiculo == null)
-            {
-                return NotFound();
-            }
-
-            _context.Remove(veiculo);
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Veículo deletado com sucesso!";
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Export()
-        {
-            try
-            {
-                var veiculos = await _context.Veiculos
-                    .Include(v => v.VeiculoMarca)
-                    .Include(v => v.VeiculoMarcaModelo)
-                    .Include(v => v.VeiculoCor)
-                    .OrderBy(v => v.Codigo)
-                    .ToListAsync();
-
-                var csv = new System.Text.StringBuilder();
-                csv.AppendLine("ID,Código,Marca,Modelo,Ano,Placa,KM,Preço Compra,Preço Venda,Situação,Status,Data Cadastro");
-
-                foreach (var veiculo in veiculos)
-                {
-                    csv.AppendLine($"{veiculo.Id}," +
-                                  $"{veiculo.Codigo}," +
-                                  $"\"{veiculo.VeiculoMarca?.Descricao}\"," +
-                                  $"\"{veiculo.VeiculoMarcaModelo?.Descricao}\"," +
-                                  $"{veiculo.AnoFabricacao}," +
-                                  $"{veiculo.Placa}," +
-                                  $"{veiculo.KmSaida}," +
-                                  $"{veiculo.PrecoCompra:F2}," +
-                                  $"{veiculo.PrecoVenda:F2}," +
-                                  $"{veiculo.Situacao.GetDescription()}," +
-                                  $"{veiculo.StatusVeiculo.GetDescription()}," +
-                                  $"{veiculo.DataCadastro:dd/MM/yyyy}");
-                }
-
-                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-                var fileName = $"veiculos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
-                
-                return File(bytes, "text/csv", fileName);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        #endregion Ações Específicas
-
-        #region Métodos Auxiliares
-
-        private SelectList GetMarcasSelectList()
-        {
-            var marcas = _context.VeiculoMarcas
-                .OrderBy(m => m.Descricao)
-                .Select(m => new { m.Id, m.Descricao })
-                .ToList();
-                
-            return new SelectList(marcas, "Id", "Descricao");
-        }
-
-        private SelectList GetCoresSelectList()
-        {
-            var cores = _context.VeiculoCores
-                .OrderBy(c => c.Descricao)
-                .Select(c => new { c.Id, c.Descricao })
-                .ToList();
-                
-            return new SelectList(cores, "Id", "Descricao");
-        }
-
-        private SelectList GetProprietariosSelectList()
-        {
-            var proprietarios = _context.Clientes
-                .Where(c => c.Ativo)
-                .OrderBy(c => c.Nome)
-                .Select(c => new { c.Id, c.Nome })
-                .ToList();
-                
-            return new SelectList(proprietarios, "Id", "Nome");
-        }
-
-        private bool VeiculoExists(int id)
-        {
-            return _context.Veiculos.Any(e => e.Id == id);
-        }
-
-        #endregion  Métodos Auxiliares
-
-        // ================================================================================================
-        // NOVOS MÉTODOS PARA FORMULÁRIOS DINÂMICOS
-        // ================================================================================================
-
-        protected override List<SelectListItem> GetSelectOptions(string propertyName)
-        {
-            return propertyName switch
-            {
-                nameof(Veiculo.VeiculoMarcaId) => _context.VeiculoMarcas
-                    .Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Descricao })
-                    .ToList(),
-                nameof(Veiculo.VeiculoMarcaModeloId) => _context.VeiculoMarcaModelos
-                    .Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Descricao })
-                    .ToList(),
-                nameof(Veiculo.ProprietarioId) => _context.Clientes
-                    .Where(c => c.Ativo)
-                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Nome })
-                    .ToList(),
-                nameof(Veiculo.Situacao) => EnumExtension.GetSelectListItems<EnumSituacaoVeiculo>(true),
-                _ => base.GetSelectOptions(propertyName)
-            };
         }
 
         protected override Task BeforeCreate(Veiculo entity)
@@ -514,14 +135,14 @@ namespace AutoGestao.Controllers
                 entity.Codigo = GerarCodigoVeiculo();
             }
 
-            ValidateVeiculo(entity);
+            ValidarVeiculo(entity);
             return base.BeforeCreate(entity);
         }
 
         protected override Task BeforeUpdate(Veiculo entity)
         {
             entity.DataAlteracao = DateTime.UtcNow;
-            ValidateVeiculo(entity);
+            ValidarVeiculo(entity);
             return base.BeforeUpdate(entity);
         }
 
@@ -559,9 +180,7 @@ namespace AutoGestao.Controllers
             };
         }
 
-        // ================================================================================================
-        // ACTIONS ESPECÍFICAS PARA CRUD DAS ABAS
-        // ================================================================================================
+        #region ENDPOINTS ESPECÍFICOS
 
         [HttpPost]
         public async Task<IActionResult> AdicionarDocumento(int veiculoId, IFormFile arquivo, string descricao)
@@ -651,9 +270,94 @@ namespace AutoGestao.Controllers
             return Json(new { success = false, message = "Dados inválidos" });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Reserve(int id)
+        {
+            var veiculo = await _context.Veiculos.FindAsync(id);
+            if (veiculo != null && veiculo.Situacao == EnumSituacaoVeiculo.Estoque)
+            {
+                veiculo.Situacao = EnumSituacaoVeiculo.Reservado;
+                veiculo.DataAlteracao = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Veículo reservado com sucesso!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Não foi possível reservar o veículo!";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Unreserve(int id)
+        {
+            var veiculo = await _context.Veiculos.FindAsync(id);
+            if (veiculo != null && veiculo.Situacao == EnumSituacaoVeiculo.Reservado)
+            {
+                veiculo.Situacao = EnumSituacaoVeiculo.Estoque;
+                veiculo.DataAlteracao = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Reserva do veículo liberada com sucesso!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Não foi possível liberar a reserva do veículo!";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Export()
+        {
+            try
+            {
+                var veiculos = await _context.Veiculos
+                    .Include(v => v.VeiculoMarca)
+                    .Include(v => v.VeiculoMarcaModelo)
+                    .Include(v => v.VeiculoCor)
+                    .OrderBy(v => v.Codigo)
+                    .ToListAsync();
+
+                var csv = new System.Text.StringBuilder();
+                csv.AppendLine("ID,Código,Marca,Modelo,Ano,Placa,KM,Preço Compra,Preço Venda,Situação,Status,Data Cadastro");
+
+                foreach (var veiculo in veiculos)
+                {
+                    csv.AppendLine($"{veiculo.Id}," +
+                                  $"{veiculo.Codigo}," +
+                                  $"\"{veiculo.VeiculoMarca?.Descricao}\"," +
+                                  $"\"{veiculo.VeiculoMarcaModelo?.Descricao}\"," +
+                                  $"{veiculo.AnoFabricacao}," +
+                                  $"{veiculo.Placa}," +
+                                  $"{veiculo.KmSaida}," +
+                                  $"{veiculo.PrecoCompra:F2}," +
+                                  $"{veiculo.PrecoVenda:F2}," +
+                                  $"{veiculo.Situacao.GetDescription()}," +
+                                  $"{veiculo.StatusVeiculo.GetDescription()}," +
+                                  $"{veiculo.DataCadastro:dd/MM/yyyy}");
+                }
+
+                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+                var fileName = $"veiculos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
+
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        #endregion ENDPOINTS ESPECÍFICOS
+
         #region Métodos privados
 
-        private void ValidateVeiculo(Veiculo entity)
+        private void ValidarVeiculo(Veiculo entity)
         {
             // Validar placa única
             var placaExistente = _context.Veiculos.Any(v => v.Id != entity.Id && v.Placa == entity.Placa);
@@ -683,6 +387,19 @@ namespace AutoGestao.Controllers
 
             // Lógica para gerar próximo código
             return "VEI" + (int.Parse(ultimoCodigo.Substring(3)) + 1).ToString("D3");
+        }
+
+        private static string RenderMarcaModelo(object item)
+        {
+            var veiculo = (Veiculo)item;
+            var marca = veiculo.VeiculoMarca?.Descricao ?? "N/A";
+            var modelo = veiculo.VeiculoMarcaModelo?.Descricao ?? "N/A";
+
+            return $@"
+                <div class=""vehicle-info"">
+                    <div class=""fw-semibold"">{marca}</div>
+                    <div class=""text-muted small"">{modelo}</div>
+                </div>";
         }
 
         private async Task<IActionResult> RenderArquivosTab(Veiculo veiculo)
@@ -745,26 +462,5 @@ namespace AutoGestao.Controllers
         }
 
         #endregion Métodos privados
-    }
-
-    // ================================================================================================
-    // VIEWMODELS AUXILIARES
-    // ================================================================================================
-
-    public class VeiculoResumoViewModel
-    {
-        public Veiculo Veiculo { get; set; }
-        public decimal TotalDespesas { get; set; }
-        public int QtdDocumentos { get; set; }
-        public int QtdFotos { get; set; }
-        public List<Despesa> UltimasDespesas { get; set; } = [];
-    }
-
-    public class DespesaCreateViewModel
-    {
-        public int FornecedorId { get; set; }
-        public string Descricao { get; set; } = "";
-        public decimal Valor { get; set; }
-        public DateTime DataDespesa { get; set; } = DateTime.Today;
     }
 }

@@ -111,7 +111,7 @@ namespace AutoGestao.Extensions
                 return null;
             }
 
-            var digits = new string(input.Where(char.IsDigit).ToArray());
+            var digits = new string([.. input.Where(char.IsDigit)]);
             return digits.Length != 11
                 ? input.Trim()
                 : $"{digits.Substring(0, 3)}.{digits.Substring(3, 3)}.{digits.Substring(6, 3)}-{digits.Substring(9, 2)}";
@@ -128,7 +128,7 @@ namespace AutoGestao.Extensions
                 return null;
             }
 
-            var digits = new string(input.Where(char.IsDigit).ToArray());
+            var digits = new string([.. input.Where(char.IsDigit)]);
             return digits.Length != 14
                 ? input.Trim()
                 : $"{digits.Substring(0, 2)}.{digits.Substring(2, 3)}.{digits.Substring(5, 3)}/{digits.Substring(8, 4)}-{digits.Substring(12, 2)}";

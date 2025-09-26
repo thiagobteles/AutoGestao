@@ -16,16 +16,9 @@ namespace AutoGestao.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            // 🔧 DEBUG: Verificar estado da autenticação
-            Console.WriteLine($"DEBUG: IsAuthenticated = {User.Identity?.IsAuthenticated}");
-            Console.WriteLine($"DEBUG: User Name = {User.Identity?.Name}");
-
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            return View(new LoginRequest());
+            return User.Identity?.IsAuthenticated == true 
+                ? RedirectToAction("Index", "Home")
+                : View(new LoginRequest());
         }
 
         [HttpPost]
@@ -37,9 +30,7 @@ namespace AutoGestao.Controllers
                 return View(model);
             }
 
-            // 🔧 VALIDAR CREDENCIAIS DIRETAMENTE NO BANCO
             var result = await _authService.LoginAsync(model);
-
             if (!result.Sucesso)
             {
                 ModelState.AddModelError(string.Empty, result.Mensagem ?? "Erro ao realizar login");
@@ -49,10 +40,10 @@ namespace AutoGestao.Controllers
             // 🔧 CRIAR CLAIMS MANUALMENTE
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, result.Usuario!.Id.ToString()),
-                new Claim(ClaimTypes.Name, result.Usuario.Nome),
-                new Claim(ClaimTypes.Email, result.Usuario.Email),
-                new Claim("Perfil", result.Usuario.Perfil)
+                new(ClaimTypes.NameIdentifier, result.Usuario!.Id.ToString()),
+                new(ClaimTypes.Name, result.Usuario.Nome),
+                new(ClaimTypes.Email, result.Usuario.Email),
+                new("Perfil", result.Usuario.Perfil)
             };
 
             // Adicionar roles
@@ -74,10 +65,6 @@ namespace AutoGestao.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
                 });
 
-            // 🔧 DEBUG: Verificar após login
-            Console.WriteLine($"DEBUG: Login efetuado para {result.Usuario.Nome}");
-            Console.WriteLine($"DEBUG: Claims criados: {claims.Count}");
-
             TempData["SuccessMessage"] = $"Bem-vindo, {result.Usuario.Nome}!";
             return RedirectToAction("Index", "Home");
         }
@@ -92,7 +79,6 @@ namespace AutoGestao.Controllers
             }
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
             TempData["InfoMessage"] = "Logout realizado com sucesso!";
             return RedirectToAction("Index", "Login");
         }

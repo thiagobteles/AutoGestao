@@ -1,4 +1,6 @@
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Enumerador.Veiculo;
+using AutoGestao.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AutoGestao.Models
@@ -110,7 +112,7 @@ namespace AutoGestao.Models
         public string DisplayName { get; set; } = "";
         public EnumGridFilterType Type { get; set; } = EnumGridFilterType.Text;
         public object? Value { get; set; }
-        public List<SelectListItem>? Options { get; set; }
+        public List<SelectListItem>? Options {  get; set; }
         public string? Placeholder { get; set; }
     }
 

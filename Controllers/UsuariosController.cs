@@ -18,15 +18,6 @@ namespace AutoGestao.Controllers
     {
         private readonly IUsuarioService _usuarioService = usuarioService;
 
-        protected override List<SelectListItem> GetSelectOptions(string propertyName)
-        {
-            return propertyName switch
-            {
-                nameof(Usuario.Perfil) => EnumExtension.GetSelectListItems<EnumPerfilUsuario>(),
-                _ => base.GetSelectOptions(propertyName)
-            };
-        }
-
         protected override async Task BeforeCreate(Usuario entity)
         {
             // Validar email único
@@ -134,7 +125,7 @@ namespace AutoGestao.Controllers
                 {
                     PropertyName = "ConfirmarSenha",
                     DisplayName = "Confirmar Senha",
-                    Type = EnumFormFieldType.Password,
+                    Type = EnumFieldType.Password,
                     Required = action == "Create",
                     Section = "Dados Básicos",
                     Order = 4,

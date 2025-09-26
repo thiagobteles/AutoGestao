@@ -19,7 +19,7 @@ namespace AutoGestao.Services
                     .Where(log => log.DataHora < cutoffDate)
                     .ToListAsync();
 
-                if (logsToDelete.Any())
+                if (logsToDelete.Count != 0)
                 {
                     _context.AuditLogs.RemoveRange(logsToDelete);
                     var deletedCount = await _context.SaveChangesAsync();
@@ -65,7 +65,7 @@ namespace AutoGestao.Services
                     }
                 }
 
-                if (logsToCompress.Any())
+                if (logsToCompress.Count != 0)
                 {
                     await _context.SaveChangesAsync();
                     _logger.LogInformation($"Compressão de auditoria: {logsToCompress.Count} logs comprimidos");

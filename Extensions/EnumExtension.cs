@@ -45,20 +45,20 @@ namespace AutoGestao.Extensions
             {
                 var enumValue = (TEnum)Enum.ToObject(typeof(TEnum), item.Key);
 
-                if (obterIcone)
+                if (obterIcone && !string.IsNullOrEmpty(enumValue.GetIcone()))
                 {
                     options.Add(new SelectListItem
                     {
-                        Value = enumValue.ToString(),
-                        Text = $"{enumValue.GetIcone()} {item.Value}".Trim()
+                        Value = item.Key.ToString(),
+                        Text = $"{enumValue.GetIcone()} {enumValue.GetDescription()}".Trim()
                     });
                 }
                 else
                 {
                     options.Add(new SelectListItem
                     {
-                        Value = enumValue.ToString(),
-                        Text = item.Value.Trim()
+                        Value = item.Key.ToString(),
+                        Text = enumValue.GetDescription().Trim()
                     });
                 }
                 

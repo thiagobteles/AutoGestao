@@ -1,4 +1,4 @@
-using AutoGestao.Atributes;
+using AutoGestao.Attributes;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
@@ -93,174 +93,36 @@ namespace AutoGestao.Controllers
             return query.Provider.CreateQuery<T>(resultExp);
         }
 
-        #region Helpers para aplicar filtros
-
-        /// <summary>
-        /// Helper para aplicar filtros de data range
-        /// </summary>
-        protected IQueryable<T> ApplyDateRangeFilter<TProperty>(
-            IQueryable<T> query,
-            Dictionary<string, object> filters,
-            string filterName,
-            Expression<Func<T, TProperty>> propertyExpression)
-        {
-            var inicioKey = $"{filterName}_inicio";
-            var fimKey = $"{filterName}_fim";
-
-            DateTime? dataInicio = null;
-            DateTime? dataFim = null;
-
-            if (filters.ContainsKey(inicioKey) && DateTime.TryParse(filters[inicioKey].ToString(), out var inicio))
-            {
-                dataInicio = inicio;
-            }
-
-            if (filters.ContainsKey(fimKey) && DateTime.TryParse(filters[fimKey].ToString(), out var fim))
-            {
-                dataFim = fim.Date.AddDays(1).AddTicks(-1); // Fim do dia
-            }
-
-            if (dataInicio.HasValue || dataFim.HasValue)
-            {
-                var parameter = Expression.Parameter(typeof(T), "x");
-                var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
-
-                Expression? condition = null;
-
-                if (dataInicio.HasValue)
-                {
-                    var inicioConstant = Expression.Constant(dataInicio.Value);
-                    var greaterThanOrEqual = Expression.GreaterThanOrEqual(property, inicioConstant);
-                    condition = condition == null ? greaterThanOrEqual : Expression.AndAlso(condition, greaterThanOrEqual);
-                }
-
-                if (dataFim.HasValue)
-                {
-                    var fimConstant = Expression.Constant(dataFim.Value);
-                    var lessThanOrEqual = Expression.LessThanOrEqual(property, fimConstant);
-                    condition = condition == null ? lessThanOrEqual : Expression.AndAlso(condition, lessThanOrEqual);
-                }
-
-                if (condition != null)
-                {
-                    var lambda = Expression.Lambda<Func<T, bool>>(condition, parameter);
-                    query = query.Where(lambda);
-                }
-            }
-
-            return query;
-        }
-
-        /// <summary>
-        /// Helper para aplicar filtros de texto com múltiplas propriedades
-        /// </summary>
-        protected IQueryable<T> ApplyTextFilter(
-            IQueryable<T> query,
-            string searchTerm,
-            params Expression<Func<T, string?>>[] properties)
-        {
-            if (string.IsNullOrEmpty(searchTerm) || properties.Length == 0)
-            {
-                return query;
-            }
-
-            var parameter = Expression.Parameter(typeof(T), "x");
-            Expression? condition = null;
-
-            foreach (var propertyExpr in properties)
-            {
-                var propertyName = ((MemberExpression)propertyExpr.Body).Member.Name;
-                var property = Expression.Property(parameter, propertyName);
-
-                // Verificar se não é null
-                var notNull = Expression.NotEqual(property, Expression.Constant(null));
-
-                // Aplicar Contains
-                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
-                var searchConstant = Expression.Constant(searchTerm);
-                var containsCall = Expression.Call(property, containsMethod!, searchConstant);
-
-                // Combinar null check com contains
-                var propertyCondition = Expression.AndAlso(notNull, containsCall);
-
-                condition = condition == null ? propertyCondition : Expression.OrElse(condition, propertyCondition);
-            }
-
-            if (condition != null)
-            {
-                var lambda = Expression.Lambda<Func<T, bool>>(condition, parameter);
-                query = query.Where(lambda);
-            }
-
-            return query;
-        }
-
-        /// <summary>
-        /// Helper para aplicar filtros de enum
-        /// </summary>
-        protected IQueryable<T> ApplyEnumFilter<TEnum>(
-            IQueryable<T> query,
-            Dictionary<string, object> filters,
-            string filterName,
-            Expression<Func<T, TEnum>> propertyExpression) where TEnum : struct, Enum
-        {
-            if (filters.TryGetValue(filterName, out var value) && Enum.TryParse<TEnum>(value.ToString(), out TEnum enumValue))
-            {
-                var parameter = Expression.Parameter(typeof(T), "x");
-                var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
-                var constant = Expression.Constant(enumValue);
-                var equal = Expression.Equal(property, constant);
-                var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
-
-                query = query.Where(lambda);
-            }
-
-            return query;
-        }
-
-        /// <summary>
-        /// Helper para aplicar filtros numéricos
-        /// </summary>
-        protected IQueryable<T> ApplyNumericFilter<TProperty>(
-            IQueryable<T> query,
-            Dictionary<string, object> filters,
-            string filterName,
-            Expression<Func<T, TProperty>> propertyExpression) where TProperty : struct, IComparable<TProperty>
-        {
-            if (filters.TryGetValue(filterName, out var value))
-            {
-                if (TryConvertToNumeric(value.ToString(), out TProperty numericValue))
-                {
-                    var parameter = Expression.Parameter(typeof(T), "x");
-                    var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
-                    var constant = Expression.Constant(numericValue);
-                    var equal = Expression.Equal(property, constant);
-                    var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
-
-                    query = query.Where(lambda);
-                }
-            }
-
-            return query;
-        }
-
-        #endregion Helpers para aplicar filtros
-
-        #region Métodos Virtuais para Formulários (podem ser sobrescritos)
-
-        /// <summary>
-        /// Configurar opções para campos select
-        /// </summary>
         protected virtual List<SelectListItem> GetSelectOptions(string propertyName)
+        {
+            // Primeiro ajusta automaticamente se for Enum
+            var autoOptions = StandardGridController<T>.GetAutoEnumOptions(propertyName);
+            if (autoOptions.Count != 0)
+            {
+                return autoOptions;
+            }
+
+            // Se não for Enum, permite sobrescrita manual pelos controllers filhos
+            return GetCustomSelectOptions(propertyName);
+        }
+
+        protected virtual List<SelectListItem> GetCustomSelectOptions(string propertyName)
         {
             return [];
         }
+
+        #region Métodos Virtuais para Formulários (podem ser sobrescritos)
 
         /// <summary>
         /// Customizar campos do formulário baseado na action
         /// </summary>
         protected virtual void ConfigureFormFields(List<FormFieldViewModel> fields, T entity, string action)
         {
+        }
+
+        protected virtual bool CanCreate(T entity)
+        {
+            return true;
         }
 
         protected virtual bool CanEdit(T entity)
@@ -417,7 +279,7 @@ namespace AutoGestao.Controllers
             }
 
             // Configurar ViewModel
-            gridConfig.Items = items.Cast<object>().ToList();
+            gridConfig.Items = [.. items.Cast<object>()];
             gridConfig.TotalRecords = totalRecords;
             gridConfig.CurrentPage = page;
             gridConfig.PageSize = pageSize;
@@ -435,20 +297,42 @@ namespace AutoGestao.Controllers
         /// GET: Create - Exibir formulário de criação
         /// </summary>
         [HttpGet]
-        public virtual Task<IActionResult> Create()
+        public virtual IActionResult Create()
         {
             var entity = new T();
             var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
 
+            if (!CanCreate(entity))
+            {
+                TempData["Error"] = "Você não tem permissão para cadastrar um novo registro.";
+                return Forbid();
+            }
+
+            PopulateEnumsInViewBag();
+
+            var viewModel = BuildFormViewModel(entity, "Create");
+
+            if (IsAjaxRequest())
+            {
+                // Tenta encontrar view parcial específica primeiro
+                var partialViewName = $"_Create{typeof(T).Name}Form";
+                if (ViewExists(partialViewName))
+                {
+                    return PartialView(partialViewName, viewModel);
+                }
+
+                // Fallback para view parcial genérica
+                return PartialView("_CreateForm", viewModel);
+            }
+
             if (formTabs?.EnableTabs == true)
             {
-                var viewModel = BuildTabbedFormViewModel(entity, "Create");
-                return Task.FromResult<IActionResult>(View("_TabbedForm", viewModel));
+                viewModel = BuildTabbedFormViewModel(entity, "Create");
+                return View("_TabbedForm", viewModel);
             }
             else
             {
-                var viewModel = BuildFormViewModel(entity, "Create");
-                return Task.FromResult<IActionResult>(View("_StandardForm", viewModel));
+                return View("_StandardForm", viewModel);
             }
         }
 
@@ -459,6 +343,17 @@ namespace AutoGestao.Controllers
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Create(T entity)
         {
+            if (!CanCreate(entity))
+            {
+                TempData["Error"] = "Você não tem permissão para cadastrar um novo registro.";
+                return Forbid();
+            }
+
+            if (IsAjaxRequest())
+            {
+                return await HandleModalCreate(this, entity);
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -485,14 +380,15 @@ namespace AutoGestao.Controllers
             var viewModel = BuildFormViewModel(entity, "Create");
             AddModelStateToViewModel(viewModel);
 
-            return Request.IsAjaxRequest() ? PartialView("_StandardFormContent", viewModel) : View("_StandardForm", viewModel);
+            return Request.IsAjaxRequest() 
+                ? PartialView("_StandardFormContent", viewModel)
+                : View("_StandardForm", viewModel);
         }
 
         /// <summary>
         /// GET: Edit - Exibir formulário de edição
         /// </summary>
         [HttpGet]
-
         public virtual async Task<IActionResult> Edit(int id)
         {
             var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
@@ -507,8 +403,9 @@ namespace AutoGestao.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            PopulateEnumsInViewBag();
+            
             var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
-
             if (formTabs?.EnableTabs == true)
             {
                 var viewModel = BuildTabbedFormViewModel(entity, "Edit");
@@ -588,8 +485,9 @@ namespace AutoGestao.Controllers
                 return NotFound();
             }
 
-            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
+            PopulateEnumsInViewBag();
 
+            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
             if (formTabs?.EnableTabs == true)
             {
                 var viewModel = BuildTabbedFormViewModel(entity, "Details");
@@ -814,64 +712,10 @@ namespace AutoGestao.Controllers
         /// </summary>
         private static List<PropertyInfo> GetFormProperties()
         {
-            return typeof(T).GetProperties()
+            return [.. typeof(T).GetProperties()
                 .Where(p => p.CanRead && p.CanWrite)
                 .Where(p => !IsIgnoredProperty(p))
-                .OrderBy(p => GetPropertyOrder(p))
-                .ToList();
-        }
-
-        /// <summary>
-        /// Cria um campo do formulário baseado na propriedade
-        /// </summary>
-        private FormFieldViewModel CreateFieldFromProperty(PropertyInfo property, T entity, string action)
-        {
-            var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
-
-            // Se tem atributo FormField, usar as configurações dele
-            if (formFieldAttr != null)
-            {
-                return new FormFieldViewModel
-                {
-                    PropertyName = property.Name,
-                    DisplayName = formFieldAttr.DisplayName ?? GetDisplayName(property),
-                    Icon = formFieldAttr.Icon ?? GetDefaultIcon(property),
-                    Placeholder = formFieldAttr.Placeholder ?? GetDefaultPlaceholder(property),
-                    Type = formFieldAttr.Type,
-                    Required = formFieldAttr.Required,
-                    ReadOnly = formFieldAttr.ReadOnly || action == "Details",
-                    Value = property.GetValue(entity),
-                    ValidationRegex = formFieldAttr.ValidationRegex,
-                    ValidationMessage = formFieldAttr.ValidationMessage,
-                    ConditionalField = formFieldAttr.ConditionalField,
-                    ConditionalValue = formFieldAttr.ConditionalValue,
-                    GridColumns = formFieldAttr.GridColumns,
-                    CssClass = formFieldAttr.CssClass,
-                    DataList = formFieldAttr.DataList,
-                    Order = formFieldAttr.Order,
-                    Section = formFieldAttr.Section ?? "Não Informado",
-                    Options = formFieldAttr.Type == EnumFormFieldType.Select ? GetSelectOptions(property.Name) : []
-                };
-            }
-
-            // Se não tem atributo, tentar gerar automaticamente
-            return StandardGridController<T>.ShouldAutoGenerateField(property)
-                ? new FormFieldViewModel
-                {
-                    PropertyName = property.Name,
-                    DisplayName = GetDisplayName(property),
-                    Icon = GetDefaultIcon(property),
-                    Placeholder = GetDefaultPlaceholder(property),
-                    Type = DetermineFieldType(property),
-                    Required = IsRequiredProperty(property),
-                    ReadOnly = action == "Details",
-                    Value = property.GetValue(entity),
-                    Order = GetPropertyOrder(property),
-                    Section = "Não Informado",
-                    GridColumns = 2,
-                    Options = DetermineFieldType(property) == EnumFormFieldType.Select ? GetSelectOptions(property.Name) : []
-                }
-                : null;
+                .OrderBy(p => GetPropertyOrder(p))];
         }
 
         /// <summary>
@@ -893,85 +737,8 @@ namespace AutoGestao.Controllers
             }
 
             // Não incluir propriedades comuns que são gerenciadas automaticamente
-            var ignoredNames = new[] { "Id", "DataCadastro", "DataAlteracao", "UsuarioCadastro", "UsuarioAlteracao" };
+            var ignoredNames = new[] { "Id", "DataCadastro", "DataAlteracao", "UsuarioCadastro", "UsuarioAlteracao", "CriadoPorUsuarioId", "AlteradoPorUsuarioId" };
             return !ignoredNames.Contains(property.Name);
-        }
-
-        /// <summary>
-        /// Determina automaticamente o tipo de campo baseado na propriedade
-        /// </summary>
-        private static EnumFormFieldType DetermineFieldType(PropertyInfo property)
-        {
-            var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-            var propertyName = property.Name.ToLower();
-
-            // Verificar nome da propriedade primeiro
-            if (propertyName.Contains("email"))
-            {
-                return EnumFormFieldType.Email;
-            }
-
-            if (propertyName.Contains("telefone") || propertyName.Contains("celular"))
-            {
-                return EnumFormFieldType.Phone;
-            }
-
-            if (propertyName == "cpf")
-            {
-                return EnumFormFieldType.Cpf;
-            }
-
-            if (propertyName == "cnpj")
-            {
-                return EnumFormFieldType.Cnpj;
-            }
-
-            if (propertyName == "cep")
-            {
-                return EnumFormFieldType.Cep;
-            }
-
-            if (propertyName.Contains("senha") || propertyName.Contains("password"))
-            {
-                return EnumFormFieldType.Password;
-            }
-
-            // Verificar tipo da propriedade
-            if (type == typeof(bool))
-            {
-                return EnumFormFieldType.Checkbox;
-            }
-
-            if (type.IsEnum)
-            {
-                return EnumFormFieldType.Select;
-            }
-
-            if (type == typeof(DateTime))
-            {
-                return EnumFormFieldType.Date;
-            }
-
-            if (type == typeof(decimal) && (propertyName.Contains("valor") || propertyName.Contains("preco")))
-            {
-                return EnumFormFieldType.Currency;
-            }
-
-            if (IsNumericType(type))
-            {
-                return EnumFormFieldType.Number;
-            }
-
-            if (type == typeof(string))
-            {
-                var maxLength = property.GetCustomAttribute<MaxLengthAttribute>();
-                if (maxLength?.Length > 255)
-                {
-                    return EnumFormFieldType.TextArea;
-                }
-            }
-
-            return EnumFormFieldType.Text;
         }
 
         private Dictionary<string, object> ExtractFiltersFromRequest()
@@ -1004,9 +771,9 @@ namespace AutoGestao.Controllers
         {
             foreach (var filter in filters)
             {
-                if (values.ContainsKey(filter.Name))
+                if (values.TryGetValue(filter.Name, out var value))
                 {
-                    filter.Value = values[filter.Name];
+                    filter.Value = value;
                 }
 
                 // Para filtros de data range, verificar campos específicos
@@ -1015,14 +782,14 @@ namespace AutoGestao.Controllers
                     var inicioKey = $"{filter.Name}_inicio";
                     var fimKey = $"{filter.Name}_fim";
 
-                    if (values.ContainsKey(inicioKey))
+                    if (values.TryGetValue(inicioKey, out var valueInico))
                     {
-                        ViewBag.GetType().GetProperty(inicioKey)?.SetValue(ViewBag, values[inicioKey]);
+                        ViewBag.GetType().GetProperty(inicioKey)?.SetValue(ViewBag, valueInico);
                     }
 
-                    if (values.ContainsKey(fimKey))
+                    if (values.TryGetValue(fimKey, out var valueFim))
                     {
-                        ViewBag.GetType().GetProperty(fimKey)?.SetValue(ViewBag, values[fimKey]);
+                        ViewBag.GetType().GetProperty(fimKey)?.SetValue(ViewBag, valueFim);
                     }
                 }
             }
@@ -1126,14 +893,14 @@ namespace AutoGestao.Controllers
 
             return fieldType switch
             {
-                EnumFormFieldType.Email => "exemplo@email.com",
-                EnumFormFieldType.Phone => "(00) 00000-0000",
-                EnumFormFieldType.Cpf => "000.000.000-00",
-                EnumFormFieldType.Cnpj => "00.000.000/0000-00",
-                EnumFormFieldType.Cep => "00000-000",
-                EnumFormFieldType.Currency => "R$ 0,00",
-                EnumFormFieldType.Date => "dd/mm/aaaa",
-                EnumFormFieldType.TextArea => $"Digite as {GetDisplayName(property).ToLower()}...",
+                EnumFieldType.Email => "exemplo@email.com",
+                EnumFieldType.Phone => "(00) 00000-0000",
+                EnumFieldType.Cpf => "000.000.000-00",
+                EnumFieldType.Cnpj => "00.000.000/0000-00",
+                EnumFieldType.Cep => "00000-000",
+                EnumFieldType.Currency => "R$ 0,00",
+                EnumFieldType.Date => "dd/mm/aaaa",
+                EnumFieldType.TextArea => $"Digite as {GetDisplayName(property).ToLower()}...",
                 _ => $"Digite {GetDisplayName(property).ToLower()}"
             };
         }
@@ -1236,6 +1003,448 @@ namespace AutoGestao.Controllers
             return viewModel;
         }
 
+        private bool IsAjaxRequest()
+        {
+            return Request.Headers.ContainsKey("X-Requested-With") ||
+                   Request.Query.ContainsKey("ajax") ||
+                   Request.ContentType?.Contains("application/json") == true;
+        }
+
+        private bool ViewExists(string viewName)
+        {
+            var viewEngine = HttpContext.RequestServices.GetService(typeof(Microsoft.AspNetCore.Mvc.ViewEngines.ICompositeViewEngine))
+                as Microsoft.AspNetCore.Mvc.ViewEngines.ICompositeViewEngine;
+
+            var viewResult = viewEngine?.FindView(ControllerContext, viewName, false);
+            return viewResult?.Success ?? false;
+        }
+
         #endregion
+
+        #region Automated Enum Detection and Population
+
+        /// <summary>
+        /// Determina automaticamente o tipo de campo baseado na propriedade (MODIFICADO)
+        /// </summary>
+        private static EnumFieldType DetermineFieldType(PropertyInfo property)
+        {
+            var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+            // MODIFICAÇÃO PRINCIPAL: Detecção automática de Enums
+            if (type.IsEnum)
+            {
+                return EnumFieldType.Select;
+            }
+
+            return type switch
+            {
+                Type t when t == typeof(string) => EnumFieldType.Text,
+                Type t when t == typeof(int) || t == typeof(long) => EnumFieldType.Number,
+                Type t when t == typeof(decimal) || t == typeof(double) || t == typeof(float) => EnumFieldType.Currency,
+                Type t when t == typeof(DateTime) => EnumFieldType.Date,
+                Type t when t == typeof(bool) => EnumFieldType.Checkbox,
+                _ => EnumFieldType.Text
+            };
+        }
+
+        /// <summary>
+        /// Obtém automaticamente opções para propriedades Enum
+        /// </summary>
+        private static List<SelectListItem> GetAutoEnumOptions(string propertyName)
+        {
+            try
+            {
+                // Obtém a propriedade da entidade
+                var property = typeof(T).GetProperty(propertyName);
+                if (property == null)
+                {
+                    return [];
+                }
+
+                var propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+                if (!propertyType.IsEnum)
+                {
+                    return [];
+                }
+
+                // Usa reflexão para chamar EnumExtension.GetSelectListItems<TEnum>(true)
+                var enumExtensionMethod = typeof(EnumExtension).GetMethod("GetSelectListItems");
+                var genericMethod = enumExtensionMethod.MakeGenericMethod(propertyType);
+
+                // Chama o método com obterIcone = true (você pode parametrizar isso se quiser)
+                var result = genericMethod.Invoke(null, [true]) as List<SelectListItem>;
+
+                return result ?? [];
+            }
+            catch (Exception ex)
+            {
+                // Log do erro mas não quebra o sistema
+                Console.WriteLine($"Erro ao obter opções automáticas para Enum {propertyName}: {ex.Message}");
+                return [];
+            }
+        }
+
+        /// <summary>
+        /// CreateFieldFromProperty para usar automação
+        /// </summary>
+        private FormFieldViewModel? CreateFieldFromProperty(PropertyInfo property, T entity, string action)
+        {
+            var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
+
+            if (formFieldAttr != null)
+            {
+                return new FormFieldViewModel
+                {
+                    PropertyName = property.Name,
+                    DisplayName = formFieldAttr.DisplayName ?? GetDisplayName(property),
+                    Icon = formFieldAttr.Icon ?? GetDefaultIcon(property),
+                    Placeholder = formFieldAttr.Placeholder ?? GetDefaultPlaceholder(property),
+                    Type = formFieldAttr.Type,
+                    Required = formFieldAttr.Required || IsRequiredProperty(property),
+                    ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
+                    Value = property.GetValue(entity),
+                    Reference = formFieldAttr.Reference ?? null,
+                    ValidationRegex = formFieldAttr.ValidationRegex ?? "",
+                    ValidationMessage = formFieldAttr.ValidationMessage ?? "",
+                    ConditionalField = formFieldAttr.ConditionalField ?? "",
+                    ConditionalValue = formFieldAttr.ConditionalValue ?? "",
+                    GridColumns = formFieldAttr.GridColumns,
+                    CssClass = formFieldAttr.CssClass ?? "",
+                    DataList = formFieldAttr.DataList ?? "",
+                    Order = formFieldAttr.Order,
+                    Section = formFieldAttr.Section ?? "Não Informado",
+                    Options = formFieldAttr.Type == EnumFieldType.Select ? GetSelectOptions(property.Name) : []
+                };
+            }
+
+            // Se não tem atributo, tentar gerar automaticamente
+            if (ShouldAutoGenerateField(property))
+            {
+                var determinedType = DetermineFieldType(property);
+                return new FormFieldViewModel
+                {
+                    PropertyName = property.Name,
+                    DisplayName = GetDisplayName(property),
+                    Icon = GetDefaultIcon(property),
+                    Placeholder = GetDefaultPlaceholder(property),
+                    Type = determinedType,
+                    Required = IsRequiredProperty(property),
+                    ReadOnly = action == "Details",
+                    Value = property.GetValue(entity),
+                    Order = GetPropertyOrder(property),
+                    Section = "Não Informado",
+                    GridColumns = 2,
+                    Reference = null,
+                    Options = determinedType == EnumFieldType.Select ? GetSelectOptions(property.Name) : []
+                };
+            }
+
+            return null;
+        }
+
+        // <summary>
+        /// Popula automaticamente a ViewBag com todos os Enums da entidade
+        /// </summary>
+        protected void PopulateEnumsInViewBag()
+        {
+            var enumProperties = typeof(T).GetProperties()
+                .Where(p => {
+                    var type = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
+                    return type.IsEnum;
+                });
+
+            foreach (var property in enumProperties)
+            {
+                var options = StandardGridController<T>.GetAutoEnumOptions(property.Name);
+                if (options.Count != 0)
+                {
+                    ViewBag.GetType().GetProperty(property.Name)?.SetValue(ViewBag, options);
+                    // Alternativamente, use ViewData:
+                    ViewData[property.Name] = options;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Helpers para aplicar filtros
+
+        /// <summary>
+        /// Helper para aplicar filtros de data range
+        /// </summary>
+        protected IQueryable<T> ApplyDateRangeFilter<TProperty>(IQueryable<T> query, Dictionary<string, object> filters, string filterName, Expression<Func<T, TProperty>> propertyExpression)
+        {
+            var inicioKey = $"{filterName}_inicio";
+            var fimKey = $"{filterName}_fim";
+
+            DateTime? dataInicio = null;
+            DateTime? dataFim = null;
+
+            if (filters.ContainsKey(inicioKey) && DateTime.TryParse(filters[inicioKey].ToString(), out var inicio))
+            {
+                dataInicio = inicio;
+            }
+
+            if (filters.ContainsKey(fimKey) && DateTime.TryParse(filters[fimKey].ToString(), out var fim))
+            {
+                dataFim = fim.Date.AddDays(1).AddTicks(-1); // Fim do dia
+            }
+
+            if (dataInicio.HasValue || dataFim.HasValue)
+            {
+                var parameter = Expression.Parameter(typeof(T), "x");
+                var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
+
+                Expression? condition = null;
+
+                if (dataInicio.HasValue)
+                {
+                    var inicioConstant = Expression.Constant(dataInicio.Value);
+                    var greaterThanOrEqual = Expression.GreaterThanOrEqual(property, inicioConstant);
+                    condition = condition == null ? greaterThanOrEqual : Expression.AndAlso(condition, greaterThanOrEqual);
+                }
+
+                if (dataFim.HasValue)
+                {
+                    var fimConstant = Expression.Constant(dataFim.Value);
+                    var lessThanOrEqual = Expression.LessThanOrEqual(property, fimConstant);
+                    condition = condition == null ? lessThanOrEqual : Expression.AndAlso(condition, lessThanOrEqual);
+                }
+
+                if (condition != null)
+                {
+                    var lambda = Expression.Lambda<Func<T, bool>>(condition, parameter);
+                    query = query.Where(lambda);
+                }
+            }
+
+            return query;
+        }
+
+        /// <summary>
+        /// Helper para aplicar filtros de texto com múltiplas propriedades
+        /// </summary>
+        protected IQueryable<T> ApplyTextFilter(IQueryable<T> query, string searchTerm, params Expression<Func<T, string?>>[] properties)
+        {
+            if (string.IsNullOrEmpty(searchTerm) || properties.Length == 0)
+            {
+                return query;
+            }
+
+            var parameter = Expression.Parameter(typeof(T), "x");
+            Expression? condition = null;
+            var searchTermLower = searchTerm.ToLower();
+
+            foreach (var propertyExpr in properties)
+            {
+                var propertyName = ((MemberExpression)propertyExpr.Body).Member.Name;
+                var property = Expression.Property(parameter, propertyName);
+
+                // Verificar se não é null
+                var notNull = Expression.NotEqual(property, Expression.Constant(null));
+
+                // Aplicar ToLower na propriedade
+                var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                var propertyToLower = Expression.Call(property, toLowerMethod!);
+
+                // Aplicar Contains com termo já em lower case
+                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
+                var searchConstant = Expression.Constant(searchTermLower);
+                var containsCall = Expression.Call(propertyToLower, containsMethod!, searchConstant);
+
+                // Combinar null check com contains
+                var propertyCondition = Expression.AndAlso(notNull, containsCall);
+
+                condition = condition == null ? propertyCondition : Expression.OrElse(condition, propertyCondition);
+            }
+
+            if (condition != null)
+            {
+                var lambda = Expression.Lambda<Func<T, bool>>(condition, parameter);
+                query = query.Where(lambda);
+            }
+
+            return query;
+        }
+
+        /// <summary>
+        /// Helper para aplicar filtros de enum
+        /// </summary>
+        protected IQueryable<T> ApplyEnumFilter<TEnum>(IQueryable<T> query, Dictionary<string, object> filters, string filterName, Expression<Func<T, TEnum>> propertyExpression) where TEnum : struct, Enum
+        {
+            if (filters.TryGetValue(filterName, out var value) && Enum.TryParse<TEnum>(value.ToString(), out TEnum enumValue))
+            {
+                var parameter = Expression.Parameter(typeof(T), "x");
+                var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
+                var constant = Expression.Constant(enumValue);
+                var equal = Expression.Equal(property, constant);
+                var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
+
+                query = query.Where(lambda);
+            }
+
+            return query;
+        }
+
+        /// <summary>
+        /// Helper para aplicar filtros numéricos
+        /// </summary>
+        protected IQueryable<T> ApplyNumericFilter<TProperty>(IQueryable<T> query, Dictionary<string, object> filters, string filterName, Expression<Func<T, TProperty>> propertyExpression) where TProperty : struct, IComparable<TProperty>
+        {
+            if (filters.TryGetValue(filterName, out var value))
+            {
+                if (TryConvertToNumeric(value.ToString(), out TProperty numericValue))
+                {
+                    var parameter = Expression.Parameter(typeof(T), "x");
+                    var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);
+                    var constant = Expression.Constant(numericValue);
+                    var equal = Expression.Equal(property, constant);
+                    var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
+
+                    query = query.Where(lambda);
+                }
+            }
+
+            return query;
+        }
+
+        #endregion Helpers para aplicar filtros
+
+
+        /// <summary>
+        /// Manipula criação via modal para campos de referência
+        /// </summary>
+        /// <typeparam name="T">Tipo da entidade</typeparam>
+        /// <param name="controller">Controller</param>
+        /// <param name="entity">Entidade a ser criada</param>
+        /// <returns>ActionResult apropriado (JSON para AJAX, View para navegação normal)</returns>
+        public static async Task<IActionResult> HandleModalCreate<T>(StandardGridController<T> controller, T entity) where T : BaseEntidade, new()
+        {
+            // Verifica se é requisição AJAX (modal)
+            if (controller.Request.Headers.ContainsKey("X-Requested-With") &&
+                controller.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                try
+                {
+                    if (controller.ModelState.IsValid)
+                    {
+                        // Executar lógica de criação
+                        await controller.BeforeCreate(entity);
+
+                        controller._context.Set<T>().Add(entity);
+                        await controller._context.SaveChangesAsync();
+
+                        await controller.AfterCreate(entity);
+
+                        // Retornar JSON para o modal
+                        return controller.Json(new
+                        {
+                            success = true,
+                            id = entity.Id,
+                            text = GetDisplayText(entity),
+                            name = GetDisplayText(entity), // Compatibilidade
+                            message = "Registro criado com sucesso!"
+                        });
+                    }
+                    else
+                    {
+                        // Retornar erros de validação
+                        var errors = controller.ModelState
+                            .Where(x => x.Value?.Errors.Count > 0)
+                            .ToDictionary(
+                                kvp => kvp.Key,
+                                kvp => string.Join("; ", kvp.Value?.Errors.Select(e => e.ErrorMessage) ?? new string[0])
+                            );
+
+                        return controller.Json(new
+                        {
+                            success = false,
+                            errors
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //controller.Logger?.LogError(ex, "Erro ao criar {EntityType} via modal", typeof(T).Name);
+
+                    return controller.Json(new
+                    {
+                        success = false,
+                        errors = new Dictionary<string, string>
+                        {
+                            ["general"] = $"Erro interno: {ex.Message}"
+                        }
+                    });
+                }
+            }
+
+            // Comportamento normal se não for AJAX
+            return await DefaultCreate(controller, entity);
+        }
+
+        /// <summary>
+        /// Execução padrão do Create (comportamento original)
+        /// </summary>
+        /// <typeparam name="T">Tipo da entidade</typeparam>
+        /// <param name="controller">Controller</param>
+        /// <param name="entity">Entidade</param>
+        /// <returns>ActionResult</returns>
+        private static async Task<IActionResult> DefaultCreate<T>(StandardGridController<T> controller, T entity) where T : BaseEntidade, new()
+        {
+            try
+            {
+                await controller.BeforeCreate(entity);
+
+                if (controller.ModelState.IsValid)
+                {
+                    controller._context.Set<T>().Add(entity);
+                    await controller._context.SaveChangesAsync();
+
+                    await controller.AfterCreate(entity);
+                    return controller.RedirectToAction("Index");
+                }
+            }
+            catch (Exception ex)
+            {
+                //controller.Logger?.LogError(ex, "Erro ao criar {EntityType}", typeof(T).Name);
+                controller.ModelState.AddModelError("", $"Erro ao salvar: {ex.Message}");
+            }
+
+            // Se chegou até aqui, há erros - mostrar form novamente
+            var viewModel = controller.BuildFormViewModel(entity, "Create");
+            return controller.View(viewModel);
+        }
+
+        /// <summary>
+        /// Obtém o texto de exibição apropriado para uma entidade
+        /// </summary>
+        /// <typeparam name="T">Tipo da entidade</typeparam>
+        /// <param name="entity">Instância da entidade</param>
+        /// <returns>Texto para exibição</returns>
+        private static string GetDisplayText<T>(T entity) where T : BaseEntidade
+        {
+            var type = typeof(T);
+
+            // Propriedades comuns para exibição, em ordem de prioridade
+            var displayProperties = new[] { "Nome", "Descricao", "Titulo", "RazaoSocial", "Codigo", "Numero" };
+
+            foreach (var propName in displayProperties)
+            {
+                var prop = type.GetProperty(propName);
+                if (prop != null && prop.PropertyType == typeof(string))
+                {
+                    var value = prop.GetValue(entity) as string;
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        return value;
+                    }
+                }
+            }
+
+            // Fallback para nome do tipo + ID
+            var typeName = type.Name;
+            return $"{typeName} #{entity.Id}";
+        }
+
     }
 }

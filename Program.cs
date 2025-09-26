@@ -1,4 +1,7 @@
+using AutoGestao.Configuration;
 using AutoGestao.Data;
+using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -105,6 +108,35 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
+static void ConfigureEnumAutomation()
+{
+    // Configurações globais
+    EnumAutomationConfig.IncludeIconsByDefault = true;
+    EnumAutomationConfig.IncludeEmptyOptionForNullable = true;
+    EnumAutomationConfig.EmptyOptionText = "Selecione uma opção...";
+
+    // Configurações específicas (exemplos)
+    EnumAutomationConfig.EnumConfigurations[typeof(EnumSituacaoVeiculo)] = new EnumConfig
+    {
+        IncludeIcons = true,
+        EmptyOptionText = "Selecione a situação do veículo...",
+        SortOrder = EnumSortOrder.ByDescription
+    };
+
+    EnumAutomationConfig.EnumConfigurations[typeof(EnumEstado)] = new EnumConfig
+    {
+        IncludeIcons = false,
+        EmptyOptionText = "Selecione o estado...",
+        SortOrder = EnumSortOrder.ByName
+    };
+
+    // Enums a serem ignorados (se houver)
+    // EnumAutomationConfig.IgnoreEnumTypes.Add(typeof(EnumSomeInternalEnum));
+
+    // Propriedades específicas a serem ignoradas (se houver)
+    // EnumAutomationConfig.IgnoreProperties.Add("Veiculo.StatusInterno");
+}
+
 static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioService usuarioService)
 {
     await context.Database.MigrateAsync();
@@ -125,4 +157,6 @@ static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioS
         Console.WriteLine("Email: admin@autogestao.com");
         Console.WriteLine("Senha: admin123");
     }
+
+    ConfigureEnumAutomation();
 }
