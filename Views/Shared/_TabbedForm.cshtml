@@ -1,0 +1,116 @@
+@model TabbedFormViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="dashboard-container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">
+                <i class="@Model.Icon"></i>
+                @Model.Title
+            </h1>
+            <p class="page-subtitle mb-0">@Model.Subtitle</p>
+        </div>
+        <div>
+            <a asp-action="@Model.BackAction" class="btn-modern btn-outline-modern">
+                <i class="fas fa-arrow-left"></i>
+                @Model.BackText
+            </a>
+        </div>
+    </div>
+
+    @if (Model.EnableTabs && Model.Tabs.Any())
+    {
+        <!-- Navegação das Abas -->
+        <div class="tab-navigation mb-4">
+            <ul class="nav nav-tabs nav-tabs-modern" id="entityTabs" role="tablist">
+                @foreach (var tab in Model.Tabs.Where(t => t.HasAccess).OrderBy(t => t.Order))
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link nav-link-modern @(tab.TabId == Model.ActiveTab ? "active" : "")"
+                                id="@tab.TabId-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#@tab.TabId-content"
+                                type="button"
+                                role="tab"
+                                aria-controls="@tab.TabId-content"
+                                aria-selected="@(tab.TabId == Model.ActiveTab ? "true" : "false")"
+                                data-tab-id="@tab.TabId"
+                                data-lazy-load="@tab.LazyLoad.ToString().ToLower()"
+                                data-controller="@tab.Controller"
+                                data-action="@tab.Action">
+                            <i class="@tab.TabIcon me-2"></i>
+                            @tab.TabName
+                            <span class="tab-loading d-none">
+                                <i class="fas fa-spinner fa-spin ms-2"></i>
+                            </span>
+                        </button>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content" id="entityTabsContent">
+            @foreach (var tab in Model.Tabs.Where(t => t.HasAccess).OrderBy(t => t.Order))
+            {
+                <div class="tab-pane fade @(tab.TabId == Model.ActiveTab ? "show active" : "")"
+                     id="@tab.TabId-content"
+                     role="tabpanel"
+                     aria-labelledby="@tab.TabId-tab">
+
+                    @if (tab.TabId == "principal")
+                    {
+                        <!-- Aba principal com formulário padrão -->
+                        @await Html.PartialAsync("_StandardFormContent", Model)
+                    }
+                    else if (!tab.LazyLoad || tab.TabId == Model.ActiveTab)
+                    {
+                        <!-- Conteúdo carregado imediatamente -->
+                        <div class="tab-content-wrapper" data-tab="@tab.TabId">
+                            @if (!string.IsNullOrEmpty(tab.Content))
+                            {
+                                @Html.Raw(tab.Content)
+                            }
+                            else
+                            {
+                                <div class="tab-loading-placeholder">
+                                    <div class="d-flex justify-content-center align-items-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                        <span class="ms-3">Carregando conteúdo...</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Placeholder para lazy loading -->
+                        <div class="tab-content-wrapper" data-tab="@tab.TabId">
+                            <div class="tab-loading-placeholder">
+                                <div class="d-flex justify-content-center align-items-center py-5">
+                                    <i class="@tab.TabIcon fa-3x text-muted mb-3"></i>
+                                    <div>
+                                        <h5 class="text-muted">@tab.TabName</h5>
+                                        <p class="text-muted">Clique para carregar o conteúdo</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Formulário sem abas (fallback) -->
+        @await Html.PartialAsync("_StandardFormContent", Model)
+    }
+</div>
+
+<!-- JavaScript para gerenciamento das abas -->
+<script src="~/js/tabbed-form.js"></script>

@@ -1,0 +1,290 @@
+@using System.Security.Claims
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="d-flex align-items-center gap-3">
+        <span class="text-muted d-none d-md-inline">
+            Bem-vindo, <strong>@User.Identity.Name</strong>
+        </span>
+
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                <i class="fas fa-user"></i>
+                <span class="d-none d-lg-inline">@User.Identity.Name</span>
+                <span class="badge bg-primary">@User.FindFirst("Perfil")?.Value</span>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <h6 class="dropdown-header d-flex align-items-center">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <div>
+                            <div>@User.Identity.Name</div>
+                            <small class="text-muted">@User.FindFirst(ClaimTypes.Email)?.Value</small>
+                        </div>
+                    </h6>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <span class="dropdown-item-text">
+                        <i class="fas fa-user-tag me-2"></i>
+                        <strong>Perfil:</strong> @User.FindFirst("Perfil")?.Value
+                    </span>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <a class="dropdown-item" href="#" onclick="alterarSenha()">
+                        <i class="fas fa-lock me-2"></i>Alterar Senha
+                    </a>
+                </li>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" asp-controller="Usuarios" asp-action="Index">
+                            <i class="fas fa-users-cog me-2"></i>Gerenciar Usuários
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="fas fa-cog me-2"></i>Configurações do Sistema
+                        </a>
+                    </li>
+                }
+
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline w-100">
+                        <button type="submit" class="dropdown-item text-danger w-100 text-start">
+                            <i class="fas fa-sign-out-alt me-2"></i>Sair do Sistema
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+else
+{
+    @* <div class="d-flex align-items-center">
+        <a class="btn btn-primary" asp-controller="Login" asp-action="Index">
+            <i class="fas fa-sign-in-alt me-1"></i>
+            Entrar
+        </a>
+    </div> *@
+}
+
+<!-- Modal para alterar senha -->
+<div class="modal fade" id="modalAlterarSenha" tabindex="-1" aria-labelledby="modalAlterarSenhaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAlterarSenhaLabel">
+                    <i class="fas fa-key me-2"></i>Alterar Senha
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAlterarSenha">
+                    <div class="mb-3">
+                        <label for="senhaAtual" class="form-label">
+                            <i class="fas fa-lock me-1"></i>Senha Atual
+                        </label>
+                        <input type="password" class="form-control" id="senhaAtual" required>
+                        <div class="invalid-feedback">
+                            Por favor, informe sua senha atual.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="novaSenha" class="form-label">
+                            <i class="fas fa-key me-1"></i>Nova Senha
+                        </label>
+                        <input type="password" class="form-control" id="novaSenha" required minlength="6">
+                        <div class="form-text">
+                            A senha deve ter pelo menos 6 caracteres.
+                        </div>
+                        <div class="invalid-feedback">
+                            A nova senha deve ter pelo menos 6 caracteres.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmarSenha" class="form-label">
+                            <i class="fas fa-check me-1"></i>Confirmar Nova Senha
+                        </label>
+                        <input type="password" class="form-control" id="confirmarSenha" required>
+                        <div class="invalid-feedback">
+                            As senhas não conferem.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="salvarNovaSenha()" id="btnSalvarSenha">
+                    <i class="fas fa-save me-1"></i>Alterar Senha
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Função para abrir modal de alterar senha
+    function alterarSenha() {
+        // Limpar formulário
+        document.getElementById('formAlterarSenha').reset();
+
+        // Remover classes de validação
+        const inputs = document.querySelectorAll('#formAlterarSenha input');
+        inputs.forEach(input => {
+            input.classList.remove('is-valid', 'is-invalid');
+        });
+
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById('modalAlterarSenha'));
+        modal.show();
+
+        // Focar no primeiro campo
+        setTimeout(() => {
+            document.getElementById('senhaAtual').focus();
+        }, 500);
+    }
+
+    // Função para salvar nova senha
+    async function salvarNovaSenha() {
+        const senhaAtual = document.getElementById('senhaAtual').value;
+        const novaSenha = document.getElementById('novaSenha').value;
+        const confirmarSenha = document.getElementById('confirmarSenha').value;
+        const btnSalvar = document.getElementById('btnSalvarSenha');
+
+        // Validações
+        let isValid = true;
+
+        // Validar campos obrigatórios
+        if (!senhaAtual) {
+            document.getElementById('senhaAtual').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('senhaAtual').classList.remove('is-invalid');
+            document.getElementById('senhaAtual').classList.add('is-valid');
+        }
+
+        if (!novaSenha || novaSenha.length < 6) {
+            document.getElementById('novaSenha').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('novaSenha').classList.remove('is-invalid');
+            document.getElementById('novaSenha').classList.add('is-valid');
+        }
+
+        if (!confirmarSenha || confirmarSenha !== novaSenha) {
+            document.getElementById('confirmarSenha').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('confirmarSenha').classList.remove('is-invalid');
+            document.getElementById('confirmarSenha').classList.add('is-valid');
+        }
+
+        if (!isValid) {
+            return;
+        }
+
+        // Mostrar loading
+        const originalText = btnSalvar.innerHTML;
+        btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Alterando...';
+        btnSalvar.disabled = true;
+
+        try {
+            const response = await fetch('/Usuarios/AlterarSenha', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: JSON.stringify({
+                    usuarioId: @(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"),
+                    senhaAtual: senhaAtual,
+                    novaSenha: novaSenha,
+                    confirmarSenha: confirmarSenha
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                // Fechar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalAlterarSenha')).hide();
+
+                // Mostrar notificação de sucesso
+                if (window.showNotification) {
+                    window.showNotification('Senha alterada com sucesso!', 'success');
+                } else {
+                    alert('Senha alterada com sucesso!');
+                }
+
+                // Limpar formulário
+                document.getElementById('formAlterarSenha').reset();
+            } else {
+                // Mostrar erro
+                if (window.showNotification) {
+                    window.showNotification(data.mensagem || 'Erro ao alterar senha', 'error');
+                } else {
+                    alert(data.mensagem || 'Erro ao alterar senha');
+                }
+
+                // Focar no campo da senha atual se erro de autenticação
+                if (data.mensagem && data.mensagem.includes('atual')) {
+                    document.getElementById('senhaAtual').focus();
+                    document.getElementById('senhaAtual').classList.add('is-invalid');
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao alterar senha:', error);
+            if (window.showNotification) {
+                window.showNotification('Erro de conexão. Tente novamente.', 'error');
+            } else {
+                alert('Erro de conexão. Tente novamente.');
+            }
+        } finally {
+            // Restaurar botão
+            btnSalvar.innerHTML = originalText;
+            btnSalvar.disabled = false;
+        }
+    }
+
+    // Validação em tempo real
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmarSenhaInput = document.getElementById('confirmarSenha');
+        const novaSenhaInput = document.getElementById('novaSenha');
+
+        if (confirmarSenhaInput && novaSenhaInput) {
+            confirmarSenhaInput.addEventListener('input', function() {
+                if (this.value && novaSenhaInput.value) {
+                    if (this.value === novaSenhaInput.value) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                    }
+                }
+            });
+
+            novaSenhaInput.addEventListener('input', function() {
+                // Validar confirmar senha se já foi preenchida
+                if (confirmarSenhaInput.value) {
+                    confirmarSenhaInput.dispatchEvent(new Event('input'));
+                }
+            });
+        }
+    });
+</script>

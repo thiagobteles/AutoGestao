@@ -1,0 +1,325 @@
+@using AutoGestao.Models.Auth
+@model DashboardAuditViewModel
+@{
+    ViewData["Title"] = "Dashboard de Auditoria";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="fas fa-chart-bar me-2 text-primary"></i>
+            Dashboard de Auditoria
+        </h1>
+        <p class="text-muted mb-0">Visão geral das atividades dos últimos @Model.UltimosDias dias</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-primary">
+            <i class="fas fa-list me-1"></i>
+            Ver Logs
+        </a>
+        <button class="btn btn-info" onclick="atualizarDashboard()">
+            <i class="fas fa-sync-alt me-1"></i>
+            Atualizar
+        </button>
+    </div>
+</div>
+
+<!-- Estatísticas Gerais -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-database fa-3x mb-3"></i>
+                <h2 class="card-title">@Model.TotalOperacoes</h2>
+                <p class="card-text">Total de Operações</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h2 class="card-title">@Model.UsuariosMaisAtivos.Count</h2>
+                <p class="card-text">Usuários Ativos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-table fa-3x mb-3"></i>
+                <h2 class="card-title">@Model.EntidadesMaisAuditadas.Count</h2>
+                <p class="card-text">Entidades Auditadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar fa-3x mb-3"></i>
+                <h2 class="card-title">@Model.UltimosDias</h2>
+                <p class="card-text">Dias Analisados</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Operações por Tipo
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoOperacoes" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Atividade por Dia
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoAtividade" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabelas de Detalhes -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Usuários Mais Ativos
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.UsuariosMaisAtivos.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th class="text-end">Operações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var usuario in Model.UsuariosMaisAtivos)
+                                {
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-user me-2 text-muted"></i>
+                                            @usuario.Usuario
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="badge bg-primary">@usuario.Total</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Nenhum usuário encontrado no período.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Entidades Mais Auditadas
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.EntidadesMaisAuditadas.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Entidade</th>
+                                    <th class="text-end">Operações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var entidade in Model.EntidadesMaisAuditadas)
+                                {
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-database me-2 text-muted"></i>
+                                            @entidade.Entidade
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="badge bg-info">@entidade.Total</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Nenhuma entidade encontrada no período.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts dos Gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // ✅ CORREÇÃO: Acessar dados do Model de forma segura
+
+    // Gráfico de Operações por Tipo
+    const ctxOperacoes = document.getElementById('graficoOperacoes').getContext('2d');
+
+    // Preparar dados das operações
+    const operacoesData = [
+        @Html.Raw(string.Join(",", Model.EstatisticasPorOperacao.Select(e =>
+            $"{{ label: '{GetOperationDisplayName(e.Operacao)}', value: {e.Total} }}")))
+    ];
+
+    new Chart(ctxOperacoes, {
+        type: 'doughnut',
+        data: {
+            labels: operacoesData.map(item => item.label),
+            datasets: [{
+                data: operacoesData.map(item => item.value),
+                backgroundColor: [
+                    '#28a745', '#ffc107', '#dc3545', '#17a2b8',
+                    '#6f42c1', '#fd7e14', '#20c997', '#6c757d',
+                    '#007bff', '#e83e8c'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((context.parsed / total) * 100);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Atividade por Dia
+    const ctxAtividade = document.getElementById('graficoAtividade').getContext('2d');
+
+    // Preparar dados da atividade
+    const atividadeData = [
+        @Html.Raw(string.Join(",", Model.OperacoesPorDia.Select(d =>
+                        $"{{ label: '{d.Data:dd/MM}', value: {d.Total} }}")))
+    ];
+
+    new Chart(ctxAtividade, {
+        type: 'line',
+        data: {
+            labels: atividadeData.map(item => item.label),
+            datasets: [{
+                label: 'Operações',
+                data: atividadeData.map(item => item.value),
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0,123,255,0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return `Data: ${context[0].label}`;
+                        },
+                        label: function(context) {
+                            return `Operações: ${context.parsed.y}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    function atualizarDashboard() {
+        window.location.reload();
+    }
+
+    // ✅ Helper function para nomes das operações (C# method convertido para JS)
+    function getOperationDisplayName(operacao) {
+        const names = {
+            'Create': 'Criação',
+            'Update': 'Alteração',
+            'Delete': 'Exclusão',
+            'Login': 'Login',
+            'Logout': 'Logout',
+            'LoginFailed': 'Login Falhado',
+            'PasswordChange': 'Alteração de Senha',
+            'View': 'Visualização',
+            'Export': 'Exportação',
+            'Import': 'Importação'
+        };
+        return names[operacao] || operacao;
+    }
+</script>
+
+@{
+    string GetOperationDisplayName(AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria operacao)
+    {
+        return operacao switch
+        {
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "Criação",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "Alteração",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "Exclusão",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "Login",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Logout => "Logout",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.LoginFailed => "Login Falhado",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.PasswordChange => "Alteração de Senha",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.View => "Visualização",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Export => "Exportação",
+            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Import => "Importação",
+            _ => operacao.ToString()
+        };
+    }
+}

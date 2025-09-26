@@ -1,0 +1,143 @@
+@using AutoGestao.Entidades.Veiculos
+@model List<VeiculoDocumento>
+
+<div class="tab-arquivos">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>
+            <i class="fas fa-folder me-2"></i>
+            Documentos do Veículo
+        </h4>
+        <button type="button" class="btn-modern btn-primary-modern" data-bs-toggle="modal" data-bs-target="#uploadDocumentoModal">
+            <i class="fas fa-plus"></i>
+            Adicionar Documento
+        </button>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var documento in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card-modern documento-card">
+                        <div class="card-body-modern">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="documento-icon">
+                                    <i class="@GetDocumentIcon(documento.NomeArquivo) fa-2x text-primary"></i>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="@GetDocumentUrl(documento)" target="_blank">
+                                                <i class="fas fa-eye me-2"></i>Visualizar
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="@GetDocumentUrl(documento)" download>
+                                                <i class="fas fa-download me-2"></i>Baixar
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="#" onclick="removerDocumento(@documento.Id)">
+                                                <i class="fas fa-trash me-2"></i>Excluir
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <h6 class="documento-nome">@documento.NomeArquivo</h6>
+                            <p class="documento-descricao text-muted">@documento.Observacoes</p>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                @documento.DataUpload.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state text-center py-5">
+            <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">Nenhum documento encontrado</h5>
+            <p class="text-muted">Adicione documentos relacionados a este veículo</p>
+            <button type="button" class="btn-modern btn-primary-modern" data-bs-toggle="modal" data-bs-target="#uploadDocumentoModal">
+                <i class="fas fa-plus"></i>
+                Adicionar Primeiro Documento
+            </button>
+        </div>
+    }
+</div>
+
+<!-- Modal para upload de documento -->
+<div class="modal fade" id="uploadDocumentoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-upload me-2"></i>
+                    Adicionar Documento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="uploadDocumentoForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-group-modern mb-3">
+                        <label class="form-label-modern">
+                            <i class="fas fa-file me-1"></i>
+                            Arquivo *
+                        </label>
+                        <input type="file" name="arquivo" class="form-control-modern" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                        <div class="form-text">Formatos aceitos: PDF, DOC, DOCX, JPG, PNG. Tamanho máximo: 10MB</div>
+                    </div>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <i class="fas fa-comment me-1"></i>
+                            Descrição
+                        </label>
+                        <textarea name="descricao" class="form-control-modern" rows="3" placeholder="Descreva o documento..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-modern btn-primary-modern">
+                        <i class="fas fa-upload"></i>
+                        Fazer Upload
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetDocumentIcon(string fileName)
+    {
+        return "fas fa-file";
+        // string extension = Path.GetExtension(fileName).ToLower();
+        // return extension switch
+        // {
+        //     ".pdf" => "fas fa-file-pdf",
+        //     ".doc" => "fas fa-file-word",
+        //     ".docx" => "fas fa-file-word",
+        //     ".xls" => "fas fa-file-excel",
+        //     ".xlsx" => "fas fa-file-excel",
+        //     ".jpg" => "fas fa-file-image",
+        //     ".jpeg" => "fas fa-file-image",
+        //     ".png" => "fas fa-file-image",
+        //     ".gif" => "fas fa-file-image",
+        //     _ => "fas fa-file"
+        // };
+    }
+
+    string GetDocumentUrl(VeiculoDocumento documento)
+    {
+        return $"/uploads/documentos/{documento.Id}_{documento.NomeArquivo}";
+    }
+}

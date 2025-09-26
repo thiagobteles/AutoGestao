@@ -8,6 +8,6 @@ namespace AutoGestao.Entidades.Veiculos
         public int? VeiculoMarcaId { get; set; }
 
         // Navigation properties
-        public virtual VeiculoMarca? Marca { get; set; }
+        public virtual VeiculoMarca? VeiculoMarca { get; set; }
     }
 }

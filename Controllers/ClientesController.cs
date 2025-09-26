@@ -1,244 +1,305 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
+using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Extensions;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
-    public class ClientesController(ApplicationDbContext context) : Controller
+    public class ClientesController(ApplicationDbContext context) : StandardGridController<Cliente>(context)
     {
-        private readonly ApplicationDbContext _context = context;
-
-        [HttpGet]
-        public async Task<IActionResult> Index(
-            string? search = null,
-            EnumTipoPessoa? tipoCliente = null,
-            bool? status = null,
-            string? orderBy = "Nome",
-            string? orderDirection = "asc",
-            int pageSize = 50,
-            int page = 1)
+        protected override StandardGridViewModel ConfigureGrid()
         {
-            var query = _context.Clientes.AsQueryable();
-
-            // Aplicar filtros
-            if (!string.IsNullOrEmpty(search))
+            var retorno = new StandardGridViewModel("Clientes", "Gerencie todos os clientes", "Clientes")
             {
-                query = query.Where(c =>
-                    c.Nome.Contains(search) ||
-                    c.CPF != null && c.CPF.Contains(search) ||
-                    c.CNPJ != null && c.CNPJ.Contains(search) ||
-                    c.Email != null && c.Email.Contains(search) ||
-                    c.Telefone != null && c.Telefone.Contains(search) ||
-                    c.Celular != null && c.Celular.Contains(search));
-            }
+                Filters =
+                    [
+                        new()
+                        {
+                            Name = "search",
+                            DisplayName = "Busca Geral",
+                            Type = EnumGridFilterType.Text,
+                            Placeholder = "Nome, CPF, CNPJ, Email, Telefone..."
+                        },
+                        new()
+                        {
+                            Name = "tipocliente",
+                            DisplayName = "Tipo de Pessoa",
+                            Type = EnumGridFilterType.Select,
+                            Placeholder = "Tipo Pessoa...",
+                            Options = EnumExtension.GetSelectListItems<EnumTipoPessoa>(true)
+                        },
+                        new()
+                        {
+                            Name = "status",
+                            DisplayName = "Status",
+                            Type = EnumGridFilterType.Select,
+                            Placeholder = "Status cliente...",
+                            Options =
+                            [
+                                new() { Value = "true", Text = "✅ Ativo" },
+                                new() { Value = "false", Text = "❌ Inativo" }
+                            ]
+                        }
+                    ],
 
-            if (tipoCliente != null)
-            {
-                query = query.Where(c => c.TipoCliente == tipoCliente);
-            }
-
-            if (status != null)
-            {
-                query = query.Where(c => c.Ativo == status);
-            }
-
-            // Aplicar ordenação
-            query = orderBy?.ToLower() switch
-            {
-                "nome" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.Nome)
-                    : query.OrderBy(c => c.Nome),
-                "tipo" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.TipoCliente)
-                    : query.OrderBy(c => c.TipoCliente),
-                "documento" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.CPF ?? c.CNPJ)
-                    : query.OrderBy(c => c.CPF ?? c.CNPJ),
-                "cidade" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.Cidade)
-                    : query.OrderBy(c => c.Cidade),
-                "datacadastro" => orderDirection == "desc"
-                    ? query.OrderByDescending(c => c.DataCadastro)
-                    : query.OrderBy(c => c.DataCadastro),
-                _ => query.OrderBy(c => c.Nome)
+                Columns =
+                    [
+                        new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = EnumGridColumnType.Text, Sortable = true, Width = "65px" },
+                        new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Tipo", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Icon, Sortable = true, Width = "65px"},
+                        new() { Name = nameof(Cliente.Nome), DisplayName = "Nome/Razão Social", Sortable = true, Type = EnumGridColumnType.Text, UrlAction = "Details" },
+                        new() { Name = "Documento", DisplayName = "CPF/CNPJ", Sortable = true, Type = EnumGridColumnType.Custom, CustomRender = RenderDocumento},
+                        new() { Name = nameof(Cliente.Celular), DisplayName = "Telefone", Sortable = true },
+                        new() { Name = nameof(Cliente.Cidade), DisplayName = "Cidade", Sortable = true },
+                        new() { Name = nameof(Cliente.Estado), DisplayName = "UF", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true, Width = "65px"},
+                        new() { Name = nameof(Cliente.Ativo), DisplayName = "Ativo", Type = EnumGridColumnType.Enumerador, Sortable = true, Width = "65px" },
+                        new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
+                    ]
             };
 
-            // Obter total de registros
-            var totalRecords = await query.CountAsync();
-
-            // Aplicar paginação
-            List<Cliente> clientes;
-            if (pageSize == -1) // "Todos"
-            {
-                clientes = await query.ToListAsync();
-            }
-            else
-            {
-                clientes = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-            }
-
-            var viewModel = new ClientesIndexViewModel
-            {
-                ListaObjeto = clientes,
-                TotalRecords = totalRecords,
-                CurrentPage = page,
-                PageSize = pageSize,
-                Search = search,
-                TipoCliente = tipoCliente,
-                Ativo = status,
-                OrderBy = orderBy,
-                OrderDirection = orderDirection,
-                TotalPages = pageSize == -1 ? 1 : (int)Math.Ceiling((double)totalRecords / pageSize)
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetClientesAjax(
-            string? search = null,
-            EnumTipoPessoa? tipoCliente = null,
-            bool? status = null,
-            string? orderBy = "Nome",
-            string? orderDirection = "asc",
-            int pageSize = 50,
-            int page = 1)
-        {
-            var result = await Index(search, tipoCliente, status, orderBy, orderDirection, pageSize, page);
-
-            if (result is ViewResult viewResult && viewResult.Model is ClientesIndexViewModel model)
-            {
-                return PartialView("_ClientesGrid", model);
-            }
-
-            return BadRequest();
-        }
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var cliente = await _context.Clientes
-                .Include(c => c.Veiculos)
-                .Include(c => c.Vendas)
-                .Include(c => c.Avaliacoes)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            return View(cliente);
-        }
-
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Cliente cliente)
-        {
-            if (ModelState.IsValid)
-            {
-                cliente.DataCadastro = DateTime.Now;
-                _context.Add(cliente);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(cliente);
-        }
-
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            return View(cliente);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Cliente cliente)
-        {
-            if (id != cliente.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(cliente);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ClienteExists(cliente.Id))
+            retorno.RowActions.AddRange(
+                [
+                    new()
                     {
-                        return NotFound();
+                        Name = "NewSale",
+                        DisplayName = "Nova Venda",
+                        Icon = "fas fa-handshake",
+                        Url = "/Vendas/Create?clienteId={id}",
+                        ShowCondition = (x) => ((Cliente)x).Ativo == true
+                    },
+                    new()
+                    {
+                        Name = "NewEvaluation",
+                        DisplayName = "Nova Avaliação",
+                        Icon = "fas fa-clipboard-check",
+                        Url = "/Avaliacoes/Create?clienteId={id}",
+                        ShowCondition = (x) => ((Cliente)x).Ativo == true
+                    },
+                    new()
+                    {
+                        Name = "AlterarStatus",
+                        DisplayName = "Inativar",
+                        Icon = "fas fa-ban",
+                        Url = "/Clientes/AlterarStatus/{id}",
+                        ShowCondition = (x) => ((Cliente)x).Ativo == true
+                    },
+                    new()
+                    {
+                        Name = "AlterarStatus",
+                        DisplayName = "Ativar",
+                        Icon = "fas fa-check",
+                        Url = "/Clientes/AlterarStatus/{id}",
+                        ShowCondition = (item) => ((Cliente)item).Ativo == false
                     }
+                ]);
 
-                    throw;
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(cliente);
+            return retorno;
         }
 
-        public async Task<IActionResult> Delete(int? id)
+        protected override IQueryable<Cliente> ApplyFilters(IQueryable<Cliente> query, Dictionary<string, object> filters)
         {
-            if (id == null)
+            foreach (var filter in filters)
             {
-                return NotFound();
+                switch (filter.Key.ToLower())
+                {
+                    case "search":
+                        var searchTerm = filter.Value.ToString();
+                        if (!string.IsNullOrEmpty(searchTerm))
+                        {
+                            query = ApplyTextFilter(query, searchTerm,
+                                c => c.Nome,
+                                c => c.CPF,
+                                c => c.CNPJ,
+                                c => c.Email,
+                                c => c.Telefone,
+                                c => c.Celular);
+                        }
+                        break;
+
+                    case "status":
+                        if (bool.TryParse(filter.Value.ToString(), out bool status))
+                        {
+                            query = query.Where(c => c.Ativo == status);
+                        }
+                        break;
+
+                    case "tipocliente":
+                        query = ApplyEnumFilter(query, filters, filter.Key, c => c.TipoCliente);
+                        break;
+                }
             }
 
-            var cliente = await _context.Clientes
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            return View(cliente);
+            return query;
         }
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        protected override Task BeforeCreate(Cliente entity)
+        {
+            ValidarCliente(entity);
+            return base.BeforeCreate(entity);
+        }
+
+        protected override Task AfterCreate(Cliente entity)
+        {
+            TempData["Success"] = $"Cliente {entity.Nome} criado com sucesso!";
+            return base.AfterCreate(entity);
+        }
+
+        protected override Task BeforeUpdate(Cliente entity)
+        {
+            ValidarCliente(entity);
+            return base.BeforeUpdate(entity);
+        }
+
+        protected override Task AfterUpdate(Cliente entity)
+        {
+            TempData["Success"] = $"Cliente {entity.Nome} atualizado com sucesso!";
+            return base.AfterUpdate(entity);
+        }
+
+        protected override Task BeforeDelete(Cliente entity)
+        {
+            // Verificar se pode deletar
+            var temVendas = _context.Vendas.Any(v => v.ClienteId == entity.Id);
+
+            return temVendas
+                ? throw new InvalidOperationException("Não é possível excluir cliente com vendas associadas")
+                : base.BeforeDelete(entity);
+        }
+
+        // Só pode editar clientes ativos
+        protected override bool CanEdit(Cliente entity)
+        {
+            return entity.Ativo;
+        }
+
+        // Só pode deletar clientes que não estão vinculados a compras
+        protected override bool CanDelete(Cliente entity)
+        {
+            var temVendas = _context.Vendas.Any(v => v.ClienteId == entity.Id);
+            return !temVendas;
+        }
+
+        protected override void ConfigureFormFields(List<FormFieldViewModel> fields, Cliente entity, string action)
+        {
+            if (action == "Details")
+            {
+                // Adicionar campos calculados em modo visualização
+                var nomeField = fields.FirstOrDefault(f => f.PropertyName == nameof(Cliente.Nome));
+                if (nomeField != null)
+                {
+                    nomeField.DisplayName = $"Nome do Cliente (#{entity.Id})";
+                }
+            }
+        }
+
+        private void ValidarCliente(Cliente entity)
+        {
+            // Validações específicas
+            if (entity.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.CPF))
+            {
+                ModelState.AddModelError(nameof(entity.CPF), "CPF é obrigatório para Pessoa Física");
+            }
+
+            if (entity.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(entity.CNPJ))
+            {
+                ModelState.AddModelError(nameof(entity.CNPJ), "CNPJ é obrigatório para Pessoa Jurídica");
+            }
+
+            // Verificar CPF único
+            if (!string.IsNullOrEmpty(entity.CPF))
+            {
+                var cpfExistente = _context.Clientes.Any(c => c.Id != entity.Id && c.CPF == entity.CPF);
+                if (cpfExistente)
+                {
+                    ModelState.AddModelError(nameof(entity.CPF), "CPF já cadastrado");
+                }
+            }
+        }
+
+        private static string RenderDocumento(object item)
+        {
+            var cliente = (Cliente)item;
+            var documento = cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica
+                ? cliente.CNPJ.AplicarMascaraCnpj()
+                : cliente.CPF.AplicarMascaraCpf();
+
+            return $@"{documento}";
+        }
+
+        #region ENDPOINTS ESPECÍFICOS
+
+        [HttpPost]
+        public async Task<IActionResult> AlterarStatus(int id)
         {
             var cliente = await _context.Clientes.FindAsync(id);
             if (cliente != null)
             {
-                _context.Clientes.Remove(cliente);
+                cliente.Ativo = !cliente.Ativo;
+                cliente.DataAlteracao = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Cliente {(cliente.Ativo ? "ativado" : "inativado")} com sucesso!";
             }
+            else
+            {
+                TempData["ErrorMessage"] = "Cliente não encontrado!";
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ClienteExists(int id)
+        [HttpGet]
+        public async Task<IActionResult> Export()
         {
-            return _context.Clientes.Any(e => e.Id == id);
+            try
+            {
+                var clientes = await _context.Clientes
+                    .OrderBy(c => c.Nome)
+                    .ToListAsync();
+
+                var csv = new System.Text.StringBuilder();
+                csv.AppendLine("ID,Tipo,Nome,CPF/CNPJ,Email,Telefone,Celular,Cidade,Estado,Status,Data Cadastro");
+
+                foreach (var cliente in clientes)
+                {
+                    var documento = !string.IsNullOrEmpty(cliente.CPF) ? cliente.CPF : cliente.CNPJ;
+                    csv.AppendLine($"{cliente.Id}," +
+                                  $"{cliente.TipoCliente.GetDescription()}," +
+                                  $"\"{cliente.Nome}\"," +
+                                  $"{documento}," +
+                                  $"{cliente.Email}," +
+                                  $"{cliente.Telefone}," +
+                                  $"{cliente.Celular}," +
+                                  $"{cliente.Cidade}," +
+                                  $"{cliente.Estado.GetDescription()}," +
+                                  $"{(cliente.Ativo ? "Ativo" : "Inativo")}," +
+                                  $"{cliente.DataCadastro:dd/MM/yyyy}");
+                }
+
+                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+                var fileName = $"clientes_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
+
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
         }
+
+        [HttpGet]
+        public IActionResult Import()
+        {
+            TempData["ErrorMessage"] = $"Operação ainda não implementada!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        #endregion ENDPOINTS ESPECÍFICOS
     }
 }

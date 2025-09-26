@@ -1,0 +1,413 @@
+@model AutoGestao.Entidades.AuditLog
+@{
+    ViewData["Title"] = "Detalhes da Auditoria";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="fas fa-search me-2 text-primary"></i>
+            Detalhes da Auditoria
+        </h1>
+        <p class="text-muted mb-0">Informações completas do log de auditoria #@Model.Id</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>
+            Voltar à Lista
+        </a>
+        @if (!string.IsNullOrEmpty(Model.EntidadeNome) && !string.IsNullOrEmpty(Model.EntidadeId) && Model.EntidadeNome != "HttpRequest")
+        {
+            <button class="btn btn-info" onclick="verEntidadeAuditada()">
+                <i class="fas fa-external-link-alt me-1"></i>
+                Ver @(Model.EntidadeDisplayName ?? Model.EntidadeNome)
+            </button>
+        }
+    </div>
+</div>
+
+<!-- Status da Operação -->
+<div class="row mb-4">
+    <div class="col-12">
+        @{
+            var statusClass = Model.Sucesso ? "success" : "danger";
+            var statusIcon = Model.Sucesso ? "fa-check-circle" : "fa-times-circle";
+            var statusText = Model.Sucesso ? "Operação Realizada com Sucesso" : "Operação com Erro";
+        }
+        <div class="alert alert-@statusClass d-flex align-items-center">
+            <i class="fas @statusIcon fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading mb-1">@statusText</h5>
+                @if (!Model.Sucesso && !string.IsNullOrEmpty(Model.MensagemErro))
+                {
+                    <p class="mb-0">@Model.MensagemErro</p>
+                }
+                else
+                {
+                    <p class="mb-0">
+                        @Model.TipoOperacao realizada em @Model.EntidadeDisplayName ?? @Model.EntidadeNome
+                        em @Model.DataHora.ToString("dd/MM/yyyy às HH:mm:ss")
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informações Principais -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Informações da Operação
+                </h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="fw-bold" width="120">Tipo:</td>
+                        <td>
+                            @{
+                                var operacaoClass = Model.TipoOperacao switch
+                                {
+                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "success",
+                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "warning",
+                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "danger",
+                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "info",
+                                    _ => "secondary"
+                                };
+                                var operacaoIcon = Model.TipoOperacao switch
+                                {
+                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "fa-plus",
+                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "fa-edit",
+                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "fa-trash",
+                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "fa-sign-in-alt",
+                                    _ => "fa-cog"
+                                };
+                            }
+                            <span class="badge bg-@operacaoClass">
+                                <i class="fas @operacaoIcon me-1"></i>
+                                @Model.TipoOperacao
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Entidade:</td>
+                        <td>@(Model.EntidadeDisplayName ?? Model.EntidadeNome)</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">ID:</td>
+                        <td><code>@Model.EntidadeId</code></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Tabela:</td>
+                        <td><code>@Model.TabelaNome</code></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Data/Hora:</td>
+                        <td>
+                            @Model.DataHora.ToString("dd/MM/yyyy HH:mm:ss") UTC
+                            <br><small class="text-muted">(@Model.DataHora.ToString("yyyy-MM-dd HH:mm:ss"))</small>
+                        </td>
+                    </tr>
+                    @if (Model.DuracaoMs.HasValue)
+                    {
+                        <tr>
+                            <td class="fw-bold">Duração:</td>
+                            <td>
+                                @Model.DuracaoMs ms
+                                @if (Model.DuracaoMs > 1000)
+                                {
+                                    <span class="text-muted">(@((Model.DuracaoMs / 1000.0)?.ToString("F2"))s)</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-user me-2"></i>
+                    Informações do Usuário
+                </h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="fw-bold" width="120">Nome:</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-circle me-2 text-primary"></i>
+                                @Model.UsuarioNome
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Email:</td>
+                        <td>@Model.UsuarioEmail</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">IP Cliente:</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(Model.IpCliente))
+                            {
+                                <code>@Model.IpCliente</code>
+                                <button class="btn btn-sm btn-outline-info ms-2" onclick="consultarIP('@Model.IpCliente')">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Não disponível</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">User Agent:</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(Model.UserAgent))
+                            {
+                                <small class="text-muted" title="@Model.UserAgent">
+                                    @(Model.UserAgent.Length > 50 ? Model.UserAgent.Substring(0, 50) + "..." : Model.UserAgent)
+                                </small>
+                                @if (Model.UserAgent.Length > 50)
+                                {
+                                    <button class="btn btn-sm btn-outline-secondary ms-1" onclick="mostrarUserAgent()">
+                                        <i class="fas fa-expand-alt"></i>
+                                    </button>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Não disponível</span>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informações da Requisição -->
+@if (!string.IsNullOrEmpty(Model.UrlRequisicao) || !string.IsNullOrEmpty(Model.MetodoHttp))
+{
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-globe me-2"></i>
+                        Informações da Requisição HTTP
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <strong>Método:</strong>
+                            <br>
+                            @{
+                                var metodoCor = Model.MetodoHttp switch
+                                {
+                                    "GET" => "primary",
+                                    "POST" => "success",
+                                    "PUT" => "warning",
+                                    "DELETE" => "danger",
+                                    _ => "secondary"
+                                };
+                            }
+                            <span class="badge bg-@metodoCor">@Model.MetodoHttp</span>
+                        </div>
+                        <div class="col-md-10">
+                            <strong>URL:</strong>
+                            <br>
+                            <code class="small">@Model.UrlRequisicao</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Campos Alterados -->
+@if (!string.IsNullOrEmpty(Model.CamposAlterados))
+{
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Campos Alterados
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @{
+                        var campos = Model.CamposAlterados.Split(',').Select(c => c.Trim()).ToArray();
+                    }
+                    @foreach (var campo in campos)
+                    {
+                        <span class="badge bg-warning text-dark me-1 mb-1">@campo</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Dados Comparativos -->
+@if (!string.IsNullOrEmpty(Model.ValoresAntigos) || !string.IsNullOrEmpty(Model.ValoresNovos))
+{
+    <div class="row mb-4">
+        @if (!string.IsNullOrEmpty(Model.ValoresAntigos))
+        {
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-history me-2 text-muted"></i>
+                            Valores Anteriores
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <pre class="language-json"><code id="valoresAntigos">@Model.ValoresAntigos</code></pre>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ValoresNovos))
+        {
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-plus me-2 text-success"></i>
+                            Valores Novos
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <pre class="language-json"><code id="valoresNovos">@Model.ValoresNovos</code></pre>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Ações Relacionadas -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Ações Relacionadas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="btn-group flex-wrap" role="group">
+                    <a asp-action="Index" asp-route-usuarioId="@Model.UsuarioId" class="btn btn-outline-primary">
+                        <i class="fas fa-user me-1"></i>
+                        Ver Logs do Usuário
+                    </a>
+                    <a asp-action="Index" asp-route-entidade="@Model.EntidadeNome" class="btn btn-outline-info">
+                        <i class="fas fa-database me-1"></i>
+                        Ver Logs da Entidade
+                    </a>
+                    @if (!string.IsNullOrEmpty(Model.EntidadeId) && Model.EntidadeNome != "HttpRequest")
+                    {
+                        <a asp-action="Index" asp-route-entidade="@Model.EntidadeNome" asp-route-entidadeId="@Model.EntidadeId" class="btn btn-outline-warning">
+                            <i class="fas fa-search me-1"></i>
+                            Ver Histórico do Registro
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.IpCliente))
+                    {
+                        <a asp-action="Index" asp-route-ipCliente="@Model.IpCliente" class="btn btn-outline-secondary">
+                            <i class="fas fa-globe me-1"></i>
+                            Ver Logs do IP
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para User Agent Completo -->
+<div class="modal fade" id="modalUserAgent" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">User Agent Completo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre class="small">@Model.UserAgent</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+
+<script>
+    function verEntidadeAuditada() {
+        const controllerMap = {
+            'Usuario': 'Usuarios',
+            'Veiculo': 'Veiculos',
+            'Cliente': 'Clientes',
+            'Vendedor': 'Vendedores',
+            'Fornecedor': 'Fornecedores',
+            'Produto': 'Produtos',
+            'Venda': 'Vendas',
+            'Despesa': 'Despesas'
+        };
+
+        const controller = controllerMap['@Model.EntidadeNome'];
+        if (controller) {
+            window.open(`/${controller}/Details/@Model.EntidadeId`, '_blank');
+        } else {
+            alert('Tipo de entidade não suportado para visualização direta.');
+        }
+    }
+
+    function mostrarUserAgent() {
+        const modal = new bootstrap.Modal(document.getElementById('modalUserAgent'));
+        modal.show();
+    }
+
+    function consultarIP(ip) {
+        window.open(`https://www.whatismyipaddress.com/ip/${ip}`, '_blank');
+    }
+
+    // Formatar JSON nos elementos pre
+    document.addEventListener('DOMContentLoaded', function() {
+        const elementos = document.querySelectorAll('pre code');
+        elementos.forEach(elemento => {
+            try {
+                const json = JSON.parse(elemento.textContent);
+                elemento.textContent = JSON.stringify(json, null, 2);
+            } catch (e) {
+                // Se não for JSON válido, manter como está
+            }
+        });
+
+        // Aplicar syntax highlighting
+        if (typeof Prism !== 'undefined') {
+            Prism.highlightAll();
+        }
+    });
+</script>

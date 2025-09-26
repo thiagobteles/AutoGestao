@@ -12,7 +12,9 @@ INSERT INTO veiculo_filiais (id, descricao, data_cadastro, data_alteracao) VALUE
 
 INSERT INTO veiculo_localizacoes (id, descricao, data_cadastro, data_alteracao) VALUES
 (1, 'Pátio', NOW(), NOW()),
-(2, 'Cliente', NOW(), NOW());
+(2, 'Showroom', NOW(), NOW()),
+(3, 'Oficina', NOW(), NOW()),
+(4, 'Externa', NOW(), NOW());
 
 INSERT INTO veiculo_cores (id, descricao, data_cadastro, data_alteracao) VALUES
 (1, 'Amarelo', NOW(), NOW()),
@@ -1836,7 +1838,8 @@ INSERT INTO clientes (id, tipo_cliente, nome, cpf, cnpj, rg, email, telefone, ce
 (47, 1, 'Isabela Pereira Costa', '67890123459', NULL, '6789012348', 'isabela.costa@email.com', '5311112222', '53321098765', 'Av. Ipiranga, 369', 'Porto Alegre', 21, '90160093', '369', 'Sala 1205', 'Centro', true, 'Contadora', NOW(), NOW()),
 (48, 1, 'Vinícius Lima Santos', '78901234570', NULL, '7890123459', 'vinicius.santos@email.com', '5422223333', '54210987654', 'Rua Pinheiro Machado, 741', 'Santa Maria', 21, '97010001', '741', NULL, 'Centro', true, NULL, NOW(), NOW()),
 (49, 1, 'Larissa Santos Lima', '89012345681', NULL, '8901234570', 'larissa.lima@email.com', '5533334444', '55109876543', 'Av. Brasil, 852', 'Pelotas', 21, '96010610', '852', 'Casa 23', 'Centro', true, 'Veterinária', NOW(), NOW()),
-(50, 1, 'Gabriel Costa Pereira', '90123456782', NULL, '9012345681', 'gabriel.pereira@email.com', '5144445555', '51098765432', 'Rua da Praia, 963', 'Porto Alegre', 21, '90010001', '963', NULL, 'Centro Histórico', true, 'Jornalista', NOW(), NOW());
+(50, 1, 'Gabriel Costa Pereira', '90123456782', NULL, '9012345681', 'gabriel.pereira@email.com', '5144445555', '51098765432', 'Rua da Praia, 963', 'Porto Alegre', 21, '90010001', '963', NULL, 'Centro Histórico', true, 'Jornalista', NOW(), NOW()),
+(51, 1, 'Gabriel Costa Pereira_2', '90123436281', NULL, '9012345682', 'gabriel.pereira2@email.com', '5144445553', '51098765434', 'Rua da Praia, 962', 'Porto Alegre', 21, '90010001', '963', NULL, 'Centro Histórico', true, 'Jornalista', NOW(), NOW());
 
 -- ====================================================================
 -- 2. FORNECEDORES (50 registros)
@@ -1891,7 +1894,8 @@ INSERT INTO fornecedores (id, tipo_fornecedor, nome, cpf, cnpj, rg, email, telef
 (47, 2, 'GPS & Multimídia Automotiva', NULL, '33333333003333', NULL, 'gps@multimidia.com.br', '8522229777', '85977777770', 'Rua da Tecnologia, 4700', 'Fortaleza', 6, '60000000', '4700', 'Loja tech', 'Aldeota', true, 'Centrais multimídia', NOW(), NOW()),
 (48, 1, 'Raimundo Eletricista Cearense', '17171717171', NULL, '1717171717', 'raimundo.eletricista@email.com', '8533330888', '85988888881', 'Av. da Corrente, 4800', 'Fortaleza', 6, '61000000', '4800', 'Oficina', 'Centro', true, 'Eletricista automotivo', NOW(), NOW()),
 (49, 2, 'Insulfilm & Películas CE', NULL, '34343434003434', NULL, 'insulfilm@peliculas.com.br', '8544441999', '85999999992', 'Rua da Proteção Solar, 4900', 'Fortaleza', 6, '62000000', '4900', NULL, 'Messejana', true, 'Películas automotivas', NOW(), NOW()),
-(50, 2, 'Lavagem Ecológica Bahia', NULL, '35353535003535', NULL, 'lavagem@ecologica.com.br', '7155552000', '71900000004', 'Av. da Sustentabilidade, 5000', 'Salvador', 5, '40000000', '5000', 'Eco Wash', 'Barra', true, 'Lavagem sem água', NOW(), NOW());
+(50, 2, 'Lavagem Ecológica Bahia', NULL, '35353535003535', NULL, 'lavagem@ecologica.com.br', '7155552000', '71900000004', 'Av. da Sustentabilidade, 5000', 'Salvador', 5, '40000000', '5000', 'Eco Wash', 'Barra', true, 'Lavagem sem água', NOW(), NOW()),
+(51, 2, 'Lavagem Ecológica Bahia_2', NULL, '35353525033535', NULL, 'lavagem@ecologica.com.br', '7155552000', '71900000004', 'Av. da Sustentabilidade, 5000', 'Salvador', 5, '40000000', '5000', 'Eco Wash', 'Barra', true, 'Lavagem sem água', NOW(), NOW());
 
 -- ====================================================================
 -- 3. VENDEDORES (3 registros)
@@ -1904,57 +1908,57 @@ INSERT INTO vendedores (id, nome, cpf, email, telefone, celular, percentual_comi
 -- ====================================================================
 -- 4. VEÍCULOS ALEATÓRIOS (50 registros)
 -- ====================================================================
-INSERT INTO veiculos (id, codigo, combustivel, cambio, situacao, status_veiculo, tipo_veiculo, especie, portas, pericia_cautelar, motorizacao, ano_fabricacao, ano_modelo, placa, km_saida, chassi, renavam, quilometragem, preco_compra, preco_venda, observacoes, opcionais, data_saida, proprietario_id, veiculo_cor_id, veiculo_filial_id, veiculo_localizacao_id, veiculo_marca_id, veiculo_marca_modelo_id, data_cadastro, data_alteracao) VALUES
-(1, 'VEI001', 1, 1, 1, 1, 1, 2, 4, 1, '1.0', 2018, 2019, 'ABC1234', 0, '12345678901234567', '12345678901', 45000, 35000.00, 42000.00, 'Veículo em excelente estado', 'Ar condicionado, direção hidráulica', NULL, 1, 5, 1, 1, 1, 1, NOW(), NOW()),
-(2, 'VEI002', 2, 2, 1, 1, 1, 2, 4, 1, '1.6', 2020, 2021, 'DEF5678', 0, '23456789012345678', '23456789012', 32000, 48000.00, 55000.00, 'Veículo completo', 'Central multimídia, câmera de ré', NULL, 2, 19, 1, 1, 2, 14, NOW(), NOW()),
-(3, 'VEI003', 1, 1, 1, 1, 1, 2, 2, 1, '1.4', 2019, 2020, 'GHI9012', 0, '34567890123456789', '34567890123', 38000, 42000.00, 48000.00, 'Economico', 'Vidro elétrico, trava elétrica', NULL, 3, 8, 1, 1, 3, 48, NOW(), NOW()),
-(4, 'VEI004', 3, 1, 1, 1, 2, 2, 4, 1, '2.0', 2021, 2022, 'JKL3456', 0, '45678901234567890', '45678901234', 25000, 65000.00, 72000.00, 'SUV flex', 'Bancos de couro, teto solar', NULL, 4, 12, 1, 1, 4, 125, NOW(), NOW()),
-(5, 'VEI005', 1, 2, 1, 1, 1, 2, 4, 1, '1.0', 2017, 2018, 'MNO7890', 0, '56789012345678901', '56789012345', 52000, 28000.00, 33000.00, 'Primeiro carro', 'Básico', NULL, 5, 15, 1, 1, 1, 2, NOW(), NOW()),
-(6, 'VEI006', 4, 1, 1, 1, 2, 2, 4, 1, '1.8', 2022, 2023, 'PQR1234', 0, '67890123456789012', '67890123456', 18000, 72000.00, 78000.00, 'Híbrido', 'Full opcional', NULL, 6, 18, 1, 1, 5, 91, NOW(), NOW()),
-(7, 'VEI007', 2, 2, 1, 1, 1, 2, 2, 1, '1.6', 2019, 2020, 'STU5678', 0, '78901234567890123', '78901234567', 41000, 38000.00, 44000.00, 'Hatch esportivo', 'Rodas esportivas, som premium', NULL, 7, 26, 1, 1, 3, 51, NOW(), NOW()),
-(8, 'VEI008', 1, 1, 1, 1, 3, 5, 0, 1, '2.5', 2020, 2021, 'VWX9012', 0, '89012345678901234', '89012345678', 35000, 85000.00, 92000.00, 'Caminhonete', 'Cabine dupla, carroceria', NULL, 8, 3, 1, 1, 3, 47, NOW(), NOW()),
-(9, 'VEI009', 3, 1, 1, 1, 1, 2, 4, 1, '1.4', 2018, 2019, 'YZA3456', 0, '90123456789012345', '90123456789', 46000, 36000.00, 41000.00, 'Flex completo', 'Ar digital, GPS', NULL, 9, 2, 1, 1, 4, 124, NOW(), NOW()),
-(10, 'VEI010', 2, 2, 1, 1, 1, 2, 4, 1, '2.0', 2021, 2022, 'BCD7890', 0, '01234567890123456', '01234567890', 28000, 58000.00, 64000.00, 'Sedan premium', 'Couro, xenon', NULL, 10, 19, 1, 1, 2, 15, NOW(), NOW()),
-(11, 'VEI011', 1, 1, 1, 1, 1, 10, 0, 1, '150', 2020, 2021, 'EFG1234', 0, '12345678901234568', '12345678902', 22000, 18000.00, 22000.00, 'Moto trail', 'Baú, protetor', NULL, 11, 19, 1, 1, 46, 789, NOW(), NOW()),
-(12, 'VEI012', 3, 1, 1, 1, 1, 2, 4, 1, '1.6', 2019, 2020, 'HIJ5678', 0, '23456789012345679', '23456789013', 39000, 41000.00, 47000.00, 'Automático flex', 'Piloto automático, sensores', NULL, 12, 11, 1, 1, 6, 123, NOW(), NOW()),
-(13, 'VEI013', 1, 1, 1, 1, 2, 2, 4, 1, '3.0', 2022, 2023, 'KLM9012', 0, '34567890123456780', '34567890124', 15000, 95000.00, 105000.00, 'SUV grande', 'Terceira fileira, premium', NULL, 13, 8, 1, 1, 12, 185, NOW(), NOW()),
-(14, 'VEI014', 2, 2, 1, 1, 1, 2, 2, 1, '1.0', 2017, 2018, 'NOP3456', 0, '45678901234567891', '45678901235', 54000, 26000.00, 31000.00, 'Compacto', 'Economico urbano', NULL, 14, 25, 1, 1, 1, 3, NOW(), NOW()),
-(15, 'VEI015', 1, 1, 1, 1, 2, 2, 4, 1, '2.4', 2021, 2022, 'QRS7890', 0, '56789012345678902', '56789012346', 26000, 78000.00, 85000.00, 'Pick-up', 'Cabine dupla 4x4', NULL, 15, 15, 1, 1, 16, 241, NOW(), NOW()),
-(16, 'VEI016', 3, 1, 1, 1, 1, 2, 4, 1, '1.8', 2020, 2021, 'TUV1234', 0, '67890123456789013', '67890123457', 33000, 52000.00, 58000.00, 'Sedan médio', 'Comfort plus', NULL, 16, 2, 1, 1, 7, 140, NOW(), NOW()),
-(17, 'VEI017', 1, 2, 1, 1, 1, 2, 4, 1, '1.3', 2018, 2019, 'WXY5678', 0, '78901234567890124', '78901234568', 47000, 34000.00, 39000.00, 'Automático básico', 'Ar condicionado', NULL, 17, 5, 1, 1, 4, 127, NOW(), NOW()),
-(18, 'VEI018', 2, 1, 1, 1, 2, 2, 4, 1, '2.2', 2022, 2023, 'ZAB9012', 0, '89012345678901235', '89012345679', 12000, 88000.00, 96000.00, 'SUV médio', 'Diesel automático', NULL, 18, 12, 1, 1, 16, 244, NOW(), NOW()),
-(19, 'VEI019', 1, 1, 1, 1, 1, 2, 2, 1, '1.6', 2019, 2020, 'CDE3456', 0, '90123456789012346', '90123456780', 40000, 40000.00, 45000.00, 'Hatch médio', 'Conectividade', NULL, 19, 18, 1, 1, 8, 147, NOW(), NOW()),
-(20, 'VEI020', 1, 1, 1, 1, 1, 2, 4, 1, '1.5', 2021, 2022, 'FGH7890', 0, '01234567890123457', '01234567891', 29000, 46000.00, 52000.00, 'Sedan compacto', 'Eficiente', NULL, 20, 26, 1, 1, 8, 149, NOW(), NOW()),
-(21, 'VEI021', 3, 1, 1, 1, 1, 2, 4, 1, '1.4', 2020, 2021, 'IJK1234', 0, '12345678901234569', '12345678903', 31000, 44000.00, 50000.00, 'Flex turbo', 'Turbo, esportivo', NULL, 21, 9, 1, 1, 3, 49, NOW(), NOW()),
-(22, 'VEI022', 1, 2, 1, 1, 1, 2, 4, 1, '2.0', 2019, 2020, 'LMN5678', 0, '23456789012345680', '23456789014', 37000, 54000.00, 61000.00, 'Automático premium', 'Top de linha', NULL, 22, 19, 1, 1, 9, 153, NOW(), NOW()),
-(23, 'VEI023', 2, 1, 1, 1, 2, 2, 4, 1, '1.6', 2022, 2023, 'OPQ9012', 0, '34567890123456781', '34567890125', 16000, 68000.00, 74000.00, 'SUV compacto', 'Crossover moderno', NULL, 23, 1, 1, 1, 15, 225, NOW(), NOW()),
-(24, 'VEI024', 1, 1, 1, 1, 1, 2, 2, 1, '1.0', 2017, 2018, 'RST3456', 0, '45678901234567892', '45678901236', 55000, 24000.00, 29000.00, 'Básico confiável', 'Simples e econômico', NULL, 24, 5, 1, 1, 1, 1, NOW(), NOW()),
-(25, 'VEI025', 1, 1, 1, 1, 1, 2, 4, 1, '1.8', 2021, 2022, 'UVW7890', 0, '56789012345678903', '56789012347', 27000, 56000.00, 62000.00, 'Médio porte', 'Conforto familiar', NULL, 25, 8, 1, 1, 5, 93, NOW(), NOW()),
-(26, 'VEI026', 3, 2, 1, 1, 1, 2, 4, 1, '1.4', 2018, 2019, 'XYZ1234', 0, '67890123456789014', '67890123458', 43000, 37000.00, 42000.00, 'Flex automático', 'Câmbio CVT', NULL, 26, 15, 1, 1, 4, 128, NOW(), NOW()),
-(27, 'VEI027', 1, 1, 1, 1, 2, 2, 4, 1, '2.5', 2020, 2021, 'ABC5678', 0, '78901234567890125', '78901234569', 34000, 75000.00, 82000.00, 'SUV grande flex', '7 lugares', NULL, 27, 3, 1, 1, 7, 141, NOW(), NOW()),
-(28, 'VEI028', 2, 1, 1, 1, 1, 2, 4, 1, '1.6', 2019, 2020, 'DEF9012', 0, '89012345678901236', '89012345680', 38000, 43000.00, 49000.00, 'Etanol otimizado', 'Econômico', NULL, 28, 22, 1, 1, 10, 161, NOW(), NOW()),
-(29, 'VEI029', 1, 2, 1, 1, 1, 2, 2, 1, '1.2', 2021, 2022, 'GHI3456', 0, '90123456789012347', '90123456781', 24000, 38000.00, 44000.00, 'Automático compacto', 'Urbano prático', NULL, 29, 16, 1, 1, 10, 163, NOW(), NOW()),
-(30, 'VEI030', 1, 1, 1, 1, 2, 2, 4, 1, '3.2', 2022, 2023, 'JKL7890', 0, '01234567890123458', '01234567892', 18000, 105000.00, 115000.00, 'SUV premium', 'Luxo e potência', NULL, 30, 19, 1, 1, 20, 273, NOW(), NOW()),
-(31, 'VEI031', 1, 1, 1, 1, 1, 2, 4, 1, '1.6', 2020, 2021, 'MNO1234', 0, '12345678901234570', '12345678904', 32000, 47000.00, 53000.00, 'Médio conforto', 'Ar digital', NULL, 31, 12, 1, 1, 11, 168, NOW(), NOW()),
-(32, 'VEI032', 3, 1, 1, 1, 1, 2, 4, 1, '1.4', 2018, 2019, 'PQR5678', 0, '23456789012345681', '23456789015', 44000, 36000.00, 41000.00, 'Turbo flex', 'Esportivo econômico', NULL, 32, 4, 1, 1, 11, 170, NOW(), NOW()),
-(33, 'VEI033', 1, 2, 1, 1, 2, 2, 4, 1, '2.0', 2021, 2022, 'STU9012', 0, '34567890123456782', '34567890126', 25000, 62000.00, 69000.00, 'SUV automático', 'Inteligente conectado', NULL, 33, 8, 1, 1, 15, 228, NOW(), NOW()),
-(34, 'VEI034', 2, 1, 1, 1, 1, 2, 2, 1, '1.0', 2017, 2018, 'VWX3456', 0, '45678901234567893', '45678901237', 56000, 25000.00, 30000.00, 'Compacto etanol', 'Econômico cidade', NULL, 34, 25, 1, 1, 1, 4, NOW(), NOW()),
-(35, 'VEI035', 1, 1, 1, 1, 1, 2, 4, 1, '1.8', 2022, 2023, 'YZA7890', 0, '56789012345678904', '56789012348', 14000, 59000.00, 66000.00, 'Sedan moderno', 'Tecnologia embarcada', NULL, 35, 2, 1, 1, 12, 177, NOW(), NOW()),
-(36, 'VEI036', 1, 1, 1, 1, 3, 5, 0, 1, '3.0', 2019, 2020, 'BCD1234', 0, '67890123456789015', '67890123459', 78000, 125000.00, 135000.00, 'Caminhão leve', 'Transporte urbano', NULL, 36, 5, 1, 1, 68, 1049, NOW(), NOW()),
-(37, 'VEI037', 1, 2, 1, 1, 1, 2, 4, 1, '1.6', 2020, 2021, 'EFG5678', 0, '78901234567890126', '78901234570', 35000, 49000.00, 56000.00, 'Automático médio', 'Conforto urbano', NULL, 37, 11, 1, 1, 6, 121, NOW(), NOW()),
-(38, 'VEI038', 3, 1, 1, 1, 1, 2, 4, 1, '1.4', 2018, 2019, 'HIJ9012', 0, '89012345678901237', '89012345681', 42000, 38000.00, 43000.00, 'Flex eficiente', 'Baixo consumo', NULL, 38, 17, 1, 1, 4, 129, NOW(), NOW()),
-(39, 'VEI039', 1, 1, 1, 1, 2, 2, 4, 1, '2.2', 2021, 2022, 'KLM3456', 0, '90123456789012348', '90123456782', 26000, 72000.00, 79000.00, 'SUV diesel', 'Torque e economia', NULL, 39, 8, 1, 1, 16, 245, NOW(), NOW()),
-(40, 'VEI040', 1, 1, 1, 1, 1, 10, 0, 1, '250', 2020, 2021, 'NOP7890', 0, '01234567890123459', '01234567893', 28000, 28000.00, 33000.00, 'Moto esportiva', 'Alta cilindrada', NULL, 40, 19, 1, 1, 46, 790, NOW(), NOW()),
-(41, 'VEI041', 2, 2, 1, 1, 1, 2, 4, 1, '1.6', 2019, 2020, 'QRS1234', 0, '12345678901234571', '12345678905', 36000, 42000.00, 48000.00, 'Etanol automático', 'Praticidade urbana', NULL, 41, 15, 1, 1, 9, 154, NOW(), NOW()),
-(42, 'VEI042', 1, 1, 1, 1, 1, 2, 2, 1, '1.0', 2022, 2023, 'TUV5678', 0, '23456789012345682', '23456789016', 12000, 34000.00, 39000.00, 'Hatch novo', 'Primeiro ano modelo', NULL, 42, 1, 1, 1, 1, 5, NOW(), NOW()),
-(43, 'VEI043', 1, 1, 1, 1, 2, 2, 4, 1, '2.4', 2020, 2021, 'WXY9012', 0, '34567890123456783', '34567890127', 33000, 68000.00, 75000.00, 'Pick-up média', 'Trabalho e lazer', NULL, 43, 12, 1, 1, 5, 94, NOW(), NOW()),
-(44, 'VEI044', 3, 1, 1, 1, 1, 2, 4, 1, '1.8', 2018, 2019, 'ZAB3456', 0, '45678901234567894', '45678901238', 45000, 40000.00, 46000.00, 'Sedan flex', 'Conforto e economia', NULL, 44, 2, 1, 1, 5, 95, NOW(), NOW()),
-(45, 'VEI045', 1, 2, 1, 1, 1, 2, 4, 1, '1.4', 2021, 2022, 'CDE7890', 0, '56789012345678905', '56789012349', 22000, 41000.00, 47000.00, 'Turbo automático', 'Performance urbana', NULL, 45, 8, 1, 1, 3, 50, NOW(), NOW()),
-(46, 'VEI046', 1, 1, 1, 1, 2, 2, 4, 1, '3.5', 2022, 2023, 'FGH1234', 0, '67890123456789016', '67890123460', 15000, 115000.00, 125000.00, 'SUV premium V6', 'Máximo luxo', NULL, 46, 19, 1, 1, 28, 518, NOW(), NOW()),
-(47, 'VEI047', 1, 1, 1, 1, 1, 2, 2, 1, '1.6', 2019, 2020, 'IJK5678', 0, '78901234567890127', '78901234571', 39000, 39000.00, 45000.00, 'Hatch médio', 'Versátil', NULL, 47, 26, 1, 1, 8, 150, NOW(), NOW()),
-(48, 'VEI048', 2, 1, 1, 1, 1, 2, 4, 1, '1.8', 2020, 2021, 'LMN9012', 0, '89012345678901238', '89012345682', 31000, 51000.00, 58000.00, 'Etanol premium', 'Tecnologia flex', NULL, 48, 12, 1, 1, 10, 164, NOW(), NOW()),
-(49, 'VEI049', 1, 2, 1, 1, 1, 2, 4, 1, '1.2', 2017, 2018, 'OPQ3456', 0, '90123456789012349', '90123456783', 58000, 29000.00, 35000.00, 'Automático básico', 'Entrada premium', NULL, 49, 5, 1, 1, 4, 130, NOW(), NOW()),
-(50, 'VEI050', 1, 1, 1, 1, 2, 2, 4, 1, '2.8', 2021, 2022, 'RST7890', 0, '01234567890123460', '01234567894', 23000, 89000.00, 98000.00, 'SUV grande', 'Família numerosa', NULL, 50, 8, 1, 1, 20, 274, NOW(), NOW());
+INSERT INTO veiculos (id, codigo, combustivel, cambio, situacao, status_veiculo, tipo_veiculo, especie, portas, pericia_cautelar, motorizacao, ano_fabricacao, ano_modelo, placa, km_saida, chassi, renavam, quilometragem, preco_compra, preco_venda, observacoes, opcionais, data_saida, proprietario_id, veiculo_cor_id, veiculo_filial_id, veiculo_localizacao_id, veiculo_marca_id, veiculo_marca_modelo_id, data_cadastro, data_alteracao, origem_veiculo) VALUES
+(1, 'VEI001', 1, 1, 1, 1, 1, 2, 4, 1, '1.0', 2018, 2019, 'ABC1234', 0, '12345678901234567', '12345678901', 45000, 35000.00, 42000.00, 'Veículo em excelente estado', 'Ar condicionado, direção hidráulica', NULL, 1, 5, 1, 2, 1, 1, NOW(), NOW(), 1),
+(2, 'VEI002', 2, 2, 1, 1, 1, 2, 4, 1, '1.6', 2020, 2021, 'DEF5678', 0, '23456789012345678', '23456789012', 32000, 48000.00, 55000.00, 'Veículo completo', 'Central multimídia, câmera de ré', NULL, 2, 19, 1, 3, 2, 14, NOW(), NOW(), 1),
+(3, 'VEI003', 1, 1, 1, 1, 1, 2, 2, 1, '1.4', 2019, 2020, 'GHI9012', 0, '34567890123456789', '34567890123', 38000, 42000.00, 48000.00, 'Economico', 'Vidro elétrico, trava elétrica', NULL, 3, 8, 1, 4, 3, 48, NOW(), NOW(), 1),
+(4, 'VEI004', 3, 1, 1, 1, 2, 2, 4, 1, '2.0', 2021, 2022, 'JKL3456', 0, '45678901234567890', '45678901234', 25000, 65000.00, 72000.00, 'SUV flex', 'Bancos de couro, teto solar', NULL, 4, 12, 1, 1, 4, 125, NOW(), NOW(), 1),
+(5, 'VEI005', 1, 2, 1, 1, 1, 2, 4, 1, '1.0', 2017, 2018, 'MNO7890', 0, '56789012345678901', '56789012345', 52000, 28000.00, 33000.00, 'Primeiro carro', 'Básico', NULL, 5, 15, 1, 1, 1, 2, NOW(), NOW(), 1),
+(6, 'VEI006', 4, 1, 1, 1, 2, 2, 4, 1, '1.8', 2022, 2023, 'PQR1234', 0, '67890123456789012', '67890123456', 18000, 72000.00, 78000.00, 'Híbrido', 'Full opcional', NULL, 6, 18, 1, 1, 5, 91, NOW(), NOW(), 1),
+(7, 'VEI007', 2, 2, 1, 1, 1, 2, 2, 1, '1.6', 2019, 2020, 'STU5678', 0, '78901234567890123', '78901234567', 41000, 38000.00, 44000.00, 'Hatch esportivo', 'Rodas esportivas, som premium', NULL, 7, 26, 1, 1, 3, 51, NOW(), NOW(), 1),
+(8, 'VEI008', 1, 1, 1, 1, 3, 5, 0, 1, '2.5', 2020, 2021, 'VWX9012', 0, '89012345678901234', '89012345678', 35000, 85000.00, 92000.00, 'Caminhonete', 'Cabine dupla, carroceria', NULL, 8, 3, 1, 1, 3, 47, NOW(), NOW(), 1),
+(9, 'VEI009', 3, 1, 1, 1, 1, 2, 4, 1, '1.4', 2018, 2019, 'YZA3456', 0, '90123456789012345', '90123456789', 46000, 36000.00, 41000.00, 'Flex completo', 'Ar digital, GPS', NULL, 9, 2, 1, 1, 4, 124, NOW(), NOW(), 1),
+(10, 'VEI010', 2, 2, 1, 1, 1, 2, 4, 1, '2.0', 2021, 2022, 'BCD7890', 0, '01234567890123456', '01234567890', 28000, 58000.00, 64000.00, 'Sedan premium', 'Couro, xenon', NULL, 10, 19, 1, 1, 2, 15, NOW(), NOW(), 1),
+(11, 'VEI011', 1, 1, 1, 1, 1, 10, 0, 1, '150', 2020, 2021, 'EFG1234', 0, '12345678901234568', '12345678902', 22000, 18000.00, 22000.00, 'Moto trail', 'Baú, protetor', NULL, 11, 19, 1, 1, 46, 789, NOW(), NOW(), 1),
+(12, 'VEI012', 3, 1, 1, 1, 1, 2, 4, 1, '1.6', 2019, 2020, 'HIJ5678', 0, '23456789012345679', '23456789013', 39000, 41000.00, 47000.00, 'Automático flex', 'Piloto automático, sensores', NULL, 12, 11, 1, 1, 6, 123, NOW(), NOW(), 1),
+(13, 'VEI013', 1, 1, 1, 1, 2, 2, 4, 1, '3.0', 2022, 2023, 'KLM9012', 0, '34567890123456780', '34567890124', 15000, 95000.00, 105000.00, 'SUV grande', 'Terceira fileira, premium', NULL, 13, 8, 1, 1, 12, 185, NOW(), NOW(), 1),
+(14, 'VEI014', 2, 2, 1, 1, 1, 2, 2, 1, '1.0', 2017, 2018, 'NOP3456', 0, '45678901234567891', '45678901235', 54000, 26000.00, 31000.00, 'Compacto', 'Economico urbano', NULL, 14, 25, 1, 1, 1, 3, NOW(), NOW(), 1),
+(15, 'VEI015', 1, 1, 1, 1, 2, 2, 4, 1, '2.4', 2021, 2022, 'QRS7890', 0, '56789012345678902', '56789012346', 26000, 78000.00, 85000.00, 'Pick-up', 'Cabine dupla 4x4', NULL, 15, 15, 1, 1, 16, 241, NOW(), NOW(), 1),
+(16, 'VEI016', 3, 1, 1, 1, 1, 2, 4, 1, '1.8', 2020, 2021, 'TUV1234', 0, '67890123456789013', '67890123457', 33000, 52000.00, 58000.00, 'Sedan médio', 'Comfort plus', NULL, 16, 2, 1, 1, 7, 140, NOW(), NOW(), 1),
+(17, 'VEI017', 1, 2, 1, 1, 1, 2, 4, 1, '1.3', 2018, 2019, 'WXY5678', 0, '78901234567890124', '78901234568', 47000, 34000.00, 39000.00, 'Automático básico', 'Ar condicionado', NULL, 17, 5, 1, 1, 4, 127, NOW(), NOW(), 1),
+(18, 'VEI018', 2, 1, 1, 1, 2, 2, 4, 1, '2.2', 2022, 2023, 'ZAB9012', 0, '89012345678901235', '89012345679', 12000, 88000.00, 96000.00, 'SUV médio', 'Diesel automático', NULL, 18, 12, 1, 1, 16, 244, NOW(), NOW(), 1),
+(19, 'VEI019', 1, 1, 1, 1, 1, 2, 2, 1, '1.6', 2019, 2020, 'CDE3456', 0, '90123456789012346', '90123456780', 40000, 40000.00, 45000.00, 'Hatch médio', 'Conectividade', NULL, 19, 18, 1, 1, 8, 147, NOW(), NOW(), 1),
+(20, 'VEI020', 1, 1, 1, 1, 1, 2, 4, 1, '1.5', 2021, 2022, 'FGH7890', 0, '01234567890123457', '01234567891', 29000, 46000.00, 52000.00, 'Sedan compacto', 'Eficiente', NULL, 20, 26, 1, 1, 8, 149, NOW(), NOW(), 1),
+(21, 'VEI021', 3, 1, 1, 1, 1, 2, 4, 1, '1.4', 2020, 2021, 'IJK1234', 0, '12345678901234569', '12345678903', 31000, 44000.00, 50000.00, 'Flex turbo', 'Turbo, esportivo', NULL, 21, 9, 1, 1, 3, 49, NOW(), NOW(), 1),
+(22, 'VEI022', 1, 2, 1, 1, 1, 2, 4, 1, '2.0', 2019, 2020, 'LMN5678', 0, '23456789012345680', '23456789014', 37000, 54000.00, 61000.00, 'Automático premium', 'Top de linha', NULL, 22, 19, 1, 1, 9, 153, NOW(), NOW(), 1),
+(23, 'VEI023', 2, 1, 1, 1, 2, 2, 4, 1, '1.6', 2022, 2023, 'OPQ9012', 0, '34567890123456781', '34567890125', 16000, 68000.00, 74000.00, 'SUV compacto', 'Crossover moderno', NULL, 23, 1, 1, 1, 15, 225, NOW(), NOW(), 1),
+(24, 'VEI024', 1, 1, 1, 1, 1, 2, 2, 1, '1.0', 2017, 2018, 'RST3456', 0, '45678901234567892', '45678901236', 55000, 24000.00, 29000.00, 'Básico confiável', 'Simples e econômico', NULL, 24, 5, 1, 1, 1, 1, NOW(), NOW(), 1),
+(25, 'VEI025', 1, 1, 1, 1, 1, 2, 4, 1, '1.8', 2021, 2022, 'UVW7890', 0, '56789012345678903', '56789012347', 27000, 56000.00, 62000.00, 'Médio porte', 'Conforto familiar', NULL, 25, 8, 1, 1, 5, 93, NOW(), NOW(), 1),
+(26, 'VEI026', 3, 2, 1, 1, 1, 2, 4, 1, '1.4', 2018, 2019, 'XYZ1234', 0, '67890123456789014', '67890123458', 43000, 37000.00, 42000.00, 'Flex automático', 'Câmbio CVT', NULL, 26, 15, 1, 1, 4, 128, NOW(), NOW(), 1),
+(27, 'VEI027', 1, 1, 1, 1, 2, 2, 4, 1, '2.5', 2020, 2021, 'ABC5678', 0, '78901234567890125', '78901234569', 34000, 75000.00, 82000.00, 'SUV grande flex', '7 lugares', NULL, 27, 3, 1, 1, 7, 141, NOW(), NOW(), 1),
+(28, 'VEI028', 2, 1, 1, 1, 1, 2, 4, 1, '1.6', 2019, 2020, 'DEF9012', 0, '89012345678901236', '89012345680', 38000, 43000.00, 49000.00, 'Etanol otimizado', 'Econômico', NULL, 28, 22, 1, 1, 10, 161, NOW(), NOW(), 1),
+(29, 'VEI029', 1, 2, 1, 1, 1, 2, 2, 1, '1.2', 2021, 2022, 'GHI3456', 0, '90123456789012347', '90123456781', 24000, 38000.00, 44000.00, 'Automático compacto', 'Urbano prático', NULL, 29, 16, 1, 1, 10, 163, NOW(), NOW(), 1),
+(30, 'VEI030', 1, 1, 1, 1, 2, 2, 4, 1, '3.2', 2022, 2023, 'JKL7890', 0, '01234567890123458', '01234567892', 18000, 105000.00, 115000.00, 'SUV premium', 'Luxo e potência', NULL, 30, 19, 1, 1, 20, 273, NOW(), NOW(), 1),
+(31, 'VEI031', 1, 1, 1, 1, 1, 2, 4, 1, '1.6', 2020, 2021, 'MNO1234', 0, '12345678901234570', '12345678904', 32000, 47000.00, 53000.00, 'Médio conforto', 'Ar digital', NULL, 31, 12, 1, 1, 11, 168, NOW(), NOW(), 1),
+(32, 'VEI032', 3, 1, 1, 1, 1, 2, 4, 1, '1.4', 2018, 2019, 'PQR5678', 0, '23456789012345681', '23456789015', 44000, 36000.00, 41000.00, 'Turbo flex', 'Esportivo econômico', NULL, 32, 4, 1, 1, 11, 170, NOW(), NOW(), 1),
+(33, 'VEI033', 1, 2, 1, 1, 2, 2, 4, 1, '2.0', 2021, 2022, 'STU9012', 0, '34567890123456782', '34567890126', 25000, 62000.00, 69000.00, 'SUV automático', 'Inteligente conectado', NULL, 33, 8, 1, 1, 15, 228, NOW(), NOW(), 1),
+(34, 'VEI034', 2, 1, 1, 1, 1, 2, 2, 1, '1.0', 2017, 2018, 'VWX3456', 0, '45678901234567893', '45678901237', 56000, 25000.00, 30000.00, 'Compacto etanol', 'Econômico cidade', NULL, 34, 25, 1, 1, 1, 4, NOW(), NOW(), 1),
+(35, 'VEI035', 1, 1, 1, 1, 1, 2, 4, 1, '1.8', 2022, 2023, 'YZA7890', 0, '56789012345678904', '56789012348', 14000, 59000.00, 66000.00, 'Sedan moderno', 'Tecnologia embarcada', NULL, 35, 2, 1, 1, 12, 177, NOW(), NOW(), 1),
+(36, 'VEI036', 1, 1, 1, 1, 3, 5, 0, 1, '3.0', 2019, 2020, 'BCD1234', 0, '67890123456789015', '67890123459', 78000, 125000.00, 135000.00, 'Caminhão leve', 'Transporte urbano', NULL, 36, 5, 1, 1, 68, 1049, NOW(), NOW(), 1),
+(37, 'VEI037', 1, 2, 1, 1, 1, 2, 4, 1, '1.6', 2020, 2021, 'EFG5678', 0, '78901234567890126', '78901234570', 35000, 49000.00, 56000.00, 'Automático médio', 'Conforto urbano', NULL, 37, 11, 1, 1, 6, 121, NOW(), NOW(), 1),
+(38, 'VEI038', 3, 1, 1, 1, 1, 2, 4, 1, '1.4', 2018, 2019, 'HIJ9012', 0, '89012345678901237', '89012345681', 42000, 38000.00, 43000.00, 'Flex eficiente', 'Baixo consumo', NULL, 38, 17, 1, 1, 4, 129, NOW(), NOW(), 1),
+(39, 'VEI039', 1, 1, 1, 1, 2, 2, 4, 1, '2.2', 2021, 2022, 'KLM3456', 0, '90123456789012348', '90123456782', 26000, 72000.00, 79000.00, 'SUV diesel', 'Torque e economia', NULL, 39, 8, 1, 1, 16, 245, NOW(), NOW(), 1),
+(40, 'VEI040', 1, 1, 1, 1, 1, 10, 0, 1, '250', 2020, 2021, 'NOP7890', 0, '01234567890123459', '01234567893', 28000, 28000.00, 33000.00, 'Moto esportiva', 'Alta cilindrada', NULL, 40, 19, 1, 1, 46, 790, NOW(), NOW(), 1),
+(41, 'VEI041', 2, 2, 1, 1, 1, 2, 4, 1, '1.6', 2019, 2020, 'QRS1234', 0, '12345678901234571', '12345678905', 36000, 42000.00, 48000.00, 'Etanol automático', 'Praticidade urbana', NULL, 41, 15, 1, 1, 9, 154, NOW(), NOW(), 1),
+(42, 'VEI042', 1, 1, 1, 1, 1, 2, 2, 1, '1.0', 2022, 2023, 'TUV5678', 0, '23456789012345682', '23456789016', 12000, 34000.00, 39000.00, 'Hatch novo', 'Primeiro ano modelo', NULL, 42, 1, 1, 1, 1, 5, NOW(), NOW(), 1),
+(43, 'VEI043', 1, 1, 1, 1, 2, 2, 4, 1, '2.4', 2020, 2021, 'WXY9012', 0, '34567890123456783', '34567890127', 33000, 68000.00, 75000.00, 'Pick-up média', 'Trabalho e lazer', NULL, 43, 12, 1, 1, 5, 94, NOW(), NOW(), 1),
+(44, 'VEI044', 3, 1, 1, 1, 1, 2, 4, 1, '1.8', 2018, 2019, 'ZAB3456', 0, '45678901234567894', '45678901238', 45000, 40000.00, 46000.00, 'Sedan flex', 'Conforto e economia', NULL, 44, 2, 1, 1, 5, 95, NOW(), NOW(), 1),
+(45, 'VEI045', 1, 2, 1, 1, 1, 2, 4, 1, '1.4', 2021, 2022, 'CDE7890', 0, '56789012345678905', '56789012349', 22000, 41000.00, 47000.00, 'Turbo automático', 'Performance urbana', NULL, 45, 8, 1, 1, 3, 50, NOW(), NOW(), 1),
+(46, 'VEI046', 1, 1, 1, 1, 2, 2, 4, 1, '3.5', 2022, 2023, 'FGH1234', 0, '67890123456789016', '67890123460', 15000, 115000.00, 125000.00, 'SUV premium V6', 'Máximo luxo', NULL, 46, 19, 1, 1, 28, 518, NOW(), NOW(), 1),
+(47, 'VEI047', 1, 1, 1, 1, 1, 2, 2, 1, '1.6', 2019, 2020, 'IJK5678', 0, '78901234567890127', '78901234571', 39000, 39000.00, 45000.00, 'Hatch médio', 'Versátil', NULL, 47, 26, 1, 1, 8, 150, NOW(), NOW(), 1),
+(48, 'VEI048', 2, 1, 1, 1, 1, 2, 4, 1, '1.8', 2020, 2021, 'LMN9012', 0, '89012345678901238', '89012345682', 31000, 51000.00, 58000.00, 'Etanol premium', 'Tecnologia flex', NULL, 48, 12, 1, 1, 10, 164, NOW(), NOW(), 1),
+(49, 'VEI049', 1, 2, 1, 1, 1, 2, 4, 1, '1.2', 2017, 2018, 'OPQ3456', 0, '90123456789012349', '90123456783', 58000, 29000.00, 35000.00, 'Automático básico', 'Entrada premium', NULL, 49, 5, 1, 1, 4, 130, NOW(), NOW(), 1),
+(50, 'VEI050', 1, 1, 1, 1, 2, 2, 4, 1, '2.8', 2021, 2022, 'RST7890', 0, '01234567890123460', '01234567894', 23000, 89000.00, 98000.00, 'SUV grande', 'Família numerosa', NULL, 50, 8, 1, 1, 20, 274, NOW(), NOW(), 1);
 
 -- ====================================================================
 -- 5. TAREFAS (2 registros)
@@ -2009,6 +2013,11 @@ INSERT INTO parcelas (id, venda_id, numero_parcela, valor, data_vencimento, valo
 (30, 4, 18, 2222.24, '2026-03-13', NULL, NULL, 1, 'Décima oitava parcela (ajuste centavos)', NOW(), NOW());
 
 -- ====================================================================
--- 8. ATUALIZAÇÃO DO STATUS DOS VEÍCULOS VENDIDOS
+-- ATUALIZAÇÃO DO STATUS DOS VEÍCULOS VENDIDOS
 -- ====================================================================
-UPDATE veiculos SET situacao = 3, data_saida = NOW() WHERE id IN (SELECT veiculo_id FROM vendas);
+UPDATE veiculos SET situacao = 2, data_saida = NOW() WHERE id IN (SELECT veiculo_id FROM vendas);
+
+-- ====================================================================
+-- ATUALIZAÇÃO DO STATUS DOS VEÍCULOS RESERVADOS
+-- ====================================================================
+UPDATE veiculos SET situacao = 3, data_saida = NOW() WHERE id IN (50, 51);

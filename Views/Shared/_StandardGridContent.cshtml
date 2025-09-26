@@ -1,0 +1,317 @@
+@model StandardGridViewModel
+@using AutoGestao.Enumerador.Gerais
+@using AutoGestao.Models
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h2 mb-1">@Model.Title</h1>
+            <p class="text-muted mb-0">@Model.SubTitle</p>
+        </div>
+        <div class="d-flex gap-2">
+            @foreach (var action in Model.HeaderActions)
+            {
+                <a href="@action.Url" class="@action.CssClass">
+                    <i class="@action.Icon"></i> @action.DisplayName
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Search Filters -->
+@if (Model.Filters?.Any() == true)
+{
+    <div class="search-filters">
+        <form method="get">
+            <div class="row g-1">
+                @foreach (var filter in Model.Filters)
+                {
+                    var xClasse = "col-md-4";
+                    if (Model.Filters.Count == 1)
+                    {
+                        xClasse = "col-md-10";
+                    }
+                    else if (Model.Filters.Count == 2)
+                    {
+                        xClasse = "col-md-5";
+                    }
+                    else if (Model.Filters.Count == 3)
+                    {
+                        xClasse = "col-md-3";
+                    }
+
+                    <div class="@xClasse">
+                        @if (filter.Type == EnumGridFilterType.Text)
+                        {
+                            <input type="text" name="@filter.Name" value="@filter.Value"
+                                   class="form-control" placeholder="@filter.Placeholder" />
+                        }
+                        else if (filter.Type == EnumGridFilterType.Select)
+                        {
+                            <select name="@filter.Name" class="form-select">
+                                <option value="">@filter.Placeholder</option>
+                                @if (filter.Options != null)
+                                {
+                                    foreach (var option in filter.Options)
+                                    {
+                                        <option value="@option.Value" selected="@(option.Value == filter.Value?.ToString())">
+                                            @option.Text
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        }
+                        else if (filter.Type == EnumGridFilterType.Date)
+                        {
+                            <input type="date" name="@filter.Name" value="@filter.Value"
+                                   class="form-control" placeholder="@filter.Placeholder" />
+                        }
+                        else if (filter.Type == EnumGridFilterType.DateRange)
+                        {
+                            <div class="d-flex gap-2">
+                                <input type="date" name="@(filter.Name)_inicio"
+                                       value="@ViewBag.GetType().GetProperty($"{filter.Name}_inicio")?.GetValue(ViewBag)"
+                                       class="form-control" placeholder="Data início" />
+                                <input type="date" name="@(filter.Name)_fim"
+                                       value="@ViewBag.GetType().GetProperty($"{filter.Name}_fim")?.GetValue(ViewBag)"
+                                       class="form-control" placeholder="Data fim" />
+                            </div>
+                        }
+                        else if (filter.Type == EnumGridFilterType.Number)
+                        {
+                            <input type="number" name="@filter.Name" value="@filter.Value"
+                                   class="form-control" placeholder="@filter.Placeholder" />
+                        }
+                    </div>
+                }
+                <div class="col-md-1">
+                    <button type="submit" class="btn-search">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+}
+
+<!-- Data Grid -->
+<div class="data-grid">
+    <div class="table-responsive-enhanced" id="tableContainer">
+        <table class="base-grid-table">
+            <thead>
+                <tr>
+                    @foreach (var column in Model.Columns)
+                    {
+                        <th width="@column.Width" class="@column.CssClass">
+                            @if (column.Sortable && column.Type != EnumGridColumnType.Actions)
+                            {
+                                <div class="sortable-header" data-sortable="@column.Name" role="button" tabindex="0">
+                                    <span>@column.DisplayName</span>
+                                    <i class="sort-icon fas @(Model.OrderBy == column.Name 
+                                                ? (Model.OrderDirection == "desc" ? "fa-sort-down" : "fa-sort-up")
+                                                : "fa-sort")"
+                                        data-sort="@column.Name"></i>
+                                </div>
+                            }
+                            else
+                            {
+                                @column.DisplayName
+                            }
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items?.Count > 0)
+                {
+                    @foreach (var item in Model.Items)
+                    {
+                        var itemType = item.GetType();
+                        var itemId = itemType.GetProperty("Id")?.GetValue(item)?.ToString();
+
+                        <tr class="grid-row"
+                            data-id="@itemId"
+                            data-controller="@Model.ControllerName"
+                            role="row"
+                            tabindex="0">
+                            @foreach (var column in Model.Columns)
+                            {
+                                <td role="gridcell" class="grid-cell @(column.Type == EnumGridColumnType.Actions ? "actions-cell" : "")">
+                                    <div class="cell-content">
+                                        @await Html.PartialAsync("_GridCell", new GridCellViewModel
+                                        {
+                                            Item = item,
+                                            Column = column,
+                                            Actions = column.Type == EnumGridColumnType.Actions 
+                                                ? Model.RowActions?.Where(a => a.ShowCondition == null || a.ShowCondition(item)).ToList()
+                                                : null
+                                        })
+                                    </div>
+                                </td>
+                        }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="@Model.Columns.Count" class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Nenhum registro encontrado</h5>
+                                <p class="text-muted">Tente ajustar os filtros ou adicionar novos registros.</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DROPDOWN PORTAL - Renderizado fora da tabela -->
+    <div id="dropdownPortal" class="dropdown-portal"></div>
+
+    <!-- Controles da Grid -->
+    <div class="grid-controls">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="results-info">
+                <span class="text-muted">
+                    Exibindo @((Model.CurrentPage - 1) * Model.PageSize + 1)-@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalRecords))
+                    de @Model.TotalRecords.ToString("N0") resultados
+                </span>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label-small mb-0">Itens por página:</label>
+                    <select id="pageSizeSelector" class="form-select form-select-sm" style="width: auto;">
+                        <option value="50" selected="@(Model.PageSize == 50)">50</option>
+                        <option value="100" selected="@(Model.PageSize == 100)">100</option>
+                        <option value="200" selected="@(Model.PageSize == 200)">200</option>
+                        <option value="-1" selected="@(Model.PageSize == -1)">Todos</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    :root {
+        --primary-color: #3b82f6;
+        --success-color: #10b981;
+        --secondary-color: #6b7280;
+        --light-bg: #f8fafc;
+        --border-color: #e5e7eb;
+    }
+
+    .btn-search {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.2rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-align: center;
+        width: 100%;
+    }
+
+    .btn-new {
+        background: var(--success-color);
+        color: white;
+        border: none;
+        padding: 0.2rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .data-grid {
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .base-grid-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .base-grid-table th {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .base-grid-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+    .sortable-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .sortable-header:hover {
+            color: var(--primary-color);
+        }
+
+    .sort-icon {
+        opacity: 0.5;
+        font-size: 0.8rem;
+    }
+
+        .sortable-header:hover .sort-icon,
+        .sort-icon[data-sort].active {
+            opacity: 1;
+            color: var(--primary-color);
+        }
+
+    .grid-controls {
+        padding: 1rem 1.5rem;
+        background: var(--light-bg);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .pagination-container {
+        padding: 1rem 1.5rem;
+        background: var(--light-bg);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .pagination {
+        margin: 0;
+        justify-content: center;
+    }
+
+    .page-link {
+        border: 1px solid var(--border-color);
+        color: var(--secondary-color);
+        padding: 0.5rem 0.75rem;
+        background: white;
+        border: none;
+    }
+
+    .page-item.active .page-link {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .page-link:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+</style>

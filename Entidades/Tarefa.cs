@@ -12,10 +12,12 @@ namespace AutoGestao.Entidades
         public DateTime? DataVencimento { get; set; }
         public DateTime? DataConclusao { get; set; }
 
-        // Foreign Keys
+        // Foreign Keys (manter o ResponsavelId existente por compatibilidade)
         public int? ResponsavelId { get; set; }
+        public int? ResponsavelUsuarioId { get; set; } // Nova FK para Usuario
 
         // Navigation properties
-        public virtual Vendedor? Responsavel { get; set; }
+        public virtual Vendedor? Responsavel { get; set; } // Existente
+        public virtual Usuario? ResponsavelUsuario { get; set; } // Nova
     }
 }

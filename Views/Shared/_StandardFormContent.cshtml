@@ -1,0 +1,354 @@
+@using AutoGestao.Enumerador.Gerais
+@model StandardFormViewModel
+
+<form asp-action="@Model.ActionName" method="post" class="slide-in-right standard-form" 
+      data-ajax="@(Model.EnableAjaxSubmit ? "true" : "false")">
+    
+    @if (Model.IsEditMode && Model.Model != null)
+    {
+        <input type="hidden" name="Id" value="@((dynamic)Model.Model).Id" />
+    }
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
+
+    @foreach (var itemSection in Model.Sections)
+    {
+        <div class="card-modern mb-4">
+            <div class="card-header-modern">
+                <i class="@itemSection.Icon"></i>
+                @itemSection.Name
+            </div>
+            <div class="card-body-modern">
+                <div class="grid-@(itemSection.GridColumns)">
+                    @foreach (var field in itemSection.Fields.Where(x => x.Type != EnumFieldType.Hidden))
+                    {
+                        <div class="form-group-modern @field.CssClass" 
+                             data-conditional-field="@field.ConditionalField"
+                             data-conditional-value="@field.ConditionalValue"
+                             style="@(ShouldHideField(field, Model.Model) ? "display: none;" : "")">
+                            
+                            <label class="form-label-modern">
+                                <i class="@field.Icon me-1"></i>
+                                @field.DisplayName
+                                @if (field.Required && !Model.IsDetailsMode)
+                                {
+                                    <span class="text-danger">*</span>
+                                }
+                            </label>
+
+                            @switch (field.Type)
+                            {
+                                case EnumFieldType.Text:
+                                    <input type="text" 
+                                           name="@field.PropertyName" 
+                                           value="@field.Value" 
+                                           class="form-control-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@field.Placeholder"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Email:
+                                    <input type="email" 
+                                           name="@field.PropertyName" 
+                                           value="@field.Value" 
+                                           class="form-control-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@field.Placeholder"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Number:
+                                    <input type="number" 
+                                           name="@field.PropertyName" 
+                                           value="@field.Value" 
+                                           class="form-control-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@field.Placeholder"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Decimal:
+                                    <input type="number"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           class="form-control-modern currency-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "0,00" : field.Placeholder)"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Date:
+                                    <input type="date" 
+                                           name="@field.PropertyName" 
+                                           value="@(field.Value is DateTime dt ? dt.ToString("yyyy-MM-dd") : "")" 
+                                           class="form-control-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.TextArea:
+                                    <textarea name="@field.PropertyName" 
+                                              class="form-control-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                              placeholder="@field.Placeholder"
+                                              rows="6"
+                                              style="height: 100px !important"
+                                              @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                              @(field.ReadOnly ? "readonly" : string.Empty)>@field.Value</textarea>
+                                    break;
+
+                                case EnumFieldType.Select:
+                                    <select name="@field.PropertyName" 
+                                            class="form-select-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                            @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                            @(field.ReadOnly ? "disabled" : string.Empty)>
+                                        @if (!field.Required)
+                                        {
+                                            <option value="">@field.Placeholder</option>
+                                        }
+                                        @foreach (var option in field.Options)
+                                        {
+                                            <option value="@option.Value" selected = "@(option.Selected || option.Value == field.Value?.ToString())">
+                                                @option.Text
+                                            </option>
+                                        }
+                                    </select>
+                                    break;
+
+                                case EnumFieldType.Checkbox:
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               name="@field.PropertyName" 
+                                               value="true"
+                                               class="form-check-input @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                               @(field.Value?.ToString().ToLower() == "true" ? "checked" : "")
+                                               @(field.ReadOnly ? "disabled" : "") />
+                                        <input type="hidden" name="@field.PropertyName" value="false" />
+                                        <label class="form-check-label">
+                                            @field.DisplayName
+                                        </label>
+                                    </div>
+                                    break;
+
+                                case EnumFieldType.Phone:
+                                    <input type="tel" 
+                                           name="@field.PropertyName" 
+                                           value="@field.Value" 
+                                           class="form-control-modern phone-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "(00) 00000-0000" : field.Placeholder)"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Cpf:
+                                    <input type="text" 
+                                           name="@field.PropertyName" 
+                                           value="@field.Value" 
+                                           class="form-control-modern cpf-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "000.000.000-00" : field.Placeholder)"
+                                           maxlength="14"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Cnpj:
+                                    <input type="text" 
+                                           name="@field.PropertyName" 
+                                           value="@field.Value" 
+                                           class="form-control-modern cnpj-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "00.000.000/0000-00" : field.Placeholder)"
+                                           maxlength="18"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Cep:
+                                    <input type="text" 
+                                           name="@field.PropertyName" 
+                                           value="@field.Value" 
+                                           class="form-control-modern cep-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "00000-000" : field.Placeholder)"
+                                           maxlength="9"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           data-cep-auto-fill="true" />
+                                    break;
+
+                                case EnumFieldType.Currency:
+                                    <input type="text" 
+                                           name="@field.PropertyName" 
+                                           value="@field.Value" 
+                                           class="form-control-modern currency-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "R$ 0,00" : field.Placeholder)"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Percentage:
+                                    var percentValue = field.Value?.ToString();
+                                    if (!string.IsNullOrEmpty(percentValue) && !percentValue.Contains("%"))
+                                    {
+                                        percentValue += "%";
+                                    }
+                                    <input type="text"
+                                           name="@field.PropertyName"
+                                           value="@percentValue"
+                                           class="form-control-modern percentage-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "1,50%" : field.Placeholder)"
+                                           @(field.Required && !Model.IsDetailsMode ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Reference:
+                                    @if (Model.IsDetailsMode)
+                                    {
+                                        <div class="form-control-static">
+                                            <span id="@(field.PropertyName)_display">
+                                                @if (field.Value != null && field.Value.ToString() != "0")
+                                                {
+                                                    <span class="text-muted">Carregando...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Não informado</span>
+                                                }
+                                            </span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="reference-search-wrapper">
+                                            <input type="hidden"
+                                                   name="@field.PropertyName"
+                                                   value="@field.Value"
+                                                   id="@(field.PropertyName)_value" />
+
+                                            <div class="input-group">
+                                                <input type="text"
+                                                       class="form-control reference-search-input @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                                       id="@(field.PropertyName)_search"
+                                                       placeholder="@(string.IsNullOrEmpty(field.Placeholder) ? "Digite para pesquisar..." : field.Placeholder)"
+                                                       autocomplete="off"
+                                                       data-reference-type="@field.Reference?.Name"
+                                                       data-target-field="@field.PropertyName"
+                                                       @(field.Required ? "required" : "") />
+
+                                                <button type="button"
+                                                        class="btn btn-success reference-create-btn"
+                                                        id="@(field.PropertyName)_create"
+                                                        title="Criar novo registro"
+                                                        data-reference-type="@field.Reference?.Name"
+                                                        data-target-field="@field.PropertyName">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary reference-clear-btn"
+                                                        id="@(field.PropertyName)_clear"
+                                                        title="Limpar seleção">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+
+                                            <div class="reference-dropdown" id="@(field.PropertyName)_dropdown"></div>
+                                        </div>
+                                    }
+                                    break;
+
+                                case EnumFieldType.Hidden:
+                                    // Renderizar fora da estrutura de form-group para não ocupar espaço
+                                    break;
+                            }
+
+                            @if (HasValidationError(field.PropertyName))
+                            {
+                                <div class="invalid-feedback">
+                                    @GetValidationError(field.PropertyName)
+                                </div>
+                            }
+                            else if (!string.IsNullOrEmpty(field.ValidationMessage))
+                            {
+                                <div class="form-text">@field.ValidationMessage</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!Model.IsDetailsMode)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <button type="button" class="btn-modern btn-outline-modern" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+                Cancelar
+            </button>
+            
+            <div class="d-flex gap-2">
+                <button type="button" class="btn-modern btn-outline-modern" onclick="limparFormulario()">
+                    <i class="fas fa-eraser"></i>
+                    Limpar
+                </button>
+                <button type="submit" class="btn-modern btn-primary-modern" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    @(Model.IsEditMode ? "Atualizar" : "Salvar")
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <a asp-action="Index" class="btn-modern btn-outline-modern">
+                <i class="fas fa-arrow-left"></i>
+                Voltar à Lista
+            </a>
+            
+            @if (Model.Model != null)
+            {
+                <div class="d-flex gap-2">
+                    <a asp-action="Edit" asp-route-id="@((dynamic)Model.Model).Id" class="btn-modern btn-primary-modern">
+                        <i class="fas fa-edit"></i>
+                        Editar
+                    </a>
+                </div>
+            }
+        </div>
+    }
+</form>
+
+<script>
+    function limparFormulario() {
+        if (confirm('Tem certeza que deseja limpar todos os campos?')) {
+            document.querySelector('.standard-form').reset();
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').remove();
+            $('.alert-danger').hide();
+        }
+    }
+</script>
+
+@functions {
+    bool ShouldHideField(FormFieldViewModel field, object model)
+    {
+        if (string.IsNullOrEmpty(field.ConditionalField)) return false;
+        
+        if (model == null) return true;
+        
+        var property = model.GetType().GetProperty(field.ConditionalField);
+        var value = property?.GetValue(model)?.ToString();
+        
+        return value != field.ConditionalValue;
+    }
+
+    bool HasValidationError(string fieldName)
+    {
+        return Model.ModelState.ContainsKey(fieldName);
+    }
+
+    string GetValidationError(string fieldName)
+    {
+        return Model.ModelState.TryGetValue(fieldName, out var error) ? error : "";
+    }
+}

@@ -1,0 +1,181 @@
+@model GridCellViewModel
+@using AutoGestao.Enumerador.Gerais
+@using AutoGestao.Models
+@using AutoGestao.Extensions
+
+@{
+    var itemType = Model.Item.GetType();
+    var propertyInfo = itemType.GetProperty(Model.Column.Name);
+    var value = propertyInfo?.GetValue(Model.Item);
+}
+
+@switch (Model.Column.Type)
+{
+    case EnumGridColumnType.Actions:
+        @if (Model.Actions != null && Model.Actions.Any())
+        {
+            var visibleActions = Model.Actions.Where(action => action.ShowCondition == null || action.ShowCondition(Model.Item)).ToList();
+            @if (visibleActions.Any())
+            {
+                var itemId = itemType.GetProperty("Id")?.GetValue(Model.Item)?.ToString();
+
+                <!-- DROPDOWN CONTAINER -->
+                <div class="action-dropdown-container" data-item-id="@itemId">
+                    <button type="button"
+                            class="btn-actions-enhanced"
+                            data-dropdown-toggle="dropdown-@itemId"
+                            aria-expanded="false"
+                            title="Ações disponíveis">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+
+                    <!-- DROPDOWN ITEMS DATA (Hidden, usado pelo JS) -->
+                    <script type="application/json" class="dropdown-data">
+                        {
+                            "actions": [
+                                @foreach (var action in visibleActions)
+                                {
+                                        var actionUrl = action.Url?.Replace("{id}", itemId);
+                                        <text>{
+                                            "name": "@action.Name",
+                                            "displayName": "@action.DisplayName",
+                                            "icon": "@action.Icon",
+                                            "url": "@actionUrl",
+                                            "cssClass": "@(action.Name.ToLower().Contains("delete") || action.Name.ToLower().Contains("excluir") ? "text-danger" : "")"
+                                        }</text>
+                                        @if (action != visibleActions.Last())
+                                        {
+                                            <text>,</text>
+                                        }
+                                }
+                            ]
+                        }
+                    </script>
+                </div>
+            }
+        }
+        break;
+
+    case EnumGridColumnType.Enumerador:
+        @try
+        {
+            var displayText = value?.ToString();
+            if (value is Enum enumValue)
+            {
+                var icone = enumValue.GetIcone();
+                if (Model.Column.EnumRender == EnumRenderType.Icon)
+                {
+                    displayText = icone ?? (string)value;
+                }
+                else if (Model.Column.EnumRender == EnumRenderType.IconDescription)
+                {
+                    displayText = $"{icone} {enumValue.GetDescription()}";
+                }
+                else if (Model.Column.EnumRender == EnumRenderType.DescriptionIcon)
+                {
+                    displayText = $"{enumValue.GetDescription()} {icone}";
+                }
+                else
+                {
+                    displayText = enumValue.GetDescription();
+                }
+            }
+            else if (value != null && bool.TryParse(value.ToString(), out bool enumBoolValue))
+            {
+                <span class="status-badge @(enumBoolValue ? "status-active" : "status-inactive")">
+                    @(enumBoolValue ? "✅" : "❌")
+                </span>
+                break;
+            }
+
+            <span class="person-type">@displayText</span>
+        }
+        catch
+        {
+            @value   
+        }
+        break;
+
+    case EnumGridColumnType.Currency:
+        @if (value != null && decimal.TryParse(value.ToString(), out decimal currencyValue))
+        {
+            <span class="currency-value">@currencyValue.ToString("C")</span>
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case EnumGridColumnType.Date:
+        @if (value != null && DateTime.TryParse(value.ToString(), out DateTime dateValue))
+        {
+            @dateValue.ToString("dd/MM/yyyy")
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case EnumGridColumnType.Number:
+        @if (value != null && decimal.TryParse(value.ToString(), out decimal numberValue))
+        {
+            @numberValue.ToString("N0")
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case EnumGridColumnType.Integer:
+        @if (value != null && long.TryParse(value.ToString(), out long integerValue))
+        {
+            @integerValue.ToString()
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case EnumGridColumnType.Boolean:
+        @if (value != null && bool.TryParse(value.ToString(), out bool boolValue))
+        {
+            <span class="status-badge @(boolValue ? "status-active" : "status-inactive")">
+                <i class="fas @(boolValue ? "fa-check" : "fa-times")"></i>
+                @(boolValue ? "Sim" : "Não")
+            </span>
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case EnumGridColumnType.Custom:
+        @if (Model.Column.CustomRender != null)
+        {
+            @Html.Raw(Model.Column.CustomRender(Model.Item))
+        }
+        else
+        {
+            @(value ?? "-")
+        }
+        break;
+
+    default:
+        @if (!string.IsNullOrEmpty(Model.Column.UrlAction))
+        {
+            <a href="@Url.Action(Model.Column.UrlAction, new { id = itemType.GetProperty("Id")?.GetValue(Model.Item) })"
+               class="text-decoration-none text-primary fw-medium text-truncate">
+                @value
+            </a>
+        }
+        else
+        {
+            <span class="text-truncate" title="@value">@(value ?? "-")</span>
+        }
+        break;
+}

@@ -99,5 +99,39 @@ namespace AutoGestao.Extensions
 
             return numbers[13] == digit2;
         }
+
+        /// <summary>
+        /// Aplica máscara de CPF (000.000.000-00) a uma string que contenha 11 dígitos.
+        /// Se o input não tiver 11 dígitos, retorna o input original (após remover espaços).
+        /// </summary>
+        public static string AplicarMascaraCpf(this string input)
+        {
+            if (input is null)
+            {
+                return null;
+            }
+
+            var digits = new string([.. input.Where(char.IsDigit)]);
+            return digits.Length != 11
+                ? input.Trim()
+                : $"{digits.Substring(0, 3)}.{digits.Substring(3, 3)}.{digits.Substring(6, 3)}-{digits.Substring(9, 2)}";
+        }
+
+        /// <summary>
+        /// Aplica máscara de CNPJ (00.000.000/0000-00) a uma string que contenha 14 dígitos.
+        /// Se o input não tiver 14 dígitos, retorna o input original (após remover espaços).
+        /// </summary>
+        public static string AplicarMascaraCnpj(this string input)
+        {
+            if (input is null)
+            {
+                return null;
+            }
+
+            var digits = new string([.. input.Where(char.IsDigit)]);
+            return digits.Length != 14
+                ? input.Trim()
+                : $"{digits.Substring(0, 2)}.{digits.Substring(2, 3)}.{digits.Substring(5, 3)}/{digits.Substring(8, 4)}-{digits.Substring(12, 2)}";
+        }
     }
 }
