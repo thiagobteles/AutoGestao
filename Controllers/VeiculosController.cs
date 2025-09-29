@@ -57,7 +57,7 @@ namespace AutoGestao.Controllers
                     new() { Name = nameof(Veiculo.KmSaida), DisplayName = "KM", Type = EnumGridColumnType.Number, Sortable = true },
                     new() { Name = nameof(Veiculo.PrecoVenda), DisplayName = "Preço", Type = EnumGridColumnType.Currency, Sortable = true },
                     new() { Name = nameof(Veiculo.Situacao), DisplayName = "Situação", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.IconDescription, Sortable = true },
-                    new() { Name = nameof(Veiculo.StatusVeiculo), DisplayName = "Status", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true },
+                    new() { Name = nameof(Veiculo.Status), DisplayName = "Status", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true },
                     new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
                 ],
             };
@@ -337,7 +337,7 @@ namespace AutoGestao.Controllers
                                   $"{veiculo.PrecoCompra:F2}," +
                                   $"{veiculo.PrecoVenda:F2}," +
                                   $"{veiculo.Situacao.GetDescription()}," +
-                                  $"{veiculo.StatusVeiculo.GetDescription()}," +
+                                  $"{veiculo.Status.GetDescription()}," +
                                   $"{veiculo.DataCadastro:dd/MM/yyyy}");
                 }
 

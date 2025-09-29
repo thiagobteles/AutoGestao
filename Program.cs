@@ -13,8 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Add Entity Framework com PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -108,34 +107,34 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
-static void ConfigureEnumAutomation()
-{
-    // Configurações globais
-    EnumAutomationConfig.IncludeIconsByDefault = true;
-    EnumAutomationConfig.IncludeEmptyOptionForNullable = true;
-    EnumAutomationConfig.EmptyOptionText = "Selecione uma opção...";
+//static void ConfigureEnumAutomation()
+//{
+//    // Configurações globais
+//    EnumAutomationConfig.IncludeIconsByDefault = true;
+//    EnumAutomationConfig.IncludeEmptyOptionForNullable = true;
+//    EnumAutomationConfig.EmptyOptionText = "Selecione uma opção...";
 
-    // Configurações específicas (exemplos)
-    EnumAutomationConfig.EnumConfigurations[typeof(EnumSituacaoVeiculo)] = new EnumConfig
-    {
-        IncludeIcons = true,
-        EmptyOptionText = "Selecione a situação do veículo...",
-        SortOrder = EnumSortOrder.ByDescription
-    };
+//    // Configurações específicas (exemplos)
+//    EnumAutomationConfig.EnumConfigurations[typeof(EnumSituacaoVeiculo)] = new EnumConfig
+//    {
+//        IncludeIcons = true,
+//        EmptyOptionText = "Selecione a situação do veículo...",
+//        SortOrder = EnumSortOrder.ByDescription
+//    };
 
-    EnumAutomationConfig.EnumConfigurations[typeof(EnumEstado)] = new EnumConfig
-    {
-        IncludeIcons = false,
-        EmptyOptionText = "Selecione o estado...",
-        SortOrder = EnumSortOrder.ByName
-    };
+//    EnumAutomationConfig.EnumConfigurations[typeof(EnumEstado)] = new EnumConfig
+//    {
+//        IncludeIcons = false,
+//        EmptyOptionText = "Selecione o estado...",
+//        SortOrder = EnumSortOrder.ByName
+//    };
 
-    // Enums a serem ignorados (se houver)
-    // EnumAutomationConfig.IgnoreEnumTypes.Add(typeof(EnumSomeInternalEnum));
+//    // Enums a serem ignorados (se houver)
+//    // EnumAutomationConfig.IgnoreEnumTypes.Add(typeof(EnumSomeInternalEnum));
 
-    // Propriedades específicas a serem ignoradas (se houver)
-    // EnumAutomationConfig.IgnoreProperties.Add("Veiculo.StatusInterno");
-}
+//    // Propriedades específicas a serem ignoradas (se houver)
+//    // EnumAutomationConfig.IgnoreProperties.Add("Veiculo.StatusInterno");
+//}
 
 static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioService usuarioService)
 {
@@ -158,5 +157,5 @@ static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioS
         Console.WriteLine("Senha: admin123");
     }
 
-    ConfigureEnumAutomation();
+    //ConfigureEnumAutomation();
 }

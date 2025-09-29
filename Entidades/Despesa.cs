@@ -3,7 +3,7 @@ using AutoGestao.Enumerador;
 
 namespace AutoGestao.Entidades
 {
-    public class Despesa : BaseEntidade
+    public class Despesa : BaseEntidadeEmpresa
     {
         public string? Descricao { get; set; }
         public decimal Valor { get; set; }

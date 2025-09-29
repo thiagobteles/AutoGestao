@@ -2,6 +2,21 @@ using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Attributes
 {
+    /* 
+     * ============================================================
+     * RESUMO DAS OPÇÕES SUPORTADAS PARA ConditionalValue:
+     * ============================================================
+     * 
+     * 1. Nome do enum: "PessoaFisica" ✅
+     * 2. Valor numérico: "1" ✅
+     * 3. Nome completo: "EnumTipoPessoa.PessoaFisica" ✅
+     * 4. Múltiplos valores: "1,2" (OR logic) ✅
+     * 5. Maior que zero: ">0" ✅
+     * 6. Diferente de: "!2" ✅
+     * 
+     * Todas essas opções funcionam automaticamente com a solução implementada!
+     */
+
     /// <summary>
     /// Atributo para configuração de campos de formulário
     /// Define como uma propriedade deve ser renderizada nas telas Create/Edit/Details
@@ -12,7 +27,7 @@ namespace AutoGestao.Attributes
         /// <summary>
         /// Nome de exibição do campo
         /// </summary>
-        public string DisplayName { get; set; } = "";
+        public string Name { get; set; } = "";
 
         /// <summary>
         /// Ícone do campo (classe CSS, ex: "fas fa-user")
@@ -22,7 +37,7 @@ namespace AutoGestao.Attributes
         /// <summary>
         /// Placeholder do campo
         /// </summary>
-        public string Placeholder { get; set; } = "";
+        public string Placeholder { get; set; } = "Buscar registro...";
 
         /// <summary>
         /// Tipo do campo de formulário
@@ -62,7 +77,7 @@ namespace AutoGestao.Attributes
         /// <summary>
         /// Número de colunas do grid (1-4)
         /// </summary>
-        public int GridColumns { get; set; } = 1;
+        public int GridColumns { get; set; } = 2;
 
         /// <summary>
         /// Classe CSS customizada
@@ -85,13 +100,13 @@ namespace AutoGestao.Attributes
         public string Section { get; set; } = "Não Informado";
 
         /// <summary>
-        /// NOVA PROPRIEDADE: Tipo da entidade de referência (para campos Reference)
+        /// Tipo da entidade de referência (para campos Reference)
         /// Exemplo: Reference = typeof(Cliente)
         /// </summary>
         public Type? Reference { get; set; }
 
         /// <summary>
-        /// NOVA PROPRIEDADE: Configurações específicas para campo de referência
+        /// Configurações específicas para campo de referência
         /// </summary>
         public string ReferenceConfig { get; set; } = "";
     }

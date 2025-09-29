@@ -3,7 +3,7 @@ using AutoGestao.Enumerador;
 
 namespace AutoGestao.Entidades
 {
-    public class Avaliacao : BaseEntidade
+    public class Avaliacao : BaseEntidadeEmpresa
     {
         public int AnoVeiculo { get; set; }
         public string? PlacaVeiculo { get; set; }

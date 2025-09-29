@@ -1029,8 +1029,6 @@ namespace AutoGestao.Controllers
         private static EnumFieldType DetermineFieldType(PropertyInfo property)
         {
             var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-
-            // MODIFICAÇÃO PRINCIPAL: Detecção automática de Enums
             if (type.IsEnum)
             {
                 return EnumFieldType.Select;
@@ -1093,10 +1091,22 @@ namespace AutoGestao.Controllers
 
             if (formFieldAttr != null)
             {
+                // ✅ RESOLVER VALORES CONDICIONAIS DE ENUM AUTOMATICAMENTE
+                var resolvedConditionalValue = formFieldAttr.ConditionalValue;
+
+                if (!string.IsNullOrEmpty(formFieldAttr.ConditionalField) && !string.IsNullOrEmpty(formFieldAttr.ConditionalValue))
+                {
+                    resolvedConditionalValue = EnumExtension.ResolveMultipleConditionalValues(
+                        formFieldAttr.ConditionalField,
+                        formFieldAttr.ConditionalValue,
+                        typeof(T)
+                    );
+                }
+
                 return new FormFieldViewModel
                 {
                     PropertyName = property.Name,
-                    DisplayName = formFieldAttr.DisplayName ?? GetDisplayName(property),
+                    DisplayName = formFieldAttr.Name ?? GetDisplayName(property),
                     Icon = formFieldAttr.Icon ?? GetDefaultIcon(property),
                     Placeholder = formFieldAttr.Placeholder ?? GetDefaultPlaceholder(property),
                     Type = formFieldAttr.Type,
@@ -1107,35 +1117,16 @@ namespace AutoGestao.Controllers
                     ValidationRegex = formFieldAttr.ValidationRegex ?? "",
                     ValidationMessage = formFieldAttr.ValidationMessage ?? "",
                     ConditionalField = formFieldAttr.ConditionalField ?? "",
-                    ConditionalValue = formFieldAttr.ConditionalValue ?? "",
+                    ConditionalValue = resolvedConditionalValue ?? "",
                     GridColumns = formFieldAttr.GridColumns,
                     CssClass = formFieldAttr.CssClass ?? "",
                     DataList = formFieldAttr.DataList ?? "",
                     Order = formFieldAttr.Order,
                     Section = formFieldAttr.Section ?? "Não Informado",
-                    Options = formFieldAttr.Type == EnumFieldType.Select ? GetSelectOptions(property.Name) : []
-                };
-            }
-
-            // Se não tem atributo, tentar gerar automaticamente
-            if (ShouldAutoGenerateField(property))
-            {
-                var determinedType = DetermineFieldType(property);
-                return new FormFieldViewModel
-                {
-                    PropertyName = property.Name,
-                    DisplayName = GetDisplayName(property),
-                    Icon = GetDefaultIcon(property),
-                    Placeholder = GetDefaultPlaceholder(property),
-                    Type = determinedType,
-                    Required = IsRequiredProperty(property),
-                    ReadOnly = action == "Details",
-                    Value = property.GetValue(entity),
-                    Order = GetPropertyOrder(property),
-                    Section = "Não Informado",
-                    GridColumns = 2,
-                    Reference = null,
-                    Options = determinedType == EnumFieldType.Select ? GetSelectOptions(property.Name) : []
+                    Options = formFieldAttr.Type == EnumFieldType.Select
+                        //? GetSelectOptions(property, entity)
+                        ? GetSelectOptions(property.Name)
+                        : []
                 };
             }
 
@@ -1143,8 +1134,8 @@ namespace AutoGestao.Controllers
         }
 
         // <summary>
-        /// Popula automaticamente a ViewBag com todos os Enums da entidade
-        /// </summary>
+        // Popula automaticamente a ViewBag com todos os Enums da entidade
+        // </summary>
         protected void PopulateEnumsInViewBag()
         {
             var enumProperties = typeof(T).GetProperties()

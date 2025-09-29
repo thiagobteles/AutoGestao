@@ -3,15 +3,15 @@ using AutoGestao.Enumerador;
 
 namespace AutoGestao.Entidades
 {
-    public class Venda : BaseEntidade
+    public class Venda : BaseEntidadeEmpresa
     {
-        public required decimal ValorVenda { get; set; }
+        public decimal ValorVenda { get; set; }
         public decimal? ValorEntrada { get; set; }
         public int? NumeroParcelas { get; set; }
-        public EnumFormaPagamento? FormaPagamento { get; set; }
-        public EnumStatusVenda Status { get; set; } = EnumStatusVenda.Pendente;
+        public EnumFormaPagamento FormaPagamento { get; set; }
+        public EnumStatusVenda Status { get; set; }
         public string? Observacoes { get; set; }
-        public required DateTime DataVenda { get; set; }
+        public DateTime DataVenda { get; set; }
 
         // Foreign Keys
         public int ClienteId { get; set; }
@@ -19,9 +19,9 @@ namespace AutoGestao.Entidades
         public int VendedorId { get; set; }
 
         // Navigation properties
-        public virtual required Cliente Cliente { get; set; }
-        public virtual required Veiculo Veiculo { get; set; }
-        public virtual required Vendedor Vendedor { get; set; }
+        public virtual Cliente Cliente { get; set; }
+        public virtual Veiculo Veiculo { get; set; }
+        public virtual Vendedor Vendedor { get; set; }
         public virtual ICollection<Parcela> Parcelas { get; set; } = [];
     }
 }

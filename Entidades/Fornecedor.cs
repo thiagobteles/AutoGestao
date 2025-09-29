@@ -2,7 +2,7 @@ using AutoGestao.Enumerador;
 
 namespace AutoGestao.Entidades
 {
-    public class Fornecedor : BaseEntidade
+    public class Fornecedor : BaseEntidadeEmpresa
     {
         public EnumTipoPessoa TipoFornecedor { get; set; } = EnumTipoPessoa.Nenhum;
         public string Nome { get; set; } = string.Empty;

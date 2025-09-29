@@ -138,7 +138,7 @@ namespace AutoGestao.Controllers
                 .Where(c => c.Ativo &&
                     (
                         c.Nome.ToLower().Contains(termLower) ||
-                        c.CPF != null && c.CPF.Contains(term) ||
+                        c.Cpf != null && c.Cpf.Contains(term) ||
                         c.Email != null && c.Email.ToLower().Contains(termLower)
                     ))
                 .OrderBy(c => c.Nome)
@@ -147,7 +147,7 @@ namespace AutoGestao.Controllers
                     {
                         Value = c.Id.ToString(),
                         Text = c.Nome,
-                        Subtitle = FormatClienteSubtitle(c.CPF, c.Email, c.Telefone)
+                        Subtitle = FormatClienteSubtitle(c.Cpf, c.Email, c.Telefone)
                     })
                 .ToListAsync();
         }
@@ -285,7 +285,7 @@ namespace AutoGestao.Controllers
                     {
                         Value = c.Id.ToString(),
                         Text = c.Nome,
-                        Subtitle = FormatClienteSubtitle(c.CPF, c.Email, c.Telefone)
+                        Subtitle = FormatClienteSubtitle(c.Cpf, c.Email, c.Telefone)
                     })
                 .FirstOrDefaultAsync();
         }

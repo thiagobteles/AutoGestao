@@ -113,8 +113,8 @@ namespace AutoGestao.Controllers
                         {
                             query = ApplyTextFilter(query, searchTerm,
                                 c => c.Nome,
-                                c => c.CPF,
-                                c => c.CNPJ,
+                                c => c.Cpf,
+                                c => c.Cnpj,
                                 c => c.Email,
                                 c => c.Telefone,
                                 c => c.Celular);
@@ -200,23 +200,23 @@ namespace AutoGestao.Controllers
         private void ValidarCliente(Cliente entity)
         {
             // Validações específicas
-            if (entity.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.CPF))
+            if (entity.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.Cpf))
             {
-                ModelState.AddModelError(nameof(entity.CPF), "CPF é obrigatório para Pessoa Física");
+                ModelState.AddModelError(nameof(entity.Cpf), "CPF é obrigatório para Pessoa Física");
             }
 
-            if (entity.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(entity.CNPJ))
+            if (entity.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(entity.Cnpj))
             {
-                ModelState.AddModelError(nameof(entity.CNPJ), "CNPJ é obrigatório para Pessoa Jurídica");
+                ModelState.AddModelError(nameof(entity.Cnpj), "CNPJ é obrigatório para Pessoa Jurídica");
             }
 
             // Verificar CPF único
-            if (!string.IsNullOrEmpty(entity.CPF))
+            if (!string.IsNullOrEmpty(entity.Cpf))
             {
-                var cpfExistente = _context.Clientes.Any(c => c.Id != entity.Id && c.CPF == entity.CPF);
+                var cpfExistente = _context.Clientes.Any(c => c.Id != entity.Id && c.Cpf == entity.Cpf);
                 if (cpfExistente)
                 {
-                    ModelState.AddModelError(nameof(entity.CPF), "CPF já cadastrado");
+                    ModelState.AddModelError(nameof(entity.Cpf), "CPF já cadastrado");
                 }
             }
         }
@@ -225,8 +225,8 @@ namespace AutoGestao.Controllers
         {
             var cliente = (Cliente)item;
             var documento = cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica
-                ? cliente.CNPJ.AplicarMascaraCnpj()
-                : cliente.CPF.AplicarMascaraCpf();
+                ? cliente.Cnpj.AplicarMascaraCnpj()
+                : cliente.Cpf.AplicarMascaraCpf();
 
             return $@"{documento}";
         }
@@ -267,7 +267,7 @@ namespace AutoGestao.Controllers
 
                 foreach (var cliente in clientes)
                 {
-                    var documento = !string.IsNullOrEmpty(cliente.CPF) ? cliente.CPF : cliente.CNPJ;
+                    var documento = !string.IsNullOrEmpty(cliente.Cpf) ? cliente.Cpf : cliente.Cnpj;
                     csv.AppendLine($"{cliente.Id}," +
                                   $"{cliente.TipoCliente.GetDescription()}," +
                                   $"\"{cliente.Nome}\"," +

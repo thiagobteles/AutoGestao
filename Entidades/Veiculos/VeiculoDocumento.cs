@@ -2,7 +2,7 @@ using AutoGestao.Enumerador;
 
 namespace AutoGestao.Entidades.Veiculos
 {
-    public class VeiculoDocumento : BaseEntidade
+    public class VeiculoDocumento : BaseEntidadeEmpresa
     {
         public EnumTipoDocumento TipoDocumento { get; set; } = EnumTipoDocumento.Nenhum;
         public string NomeArquivo { get; set; } = string.Empty;

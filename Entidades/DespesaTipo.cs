@@ -1,7 +1,7 @@
 namespace AutoGestao.Entidades
 {
-    public class DespesaTipo : BaseEntidade
+    public class DespesaTipo : BaseEntidadeEmpresa
     {
-        public required string Descricao { get; set; }
+        public string Descricao { get; set; }
     }
 }

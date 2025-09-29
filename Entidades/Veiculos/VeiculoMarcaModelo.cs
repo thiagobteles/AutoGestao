@@ -1,6 +1,6 @@
 namespace AutoGestao.Entidades.Veiculos
 {
-    public class VeiculoMarcaModelo : BaseEntidade
+    public class VeiculoMarcaModelo : BaseEntidadeEmpresa
     {
         public string Descricao { get; set; } = string.Empty;
 

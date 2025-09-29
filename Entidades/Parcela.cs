@@ -2,10 +2,10 @@ using AutoGestao.Enumerador;
 
 namespace AutoGestao.Entidades
 {
-    public class Parcela : BaseEntidade
+    public class Parcela : BaseEntidadeEmpresa
     {
-        public required int NumeroParcela { get; set; }
-        public required decimal Valor { get; set; }
+        public int NumeroParcela { get; set; }
+        public decimal Valor { get; set; }
         public DateTime DataVencimento { get; set; }
         public DateTime? DataPagamento { get; set; }
         public decimal? ValorPago { get; set; }
@@ -16,6 +16,6 @@ namespace AutoGestao.Entidades
         public int VendaId { get; set; }
 
         // Navigation properties
-        public virtual required Venda Venda { get; set; }
+        public virtual Venda Venda { get; set; }
     }
 }
