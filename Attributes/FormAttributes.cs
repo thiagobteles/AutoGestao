@@ -37,7 +37,7 @@ namespace AutoGestao.Attributes
         /// <summary>
         /// Placeholder do campo
         /// </summary>
-        public string Placeholder { get; set; } = "Buscar registro...";
+        public string Placeholder { get; set; }
 
         /// <summary>
         /// Tipo do campo de formulário
@@ -65,7 +65,7 @@ namespace AutoGestao.Attributes
         public string ValidationMessage { get; set; } = "";
 
         /// <summary>
-        /// Número de colunas do grid (1-4)
+        /// Número de colunas do grid (1-6)
         /// </summary>
         public int GridColumns { get; set; } = 2;
 
@@ -87,7 +87,7 @@ namespace AutoGestao.Attributes
         /// <summary>
         /// Seção do formulário onde o campo será exibido
         /// </summary>
-        public string Section { get; set; } = "Não Informado";
+        public string Section { get; set; } = "Gerais";
 
         /// <summary>
         /// Tipo da entidade de referência (para campos Reference)

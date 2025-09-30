@@ -26,13 +26,28 @@ namespace AutoGestao.Services
             try
             {
                 var httpContext = _httpContextAccessor.HttpContext;
-                var (Id, Nome, Email) = GetCurrentUser();
+                var usuario = GetCurrentUser();
+
+                // ⚠️ CORREÇÃO PRINCIPAL: Validar IdEmpresa
+                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(usuario.IdEmpresa);
+
+                // Se não houver empresa válida, logar o erro mas não falhar
+                if (!idEmpresaValido.HasValue)
+                {
+                    _logger.LogWarning(
+                        "Tentativa de criar audit log sem empresa válida. Usuário: {UsuarioId}, Empresa: {IdEmpresa}",
+                        usuario.Id,
+                        usuario.IdEmpresa
+                    );
+                    return; // Não cria o log se não houver empresa válida
+                }
 
                 var auditLog = new AuditLog
                 {
-                    UsuarioId = Id,
-                    UsuarioNome = Nome,
-                    UsuarioEmail = Email,
+                    IdEmpresa = idEmpresaValido.Value,
+                    UsuarioId = usuario.Id,
+                    UsuarioNome = usuario.Nome,
+                    UsuarioEmail = usuario.Email,
                     EntidadeNome = entidadeNome,
                     EntidadeDisplayName = GetEntityDisplayName(entidadeNome),
                     EntidadeId = entidadeId,
@@ -55,41 +70,13 @@ namespace AutoGestao.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao registrar log de auditoria para {EntidadeNome}:{EntidadeId}", entidadeNome, entidadeId);
-            }
-        }
-
-        public async Task LogLoginAsync(long usuarioId, string usuarioNome, string usuarioEmail, bool sucesso, string? mensagemErro = null)
-        {
-            try
-            {
-                var tipoOperacao = sucesso ? EnumTipoOperacaoAuditoria.Login : EnumTipoOperacaoAuditoria.LoginFailed;
-
-                var auditLog = new AuditLog
-                {
-                    UsuarioId = usuarioId,
-                    UsuarioNome = usuarioNome,
-                    UsuarioEmail = usuarioEmail,
-                    EntidadeNome = "Usuario",
-                    EntidadeDisplayName = "Usuário",
-                    EntidadeId = usuarioId.ToString(),
-                    TipoOperacao = tipoOperacao,
-                    TabelaNome = "usuarios",
-                    IpCliente = GetClientIpAddress(),
-                    UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString(),
-                    UrlRequisicao = _httpContextAccessor.HttpContext?.Request.Path,
-                    MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
-                    Sucesso = sucesso,
-                    MensagemErro = mensagemErro,
-                    DataHora = DateTime.UtcNow
-                };
-
-                _context.AuditLogs.Add(auditLog);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao registrar log de login para usuário {UsuarioId}", usuarioId);
+                _logger.LogError(
+                    ex,
+                    "Erro ao registrar log de auditoria para {EntidadeNome}:{EntidadeId}. Erro: {Message}",
+                    entidadeNome,
+                    entidadeId,
+                    ex.Message
+                );
             }
         }
 
@@ -97,10 +84,11 @@ namespace AutoGestao.Services
         {
             try
             {
-                var (Id, Nome, Email) = GetCurrentUser();
+                var (Id, Nome, Email, IdEmpresa) = GetCurrentUser();
 
                 var auditLog = new AuditLog
                 {
+                    IdEmpresa = IdEmpresa.Value,
                     UsuarioId = Id,
                     UsuarioNome = Nome,
                     UsuarioEmail = Email,
@@ -127,6 +115,155 @@ namespace AutoGestao.Services
             }
         }
 
+        public async Task LogLoginAsync(long usuarioId, string usuarioNome, string usuarioEmail, long? IdEmpresa, bool sucesso, string? mensagemErro = null)
+        {
+            try
+            {
+                var tipoOperacao = sucesso ? EnumTipoOperacaoAuditoria.Login : EnumTipoOperacaoAuditoria.LoginFailed;
+
+                var auditLog = new AuditLog
+                {
+                    IdEmpresa = IdEmpresa.Value,
+                    UsuarioId = usuarioId,
+                    UsuarioNome = usuarioNome,
+                    UsuarioEmail = usuarioEmail,
+                    EntidadeNome = "Usuario",
+                    EntidadeDisplayName = "Usuário",
+                    EntidadeId = usuarioId.ToString(),
+                    TipoOperacao = tipoOperacao,
+                    TabelaNome = "usuarios",
+                    IpCliente = GetClientIpAddress(),
+                    UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString(),
+                    UrlRequisicao = _httpContextAccessor.HttpContext?.Request.Path,
+                    MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
+                    Sucesso = sucesso,
+                    MensagemErro = mensagemErro,
+                    DataHora = DateTime.UtcNow
+                };
+
+                _context.AuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao registrar log de login para usuário {UsuarioId}", usuarioId);
+            }
+        }
+
+        /// <summary>
+        /// Valida se o IdEmpresa existe na tabela empresas
+        /// </summary>
+        private async Task<long?> ValidarEObterIdEmpresaAsync(long? idEmpresa)
+        {
+            if (!idEmpresa.HasValue || idEmpresa.Value <= 0)
+            {
+                _logger.LogWarning("IdEmpresa inválido ou não informado: {IdEmpresa}", idEmpresa);
+                return null;
+            }
+
+            try
+            {
+                // Verificar se a empresa existe
+                var empresaExiste = await _context.Empresas
+                    .AnyAsync(e => e.Id == idEmpresa.Value);
+
+                if (!empresaExiste)
+                {
+                    _logger.LogWarning(
+                        "Empresa não encontrada no banco de dados. IdEmpresa: {IdEmpresa}",
+                        idEmpresa
+                    );
+                    return null;
+                }
+
+                return idEmpresa.Value;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Erro ao validar IdEmpresa: {IdEmpresa}. Erro: {Message}",
+                    idEmpresa,
+                    ex.Message
+                );
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Obtém usuário atual do contexto HTTP
+        /// </summary>
+        private (long Id, string Nome, string Email, long? IdEmpresa) GetCurrentUser()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext?.User?.Identity?.IsAuthenticated == true)
+            {
+                var claims = httpContext.User.Claims;
+
+                var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                var userName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value ?? "Sistema";
+                var userEmail = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? "";
+                var empresaId = claims.FirstOrDefault(c => c.Type == "IdEmpresa")?.Value;
+
+                return (
+                    Id: long.TryParse(userId, out var id) ? id : 0,
+                    Nome: userName,
+                    Email: userEmail,
+                    IdEmpresa: long.TryParse(empresaId, out var empId) ? empId : null
+                );
+            }
+
+            // Usuário não autenticado ou sistema
+            return (0, "Sistema", "sistema@autogestao.com", null);
+        }
+
+        private string GetClientIpAddress()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null)
+            {
+                return "Unknown";
+            }
+
+            var ip = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (string.IsNullOrEmpty(ip))
+            {
+                ip = httpContext.Request.Headers["X-Real-IP"].FirstOrDefault();
+            }
+
+            if (string.IsNullOrEmpty(ip))
+            {
+                ip = httpContext.Connection.RemoteIpAddress?.ToString();
+            }
+
+            return ip ?? "Unknown";
+        }
+
+        private static string GetEntityDisplayName(string entidadeNome)
+        {
+            // Adicione mapeamentos conforme necessário
+            var displayNames = new Dictionary<string, string>
+            {
+                { "Usuario", "Usuário" },
+                { "Cliente", "Cliente" },
+                { "Veiculo", "Veículo" },
+                { "Produto", "Produto" },
+                { "Venda", "Venda" },
+                { "Empresa", "Empresa" }
+            };
+
+            return displayNames.TryGetValue(entidadeNome, out var displayName)
+                ? displayName
+                : entidadeNome;
+        }
+
+        private static string GetTableName(string entidadeNome)
+        {
+            // Converter nome da entidade para nome da tabela (plural em minúsculas)
+            return entidadeNome.ToLower() + "s";
+        }
+
         public async Task<List<AuditLog>> GetLogsAsync(
             long? usuarioId = null,
             string? entidade = null,
@@ -136,7 +273,7 @@ namespace AutoGestao.Services
             int skip = 0,
             int take = 50)
         {
-            var query = _context.AuditLogs.Include(a => a.Usuario).AsQueryable();
+            var query = _context.AuditLogs.AsQueryable();
 
             if (usuarioId.HasValue)
             {
@@ -145,7 +282,7 @@ namespace AutoGestao.Services
 
             if (!string.IsNullOrEmpty(entidade))
             {
-                query = query.Where(a => a.EntidadeNome.Contains(entidade));
+                query = query.Where(a => a.EntidadeNome == entidade);
             }
 
             if (tipoOperacao.HasValue)
@@ -205,66 +342,6 @@ namespace AutoGestao.Services
             }
 
             return await query.CountAsync();
-        }
-
-        private (long? Id, string Nome, string Email) GetCurrentUser()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext?.User?.Identity?.IsAuthenticated == true)
-            {
-                var idClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var nome = httpContext.User.FindFirst(ClaimTypes.Name)?.Value ?? "Sistema";
-                var email = httpContext.User.FindFirst(ClaimTypes.Email)?.Value ?? "";
-
-                if (int.TryParse(idClaim, out int userId))
-                {
-                    return (userId, nome, email);
-                }
-            }
-
-            return (null, "Sistema", "sistema@autogestao.com");
-        }
-
-        private string? GetClientIpAddress()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext == null)
-            {
-                return null;
-            }
-
-            var ipAddress = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            if (string.IsNullOrEmpty(ipAddress))
-            {
-                ipAddress = httpContext.Request.Headers["X-Real-IP"].FirstOrDefault();
-            }
-            if (string.IsNullOrEmpty(ipAddress))
-            {
-                ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
-            }
-
-            return ipAddress;
-        }
-
-        private string GetEntityDisplayName(string entidadeNome)
-        {
-            return entidadeNome switch
-            {
-                "Usuario" => "Usuário",
-                "Veiculo" => "Veículo",
-                "Cliente" => "Cliente",
-                "Vendedor" => "Vendedor",
-                "Fornecedor" => "Fornecedor",
-                "Produto" => "Produto",
-                "Venda" => "Venda",
-                "Despesa" => "Despesa",
-                _ => entidadeNome
-            };
-        }
-
-        private string GetTableName(string entidadeNome)
-        {
-            return entidadeNome.ToLower() + "s";
         }
     }
 }

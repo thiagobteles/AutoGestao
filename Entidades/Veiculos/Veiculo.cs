@@ -33,7 +33,7 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 10, Name = "Marca", Section = "Especificações", Icon = "fas fa-car", Required = true, Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarca), Placeholder = "Buscar Marca...", GridColumns = 2)]
         public long IdVeiculoMarca { get; set; }
 
-        [ConditionalRule(EnumConditionalRuleType.ReadOnly, "VeiculoMarcaId == 0")]
+        [ConditionalRule(EnumConditionalRuleType.Enabled, "VeiculoMarcaId != 0")]
         [ConditionalRequired("VeiculoMarcaId > 0", "Modelo obrigatório!")]
         [FormField(Order = 10, Name = "Modelo", Section = "Especificações", Icon = "fas fa-car-side", Required = true, Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarcaModelo), Placeholder = "Buscar modelo...")]
         public long IdVeiculoMarcaModelo { get; set; }

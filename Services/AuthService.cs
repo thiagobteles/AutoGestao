@@ -30,7 +30,7 @@ namespace AutoGestao.Services
                     if (usuario != null)
                     {
                         var auditService = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
-                        await auditService?.LogLoginAsync(usuario.Id, usuario.Nome, usuario.Email, false, "Senha incorreta");
+                        await auditService?.LogLoginAsync(usuario.Id, usuario.Nome, usuario.Email, usuario.IdEmpresa, false, "Senha incorreta");
                     }
 
                     return new LoginResponse
@@ -46,7 +46,7 @@ namespace AutoGestao.Services
 
                 // Log de login bem-sucedido
                 var auditServiceSuccess = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
-                await auditServiceSuccess?.LogLoginAsync(usuario.Id, usuario.Nome, usuario.Email, true);
+                await auditServiceSuccess?.LogLoginAsync(usuario.Id, usuario.Nome, usuario.Email, usuario.IdEmpresa, true);
 
                 // Gerar token JWT
                 var token = GenerateJwtToken(usuario);

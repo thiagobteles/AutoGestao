@@ -14,7 +14,7 @@ namespace AutoGestao.Services.Interface
             string[]? camposAlterados = null,
             string? mensagemErro = null);
 
-        Task LogLoginAsync(long usuarioId, string usuarioNome, string usuarioEmail, bool sucesso, string? mensagemErro = null);
+        Task LogLoginAsync(long usuarioId, string usuarioNome, string usuarioEmail, long? IdEmpresa, bool sucesso, string? mensagemErro = null);
 
         Task LogHttpRequestAsync(string url, string metodo, bool sucesso, long? duracaoMs = null, string? mensagemErro = null);
 

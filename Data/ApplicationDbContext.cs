@@ -7,7 +7,6 @@ namespace AutoGestao.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
-
         #region DbSets
 
         public DbSet<Cliente> Clientes { get; set; }
