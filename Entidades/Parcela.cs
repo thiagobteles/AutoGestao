@@ -13,7 +13,7 @@ namespace AutoGestao.Entidades
         public string? Observacoes {  get; set; }
 
         // Foreign Keys
-        public int VendaId { get; set; }
+        public long IdVenda { get; set; }
 
         // Navigation properties
         public virtual Venda Venda { get; set; }

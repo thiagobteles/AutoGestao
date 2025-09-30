@@ -8,7 +8,7 @@ namespace AutoGestao.Entidades
     public class AuditLog : BaseEntidadeEmpresa
     {
         [FormField(Name = "Usuário", Icon = "fas fa-user", Type = EnumFieldType.Text, ReadOnly = true, Order = 1, Section = "Identificação")]
-        public int? UsuarioId { get; set; }
+        public long? UsuarioId { get; set; }
 
         [FormField(Name = "Nome do Usuário", Icon = "fas fa-user", Type = EnumFieldType.Text, ReadOnly = true, Order = 2, Section = "Identificação")]
         public string? UsuarioNome { get; set; }

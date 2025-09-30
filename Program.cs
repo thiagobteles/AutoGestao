@@ -1,6 +1,8 @@
 using AutoGestao.Configuration;
 using AutoGestao.Data;
+using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Services;
 using AutoGestao.Services.Interface;
@@ -35,10 +37,11 @@ builder.Services.AddAuthorization();
 
 // Registrar serviços
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmpresaService, EmpresaService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
+builder.Services.AddHttpContextAccessor();
 
 // Criar um background service para executar limpeza:
 builder.Services.AddHostedService<AuditCleanupBackgroundService>();
@@ -101,52 +104,43 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
+    var empresaService = scope.ServiceProvider.GetRequiredService<IEmpresaService>();
 
-    await InicializarDadosPadrao(context, usuarioService);
+    await InicializarDadosPadrao(context, usuarioService, empresaService);
 }
 
 app.Run();
 
-//static void ConfigureEnumAutomation()
-//{
-//    // Configurações globais
-//    EnumAutomationConfig.IncludeIconsByDefault = true;
-//    EnumAutomationConfig.IncludeEmptyOptionForNullable = true;
-//    EnumAutomationConfig.EmptyOptionText = "Selecione uma opção...";
-
-//    // Configurações específicas (exemplos)
-//    EnumAutomationConfig.EnumConfigurations[typeof(EnumSituacaoVeiculo)] = new EnumConfig
-//    {
-//        IncludeIcons = true,
-//        EmptyOptionText = "Selecione a situação do veículo...",
-//        SortOrder = EnumSortOrder.ByDescription
-//    };
-
-//    EnumAutomationConfig.EnumConfigurations[typeof(EnumEstado)] = new EnumConfig
-//    {
-//        IncludeIcons = false,
-//        EmptyOptionText = "Selecione o estado...",
-//        SortOrder = EnumSortOrder.ByName
-//    };
-
-//    // Enums a serem ignorados (se houver)
-//    // EnumAutomationConfig.IgnoreEnumTypes.Add(typeof(EnumSomeInternalEnum));
-
-//    // Propriedades específicas a serem ignoradas (se houver)
-//    // EnumAutomationConfig.IgnoreProperties.Add("Veiculo.StatusInterno");
-//}
-
-static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioService usuarioService)
+static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
 {
     await context.Database.MigrateAsync();
 
-    if (!await context.Usuarios.AnyAsync(u => u.Perfil == AutoGestao.Enumerador.Gerais.EnumPerfilUsuario.Admin))
+    if (!await context.Usuarios.AnyAsync(u => u.Perfil == EnumPerfilUsuario.Admin))
     {
-        var adminUser = new AutoGestao.Entidades.Usuario
+        var empresa = new Empresa
         {
-            Nome = "Administrador",
+            RazaoSocial = "2PLus Consultoria",
+            CEP = "74125200",
+            Telefone = "62981483753",
+            Email = "thiago_bteles@hotmail.com",
+            Estado = EnumEstado.Goias,
+            Cidade = "Goiânia",
+            Endereco = "Rua T46",
+            Numero = "305",
+            Bairro = "Setor Oeste",
+            Complemento = "Apartamento 401",
+            Observacoes = "Empresa e dados teste",
+            Ativo = true
+        };
+        
+        await empresaService.CriarEmpresaAsync(empresa);
+
+        var adminUser = new Usuario
+        {
+            Nome = "Thiago",
             Email = "admin@autogestao.com",
-            Perfil = AutoGestao.Enumerador.Gerais.EnumPerfilUsuario.Admin,
+            Perfil = EnumPerfilUsuario.Admin,
+            IdEmpresa = 1,
             Ativo = true
         };
 
@@ -156,6 +150,4 @@ static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioS
         Console.WriteLine("Email: admin@autogestao.com");
         Console.WriteLine("Senha: admin123");
     }
-
-    //ConfigureEnumAutomation();
 }

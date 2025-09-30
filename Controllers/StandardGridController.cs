@@ -3,6 +3,7 @@ using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
+using AutoGestao.Helpers;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -1091,17 +1092,40 @@ namespace AutoGestao.Controllers
 
             if (formFieldAttr != null)
             {
-                // ✅ RESOLVER VALORES CONDICIONAIS DE ENUM AUTOMATICAMENTE
-                var resolvedConditionalValue = formFieldAttr.ConditionalValue;
+                // ============================================================
+                // PROCESSAMENTO DE REGRAS CONDICIONAIS
+                // ============================================================
 
-                if (!string.IsNullOrEmpty(formFieldAttr.ConditionalField) && !string.IsNullOrEmpty(formFieldAttr.ConditionalValue))
+                // Obtém as novas anotações de regras condicionais
+                var conditionalDisplayAttr = property.GetCustomAttribute<ConditionalDisplayAttribute>();
+                var conditionalRequiredAttr = property.GetCustomAttribute<ConditionalRequiredAttribute>();
+
+                // Regra de exibição (usa nova anotação ou fallback para sistema antigo)
+                var displayRule = "";
+                if (conditionalDisplayAttr != null)
                 {
-                    resolvedConditionalValue = EnumExtension.ResolveMultipleConditionalValues(
-                        formFieldAttr.ConditionalField,
-                        formFieldAttr.ConditionalValue,
-                        typeof(T)
-                    );
+                    displayRule = conditionalDisplayAttr.Rule;
                 }
+
+                // Avalia se o campo deve ser exibido
+                var shouldDisplay = true;
+                if (!string.IsNullOrEmpty(displayRule))
+                {
+                    shouldDisplay = ConditionalExpressionEvaluator.Evaluate(displayRule, entity, typeof(T));
+                }
+
+                // Regra de obrigatoriedade condicional
+                var requiredRule = conditionalRequiredAttr?.Rule ?? "";
+                var isConditionallyRequired = false;
+                var requiredMessage = conditionalRequiredAttr?.ErrorMessage ?? "";
+
+                if (!string.IsNullOrEmpty(requiredRule))
+                {
+                    isConditionallyRequired = ConditionalExpressionEvaluator.Evaluate(requiredRule, entity, typeof(T));
+                }
+
+                // Determina se o campo é obrigatório
+                var isRequired = formFieldAttr.Required || isConditionallyRequired;
 
                 return new FormFieldViewModel
                 {
@@ -1110,21 +1134,25 @@ namespace AutoGestao.Controllers
                     Icon = formFieldAttr.Icon ?? GetDefaultIcon(property),
                     Placeholder = formFieldAttr.Placeholder ?? GetDefaultPlaceholder(property),
                     Type = formFieldAttr.Type,
-                    Required = formFieldAttr.Required || IsRequiredProperty(property),
+                    Required = isRequired,
                     ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
                     Value = property.GetValue(entity),
                     Reference = formFieldAttr.Reference ?? null,
                     ValidationRegex = formFieldAttr.ValidationRegex ?? "",
                     ValidationMessage = formFieldAttr.ValidationMessage ?? "",
-                    ConditionalField = formFieldAttr.ConditionalField ?? "",
-                    ConditionalValue = resolvedConditionalValue ?? "",
+
+                    // Novas regras condicionais
+                    ConditionalDisplayRule = displayRule,
+                    ConditionalRequiredRule = requiredRule,
+                    ConditionalRequiredMessage = requiredMessage,
+                    ShouldDisplay = shouldDisplay,
+                    IsConditionallyRequired = isConditionallyRequired,
                     GridColumns = formFieldAttr.GridColumns,
                     CssClass = formFieldAttr.CssClass ?? "",
                     DataList = formFieldAttr.DataList ?? "",
                     Order = formFieldAttr.Order,
                     Section = formFieldAttr.Section ?? "Não Informado",
                     Options = formFieldAttr.Type == EnumFieldType.Select
-                        //? GetSelectOptions(property, entity)
                         ? GetSelectOptions(property.Name)
                         : []
                 };
@@ -1301,7 +1329,6 @@ namespace AutoGestao.Controllers
 
         #endregion Helpers para aplicar filtros
 
-
         /// <summary>
         /// Manipula criação via modal para campos de referência
         /// </summary>
@@ -1312,8 +1339,7 @@ namespace AutoGestao.Controllers
         public static async Task<IActionResult> HandleModalCreate<T>(StandardGridController<T> controller, T entity) where T : BaseEntidade, new()
         {
             // Verifica se é requisição AJAX (modal)
-            if (controller.Request.Headers.ContainsKey("X-Requested-With") &&
-                controller.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if (controller.Request.Headers.TryGetValue("X-Requested-With", out var value) && value == "XMLHttpRequest")
             {
                 try
                 {
@@ -1321,10 +1347,8 @@ namespace AutoGestao.Controllers
                     {
                         // Executar lógica de criação
                         await controller.BeforeCreate(entity);
-
                         controller._context.Set<T>().Add(entity);
                         await controller._context.SaveChangesAsync();
-
                         await controller.AfterCreate(entity);
 
                         // Retornar JSON para o modal
@@ -1356,8 +1380,6 @@ namespace AutoGestao.Controllers
                 }
                 catch (Exception ex)
                 {
-                    //controller.Logger?.LogError(ex, "Erro ao criar {EntityType} via modal", typeof(T).Name);
-
                     return controller.Json(new
                     {
                         success = false,
@@ -1436,6 +1458,5 @@ namespace AutoGestao.Controllers
             var typeName = type.Name;
             return $"{typeName} #{entity.Id}";
         }
-
     }
 }

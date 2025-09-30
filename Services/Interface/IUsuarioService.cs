@@ -8,8 +8,8 @@ namespace AutoGestao.Services.Interface
 
         Task<Usuario?> BuscarPorEmailAsync(string email);
 
-        Task<bool> EmailExisteAsync(string email, int? usuarioId = null);
+        Task<bool> EmailExisteAsync(string email, long? usuarioId = null);
 
-        Task<bool> AlterarSenhaAsync(int usuarioId, string senhaAtual, string novaSenha);
+        Task<bool> AlterarSenhaAsync(long usuarioId, string senhaAtual, string novaSenha);
     }
 }

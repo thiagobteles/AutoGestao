@@ -14,20 +14,25 @@ namespace AutoGestao.Services
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly ILogger<AuditService> _logger = logger;
 
-        public async Task LogAsync(string entidadeNome, string entidadeId, EnumTipoOperacaoAuditoria tipoOperacao,
-                                  object? valoresAntigos = null, object? valoresNovos = null,
-                                  string[]? camposAlterados = null, string? mensagemErro = null)
+        public async Task LogAsync(
+            string entidadeNome,
+            string entidadeId,
+            EnumTipoOperacaoAuditoria tipoOperacao,
+            object? valoresAntigos = null,
+            object? valoresNovos = null,
+            string[]? camposAlterados = null,
+            string? mensagemErro = null)
         {
             try
             {
                 var httpContext = _httpContextAccessor.HttpContext;
-                var usuario = GetCurrentUser();
+                var (Id, Nome, Email) = GetCurrentUser();
 
                 var auditLog = new AuditLog
                 {
-                    UsuarioId = usuario.Id,
-                    UsuarioNome = usuario.Nome,
-                    UsuarioEmail = usuario.Email,
+                    UsuarioId = Id,
+                    UsuarioNome = Nome,
+                    UsuarioEmail = Email,
                     EntidadeNome = entidadeNome,
                     EntidadeDisplayName = GetEntityDisplayName(entidadeNome),
                     EntidadeId = entidadeId,
@@ -54,7 +59,7 @@ namespace AutoGestao.Services
             }
         }
 
-        public async Task LogLoginAsync(int usuarioId, string usuarioNome, string usuarioEmail, bool sucesso, string? mensagemErro = null)
+        public async Task LogLoginAsync(long usuarioId, string usuarioNome, string usuarioEmail, bool sucesso, string? mensagemErro = null)
         {
             try
             {
@@ -92,13 +97,13 @@ namespace AutoGestao.Services
         {
             try
             {
-                var usuario = GetCurrentUser();
+                var (Id, Nome, Email) = GetCurrentUser();
 
                 var auditLog = new AuditLog
                 {
-                    UsuarioId = usuario.Id,
-                    UsuarioNome = usuario.Nome,
-                    UsuarioEmail = usuario.Email,
+                    UsuarioId = Id,
+                    UsuarioNome = Nome,
+                    UsuarioEmail = Email,
                     EntidadeNome = "HttpRequest",
                     EntidadeDisplayName = "Requisição HTTP",
                     EntidadeId = Guid.NewGuid().ToString(),
@@ -122,10 +127,14 @@ namespace AutoGestao.Services
             }
         }
 
-        public async Task<List<AuditLog>> GetLogsAsync(int? usuarioId = null, string? entidade = null,
-                                                      EnumTipoOperacaoAuditoria? tipoOperacao = null,
-                                                      DateTime? dataInicio = null, DateTime? dataFim = null,
-                                                      int skip = 0, int take = 50)
+        public async Task<List<AuditLog>> GetLogsAsync(
+            long? usuarioId = null,
+            string? entidade = null,
+            EnumTipoOperacaoAuditoria? tipoOperacao = null,
+            DateTime? dataInicio = null,
+            DateTime? dataFim = null,
+            int skip = 0,
+            int take = 50)
         {
             var query = _context.AuditLogs.Include(a => a.Usuario).AsQueryable();
 
@@ -161,9 +170,12 @@ namespace AutoGestao.Services
                 .ToListAsync();
         }
 
-        public async Task<int> GetLogsCountAsync(int? usuarioId = null, string? entidade = null,
-                                                EnumTipoOperacaoAuditoria? tipoOperacao = null,
-                                                DateTime? dataInicio = null, DateTime? dataFim = null)
+        public async Task<int> GetLogsCountAsync(
+            long? usuarioId = null,
+            string? entidade = null,
+            EnumTipoOperacaoAuditoria? tipoOperacao = null,
+            DateTime? dataInicio = null,
+            DateTime? dataFim = null)
         {
             var query = _context.AuditLogs.AsQueryable();
 
@@ -195,7 +207,7 @@ namespace AutoGestao.Services
             return await query.CountAsync();
         }
 
-        private (int? Id, string Nome, string Email) GetCurrentUser()
+        private (long? Id, string Nome, string Email) GetCurrentUser()
         {
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext?.User?.Identity?.IsAuthenticated == true)

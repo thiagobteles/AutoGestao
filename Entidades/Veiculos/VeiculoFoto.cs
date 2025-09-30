@@ -9,7 +9,7 @@ namespace AutoGestao.Entidades.Veiculos
         public bool Principal { get; set; }
 
         // Foreign Keys
-        public int VeiculoId { get; set; }
+        public long IdVeiculo { get; set; }
 
         // Navigation properties
         public virtual Veiculo Veiculo { get; set; } = null!;

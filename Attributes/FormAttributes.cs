@@ -42,7 +42,7 @@ namespace AutoGestao.Attributes
         /// <summary>
         /// Tipo do campo de formulário
         /// </summary>
-        public EnumFieldType Type { get; set; } = EnumFieldType.Text;
+        public EnumFieldType Type { get; set; }
 
         /// <summary>
         /// Indica se o campo é obrigatório
@@ -63,16 +63,6 @@ namespace AutoGestao.Attributes
         /// Mensagem de erro de validação
         /// </summary>
         public string ValidationMessage { get; set; } = "";
-
-        /// <summary>
-        /// Campo condicional (mostra/esconde baseado em outro campo)
-        /// </summary>
-        public string ConditionalField { get; set; } = "";
-
-        /// <summary>
-        /// Valor do campo condicional
-        /// </summary>
-        public string ConditionalValue { get; set; } = "";
 
         /// <summary>
         /// Número de colunas do grid (1-4)
@@ -109,36 +99,5 @@ namespace AutoGestao.Attributes
         /// Configurações específicas para campo de referência
         /// </summary>
         public string ReferenceConfig { get; set; } = "";
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class FormConfigAttribute : Attribute
-    {
-        public string Title { get; set; } = "";
-        public string Subtitle { get; set; } = "";
-        public string Icon { get; set; } = "fas fa-edit";
-        public bool EnableAjaxSubmit { get; set; } = true;
-        public string BackAction { get; set; } = "Index";
-        public string BackText { get; set; } = "Voltar à Lista";
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class FormTabsAttribute : Attribute
-    {
-        public bool EnableTabs { get; set; } = true;
-        public string DefaultTab { get; set; } = "principal";
-    }
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class FormTabAttribute(string tabId, string tabName) : Attribute
-    {
-        public string TabId { get; set; } = tabId;
-        public string TabName { get; set; } = tabName;
-        public string TabIcon { get; set; } = "fas fa-edit";
-        public int Order { get; set; } = 0;
-        public string Controller { get; set; } = "";
-        public string Action { get; set; } = "Index";
-        public bool LazyLoad { get; set; } = true;
-        public string[] RequiredRoles { get; set; } = [];
     }
 }

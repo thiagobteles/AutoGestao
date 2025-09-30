@@ -14,9 +14,9 @@ namespace AutoGestao.Entidades
         public DateTime DataVenda { get; set; }
 
         // Foreign Keys
-        public int ClienteId { get; set; }
-        public int VeiculoId { get; set; }
-        public int VendedorId { get; set; }
+        public long IdCliente { get; set; }
+        public long IdVeiculo { get; set; }
+        public long IdVendedor { get; set; }
 
         // Navigation properties
         public virtual Cliente Cliente { get; set; }

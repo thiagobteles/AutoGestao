@@ -193,7 +193,7 @@ namespace AutoGestao.Controllers
 
             var documento = new VeiculoDocumento
             {
-                VeiculoId = veiculoId,
+                IdVeiculo = veiculoId,
                 NomeArquivo = arquivo.FileName,
                 Observacoes = descricao,
                 DataUpload = DateTime.UtcNow
@@ -233,7 +233,7 @@ namespace AutoGestao.Controllers
 
             var fotoEntidade = new VeiculoFoto
             {
-                VeiculoId = veiculoId,
+                IdVeiculo = veiculoId,
                 NomeArquivo = foto.FileName,
                 Descricao = descricao,
                 DataUpload = DateTime.UtcNow
@@ -253,8 +253,8 @@ namespace AutoGestao.Controllers
             {
                 var despesa = new Despesa
                 {
-                    VeiculoId = veiculoId,
-                    FornecedorId = model.FornecedorId,
+                    IdVeiculo = veiculoId,
+                    IdFornecedor = model.FornecedorId,
                     Descricao = model.Descricao,
                     Valor = model.Valor,
                     DataDespesa = model.DataDespesa,
@@ -405,7 +405,7 @@ namespace AutoGestao.Controllers
         private async Task<IActionResult> RenderArquivosTab(Veiculo veiculo)
         {
             var documentos = await _context.VeiculoDocumentos
-                .Where(d => d.VeiculoId == veiculo.Id)
+                .Where(d => d.IdVeiculo == veiculo.Id)
                 .ToListAsync();
 
             return PartialView("_TabArquivos", documentos);
@@ -414,7 +414,7 @@ namespace AutoGestao.Controllers
         private async Task<IActionResult> RenderMidiasTab(Veiculo veiculo)
         {
             var fotos = await _context.VeiculoFotos
-                .Where(f => f.VeiculoId == veiculo.Id)
+                .Where(f => f.IdVeiculo == veiculo.Id)
                 .ToListAsync();
 
             return PartialView("_TabMidias", fotos);
@@ -423,7 +423,7 @@ namespace AutoGestao.Controllers
         private async Task<IActionResult> RenderFinanceiroTab(Veiculo veiculo)
         {
             var despesas = await _context.Despesas
-                .Where(d => d.VeiculoId == veiculo.Id)
+                .Where(d => d.IdVeiculo == veiculo.Id)
                 .Include(d => d.Fornecedor)
                 .ToListAsync();
 
@@ -436,12 +436,12 @@ namespace AutoGestao.Controllers
             {
                 Veiculo = veiculo,
                 TotalDespesas = await _context.Despesas
-                    .Where(d => d.VeiculoId == veiculo.Id)
+                    .Where(d => d.IdVeiculo == veiculo.Id)
                     .SumAsync(d => d.Valor),
                 QtdDocumentos = await _context.VeiculoDocumentos
-                    .CountAsync(d => d.VeiculoId == veiculo.Id),
+                    .CountAsync(d => d.IdVeiculo == veiculo.Id),
                 QtdFotos = await _context.VeiculoFotos
-                    .CountAsync(f => f.VeiculoId == veiculo.Id)
+                    .CountAsync(f => f.IdVeiculo == veiculo.Id)
             };
 
             return PartialView("_TabResumo", resumo);

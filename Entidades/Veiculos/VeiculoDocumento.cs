@@ -11,7 +11,7 @@ namespace AutoGestao.Entidades.Veiculos
         public DateTime DataUpload { get; set; }
 
         // Foreign Keys
-        public int VeiculoId { get; set; }
+        public long IdVeiculo { get; set; }
 
         // Navigation properties
         public virtual Veiculo Veiculo { get; set; } = null!;

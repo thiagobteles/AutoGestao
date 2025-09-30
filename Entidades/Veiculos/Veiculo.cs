@@ -1,7 +1,6 @@
 using AutoGestao.Attributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Enumerador.Veiculo;
-using System.ComponentModel.DataAnnotations;
 
 namespace AutoGestao.Entidades.Veiculos
 {
@@ -22,7 +21,6 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Number, ReadOnly = true, GridColumns = 2)]
         public string Codigo { get; set; }
 
-        [Required]
         [FormField(Order = 1, Name = "Placa", Section = "Identificação", Icon = "fas fa-id-card", Type = EnumFieldType.Text, Required = true, Placeholder = "XXX-0000 ou XXX0X00")]
         public string Placa { get; set; }
 
@@ -33,10 +31,12 @@ namespace AutoGestao.Entidades.Veiculos
         public string? Renavam { get; set; }
 
         [FormField(Order = 10, Name = "Marca", Section = "Especificações", Icon = "fas fa-car", Required = true, Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarca), Placeholder = "Buscar Marca...", GridColumns = 2)]
-        public int VeiculoMarcaId { get; set; }
+        public long IdVeiculoMarca { get; set; }
 
-        [FormField(Order = 10, Name = "Modelo", Section = "Especificações", Icon = "fas fa-car-side", Required = true, Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarcaModelo), ConditionalField = nameof(VeiculoMarcaId), Placeholder = "Buscar modelo...")]
-        public int VeiculoMarcaModeloId { get; set; }
+        [ConditionalRule(EnumConditionalRuleType.ReadOnly, "VeiculoMarcaId == 0")]
+        [ConditionalRequired("VeiculoMarcaId > 0", "Modelo obrigatório!")]
+        [FormField(Order = 10, Name = "Modelo", Section = "Especificações", Icon = "fas fa-car-side", Required = true, Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarcaModelo), Placeholder = "Buscar modelo...")]
+        public long IdVeiculoMarcaModelo { get; set; }
 
         [FormField(Order = 10, Name = "Ano Fabricação", Section = "Especificações", Icon = "fas fa-calendar", Type = EnumFieldType.Number, Required = true)]
         public int? AnoFabricacao { get; set; }
@@ -45,7 +45,7 @@ namespace AutoGestao.Entidades.Veiculos
         public int? AnoModelo { get; set; }
 
         [FormField(Order = 10, Name = "Cor", Section = "Especificações", Icon = "fas fa-palette", Type = EnumFieldType.Reference, Reference = typeof(VeiculoCor), Placeholder = "Buscar cor...")]
-        public int? VeiculoCorId { get; set; }
+        public long? IdVeiculoCor { get; set; }
 
         [FormField(Order = 10, Name = "Motorização", Section = "Especificações", Type = EnumFieldType.Text)]
         public string? Motorizacao { get; set; }
@@ -68,8 +68,8 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 10, Name = "Portas", Section = "Especificações", Type = EnumFieldType.Select)]
         public EnumPortasVeiculo NumeroPortas { get; set; }
 
-        [FormField(Order = 10, Name = "Capacidade porta malas", Section = "Especificações", Type = EnumFieldType.Text)]
-        public string CapacidadePortaMalas { get; set; }
+        [FormField(Order = 10, Name = "Capacidade porta malas", Section = "Especificações", Type = EnumFieldType.Number)]
+        public int? CapacidadePortaMalas { get; set; }
 
         [FormField(Order = 10, Name = "Perícia Cautelar", Section = "Especificações", Type = EnumFieldType.Select)]
         public EnumPericiaCautelarVeiculo PericiaCautelar { get; set; }
@@ -78,7 +78,7 @@ namespace AutoGestao.Entidades.Veiculos
         public EnumOrigemVeiculo OrigemVeiculo { get; set; }
 
         [FormField(Order = 20, Name = "Proprietário", Section = "Financeiro", Icon = "fas fa-user", Type = EnumFieldType.Reference, Reference = typeof(Cliente), GridColumns = 2)]
-        public int? ProprietarioId { get; set; }
+        public long IdCliente { get; set; }
 
         [FormField(Order = 20, Name = "Data entrada", Section = "Financeiro", Type = EnumFieldType.Date)]
         public DateTime? DataEntrada { get; set; }
@@ -102,10 +102,10 @@ namespace AutoGestao.Entidades.Veiculos
         public EnumSituacaoVeiculo Situacao { get; set; }
 
         [FormField(Order = 40, Name = "Filial", Section = "Informativo", Type = EnumFieldType.Reference, Reference = typeof(VeiculoFilial), GridColumns = 2)]
-        public int? VeiculoFilialId { get; set; }
+        public long? IdVeiculoFilial { get; set; }
 
         [FormField(Order = 40, Name = "Localização", Section = "Informativo", Type = EnumFieldType.Reference, Reference = typeof(VeiculoLocalizacao))]
-        public int? VeiculoLocalizacaoId { get; set; }
+        public long? IdVeiculoLocalizacao { get; set; }
 
         [FormField(Order = 40, Name = "Observações", Section = "Informativo", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea)]
         public string? Observacoes { get; set; }

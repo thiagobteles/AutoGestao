@@ -22,12 +22,12 @@ namespace AutoGestao.Services
 
         public async Task<Usuario?> BuscarPorEmailAsync(string email)
         {
-            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
         }
 
-        public async Task<bool> EmailExisteAsync(string email, int? usuarioId = null)
+        public async Task<bool> EmailExisteAsync(string email, long? usuarioId = null)
         {
-            var query = _context.Usuarios.Where(u => u.Email.ToLower() == email.ToLower());
+            var query = _context.Usuarios.Where(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
             if (usuarioId.HasValue)
             {
                 query = query.Where(u => u.Id != usuarioId.Value);
@@ -36,7 +36,7 @@ namespace AutoGestao.Services
             return await query.AnyAsync();
         }
 
-        public async Task<bool> AlterarSenhaAsync(int usuarioId, string senhaAtual, string novaSenha)
+        public async Task<bool> AlterarSenhaAsync(long usuarioId, string senhaAtual, string novaSenha)
         {
             var usuario = await _context.Usuarios.FindAsync(usuarioId);
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(senhaAtual, usuario.SenhaHash))

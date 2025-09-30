@@ -13,8 +13,8 @@ namespace AutoGestao.Entidades
         public DateTime? DataConclusao { get; set; }
 
         // Foreign Keys
-        public int? ResponsavelId { get; set; }
-        public int? ResponsavelUsuarioId { get; set; }
+        public long? IdResponsavel { get; set; }
+        public long? IdResponsavelUsuario { get; set; }
 
         // Navigation properties
         public virtual Vendedor? Responsavel { get; set; }

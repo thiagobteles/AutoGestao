@@ -10,13 +10,13 @@ namespace AutoGestao.Entidades
         public decimal? ValorOferecido { get; set; }
         public string? Observacoes { get; set; }
         public DateTime DataAvaliacao { get; set; }
-        public EnumStatusAvaliacao StatusAvaliacao { get; set; } = EnumStatusAvaliacao.Pendente;
+        public EnumStatusAvaliacao StatusAvaliacao { get; set; }
 
         // Foreign Keys
-        public int? ClienteId { get; set; }
-        public int? VendedorResponsavelId { get; set; }
-        public int? VeiculoMarcaId { get; set; }
-        public int? VeiculoMarcaModeloId { get; set; }
+        public long? IdCliente { get; set; }
+        public long? IdVendedorResponsavel { get; set; }
+        public long? IdVeiculoMarca { get; set; }
+        public long? IdVeiculoMarcaModelo { get; set; }
 
         // Navigation properties
         public virtual Cliente? Cliente { get; set; }

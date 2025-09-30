@@ -12,9 +12,9 @@ namespace AutoGestao.Entidades
         public EnumStatusDespesa Status { get; set; } = EnumStatusDespesa.Pendente;
 
         // Foreign Keys
-        public int VeiculoId { get; set; }
-        public int DespesaTipoId { get; set; }
-        public int FornecedorId { get; set; }
+        public long IdVeiculo { get; set; }
+        public long IdDespesaTipo { get; set; }
+        public long IdFornecedor { get; set; }
 
         // Navigation properties
         public virtual Veiculo? Veiculo { get; set; }

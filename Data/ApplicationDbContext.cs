@@ -191,7 +191,7 @@ namespace AutoGestao.Data
                 entity.Property(e => e.Combustivel).IsRequired();
                 entity.Property(e => e.Cambio).IsRequired();
                 entity.Property(e => e.NumeroPortas).IsRequired();
-                entity.Property(e => e.CapacidadePortaMalas).HasMaxLength(50);
+                entity.Property(e => e.CapacidadePortaMalas).IsRequired(false);
                 entity.Property(e => e.PrecoCompra).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.PrecoVenda).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Status).IsRequired();
@@ -436,79 +436,79 @@ namespace AutoGestao.Data
             // ===========================================
             // RELACIONAMENTOS DO VEÍCULO
             // ===========================================
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.Proprietario).WithMany(c => c.Veiculos).HasForeignKey(v => v.ProprietarioId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoCor).WithMany().HasForeignKey(v => v.VeiculoCorId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoFilial).WithMany().HasForeignKey(v => v.VeiculoFilialId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoLocalizacao).WithMany().HasForeignKey(v => v.VeiculoLocalizacaoId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoMarca).WithMany().HasForeignKey(v => v.VeiculoMarcaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoMarcaModelo).WithMany().HasForeignKey(v => v.VeiculoMarcaModeloId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.Proprietario).WithMany(c => c.Veiculos).HasForeignKey(v => v.IdCliente).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoCor).WithMany().HasForeignKey(v => v.IdVeiculoCor).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoFilial).WithMany().HasForeignKey(v => v.IdVeiculoFilial).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoLocalizacao).WithMany().HasForeignKey(v => v.IdVeiculoLocalizacao).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoMarca).WithMany().HasForeignKey(v => v.IdVeiculoMarca).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoMarcaModelo).WithMany().HasForeignKey(v => v.IdVeiculoMarcaModelo).OnDelete(DeleteBehavior.SetNull);
 
             // ===========================================
             // RELACIONAMENTO ENTRE MARCA E MODELO
             // ===========================================
-            modelBuilder.Entity<VeiculoMarcaModelo>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<VeiculoMarcaModelo>().HasOne(m => m.VeiculoMarca).WithMany().HasForeignKey(m => m.VeiculoMarcaId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<VeiculoMarcaModelo>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<VeiculoMarcaModelo>().HasOne(m => m.VeiculoMarca).WithMany().HasForeignKey(m => m.IdVeiculoMarca).OnDelete(DeleteBehavior.SetNull);
 
             // ===========================================
             // RELACIONAMENTOS DAS FOTOS DO VEÍCULO
             // ===========================================
-            modelBuilder.Entity<VeiculoFoto>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<VeiculoFoto>().HasOne(vf => vf.Veiculo).WithMany(v => v.Fotos).HasForeignKey(vf => vf.VeiculoId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<VeiculoFoto>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<VeiculoFoto>().HasOne(vf => vf.Veiculo).WithMany(v => v.Fotos).HasForeignKey(vf => vf.IdVeiculo).OnDelete(DeleteBehavior.Cascade);
 
             // ===========================================
             // RELACIONAMENTOS DOS DOCUMENTOS DO VEÍCULO
             // ===========================================
-            modelBuilder.Entity<VeiculoDocumento>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<VeiculoDocumento>().HasOne(vd => vd.Veiculo).WithMany(v => v.Documentos).HasForeignKey(vd => vd.VeiculoId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<VeiculoDocumento>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<VeiculoDocumento>().HasOne(vd => vd.Veiculo).WithMany(v => v.Documentos).HasForeignKey(vd => vd.IdVeiculo).OnDelete(DeleteBehavior.Cascade);
 
             // ===========================================
             // RELACIONAMENTOS DA VENDA
             // ===========================================
-            modelBuilder.Entity<Venda>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Venda>().HasOne(v => v.Cliente).WithMany(c => c.Vendas).HasForeignKey(v => v.ClienteId).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Venda>().HasOne(v => v.Veiculo).WithMany(ve => ve.Vendas).HasForeignKey(v => v.VeiculoId).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Venda>().HasOne(v => v.Vendedor).WithMany(ve => ve.Vendas).HasForeignKey(v => v.VendedorId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Venda>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Venda>().HasOne(v => v.Cliente).WithMany(c => c.Vendas).HasForeignKey(v => v.IdCliente).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Venda>().HasOne(v => v.Veiculo).WithMany(ve => ve.Vendas).HasForeignKey(v => v.IdVeiculo).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Venda>().HasOne(v => v.Vendedor).WithMany(ve => ve.Vendas).HasForeignKey(v => v.IdVendedor).OnDelete(DeleteBehavior.Restrict);
 
             // ===========================================
             // RELACIONAMENTOS DA PARCELA
             // ===========================================
-            modelBuilder.Entity<Parcela>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Parcela>().HasOne(p => p.Venda).WithMany(v => v.Parcelas).HasForeignKey(p => p.VendaId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Parcela>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Parcela>().HasOne(p => p.Venda).WithMany(v => v.Parcelas).HasForeignKey(p => p.IdVenda).OnDelete(DeleteBehavior.Cascade);
 
             // ===========================================
             // RELACIONAMENTOS DAS DESPESAS
             // ===========================================
-            modelBuilder.Entity<Despesa>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Despesa>().HasOne(d => d.Veiculo).WithMany(v => v.Despesas).HasForeignKey(d => d.VeiculoId).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Despesa>().HasOne(d => d.DespesaTipo).WithMany().HasForeignKey(d => d.DespesaTipoId).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Despesa>().HasOne(d => d.Fornecedor).WithMany().HasForeignKey(d => d.FornecedorId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Despesa>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Despesa>().HasOne(d => d.Veiculo).WithMany(v => v.Despesas).HasForeignKey(d => d.IdVeiculo).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Despesa>().HasOne(d => d.DespesaTipo).WithMany().HasForeignKey(d => d.IdDespesaTipo).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Despesa>().HasOne(d => d.Fornecedor).WithMany().HasForeignKey(d => d.IdFornecedor).OnDelete(DeleteBehavior.Restrict);
 
             // ===========================================
             // RELACIONAMENTOS DAS AVALIAÇÕES
             // ===========================================
-            modelBuilder.Entity<Avaliacao>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Avaliacao>().HasOne(a => a.Cliente).WithMany(c => c.Avaliacoes).HasForeignKey(a => a.ClienteId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VendedorResponsavel).WithMany(v => v.Avaliacoes).HasForeignKey(a => a.VendedorResponsavelId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VeiculoMarca).WithMany().HasForeignKey(a => a.VeiculoMarcaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VeiculoMarcaModelo).WithMany().HasForeignKey(a => a.VeiculoMarcaModeloId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Avaliacao>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Avaliacao>().HasOne(a => a.Cliente).WithMany(c => c.Avaliacoes).HasForeignKey(a => a.IdCliente).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VendedorResponsavel).WithMany(v => v.Avaliacoes).HasForeignKey(a => a.IdVendedorResponsavel).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VeiculoMarca).WithMany().HasForeignKey(a => a.IdVeiculoMarca).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VeiculoMarcaModelo).WithMany().HasForeignKey(a => a.IdVeiculoMarcaModelo).OnDelete(DeleteBehavior.SetNull);
 
             // ===========================================
             // RELACIONAMENTOS DAS TAREFAS
             // ===========================================
-            modelBuilder.Entity<Tarefa>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Tarefa>().HasOne(t => t.Responsavel).WithMany(v => v.Tarefas).HasForeignKey(t => t.ResponsavelId).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Tarefa>().HasOne(t => t.ResponsavelUsuario).WithMany(u => u.TarefasResponsavel).HasForeignKey(t => t.ResponsavelUsuarioId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Tarefa>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Tarefa>().HasOne(t => t.Responsavel).WithMany(v => v.Tarefas).HasForeignKey(t => t.IdResponsavel).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Tarefa>().HasOne(t => t.ResponsavelUsuario).WithMany(u => u.TarefasResponsavel).HasForeignKey(t => t.IdResponsavelUsuario).OnDelete(DeleteBehavior.SetNull);
 
             // ===========================================
             // RELACIONAMENTOS DO USUARIO
             // ===========================================
-            modelBuilder.Entity<Usuario>().HasOne(u => u.Empresa).WithMany().HasForeignKey(u => u.EmpresaId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Usuario>().HasOne(u => u.Empresa).WithMany().HasForeignKey(u => u.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
 
             // ===========================================
             // RELACIONAMENTOS DO AUDITLOG
             // ===========================================
-            modelBuilder.Entity<AuditLog>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.EmpresaId).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<AuditLog>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<AuditLog>().HasOne(a => a.Usuario).WithMany(u => u.AuditLogs).HasForeignKey(a => a.UsuarioId).OnDelete(DeleteBehavior.SetNull);
 
             #endregion CONFIGURAÇÕES DE RELACIONAMENTOS
@@ -554,8 +554,8 @@ namespace AutoGestao.Data
             // ===========================================
             modelBuilder.Entity<Venda>().HasIndex(v => v.DataVenda);
             modelBuilder.Entity<Venda>().HasIndex(v => v.Status);
-            modelBuilder.Entity<Venda>().HasIndex(v => v.ClienteId);
-            modelBuilder.Entity<Venda>().HasIndex(v => v.VendedorId);
+            modelBuilder.Entity<Venda>().HasIndex(v => v.IdCliente);
+            modelBuilder.Entity<Venda>().HasIndex(v => v.IdVendedor);
 
             // ===========================================
             // ÍNDICES PARA PERFORMANCE - PARCELA
@@ -574,8 +574,8 @@ namespace AutoGestao.Data
             // ===========================================
             modelBuilder.Entity<Tarefa>().HasIndex(t => t.Status);
             modelBuilder.Entity<Tarefa>().HasIndex(t => t.DataVencimento);
-            modelBuilder.Entity<Tarefa>().HasIndex(t => t.ResponsavelId);
-            modelBuilder.Entity<Tarefa>().HasIndex(t => t.ResponsavelUsuarioId);
+            modelBuilder.Entity<Tarefa>().HasIndex(t => t.IdResponsavel);
+            modelBuilder.Entity<Tarefa>().HasIndex(t => t.IdResponsavelUsuario);
 
             // ===========================================
             // ÍNDICES PARA PERFORMANCE - CLIENTE
@@ -590,19 +590,19 @@ namespace AutoGestao.Data
             // ===========================================
             // ÍNDICES PARA EMPRESA
             // ===========================================
-            modelBuilder.Entity<Venda>().HasIndex(v => v.EmpresaId);
-            modelBuilder.Entity<Parcela>().HasIndex(p => p.EmpresaId);
-            modelBuilder.Entity<Veiculo>().HasIndex(v => v.EmpresaId);
-            modelBuilder.Entity<Tarefa>().HasIndex(t => t.EmpresaId);
-            modelBuilder.Entity<Avaliacao>().HasIndex(a => a.EmpresaId);
-            modelBuilder.Entity<Despesa>().HasIndex(d => d.EmpresaId);
-            modelBuilder.Entity<Usuario>().HasIndex(u => u.EmpresaId);
-            modelBuilder.Entity<VeiculoCor>().HasIndex(c => c.EmpresaId);
-            modelBuilder.Entity<VeiculoFilial>().HasIndex(f => f.EmpresaId);
-            modelBuilder.Entity<VeiculoLocalizacao>().HasIndex(l => l.EmpresaId);
-            modelBuilder.Entity<VeiculoMarca>().HasIndex(m => m.EmpresaId);
-            modelBuilder.Entity<DespesaTipo>().HasIndex(dt => dt.EmpresaId);
-            modelBuilder.Entity<AuditLog>().HasIndex(a => a.EmpresaId);
+            modelBuilder.Entity<Venda>().HasIndex(v => v.IdEmpresa);
+            modelBuilder.Entity<Parcela>().HasIndex(p => p.IdEmpresa);
+            modelBuilder.Entity<Veiculo>().HasIndex(v => v.IdEmpresa);
+            modelBuilder.Entity<Tarefa>().HasIndex(t => t.IdEmpresa);
+            modelBuilder.Entity<Avaliacao>().HasIndex(a => a.IdEmpresa);
+            modelBuilder.Entity<Despesa>().HasIndex(d => d.IdEmpresa);
+            modelBuilder.Entity<Usuario>().HasIndex(u => u.IdEmpresa);
+            modelBuilder.Entity<VeiculoCor>().HasIndex(c => c.IdEmpresa);
+            modelBuilder.Entity<VeiculoFilial>().HasIndex(f => f.IdEmpresa);
+            modelBuilder.Entity<VeiculoLocalizacao>().HasIndex(l => l.IdEmpresa);
+            modelBuilder.Entity<VeiculoMarca>().HasIndex(m => m.IdEmpresa);
+            modelBuilder.Entity<DespesaTipo>().HasIndex(dt => dt.IdEmpresa);
+            modelBuilder.Entity<AuditLog>().HasIndex(a => a.IdEmpresa);
 
             // ===========================================
             // ÍNDICES PARA PERFORMANCE - AUDITLOG

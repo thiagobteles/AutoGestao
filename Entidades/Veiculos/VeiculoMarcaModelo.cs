@@ -5,7 +5,7 @@ namespace AutoGestao.Entidades.Veiculos
         public string Descricao { get; set; } = string.Empty;
 
         // Foreign Keys
-        public int? VeiculoMarcaId { get; set; }
+        public long? IdVeiculoMarca { get; set; }
 
         // Navigation properties
         public virtual VeiculoMarca? VeiculoMarca { get; set; }

@@ -164,7 +164,7 @@ namespace AutoGestao.Controllers
         protected override Task BeforeDelete(Cliente entity)
         {
             // Verificar se pode deletar
-            var temVendas = _context.Vendas.Any(v => v.ClienteId == entity.Id);
+            var temVendas = _context.Vendas.Any(v => v.IdCliente == entity.Id);
 
             return temVendas
                 ? throw new InvalidOperationException("Não é possível excluir cliente com vendas associadas")
@@ -180,7 +180,7 @@ namespace AutoGestao.Controllers
         // Só pode deletar clientes que não estão vinculados a compras
         protected override bool CanDelete(Cliente entity)
         {
-            var temVendas = _context.Vendas.Any(v => v.ClienteId == entity.Id);
+            var temVendas = _context.Vendas.Any(v => v.IdCliente == entity.Id);
             return !temVendas;
         }
 

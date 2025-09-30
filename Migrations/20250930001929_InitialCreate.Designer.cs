@@ -3,6 +3,7 @@ using System;
 using AutoGestao.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoGestao.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250930001929_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1027,8 +1030,9 @@ namespace AutoGestao.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("cambio");
 
-                    b.Property<int?>("CapacidadePortaMalas")
-                        .HasColumnType("integer")
+                    b.Property<string>("CapacidadePortaMalas")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("capacidade_porta_malas");
 
                     b.Property<string>("Chassi")

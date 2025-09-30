@@ -93,7 +93,7 @@ namespace AutoGestao.Enumerador.Gerais
         Hidden,
 
         /// <summary>
-        /// Campo de referência com busca automática (NOVO)
+        /// Campo de referência com busca automática
         /// </summary>
         Reference
     }

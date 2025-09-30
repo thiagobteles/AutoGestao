@@ -14,19 +14,23 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Tipo de Cliente", Icon = "fas fa-user-tag", Type = EnumFieldType.Select, Required = true, Order = 1, Section = "Tipo de Cliente")]
         public EnumTipoPessoa TipoCliente { get; set; }
 
-        [FormField(Order = 10, Name = "Nome Completo", Icon = "fas fa-signature", Type = EnumFieldType.Text, Required = true,  Section = "Dados Básicos", Placeholder = "Digite o nome completo")]
-        public string Nome { get; set; } = "";
+        [FormField(Order = 10, Name = "Nome Completo", Icon = "fas fa-signature", Type = EnumFieldType.Text, Required = true, Section = "Dados Básicos", Placeholder = "Digite o nome completo")]
+        public string Nome { get; set; }
 
-        [FormField(Name = "CPF", Icon = "fas fa-fingerprint", Type = EnumFieldType.Cpf, Required = false, Order = 11, Section = "Dados Básicos", ConditionalField = "TipoCliente", ConditionalValue = "PessoaFisica", GridColumns = 2)]
-        public string? Cpf { get; set; }
-
-        [FormField(Name = "RG", Icon = "fas fa-building", Type = EnumFieldType.Text, Required = false, Order = 13, Section = "Dados Básicos", ConditionalField = "TipoCliente", ConditionalValue = "EnumTipoPessoa.PessoaFisica")]
-        public string? Rg { get; set; }
-
-        [FormField(Name = "Data de nascimento", Icon = "fas fa-building", Type = EnumFieldType.Date, Required = false, Order = 14, Section = "Dados Básicos", ConditionalField = "TipoCliente", ConditionalValue = "1")]
+        [ConditionalDisplay("TipoCliente == 1")]
+        [FormField(Name = "Data de nascimento", Icon = "fas fa-building", Type = EnumFieldType.Date, Order = 14, Section = "Dados Básicos")]
         public DateTime? DataNascimento { get; set; }
 
-        [FormField(Name = "CNPJ", Icon = "fas fa-building", Type = EnumFieldType.Cnpj, Required = false, Order = 12, Section = "Dados Básicos", ConditionalField = "TipoCliente", ConditionalValue = "2")]
+        [ConditionalDisplay("TipoCliente == 1")]
+        [FormField(Name = "CPF", Icon = "fas fa-fingerprint", Type = EnumFieldType.Cpf, Order = 11, Section = "Dados Básicos", GridColumns = 2)]
+        public string? Cpf { get; set; }
+
+        [ConditionalDisplay("TipoCliente == 1")]
+        [FormField(Name = "RG", Icon = "fas fa-building", Type = EnumFieldType.Text, Order = 13, Section = "Dados Básicos")]
+        public string? Rg { get; set; }
+
+        [ConditionalDisplay("TipoCliente == 2")]
+        [FormField(Name = "CNPJ", Icon = "fas fa-building", Type = EnumFieldType.Cnpj, Order = 12, Section = "Dados Básicos")]
         public string? Cnpj { get; set; }
 
         [FormField(Name = "Email", Icon = "fas fa-envelope", Type = EnumFieldType.Email, Order = 20, Section = "Contato", Placeholder = "cliente@email.com")]
@@ -35,6 +39,7 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Telefone", Icon = "fas fa-phone", Type = EnumFieldType.Phone, Order = 21, Section = "Contato", GridColumns = 2)]
         public string? Telefone { get; set; }
 
+        [ConditionalRequired("IsEmpty(Telefone)", "Celular é obrigatório quando não há telefone")]
         [FormField(Name = "Celular", Icon = "fas fa-mobile", Type = EnumFieldType.Phone, Order = 22, Section = "Contato", GridColumns = 2)]
         public string? Celular { get; set; }
 

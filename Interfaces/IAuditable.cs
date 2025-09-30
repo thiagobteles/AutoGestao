@@ -5,10 +5,14 @@ namespace AutoGestao.Interfaces
     /// </summary>
     public interface IAuditable
     {
-        int Id { get; set; }
+        long Id { get; set; }
+
         DateTime DataCadastro { get; set; }
+
         DateTime DataAlteracao { get; set; }
-        int? CriadoPorUsuarioId { get; set; }
-        int? AlteradoPorUsuarioId { get; set; }
+
+        long? CriadoPorUsuarioId { get; set; }
+
+        long? AlteradoPorUsuarioId { get; set; }
     }
 }
