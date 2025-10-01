@@ -15,7 +15,7 @@ namespace AutoGestao.Entidades.Veiculos
     [FormTab("vistoria", "Vistoria", TabIcon = "fas fa-search", Order = 7, Controller = "VeiculoVistoria")]
     [FormTab("web", "Web", TabIcon = "fas fa-globe", Order = 8, Controller = "VeiculoWeb")]
     [FormTab("entrada", "Entrada", TabIcon = "fas fa-sign-in-alt", Order = 9, Controller = "VeiculoEntrada")]
-    [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 11, Controller = "Despesas", RequiredRoles = new[] { "Admin", "Financeiro" })]
+    [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 10, Controller = "Despesas", RequiredRoles = new[] { "Admin", "Financeiro" })]
     public class Veiculo : BaseEntidadeEmpresa
     {
         [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Number, ReadOnly = true, GridColumns = 2)]
@@ -33,8 +33,8 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 10, Name = "Marca", Section = "Especificações", Icon = "fas fa-car", Required = true, Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarca), Placeholder = "Buscar Marca...", GridColumns = 2)]
         public long IdVeiculoMarca { get; set; }
 
-        [ConditionalRule(EnumConditionalRuleType.Enabled, "VeiculoMarcaId != 0")]
-        [ConditionalRequired("VeiculoMarcaId > 0", "Modelo obrigatório!")]
+        [ConditionalRule(EnumConditionalRuleType.Enabled, "IdVeiculoMarca != 0")]
+        [ReferenceFilter("IdVeiculoMarca", "IdVeiculoMarca", Operator = EnumFilterOperator.Equals)]
         [FormField(Order = 10, Name = "Modelo", Section = "Especificações", Icon = "fas fa-car-side", Required = true, Type = EnumFieldType.Reference, Reference = typeof(VeiculoMarcaModelo), Placeholder = "Buscar modelo...")]
         public long IdVeiculoMarcaModelo { get; set; }
 

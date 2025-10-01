@@ -191,10 +191,10 @@
         </div>
     </div>
 
-    <script src="~/js/reference-field.js"></script>
-    <script src="~/js/itemvenda.js"></script>
-    <script src="~/js/grid-enhanced.js"></script>
     <script src="~/js/conditional-fields.js"></script>
+    <script src="~/js/grid-enhanced.js"></script>
+    <script src="~/js/itemvenda.js"></script>
+    <script src="~/js/reference-field.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/standard-form.js"></script>
     <script src="~/js/tabbed-form.js"></script>
@@ -485,14 +485,27 @@
                 const currentPath = window.location.pathname.toLowerCase();
                 let ajaxUrl;
 
-                if (currentPath.includes('veiculos')) {
+                if (currentPath.includes('veiculos'))
+                {
                     ajaxUrl = '/Veiculos/GetVeiculosAjax';
-                } else if (currentPath.includes('clientes')) {
+                }
+                else if (currentPath.includes('clientes'))
+                {
                     ajaxUrl = '/Clientes/GetClientesAjax';
-                } else {
-                    console.error('URL Ajax não identificada para:', currentPath);
-                    forceHideLoading();
-                    return;
+                }
+                else
+                {
+                    let controller = this.getAttribute('data-controller');
+                    if (controller != null)
+                    {
+                        ajaxUrl = `'${controller}/Get${controller}Ajax`;
+                    }
+                    else
+                    {
+                        console.error('URL Ajax não identificada para:', currentPath);
+                        forceHideLoading();
+                        return;
+                    }
                 }
 
                 fetch(`${ajaxUrl}?${params.toString()}`)
@@ -611,13 +624,21 @@
                     const currentPath = window.location.pathname.toLowerCase();
                     let controller = '';
 
-                    if (currentPath.includes('veiculos')) {
+                    if (currentPath.includes('veiculos'))
+                    {
                         controller = 'Veiculos';
-                    } else if (currentPath.includes('clientes')) {
+                    }
+                    else if (currentPath.includes('clientes'))
+                    {
                         controller = 'Clientes';
                     }
+                    else
+                    {
+                        controller = this.getAttribute('data-controller');
+                    }
 
-                    if (controller) {
+                    if (controller)
+                    {
                         showLoading(true);
                         window.location.href = `/${controller}/Delete/${id}`;
                     }

@@ -1096,25 +1096,21 @@ namespace AutoGestao.Controllers
                 // PROCESSAMENTO DE REGRAS CONDICIONAIS
                 // ============================================================
 
-                // Obtém as novas anotações de regras condicionais
                 var conditionalDisplayAttr = property.GetCustomAttribute<ConditionalDisplayAttribute>();
                 var conditionalRequiredAttr = property.GetCustomAttribute<ConditionalRequiredAttribute>();
 
-                // Regra de exibição (usa nova anotação ou fallback para sistema antigo)
                 var displayRule = "";
                 if (conditionalDisplayAttr != null)
                 {
                     displayRule = conditionalDisplayAttr.Rule;
                 }
 
-                // Avalia se o campo deve ser exibido
                 var shouldDisplay = true;
                 if (!string.IsNullOrEmpty(displayRule))
                 {
                     shouldDisplay = ConditionalExpressionEvaluator.Evaluate(displayRule, entity, typeof(T));
                 }
 
-                // Regra de obrigatoriedade condicional
                 var requiredRule = conditionalRequiredAttr?.Rule ?? "";
                 var isConditionallyRequired = false;
                 var requiredMessage = conditionalRequiredAttr?.ErrorMessage ?? "";
@@ -1124,8 +1120,17 @@ namespace AutoGestao.Controllers
                     isConditionallyRequired = ConditionalExpressionEvaluator.Evaluate(requiredRule, entity, typeof(T));
                 }
 
-                // Determina se o campo é obrigatório
                 var isRequired = formFieldAttr.Required || isConditionallyRequired;
+
+                // ============================================================
+                // PROCESSAMENTO DE FILTROS DE REFERÊNCIA
+                // ============================================================
+                string? referenceFilters = null;
+                if (formFieldAttr.Type == EnumFieldType.Reference && ReferenceFilterHelper.HasFilters(property))
+                {
+                    var filterConfig = ReferenceFilterHelper.GetFilterConfig(property);
+                    referenceFilters = ReferenceFilterHelper.SerializeFilterConfig(filterConfig);
+                }
 
                 return new FormFieldViewModel
                 {
@@ -1140,21 +1145,24 @@ namespace AutoGestao.Controllers
                     Reference = formFieldAttr.Reference ?? null,
                     ValidationRegex = formFieldAttr.ValidationRegex ?? "",
                     ValidationMessage = formFieldAttr.ValidationMessage ?? "",
-
-                    // Novas regras condicionais
                     ConditionalDisplayRule = displayRule,
                     ConditionalRequiredRule = requiredRule,
                     ConditionalRequiredMessage = requiredMessage,
                     ShouldDisplay = shouldDisplay,
                     IsConditionallyRequired = isConditionallyRequired,
+
                     GridColumns = formFieldAttr.GridColumns,
                     CssClass = formFieldAttr.CssClass ?? "",
                     DataList = formFieldAttr.DataList ?? "",
                     Order = formFieldAttr.Order,
                     Section = formFieldAttr.Section ?? "Não Informado",
+
                     Options = formFieldAttr.Type == EnumFieldType.Select
                         ? GetSelectOptions(property.Name)
-                        : []
+                        : [],
+
+                    // Adicionar configuração de filtros de referência
+                    ReferenceFilters = referenceFilters
                 };
             }
 

@@ -1,9 +1,8 @@
-using AutoGestao.Controllers;
 using AutoGestao.Data;
-using AutoGestao.Entidades;
+using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 
 namespace AutoGestao.Controllers
 {
@@ -18,17 +17,11 @@ namespace AutoGestao.Controllers
         private readonly ApplicationDbContext _context = context;
         private readonly ILogger<ReferenceController> _logger = logger;
 
-        /// <summary>
-        /// Busca registros por termo de pesquisa
-        /// </summary>
-        /// <param name="request">Parâmetros da busca</param>
-        /// <returns>Lista de itens encontrados</returns>
         [HttpPost("Search")]
         public async Task<ActionResult<List<ReferenceItem>>> Search([FromBody] ReferenceSearchRequest request)
         {
             try
             {
-                // Validação de entrada
                 if (string.IsNullOrEmpty(request.EntityType))
                 {
                     return BadRequest(new { error = "EntityType é obrigatório" });
@@ -41,20 +34,20 @@ namespace AutoGestao.Controllers
 
                 if (request.PageSize <= 0 || request.PageSize > 50)
                 {
-                    request.PageSize = 10; // Default
+                    request.PageSize = 10;
                 }
 
-                _logger.LogInformation("Buscando {EntityType} com termo '{SearchTerm}'",
-                    request.EntityType, request.SearchTerm);
+                _logger.LogInformation("Buscando {EntityType} com termo '{SearchTerm}' e {FilterCount} filtros",
+                    request.EntityType, request.SearchTerm, request.Filters?.Count ?? 0);
 
                 var results = request.EntityType.ToLower() switch
                 {
-                    "cliente" => await SearchClientes(request.SearchTerm, request.PageSize),
-                    "fornecedor" => await SearchFornecedores(request.SearchTerm, request.PageSize),
-                    "vendedor" => await SearchVendedores(request.SearchTerm, request.PageSize),
-                    "veiculomarca" => await SearchVeiculoMarcas(request.SearchTerm, request.PageSize),
-                    "veiculomarcamodelo" => await SearchVeiculoMarcaModelos(request.SearchTerm, request.PageSize),
-                    "veiculocor" => await SearchVeiculoCores(request.SearchTerm, request.PageSize),
+                    "cliente" => await SearchClientes(request.SearchTerm, request.PageSize, request.Filters),
+                    "fornecedor" => await SearchFornecedores(request.SearchTerm, request.PageSize, request.Filters),
+                    "vendedor" => await SearchVendedores(request.SearchTerm, request.PageSize, request.Filters),
+                    "veiculomarca" => await SearchVeiculoMarcas(request.SearchTerm, request.PageSize, request.Filters),
+                    "veiculomarcamodelo" => await SearchVeiculoMarcaModelos(request.SearchTerm, request.PageSize, request.Filters),
+                    "veiculocor" => await SearchVeiculoCores(request.SearchTerm, request.PageSize, request.Filters),
                     _ => []
                 };
 
@@ -63,13 +56,8 @@ namespace AutoGestao.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar {EntityType} com termo '{SearchTerm}'", request.EntityType, request.SearchTerm);
-
-                return StatusCode(500, new
-                {
-                    error = "Erro interno do servidor",
-                    details = ex.Message
-                });
+                _logger.LogError(ex, "Erro ao buscar {EntityType}", request.EntityType);
+                return StatusCode(500, new { error = "Erro interno do servidor", details = ex.Message });
             }
         }
 
@@ -125,143 +113,210 @@ namespace AutoGestao.Controllers
             }
         }
 
-        #region Métodos de Busca por Entidade
+        #region Aplicação de Filtros Dinâmicos
 
         /// <summary>
-        /// Busca clientes por nome, CPF ou email
+        /// Aplica filtros dinâmicos em uma query usando reflection
+        /// Suporta filtros como: { "IdVeiculoMarca": "5", "Ativo": "true" }
         /// </summary>
-        private async Task<List<ReferenceItem>> SearchClientes(string term, int pageSize)
+        private IQueryable<T> ApplyDynamicFilters<T>(IQueryable<T> query, Dictionary<string, string>? filters) where T : class
+        {
+            if (filters == null || filters.Count == 0)
+            {
+                return query;
+            }
+
+            foreach (var filter in filters)
+            {
+                var propertyName = filter.Key;
+                var filterValue = filter.Value;
+
+                // Ignorar filtros vazios
+                if (string.IsNullOrWhiteSpace(filterValue) || filterValue == "0")
+                {
+                    continue;
+                }
+
+                try
+                {
+                    // Obter a propriedade da entidade
+                    var property = typeof(T).GetProperty(propertyName);
+                    if (property == null)
+                    {
+                        _logger.LogWarning("Propriedade {PropertyName} não encontrada em {EntityType}",
+                            propertyName, typeof(T).Name);
+                        continue;
+                    }
+
+                    // Criar a expressão de filtro dinamicamente
+                    var parameter = Expression.Parameter(typeof(T), "x");
+                    var propertyAccess = Expression.Property(parameter, property);
+
+                    // Converter o valor do filtro para o tipo correto
+                    object convertedValue;
+                    try
+                    {
+                        var underlyingType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+                        convertedValue = Convert.ChangeType(filterValue, underlyingType);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Erro ao converter valor '{Value}' para tipo {Type}",
+                            filterValue, property.PropertyType.Name);
+                        continue;
+                    }
+
+                    var constant = Expression.Constant(convertedValue, property.PropertyType);
+                    var equals = Expression.Equal(propertyAccess, constant);
+                    var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
+
+                    query = query.Where(lambda);
+
+                    _logger.LogDebug("Filtro aplicado: {PropertyName} = {Value}", propertyName, filterValue);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Erro ao aplicar filtro {PropertyName} = {Value}",
+                        propertyName, filterValue);
+                }
+            }
+
+            return query;
+        }
+
+        #endregion
+
+        #region Métodos de Busca com Filtros
+
+        private async Task<List<ReferenceItem>> SearchClientes(string term, int pageSize, Dictionary<string, string>? filters)
         {
             var termLower = term.ToLower();
-
-            return await _context.Clientes
+            var query = _context.Clientes
                 .Where(c => c.Ativo &&
-                    (
-                        c.Nome.ToLower().Contains(termLower) ||
-                        c.Cpf != null && c.Cpf.Contains(term) ||
-                        c.Email != null && c.Email.ToLower().Contains(termLower)
-                    ))
+                    (c.Nome.ToLower().Contains(termLower) ||
+                     (c.Cpf != null && c.Cpf.Contains(termLower)) ||
+                     (c.Email != null && c.Email.ToLower().Contains(termLower))));
+
+            query = ApplyDynamicFilters(query, filters);
+
+            return await query
                 .OrderBy(c => c.Nome)
                 .Take(pageSize)
                 .Select(c => new ReferenceItem
-                    {
-                        Value = c.Id.ToString(),
-                        Text = c.Nome,
-                        Subtitle = FormatClienteSubtitle(c.Cpf, c.Email, c.Telefone)
-                    })
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Nome,
+                    Subtitle = FormatClienteSubtitle(c.Cpf, c.Email, c.Telefone)
+                })
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// Busca fornecedores por nome, CNPJ ou email
-        /// </summary>
-        private async Task<List<ReferenceItem>> SearchFornecedores(string term, int pageSize)
+        private async Task<List<ReferenceItem>> SearchFornecedores(string term, int pageSize, Dictionary<string, string>? filters)
         {
             var termLower = term.ToLower();
-
-            return await _context.Fornecedores
+            var query = _context.Fornecedores
                 .Where(f => f.Ativo &&
-                    (
-                        f.Nome.ToLower().Contains(termLower) ||
-                        f.CNPJ != null && f.CNPJ.Contains(term) ||
-                        f.Email != null && f.Email.ToLower().Contains(termLower)
-                    ))
+                    (f.Nome.ToLower().Contains(termLower) ||
+                     (f.CNPJ != null && f.CNPJ.Contains(termLower)) ||
+                     (f.Email != null && f.Email.ToLower().Contains(termLower))));
+
+            query = ApplyDynamicFilters(query, filters);
+
+            return await query
                 .OrderBy(f => f.Nome)
                 .Take(pageSize)
                 .Select(f => new ReferenceItem
-                    {
-                        Value = f.Id.ToString(),
-                        Text = f.Nome,
-                        Subtitle = FormatFornecedorSubtitle(f.CNPJ, f.Email)
-                    })
+                {
+                    Value = f.Id.ToString(),
+                    Text = f.Nome,
+                    Subtitle = FormatFornecedorSubtitle(f.CNPJ, f.Email)
+                })
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// Busca vendedores por nome, CPF ou email
-        /// </summary>
-        private async Task<List<ReferenceItem>> SearchVendedores(string term, int pageSize)
+        private async Task<List<ReferenceItem>> SearchVendedores(string term, int pageSize, Dictionary<string, string>? filters)
         {
             var termLower = term.ToLower();
+            var query = _context.Vendedores
+                .Where(v => v.Ativo &&
+                    (v.Nome.ToLower().Contains(termLower) ||
+                     (v.CPF != null && v.CPF.Contains(termLower)) ||
+                     (v.Email != null && v.Email.ToLower().Contains(termLower))));
 
-            return await _context.Vendedores
-                .Where(v => v.Ativo && 
-                    (
-                        v.Nome.ToLower().Contains(termLower) ||
-                        v.CPF != null && v.CPF.Contains(term) ||
-                        v.Email != null && v.Email.ToLower().Contains(termLower)
-                    ))
+            query = ApplyDynamicFilters(query, filters);
+
+            return await query
                 .OrderBy(v => v.Nome)
                 .Take(pageSize)
                 .Select(v => new ReferenceItem
-                    {
-                        Value = v.Id.ToString(),
-                        Text = v.Nome,
-                        Subtitle = FormatVendedorSubtitle(v.CPF, v.Email)
-                    })
+                {
+                    Value = v.Id.ToString(),
+                    Text = v.Nome,
+                    Subtitle = FormatVendedorSubtitle(v.CPF, v.Email)
+                })
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// Busca marcas de veículos por descrição
-        /// </summary>
-        private async Task<List<ReferenceItem>> SearchVeiculoMarcas(string term, int pageSize)
+        private async Task<List<ReferenceItem>> SearchVeiculoMarcas(string term, int pageSize, Dictionary<string, string>? filters)
         {
             var termLower = term.ToLower();
+            var query = _context.VeiculoMarcas
+                .Where(m => m.Descricao.ToLower().Contains(termLower));
 
-            return await _context.VeiculoMarcas
-                .Where(m => m.Descricao.ToLower().Contains(termLower))
+            query = ApplyDynamicFilters(query, filters);
+
+            return await query
                 .OrderBy(m => m.Descricao)
                 .Take(pageSize)
                 .Select(m => new ReferenceItem
-                    {
-                        Value = m.Id.ToString(),
-                        Text = m.Descricao,
-                        Subtitle = null
-                    })
+                {
+                    Value = m.Id.ToString(),
+                    Text = m.Descricao,
+                    Subtitle = null
+                })
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// Busca modelos de veículos por descrição
-        /// </summary>
-        private async Task<List<ReferenceItem>> SearchVeiculoMarcaModelos(string term, int pageSize)
+        private async Task<List<ReferenceItem>> SearchVeiculoMarcaModelos(string term, int pageSize, Dictionary<string, string>? filters)
         {
             var termLower = term.ToLower();
-
-            return await _context.VeiculoMarcaModelos
+            var query = _context.VeiculoMarcaModelos
                 .Include(m => m.VeiculoMarca)
-                .Where(m => m.Descricao.ToLower().Contains(termLower) ||
-                           m.VeiculoMarca != null && m.VeiculoMarca.Descricao.ToLower().Contains(termLower))
+                .Where(m => m.Descricao.ToLower().Contains(termLower));
+
+            // Aplicar filtros dinâmicos - especialmente o filtro por IdVeiculoMarca!
+            query = ApplyDynamicFilters(query, filters);
+
+            return await query
                 .OrderBy(m => m.VeiculoMarca != null ? m.VeiculoMarca.Descricao : "")
                 .ThenBy(m => m.Descricao)
                 .Take(pageSize)
                 .Select(m => new ReferenceItem
-                    {
-                        Value = m.Id.ToString(),
-                        Text = m.Descricao,
-                        Subtitle = m.VeiculoMarca != null ? m.VeiculoMarca.Descricao : null
-                    })
+                {
+                    Value = m.Id.ToString(),
+                    Text = m.Descricao,
+                    Subtitle = m.VeiculoMarca != null ? m.VeiculoMarca.Descricao : null
+                })
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// Busca cores de veículos por descrição
-        /// </summary>
-        private async Task<List<ReferenceItem>> SearchVeiculoCores(string term, int pageSize)
+        private async Task<List<ReferenceItem>> SearchVeiculoCores(string term, int pageSize, Dictionary<string, string>? filters)
         {
             var termLower = term.ToLower();
+            var query = _context.VeiculoCores
+                .Where(c => c.Descricao.ToLower().Contains(termLower));
 
-            return await _context.VeiculoCores
-                .Where(c => c.Descricao.ToLower().Contains(termLower))
+            query = ApplyDynamicFilters(query, filters);
+
+            return await query
                 .OrderBy(c => c.Descricao)
                 .Take(pageSize)
                 .Select(c => new ReferenceItem
-                    {
-                        Value = c.Id.ToString(),
-                        Text = c.Descricao,
-                        Subtitle = null
-                    })
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Descricao,
+                    Subtitle = null
+                })
                 .ToListAsync();
         }
 
@@ -398,15 +453,11 @@ namespace AutoGestao.Controllers
 
         #endregion
 
-        #region Métodos Utilitários para Formatação
+        #region Métodos Helper de Formatação
 
-        /// <summary>
-        /// Formata subtitle para cliente
-        /// </summary>
         private static string FormatClienteSubtitle(string? cpf, string? email, string? telefone)
         {
             var parts = new List<string>();
-
             if (!string.IsNullOrEmpty(cpf))
             {
                 parts.Add($"CPF: {cpf}");
@@ -422,16 +473,12 @@ namespace AutoGestao.Controllers
                 parts.Add(telefone);
             }
 
-            return parts.Any() ? string.Join(" • ", parts) : "Sem informações adicionais";
+            return parts.Count > 0 ? string.Join(" • ", parts) : string.Empty;
         }
 
-        /// <summary>
-        /// Formata subtitle para fornecedor
-        /// </summary>
         private static string FormatFornecedorSubtitle(string? cnpj, string? email)
         {
             var parts = new List<string>();
-
             if (!string.IsNullOrEmpty(cnpj))
             {
                 parts.Add($"CNPJ: {cnpj}");
@@ -442,16 +489,12 @@ namespace AutoGestao.Controllers
                 parts.Add(email);
             }
 
-            return parts.Any() ? string.Join(" • ", parts) : "Sem informações adicionais";
+            return parts.Count > 0 ? string.Join(" • ", parts) : string.Empty;
         }
 
-        /// <summary>
-        /// Formata subtitle para vendedor
-        /// </summary>
         private static string FormatVendedorSubtitle(string? cpf, string? email)
         {
             var parts = new List<string>();
-
             if (!string.IsNullOrEmpty(cpf))
             {
                 parts.Add($"CPF: {cpf}");
@@ -462,67 +505,9 @@ namespace AutoGestao.Controllers
                 parts.Add(email);
             }
 
-            return parts.Any() ? string.Join(" • ", parts) : "Sem informações adicionais";
+            return parts.Count > 0 ? string.Join(" • ", parts) : string.Empty;
         }
 
         #endregion
     }
-
-    #region DTOs e Modelos de Request/Response
-
-    /// <summary>
-    /// Request para busca de referências
-    /// </summary>
-    public class ReferenceSearchRequest
-    {
-        [Required(ErrorMessage = "EntityType é obrigatório")]
-        public string EntityType { get; set; } = "";
-
-        [Required(ErrorMessage = "SearchTerm é obrigatório")]
-        [MinLength(2, ErrorMessage = "SearchTerm deve ter pelo menos 2 caracteres")]
-        public string SearchTerm { get; set; } = "";
-
-        [Range(1, 50, ErrorMessage = "PageSize deve estar entre 1 e 50")]
-        public int PageSize { get; set; } = 10;
-    }
-
-    /// <summary>
-    /// Request para busca por ID
-    /// </summary>
-    public class ReferenceGetByIdRequest
-    {
-        [Required(ErrorMessage = "EntityType é obrigatório")]
-        public string EntityType { get; set; } = "";
-
-        [Required(ErrorMessage = "Id é obrigatório")]
-        public string Id { get; set; } = "";
-    }
-
-    /// <summary>
-    /// Item de referência retornado pela API
-    /// </summary>
-    public class ReferenceItem
-    {
-        /// <summary>
-        /// Valor (ID) do item
-        /// </summary>
-        public string Value { get; set; } = "";
-
-        /// <summary>
-        /// Texto principal para exibição
-        /// </summary>
-        public string Text { get; set; } = "";
-
-        /// <summary>
-        /// Texto secundário/subtitle (opcional)
-        /// </summary>
-        public string? Subtitle { get; set; }
-
-        /// <summary>
-        /// Informações extras (para futuras expansões)
-        /// </summary>
-        public Dictionary<string, object>? Extra { get; set; }
-    }
-
-    #endregion
 }

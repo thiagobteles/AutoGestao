@@ -131,5 +131,12 @@ namespace AutoGestao.Models
         /// Avaliado no backend
         /// </summary>
         public bool IsConditionallyRequired { get; set; } = false;
+
+        /// <summary>
+        /// Configuração de filtros para campos Reference (JSON string)
+        /// Usado para filtrar dinamicamente os resultados da busca
+        /// Exemplo: {"IdVeiculoMarca":{"value":"IdVeiculoMarca","isProperty":true}}
+        /// </summary>
+        public string? ReferenceFilters { get; set; }
     }
 }
