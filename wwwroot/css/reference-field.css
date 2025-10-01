@@ -7,23 +7,6 @@
     width: 100%;
 }
 
-.reference-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: #ffffff;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    z-index: 1050;
-    display: none;
-    max-height: 300px;
-    overflow-y: auto;
-    margin-top: 2px;
-    animation: fadeInDown 0.2s ease-out;
-}
-
 @keyframes fadeInDown {
     from {
         opacity: 0;
@@ -614,4 +597,26 @@
         color: black !important;
         border: 1px solid #000 !important;
     }
+}
+
+/* Container do dropdown - sem scroll horizontal */
+.reference-dropdown {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    z-index: 9999 !important;
+    display: none;
+    max-height: 300px !important;
+    overflow-x: hidden !important; /* NUNCA mostrar scroll horizontal */
+    overflow-y: auto !important; /* Scroll vertical apenas quando necessário */
+    margin-top: 2px !important;
+    animation: fadeInDown 0.2s ease-out;
+    /* Garantir que o conteúdo não force largura extra */
+    width: 100% !important;
+    box-sizing: border-box !important;
 }

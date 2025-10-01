@@ -63,6 +63,7 @@ namespace AutoGestao.Services
                         Nome = usuario.Nome,
                         Email = usuario.Email,
                         Perfil = usuario.Perfil.ToString(),
+                        IdEmpresa = usuario.IdEmpresa,
                         Roles = roles
                     }
                 };
@@ -78,7 +79,7 @@ namespace AutoGestao.Services
             }
         }
 
-        public async Task<bool> ValidateTokenAsync(string token)
+        public bool ValidateToken(string token)
         {
             try
             {

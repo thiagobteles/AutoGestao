@@ -6,7 +6,7 @@ namespace AutoGestao.Services.Interface
     {
         Task<LoginResponse> LoginAsync(LoginRequest request);
 
-        Task<bool> ValidateTokenAsync(string token);
+        bool ValidateToken(string token);
 
         Task LogoutAsync(int usuarioId);
 

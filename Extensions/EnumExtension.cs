@@ -33,7 +33,10 @@ namespace AutoGestao.Extensions
         {
             var field = source.GetType().GetField(source.ToString());
             var attributes = (IconeAttribute[])field.GetCustomAttributes(typeof(IconeAttribute), false);
-            return attributes != null && attributes.Length > 0 ? attributes[0].Icone : source.ToString();
+
+            // Retorna o ícone apenas se o atributo existir
+            // Caso contrário retorna null em vez de source.ToString()
+            return attributes != null && attributes.Length > 0 ? attributes[0].Icone : null;
         }
 
         public static string GetValueString<T>(this T source)
@@ -55,13 +58,15 @@ namespace AutoGestao.Extensions
             foreach (var item in enumDictionary.Where(x => x.Key != 0))
             {
                 var enumValue = (TEnum)Enum.ToObject(typeof(TEnum), item.Key);
+                var icone = enumValue.GetIcone();
+                var descricao = enumValue.GetDescription();
 
-                if (obterIcone && !string.IsNullOrEmpty(enumValue.GetIcone()))
+                if (obterIcone && !string.IsNullOrEmpty(icone))
                 {
                     options.Add(new SelectListItem
                     {
                         Value = item.Key.ToString(),
-                        Text = $"{enumValue.GetIcone()} {enumValue.GetDescription()}".Trim()
+                        Text = $"{icone} {descricao}".Trim()
                     });
                 }
                 else
@@ -69,11 +74,11 @@ namespace AutoGestao.Extensions
                     options.Add(new SelectListItem
                     {
                         Value = item.Key.ToString(),
-                        Text = enumValue.GetDescription().Trim()
+                        Text = descricao.Trim()
                     });
                 }
-                
             }
+
             return options;
         }
     }

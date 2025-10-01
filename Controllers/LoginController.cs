@@ -43,6 +43,7 @@ namespace AutoGestao.Controllers
                 new(ClaimTypes.NameIdentifier, result.Usuario!.Id.ToString()),
                 new(ClaimTypes.Name, result.Usuario.Nome),
                 new(ClaimTypes.Email, result.Usuario.Email),
+                new("IdEmpresa", result.Usuario.IdEmpresa.ToString()),
                 new("Perfil", result.Usuario.Perfil)
             };
 

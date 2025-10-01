@@ -63,21 +63,31 @@
             if (value is Enum enumValue)
             {
                 var icone = enumValue.GetIcone();
+                var descricao = enumValue.GetDescription();
+
                 if (Model.Column.EnumRender == EnumRenderType.Icon)
                 {
-                    displayText = icone ?? (string)value;
+                    // Mostra apenas o ícone se existir, senão mostra a descrição
+                    displayText = !string.IsNullOrEmpty(icone) ? icone : descricao;
                 }
                 else if (Model.Column.EnumRender == EnumRenderType.IconDescription)
                 {
-                    displayText = $"{icone} {enumValue.GetDescription()}";
+                    // Mostra ícone + descrição apenas se tiver ícone, senão apenas descrição
+                    displayText = !string.IsNullOrEmpty(icone)
+                        ? $"{icone} {descricao}"
+                        : descricao;
                 }
                 else if (Model.Column.EnumRender == EnumRenderType.DescriptionIcon)
                 {
-                    displayText = $"{enumValue.GetDescription()} {icone}";
+                    // Mostra descrição + ícone apenas se tiver ícone, senão apenas descrição
+                    displayText = !string.IsNullOrEmpty(icone)
+                        ? $"{descricao} {icone}"
+                        : descricao;
                 }
                 else
                 {
-                    displayText = enumValue.GetDescription();
+                    // EnumRenderType.Description - mostra apenas a descrição
+                    displayText = descricao;
                 }
             }
             else if (value != null && bool.TryParse(value.ToString(), out bool enumBoolValue))
@@ -92,7 +102,7 @@
         }
         catch
         {
-            @value   
+            @value
         }
         break;
 

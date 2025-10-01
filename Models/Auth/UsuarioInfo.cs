@@ -10,6 +10,8 @@ namespace AutoGestao.Models.Auth
 
         public string Perfil { get; set; }
 
+        public long IdEmpresa { get; set; }
+
         public string[] Roles { get; set; } = [];
     }
 }

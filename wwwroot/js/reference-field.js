@@ -823,3 +823,181 @@ document.addEventListener('DOMContentLoaded', () => {
 if (document.readyState !== 'loading' && !window.referenceFieldHandlerInstance) {
     window.referenceFieldHandlerInstance = new ReferenceFieldHandler();
 }
+
+// ===================================================================
+// CORREÇÃO DO DROPDOWN DE REFERÊNCIAS
+// Adicione este código ao reference-field.js ou carregue separadamente
+// ===================================================================
+
+class ReferenceDropdownFix {
+    constructor() {
+        this.activeDropdown = null;
+        this.init();
+    }
+
+    init() {
+        // Observar quando dropdowns são mostrados
+        this.observeDropdowns();
+
+        // Adicionar listeners para ajustar posicionamento
+        window.addEventListener('scroll', () => this.repositionActiveDropdown(), true);
+        window.addEventListener('resize', () => this.repositionActiveDropdown());
+    }
+
+    observeDropdowns() {
+        // Usar MutationObserver para detectar quando display muda
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const dropdown = mutation.target;
+                    if (dropdown.classList.contains('reference-dropdown')) {
+                        const isVisible = dropdown.style.display === 'block';
+
+                        if (isVisible) {
+                            this.handleDropdownShow(dropdown);
+                        } else {
+                            this.handleDropdownHide(dropdown);
+                        }
+                    }
+                }
+            });
+        });
+
+        // Observar todos os dropdowns
+        document.querySelectorAll('.reference-dropdown').forEach(dropdown => {
+            observer.observe(dropdown, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
+        });
+    }
+
+    handleDropdownShow(dropdown) {
+        console.log('Dropdown mostrado:', dropdown.id);
+        this.activeDropdown = dropdown;
+
+        // SOLUÇÃO 1: Garantir z-index e overflow nos pais
+        this.fixContainersOverflow(dropdown);
+
+        // SOLUÇÃO 2: Se ainda não aparecer, usar posicionamento fixo
+        setTimeout(() => {
+            if (!this.isDropdownVisible(dropdown)) {
+                console.warn('Dropdown não visível, aplicando correção de posicionamento...');
+                this.useFixedPositioning(dropdown);
+            }
+        }, 100);
+    }
+
+    handleDropdownHide(dropdown) {
+        console.log('Dropdown escondido:', dropdown.id);
+
+        // Remover classes de correção
+        this.removeContainerFixes(dropdown);
+
+        // Remover posicionamento fixo se foi aplicado
+        dropdown.classList.remove('portal-mode');
+        dropdown.style.removeProperty('position');
+        dropdown.style.removeProperty('top');
+        dropdown.style.removeProperty('left');
+        dropdown.style.removeProperty('width');
+
+        if (this.activeDropdown === dropdown) {
+            this.activeDropdown = null;
+        }
+    }
+
+    fixContainersOverflow(dropdown) {
+        // Adicionar classe aos containers pais para permitir overflow
+        let parent = dropdown.parentElement;
+        const parentsToFix = [];
+
+        while (parent && parent !== document.body) {
+            parentsToFix.push(parent);
+            parent = parent.parentElement;
+        }
+
+        parentsToFix.forEach(el => {
+            el.classList.add('reference-dropdown-parent-active');
+
+            // Forçar overflow visible
+            if (window.getComputedStyle(el).overflow === 'hidden' ||
+                window.getComputedStyle(el).overflowY === 'hidden') {
+                el.style.setProperty('overflow', 'visible', 'important');
+            }
+        });
+    }
+
+    removeContainerFixes(dropdown) {
+        // Remover classes dos containers pais
+        let parent = dropdown.parentElement;
+
+        while (parent && parent !== document.body) {
+            parent.classList.remove('reference-dropdown-parent-active');
+
+            // Remover style inline se foi adicionado por nós
+            if (parent.style.overflow === 'visible') {
+                parent.style.removeProperty('overflow');
+            }
+
+            parent = parent.parentElement;
+        }
+    }
+
+    isDropdownVisible(dropdown) {
+        const rect = dropdown.getBoundingClientRect();
+        return rect.height > 0 && rect.width > 0;
+    }
+
+    useFixedPositioning(dropdown) {
+        const wrapper = dropdown.closest('.reference-search-wrapper');
+        if (!wrapper) return;
+
+        const input = wrapper.querySelector('.reference-search-input');
+        if (!input) return;
+
+        // Obter posição do input
+        const inputRect = input.getBoundingClientRect();
+
+        // Aplicar posicionamento fixo
+        dropdown.style.position = 'fixed';
+        dropdown.style.top = `${inputRect.bottom + 2}px`;
+        dropdown.style.left = `${inputRect.left}px`;
+        dropdown.style.width = `${inputRect.width}px`;
+        dropdown.style.zIndex = '10000';
+
+        dropdown.classList.add('portal-mode');
+
+        console.log('Aplicado posicionamento fixo:', {
+            top: inputRect.bottom + 2,
+            left: inputRect.left,
+            width: inputRect.width
+        });
+    }
+
+    repositionActiveDropdown() {
+        if (!this.activeDropdown || !this.activeDropdown.classList.contains('portal-mode')) {
+            return;
+        }
+
+        const wrapper = this.activeDropdown.closest('.reference-search-wrapper');
+        if (!wrapper) return;
+
+        const input = wrapper.querySelector('.reference-search-input');
+        if (!input) return;
+
+        const inputRect = input.getBoundingClientRect();
+
+        this.activeDropdown.style.top = `${inputRect.bottom + 2}px`;
+        this.activeDropdown.style.left = `${inputRect.left}px`;
+        this.activeDropdown.style.width = `${inputRect.width}px`;
+    }
+}
+
+// Inicializar quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.referenceDropdownFix = new ReferenceDropdownFix();
+    });
+} else {
+    window.referenceDropdownFix = new ReferenceDropdownFix();
+}
