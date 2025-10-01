@@ -269,11 +269,11 @@ class ReferenceFieldHandler {
 
         if (results.length === 0) {
             dropdown.innerHTML = `
-                <div class="dropdown-item disabled">
-                    <i class="fas fa-search me-2"></i>
-                    Nenhum resultado encontrado
-                </div>
-            `;
+            <div class="dropdown-item disabled">
+                <i class="fas fa-search me-2"></i>
+                Nenhum resultado encontrado
+            </div>
+        `;
         } else {
             results.forEach((item, index) => {
                 const div = document.createElement('div');
@@ -281,11 +281,11 @@ class ReferenceFieldHandler {
                 if (index === 0) div.classList.add('active');
 
                 div.innerHTML = `
-                    <div class="reference-item-content">
-                        <div class="reference-item-title">${this.escapeHtml(item.text)}</div>
-                        ${item.subtitle ? `<div class="reference-item-subtitle text-muted">${this.escapeHtml(item.subtitle)}</div>` : ''}
-                    </div>
-                `;
+                <div class="reference-item-content">
+                    <div class="reference-item-title">${this.escapeHtml(item.text)}</div>
+                    ${item.subtitle ? `<div class="reference-item-subtitle text-muted">${this.escapeHtml(item.subtitle)}</div>` : ''}
+                </div>
+            `;
 
                 div.dataset.value = item.value;
                 div.dataset.text = item.text;
@@ -302,6 +302,10 @@ class ReferenceFieldHandler {
 
         dropdown.style.display = 'block';
         this.activeDropdown = dropdown;
+
+        if (window.referenceDropdownFix) {
+            window.referenceDropdownFix.manageDropdownSectionOverflow(dropdown, true);
+        }
     }
 
     selectItem(input, item) {
@@ -709,12 +713,23 @@ class ReferenceFieldHandler {
     }
 
     hideDropdown(input) {
+        if (!input) return;
+
         const targetField = input.dataset.targetField;
         const dropdown = document.getElementById(`${targetField}_dropdown`);
+
         if (dropdown) {
+            if (window.referenceDropdownFix) {
+                window.referenceDropdownFix.manageDropdownSectionOverflow(dropdown, false);
+            }
+
             dropdown.style.display = 'none';
+            dropdown.innerHTML = '';
         }
-        this.activeDropdown = null;
+
+        if (this.activeDropdown === dropdown) {
+            this.activeDropdown = null;
+        }
     }
 
     closeAllDropdowns() {
@@ -826,7 +841,6 @@ if (document.readyState !== 'loading' && !window.referenceFieldHandlerInstance) 
 
 // ===================================================================
 // CORREÇÃO DO DROPDOWN DE REFERÊNCIAS
-// Adicione este código ao reference-field.js ou carregue separadamente
 // ===================================================================
 
 class ReferenceDropdownFix {
@@ -838,6 +852,7 @@ class ReferenceDropdownFix {
     init() {
         // Observar quando dropdowns são mostrados
         this.observeDropdowns();
+        this.setupDropdownObserver();
 
         // Adicionar listeners para ajustar posicionamento
         window.addEventListener('scroll', () => this.repositionActiveDropdown(), true);
@@ -990,6 +1005,84 @@ class ReferenceDropdownFix {
         this.activeDropdown.style.top = `${inputRect.bottom + 2}px`;
         this.activeDropdown.style.left = `${inputRect.left}px`;
         this.activeDropdown.style.width = `${inputRect.width}px`;
+    }
+
+    manageDropdownSectionOverflow(dropdown, isOpen) {
+        if (!dropdown) return;
+
+        const section = dropdown.closest('.card-modern');
+        const sectionBody = dropdown.closest('.card-body-modern');
+        const grid = dropdown.closest('[class*="grid-"]');
+        const formGroup = dropdown.closest('.form-group-modern');
+
+        if (isOpen) {
+            // Forçar com !important
+            if (section) {
+                section.style.setProperty('overflow', 'visible', 'important');
+                section.style.setProperty('z-index', '10000', 'important');
+                section.style.setProperty('position', 'relative', 'important');
+            }
+            if (sectionBody) {
+                sectionBody.style.setProperty('overflow', 'visible', 'important');
+                sectionBody.style.setProperty('z-index', '10001', 'important');
+            }
+            if (grid) {
+                grid.style.setProperty('overflow', 'visible', 'important');
+                grid.style.setProperty('z-index', '10002', 'important');
+            }
+            if (formGroup) {
+                formGroup.style.setProperty('overflow', 'visible', 'important');
+                formGroup.style.setProperty('z-index', '10003', 'important');
+            }
+            dropdown.style.setProperty('z-index', '10050', 'important');
+
+            console.log('✅ Overflow forçado com !important');
+        } else {
+            // Restaurar
+            if (section) {
+                section.style.removeProperty('overflow');
+                section.style.removeProperty('z-index');
+                section.style.removeProperty('position');
+            }
+            if (sectionBody) {
+                sectionBody.style.removeProperty('overflow');
+                sectionBody.style.removeProperty('z-index');
+            }
+            if (grid) {
+                grid.style.removeProperty('overflow');
+                grid.style.removeProperty('z-index');
+            }
+            if (formGroup) {
+                formGroup.style.removeProperty('overflow');
+                formGroup.style.removeProperty('z-index');
+            }
+        }
+    }
+
+    setupDropdownObserver() {
+        // Observar quando dropdowns mudam de display
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const dropdown = mutation.target;
+
+                    if (dropdown.classList.contains('reference-dropdown')) {
+                        const isOpen = dropdown.style.display === 'block';
+                        this.manageDropdownSectionOverflow(dropdown, isOpen);
+                    }
+                }
+            });
+        });
+
+        // Observar todos os dropdowns
+        document.querySelectorAll('.reference-dropdown').forEach(dropdown => {
+            observer.observe(dropdown, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
+        });
+
+        console.log('✅ Observador de dropdown inicializado');
     }
 }
 
