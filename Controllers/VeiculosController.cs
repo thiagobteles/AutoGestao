@@ -5,6 +5,7 @@ using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Extensions;
+using AutoGestao.Helpers;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,7 +20,7 @@ namespace AutoGestao.Controllers
             return _context.Veiculos
                 .Include(v => v.VeiculoMarca)
                 .Include(v => v.VeiculoMarcaModelo)
-                .Include(v => v.Proprietario)
+                .Include(v => v.Cliente)
                 .AsQueryable();
         }
 
@@ -45,20 +46,6 @@ namespace AutoGestao.Controllers
                         Placeholder = "Situação do veiculo...",
                         Options = EnumExtension.GetSelectListItems<EnumSituacaoVeiculo>(true)
                     }
-                ],
-
-                // Configuração das colunas
-                Columns =
-                [
-                    new() { Name = nameof(Veiculo.Id), DisplayName = "Cód", Type = EnumGridColumnType.Text, Sortable = true, Width = "65px" },
-                    new() { Name = "MarcaModelo", DisplayName = "Marca/Modelo", Sortable = false, Type = EnumGridColumnType.Custom, CustomRender = RenderMarcaModelo },
-                    new() { Name = nameof(Veiculo.AnoFabricacao), DisplayName = "Ano", Type = EnumGridColumnType.Integer, Sortable = true},
-                    new() { Name = nameof(Veiculo.Placa), DisplayName = "Placa", Sortable = true },
-                    new() { Name = nameof(Veiculo.KmSaida), DisplayName = "KM", Type = EnumGridColumnType.Number, Sortable = true },
-                    new() { Name = nameof(Veiculo.PrecoVenda), DisplayName = "Preço", Type = EnumGridColumnType.Currency, Sortable = true },
-                    new() { Name = nameof(Veiculo.Situacao), DisplayName = "Situação", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.IconDescription, Sortable = true },
-                    new() { Name = nameof(Veiculo.Status), DisplayName = "Status", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true },
-                    new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
                 ],
             };
 

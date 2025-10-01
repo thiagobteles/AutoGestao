@@ -74,7 +74,7 @@ namespace AutoGestao.Helpers
                 var enumExtensionMethod = typeof(EnumExtension).GetMethod("GetSelectListItems");
                 var genericMethod = enumExtensionMethod?.MakeGenericMethod(enumType);
 
-                var result = (List<SelectListItem>?)genericMethod?.Invoke(null, new object[] { includeIcons });
+                var result = (List<SelectListItem>?)genericMethod?.Invoke(null, [includeIcons]);
 
                 return result ?? [];
             }

@@ -41,7 +41,9 @@ builder.Services.AddScoped<IEmpresaService, EmpresaService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
+builder.Services.AddScoped<GenericReferenceService>();
 builder.Services.AddHttpContextAccessor();
+
 
 // Criar um background service para executar limpeza:
 builder.Services.AddHostedService<AuditCleanupBackgroundService>();

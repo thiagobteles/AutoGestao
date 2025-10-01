@@ -1,22 +1,33 @@
 using AutoGestao.Data;
+using AutoGestao.Entidades;
+using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Models;
+using AutoGestao.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace AutoGestao.Controllers
 {
-    /// <summary>
-    /// API Controller para busca e obtenção de dados de referência
-    /// Suporta busca dinâmica para campos de referência do sistema
-    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    public class ReferenceController(ApplicationDbContext context, ILogger<ReferenceController> logger) : ControllerBase
+    public class ReferenceController(GenericReferenceService referenceService, ILogger<ReferenceController> logger) : ControllerBase
     {
-        private readonly ApplicationDbContext _context = context;
+        private readonly GenericReferenceService _referenceService = referenceService;
         private readonly ILogger<ReferenceController> _logger = logger;
 
+        // Mapeamento de EntityType para Type real
+        private static readonly Dictionary<string, Type> EntityTypeMap = new()
+        {
+            { "cliente", typeof(Cliente) },
+            { "fornecedor", typeof(Fornecedor) },
+            { "vendedor", typeof(Vendedor) },
+            { "veiculomarca", typeof(VeiculoMarca) },
+            { "veiculomarcamodelo", typeof(VeiculoMarcaModelo) },
+            { "veiculocor", typeof(VeiculoCor) }
+        };
+
+        /// <summary>
+        /// Busca referências usando termo de pesquisa
+        /// </summary>
         [HttpPost("Search")]
         public async Task<ActionResult<List<ReferenceItem>>> Search([FromBody] ReferenceSearchRequest request)
         {
@@ -37,21 +48,18 @@ namespace AutoGestao.Controllers
                     request.PageSize = 10;
                 }
 
-                _logger.LogInformation("Buscando {EntityType} com termo '{SearchTerm}' e {FilterCount} filtros",
-                    request.EntityType, request.SearchTerm, request.Filters?.Count ?? 0);
-
-                var results = request.EntityType.ToLower() switch
+                var entityType = GetEntityType(request.EntityType);
+                if (entityType == null)
                 {
-                    "cliente" => await SearchClientes(request.SearchTerm, request.PageSize, request.Filters),
-                    "fornecedor" => await SearchFornecedores(request.SearchTerm, request.PageSize, request.Filters),
-                    "vendedor" => await SearchVendedores(request.SearchTerm, request.PageSize, request.Filters),
-                    "veiculomarca" => await SearchVeiculoMarcas(request.SearchTerm, request.PageSize, request.Filters),
-                    "veiculomarcamodelo" => await SearchVeiculoMarcaModelos(request.SearchTerm, request.PageSize, request.Filters),
-                    "veiculocor" => await SearchVeiculoCores(request.SearchTerm, request.PageSize, request.Filters),
-                    _ => []
-                };
+                    return BadRequest(new { error = $"EntityType '{request.EntityType}' não suportado" });
+                }
 
-                _logger.LogInformation("Encontrados {Count} resultados para {EntityType}", results.Count, request.EntityType);
+                _logger.LogInformation("Buscando {EntityType} com termo '{SearchTerm}'",
+                    request.EntityType, request.SearchTerm);
+
+                var results = await InvokeSearchAsync(entityType, request.SearchTerm, request.PageSize, request.Filters);
+
+                _logger.LogInformation("Encontrados {Count} resultados", results.Count);
                 return Ok(results);
             }
             catch (Exception ex)
@@ -62,16 +70,13 @@ namespace AutoGestao.Controllers
         }
 
         /// <summary>
-        /// Obtém um registro específico por ID
+        /// Obtém um item específico por ID de forma genérica
         /// </summary>
-        /// <param name="request">Parâmetros da busca por ID</param>
-        /// <returns>Item encontrado ou NotFound</returns>
         [HttpPost("GetById")]
         public async Task<ActionResult<ReferenceItem>> GetById([FromBody] ReferenceGetByIdRequest request)
         {
             try
             {
-                // Validação de entrada
                 if (string.IsNullOrEmpty(request.EntityType))
                 {
                     return BadRequest(new { error = "EntityType é obrigatório" });
@@ -82,17 +87,15 @@ namespace AutoGestao.Controllers
                     return BadRequest(new { error = "Id é obrigatório" });
                 }
 
-                _logger.LogInformation("Buscando {EntityType} com ID '{Id}'", request.EntityType, request.Id);
-                var result = request.EntityType.ToLower() switch
+                var entityType = GetEntityType(request.EntityType);
+                if (entityType == null)
                 {
-                    "cliente" => await GetClienteById(request.Id),
-                    "fornecedor" => await GetFornecedorById(request.Id),
-                    "vendedor" => await GetVendedorById(request.Id),
-                    "veiculomarca" => await GetVeiculoMarcaById(request.Id),
-                    "veiculomarcamodelo" => await GetVeiculoMarcaModeloById(request.Id),
-                    "veiculocor" => await GetVeiculoCorById(request.Id),
-                    _ => null
-                };
+                    return BadRequest(new { error = $"EntityType '{request.EntityType}' não suportado" });
+                }
+
+                _logger.LogInformation("Buscando {EntityType} com ID '{Id}'", request.EntityType, request.Id);
+
+                var result = await InvokeGetByIdAsync(entityType, request.Id);
 
                 if (result == null)
                 {
@@ -105,407 +108,67 @@ namespace AutoGestao.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao buscar {EntityType} com ID '{Id}'", request.EntityType, request.Id);
-                return StatusCode(500, new
-                {
-                    error = "Erro interno do servidor",
-                    details = ex.Message
-                });
+                return StatusCode(500, new { error = "Erro interno do servidor", details = ex.Message });
             }
         }
 
-        #region Aplicação de Filtros Dinâmicos
+        #region Helper Methods
+
+        private static Type? GetEntityType(string entityType)
+        {
+            return EntityTypeMap.TryGetValue(entityType.ToLower(), out var type) ? type : null;
+        }
 
         /// <summary>
-        /// Aplica filtros dinâmicos em uma query usando reflection
-        /// Suporta filtros como: { "IdVeiculoMarca": "5", "Ativo": "true" }
+        /// Invoca GetByIdAsync usando reflection
         /// </summary>
-        private IQueryable<T> ApplyDynamicFilters<T>(IQueryable<T> query, Dictionary<string, string>? filters) where T : class
+        private async Task<ReferenceItem?> InvokeGetByIdAsync(Type entityType, string id)
         {
-            if (filters == null || filters.Count == 0)
-            {
-                return query;
-            }
+            var method = typeof(GenericReferenceService)
+                .GetMethod(nameof(GenericReferenceService.GetByIdAsync))
+                ?.MakeGenericMethod(entityType);
 
-            foreach (var filter in filters)
-            {
-                var propertyName = filter.Key;
-                var filterValue = filter.Value;
-
-                // Ignorar filtros vazios
-                if (string.IsNullOrWhiteSpace(filterValue) || filterValue == "0")
-                {
-                    continue;
-                }
-
-                try
-                {
-                    // Obter a propriedade da entidade
-                    var property = typeof(T).GetProperty(propertyName);
-                    if (property == null)
-                    {
-                        _logger.LogWarning("Propriedade {PropertyName} não encontrada em {EntityType}",
-                            propertyName, typeof(T).Name);
-                        continue;
-                    }
-
-                    // Criar a expressão de filtro dinamicamente
-                    var parameter = Expression.Parameter(typeof(T), "x");
-                    var propertyAccess = Expression.Property(parameter, property);
-
-                    // Converter o valor do filtro para o tipo correto
-                    object convertedValue;
-                    try
-                    {
-                        var underlyingType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-                        convertedValue = Convert.ChangeType(filterValue, underlyingType);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Erro ao converter valor '{Value}' para tipo {Type}",
-                            filterValue, property.PropertyType.Name);
-                        continue;
-                    }
-
-                    var constant = Expression.Constant(convertedValue, property.PropertyType);
-                    var equals = Expression.Equal(propertyAccess, constant);
-                    var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
-
-                    query = query.Where(lambda);
-
-                    _logger.LogDebug("Filtro aplicado: {PropertyName} = {Value}", propertyName, filterValue);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Erro ao aplicar filtro {PropertyName} = {Value}",
-                        propertyName, filterValue);
-                }
-            }
-
-            return query;
-        }
-
-        #endregion
-
-        #region Métodos de Busca com Filtros
-
-        private async Task<List<ReferenceItem>> SearchClientes(string term, int pageSize, Dictionary<string, string>? filters)
-        {
-            var termLower = term.ToLower();
-            var query = _context.Clientes
-                .Where(c => c.Ativo &&
-                    (c.Nome.ToLower().Contains(termLower) ||
-                     (c.Cpf != null && c.Cpf.Contains(termLower)) ||
-                     (c.Email != null && c.Email.ToLower().Contains(termLower))));
-
-            query = ApplyDynamicFilters(query, filters);
-
-            return await query
-                .OrderBy(c => c.Nome)
-                .Take(pageSize)
-                .Select(c => new ReferenceItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Nome,
-                    Subtitle = FormatClienteSubtitle(c.Cpf, c.Email, c.Telefone)
-                })
-                .ToListAsync();
-        }
-
-        private async Task<List<ReferenceItem>> SearchFornecedores(string term, int pageSize, Dictionary<string, string>? filters)
-        {
-            var termLower = term.ToLower();
-            var query = _context.Fornecedores
-                .Where(f => f.Ativo &&
-                    (f.Nome.ToLower().Contains(termLower) ||
-                     (f.CNPJ != null && f.CNPJ.Contains(termLower)) ||
-                     (f.Email != null && f.Email.ToLower().Contains(termLower))));
-
-            query = ApplyDynamicFilters(query, filters);
-
-            return await query
-                .OrderBy(f => f.Nome)
-                .Take(pageSize)
-                .Select(f => new ReferenceItem
-                {
-                    Value = f.Id.ToString(),
-                    Text = f.Nome,
-                    Subtitle = FormatFornecedorSubtitle(f.CNPJ, f.Email)
-                })
-                .ToListAsync();
-        }
-
-        private async Task<List<ReferenceItem>> SearchVendedores(string term, int pageSize, Dictionary<string, string>? filters)
-        {
-            var termLower = term.ToLower();
-            var query = _context.Vendedores
-                .Where(v => v.Ativo &&
-                    (v.Nome.ToLower().Contains(termLower) ||
-                     (v.CPF != null && v.CPF.Contains(termLower)) ||
-                     (v.Email != null && v.Email.ToLower().Contains(termLower))));
-
-            query = ApplyDynamicFilters(query, filters);
-
-            return await query
-                .OrderBy(v => v.Nome)
-                .Take(pageSize)
-                .Select(v => new ReferenceItem
-                {
-                    Value = v.Id.ToString(),
-                    Text = v.Nome,
-                    Subtitle = FormatVendedorSubtitle(v.CPF, v.Email)
-                })
-                .ToListAsync();
-        }
-
-        private async Task<List<ReferenceItem>> SearchVeiculoMarcas(string term, int pageSize, Dictionary<string, string>? filters)
-        {
-            var termLower = term.ToLower();
-            var query = _context.VeiculoMarcas
-                .Where(m => m.Descricao.ToLower().Contains(termLower));
-
-            query = ApplyDynamicFilters(query, filters);
-
-            return await query
-                .OrderBy(m => m.Descricao)
-                .Take(pageSize)
-                .Select(m => new ReferenceItem
-                {
-                    Value = m.Id.ToString(),
-                    Text = m.Descricao,
-                    Subtitle = null
-                })
-                .ToListAsync();
-        }
-
-        private async Task<List<ReferenceItem>> SearchVeiculoMarcaModelos(string term, int pageSize, Dictionary<string, string>? filters)
-        {
-            var termLower = term.ToLower();
-            var query = _context.VeiculoMarcaModelos
-                .Include(m => m.VeiculoMarca)
-                .Where(m => m.Descricao.ToLower().Contains(termLower));
-
-            // Aplicar filtros dinâmicos - especialmente o filtro por IdVeiculoMarca!
-            query = ApplyDynamicFilters(query, filters);
-
-            return await query
-                .OrderBy(m => m.VeiculoMarca != null ? m.VeiculoMarca.Descricao : "")
-                .ThenBy(m => m.Descricao)
-                .Take(pageSize)
-                .Select(m => new ReferenceItem
-                {
-                    Value = m.Id.ToString(),
-                    Text = m.Descricao,
-                    Subtitle = m.VeiculoMarca != null ? m.VeiculoMarca.Descricao : null
-                })
-                .ToListAsync();
-        }
-
-        private async Task<List<ReferenceItem>> SearchVeiculoCores(string term, int pageSize, Dictionary<string, string>? filters)
-        {
-            var termLower = term.ToLower();
-            var query = _context.VeiculoCores
-                .Where(c => c.Descricao.ToLower().Contains(termLower));
-
-            query = ApplyDynamicFilters(query, filters);
-
-            return await query
-                .OrderBy(c => c.Descricao)
-                .Take(pageSize)
-                .Select(c => new ReferenceItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Descricao,
-                    Subtitle = null
-                })
-                .ToListAsync();
-        }
-
-        #endregion
-
-        #region Métodos GetById por Entidade
-
-        /// <summary>
-        /// Obtém cliente por ID
-        /// </summary>
-        private async Task<ReferenceItem?> GetClienteById(string id)
-        {
-            if (!int.TryParse(id, out var clienteId))
+            if (method == null)
             {
                 return null;
             }
 
-            return await _context.Clientes
-                .Where(c => c.Id == clienteId)
-                .Select(c => new ReferenceItem
-                    {
-                        Value = c.Id.ToString(),
-                        Text = c.Nome,
-                        Subtitle = FormatClienteSubtitle(c.Cpf, c.Email, c.Telefone)
-                    })
-                .FirstOrDefaultAsync();
-        }
-
-        /// <summary>
-        /// Obtém fornecedor por ID
-        /// </summary>
-        private async Task<ReferenceItem?> GetFornecedorById(string id)
-        {
-            if (!int.TryParse(id, out var fornecedorId))
+            var task = (Task?)method.Invoke(_referenceService, new object[] { id });
+            if (task == null)
             {
                 return null;
             }
 
-            return await _context.Fornecedores
-                .Where(f => f.Id == fornecedorId)
-                .Select(f => new ReferenceItem
-                {
-                    Value = f.Id.ToString(),
-                    Text = f.Nome,
-                    Subtitle = FormatFornecedorSubtitle(f.CNPJ, f.Email)
-                })
-                .FirstOrDefaultAsync();
+            await task.ConfigureAwait(false);
+
+            var resultProperty = task.GetType().GetProperty("Result");
+            return resultProperty?.GetValue(task) as ReferenceItem;
         }
 
         /// <summary>
-        /// Obtém vendedor por ID
+        /// Invoca SearchAsync usando reflection
         /// </summary>
-        private async Task<ReferenceItem?> GetVendedorById(string id)
+        private async Task<List<ReferenceItem>> InvokeSearchAsync(Type entityType, string searchTerm, int pageSize, Dictionary<string, string>? filters)
         {
-            if (!int.TryParse(id, out var vendedorId))
+            var method = typeof(GenericReferenceService)
+                .GetMethod(nameof(GenericReferenceService.SearchAsync))
+                ?.MakeGenericMethod(entityType);
+
+            if (method == null)
             {
-                return null;
+                return new List<ReferenceItem>();
             }
 
-            return await _context.Vendedores
-                .Where(v => v.Id == vendedorId)
-                .Select(v => new ReferenceItem
-                {
-                    Value = v.Id.ToString(),
-                    Text = v.Nome,
-                    Subtitle = FormatVendedorSubtitle(v.CPF, v.Email)
-                })
-                .FirstOrDefaultAsync();
-        }
-
-        /// <summary>
-        /// Obtém marca de veículo por ID
-        /// </summary>
-        private async Task<ReferenceItem?> GetVeiculoMarcaById(string id)
-        {
-            if (!int.TryParse(id, out var marcaId))
+            var task = (Task?)method.Invoke(_referenceService, new object?[] { searchTerm, pageSize, filters });
+            if (task == null)
             {
-                return null;
+                return new List<ReferenceItem>();
             }
 
-            return await _context.VeiculoMarcas
-                .Where(m => m.Id == marcaId)
-                .Select(m => new ReferenceItem
-                {
-                    Value = m.Id.ToString(),
-                    Text = m.Descricao,
-                    Subtitle = null
-                })
-                .FirstOrDefaultAsync();
-        }
+            await task.ConfigureAwait(false);
 
-        /// <summary>
-        /// Obtém modelo de veículo por ID
-        /// </summary>
-        private async Task<ReferenceItem?> GetVeiculoMarcaModeloById(string id)
-        {
-            if (!int.TryParse(id, out var modeloId))
-            {
-                return null;
-            }
-
-            return await _context.VeiculoMarcaModelos
-                .Include(m => m.VeiculoMarca)
-                .Where(m => m.Id == modeloId)
-                .Select(m => new ReferenceItem
-                {
-                    Value = m.Id.ToString(),
-                    Text = m.Descricao,
-                    Subtitle = m.VeiculoMarca != null ? m.VeiculoMarca.Descricao : null
-                })
-                .FirstOrDefaultAsync();
-        }
-
-        /// <summary>
-        /// Obtém cor de veículo por ID
-        /// </summary>
-        private async Task<ReferenceItem?> GetVeiculoCorById(string id)
-        {
-            if (!int.TryParse(id, out var corId))
-            {
-                return null;
-            }
-
-            return await _context.VeiculoCores
-                .Where(c => c.Id == corId)
-                .Select(c => new ReferenceItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Descricao,
-                    Subtitle = null
-                })
-                .FirstOrDefaultAsync();
-        }
-
-        #endregion
-
-        #region Métodos Helper de Formatação
-
-        private static string FormatClienteSubtitle(string? cpf, string? email, string? telefone)
-        {
-            var parts = new List<string>();
-            if (!string.IsNullOrEmpty(cpf))
-            {
-                parts.Add($"CPF: {cpf}");
-            }
-
-            if (!string.IsNullOrEmpty(email))
-            {
-                parts.Add(email);
-            }
-
-            if (!string.IsNullOrEmpty(telefone))
-            {
-                parts.Add(telefone);
-            }
-
-            return parts.Count > 0 ? string.Join(" • ", parts) : string.Empty;
-        }
-
-        private static string FormatFornecedorSubtitle(string? cnpj, string? email)
-        {
-            var parts = new List<string>();
-            if (!string.IsNullOrEmpty(cnpj))
-            {
-                parts.Add($"CNPJ: {cnpj}");
-            }
-
-            if (!string.IsNullOrEmpty(email))
-            {
-                parts.Add(email);
-            }
-
-            return parts.Count > 0 ? string.Join(" • ", parts) : string.Empty;
-        }
-
-        private static string FormatVendedorSubtitle(string? cpf, string? email)
-        {
-            var parts = new List<string>();
-            if (!string.IsNullOrEmpty(cpf))
-            {
-                parts.Add($"CPF: {cpf}");
-            }
-
-            if (!string.IsNullOrEmpty(email))
-            {
-                parts.Add(email);
-            }
-
-            return parts.Count > 0 ? string.Join(" • ", parts) : string.Empty;
+            var resultProperty = task.GetType().GetProperty("Result");
+            return (resultProperty?.GetValue(task) as List<ReferenceItem>) ?? new List<ReferenceItem>();
         }
 
         #endregion

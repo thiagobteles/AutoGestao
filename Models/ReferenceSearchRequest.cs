@@ -22,7 +22,7 @@ namespace AutoGestao.Models
         /// Filtros dinâmicos a serem aplicados na busca
         /// Exemplo: { "IdVeiculoMarca": "5", "Ativo": "true" }
         /// </summary>
-        public Dictionary<string, string> Filters { get; set; } = new();
+        public Dictionary<string, string> Filters { get; set; } = [];
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ namespace AutoGestao.Models
         /// <summary>
         /// Lista de filtros configurados via [ReferenceFilter]
         /// </summary>
-        public List<ReferenceFilterInfo> Filters { get; set; } = new();
+        public List<ReferenceFilterInfo> Filters { get; set; } = [];
 
         /// <summary>
         /// Nome da propriedade que possui os filtros

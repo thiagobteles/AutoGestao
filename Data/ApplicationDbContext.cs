@@ -436,7 +436,7 @@ namespace AutoGestao.Data
             // RELACIONAMENTOS DO VEÍCULO
             // ===========================================
             modelBuilder.Entity<Veiculo>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Veiculo>().HasOne(v => v.Proprietario).WithMany(c => c.Veiculos).HasForeignKey(v => v.IdCliente).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Veiculo>().HasOne(v => v.Cliente).WithMany(c => c.Veiculos).HasForeignKey(v => v.IdCliente).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoCor).WithMany().HasForeignKey(v => v.IdVeiculoCor).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoFilial).WithMany().HasForeignKey(v => v.IdVeiculoFilial).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<Veiculo>().HasOne(v => v.VeiculoLocalizacao).WithMany().HasForeignKey(v => v.IdVeiculoLocalizacao).OnDelete(DeleteBehavior.SetNull);

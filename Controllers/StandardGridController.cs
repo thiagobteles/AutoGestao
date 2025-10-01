@@ -23,11 +23,7 @@ namespace AutoGestao.Controllers
         {
             var retorno = new StandardGridViewModel($"{typeof(T).Name}s", $"Gerencie todos os {typeof(T).Name}s", $"{typeof(T).Name}s")
             {
-                Columns =
-                [
-                    new() { Name = "Id", DisplayName = "Cód", Type = EnumGridColumnType.Text, Sortable = true, Width = "65px" },
-                    new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
-                ]
+                Columns = GridColumnBuilder.BuildColumns<T>()
             };
 
             return retorno;

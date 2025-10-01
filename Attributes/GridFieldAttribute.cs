@@ -1,0 +1,186 @@
+using System;
+
+namespace AutoGestao.Attributes
+{
+    /// <summary>
+    /// Anotação ÚNICA que controla tudo: Grid + ReferenceItem + Busca
+    /// Simplifica o uso no dia a dia, complexidade fica no helper genérico
+    /// </summary>
+    /// <remarks>
+    /// Construtor simplificado - apenas DisplayName
+    /// Exemplo: [GridField("Nome do Cliente")]
+    /// </remarks>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class GridFieldAttribute(string? displayName = null) : Attribute
+    {
+        /// <summary>
+        /// Nome de exibição na grid e nos labels
+        /// </summary>
+        public string? DisplayName { get; set; } = displayName;
+
+        /// <summary>
+        /// Ordem de exibição (menor = primeiro)
+        /// Se não informado, usa ordem alfabética inteligente
+        /// </summary>
+        public int Order { get; set; } = -1; // -1 = auto
+
+        /// <summary>
+        /// Largura da coluna (ex: "120px", "15%")
+        /// Se não informado, calcula automaticamente
+        /// </summary>
+        public string? Width { get; set; }
+
+        /// <summary>
+        /// Se a coluna é ordenável
+        /// </summary>
+        public bool Sortable { get; set; } = true;
+
+        /// <summary>
+        /// Se deve criar link para Details na grid
+        /// </summary>
+        public bool IsLink { get; set; } = false;
+
+        /// <summary>
+        /// Se este campo é o TEXTO PRINCIPAL do ReferenceItem
+        /// Apenas UMA propriedade deve ter IsText = true
+        /// </summary>
+        public bool IsText { get; set; } = false;
+
+        /// <summary>
+        /// Se este campo é BUSCÁVEL (ReferenceSearchable)
+        /// </summary>
+        public bool IsSearchable { get; set; } = false;
+
+        /// <summary>
+        /// Se este campo aparece no SUBTITLE do ReferenceItem
+        /// </summary>
+        public bool IsSubtitle { get; set; } = false;
+
+        /// <summary>
+        /// Prefixo para o subtitle (ex: "CPF: ", "Email: ")
+        /// </summary>
+        public string? SubtitlePrefix { get; set; }
+
+        /// <summary>
+        /// Ordem no subtitle (quando IsSubtitle = true)
+        /// </summary>
+        public int SubtitleOrder { get; set; } = 0;
+
+        /// <summary>
+        /// Máscara de formatação
+        /// Exemplos: "###.###.###-##" (CPF), "##.###.###/####-##" (CNPJ)
+        /// </summary>
+        public string? Format { get; set; }
+
+        /// <summary>
+        /// Navegação para relacionamento (ex: "VeiculoMarca.Descricao")
+        /// </summary>
+        public string? NavigationPath { get; set; }
+
+        /// <summary>
+        /// Se false, campo NÃO aparece na grid (mas pode aparecer no ReferenceItem)
+        /// </summary>
+        public bool ShowInGrid { get; set; } = true;
+    }
+
+    /// <summary>
+    /// Atalho para campo de ID - sempre primeira coluna, não editável
+    /// Uso: [GridId] ou [GridId("Código")]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class GridIdAttribute : GridFieldAttribute
+    {
+        public GridIdAttribute(string? displayName = "Cód") : base(displayName)
+        {
+            Order = 0;
+            Width = "65px";
+            Sortable = true;
+            ShowInGrid = true;
+        }
+    }
+
+    /// <summary>
+    /// Atalho para campo Ativo/Status - sempre última coluna
+    /// Uso: [GridStatus] ou [GridStatus("Situação")]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class GridStatusAttribute : GridFieldAttribute
+    {
+        public GridStatusAttribute(string? displayName = "Ativo") : base(displayName)
+        {
+            Order = 999;
+            Width = "65px";
+            Sortable = true;
+        }
+    }
+
+    /// <summary>
+    /// Atalho para campo principal da entidade
+    /// Automaticamente: IsText = true, IsSearchable = true, IsLink = true
+    /// Uso: [GridMain("Nome Completo")] ou apenas [GridMain]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class GridMainAttribute : GridFieldAttribute
+    {
+        public GridMainAttribute(string? displayName = null) : base(displayName)
+        {
+            IsText = true;
+            IsSearchable = true;
+            IsLink = true;
+            Order = 10;
+        }
+    }
+
+    /// <summary>
+    /// Atalho para campos de documento (CPF/CNPJ)
+    /// Automaticamente: IsSubtitle = true, IsSearchable = true, com formatação
+    /// Uso: [GridDocument("CPF", DocumentType.CPF)] ou [GridDocument("CNPJ", DocumentType.CNPJ)]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class GridDocumentAttribute : GridFieldAttribute
+    {
+        public GridDocumentAttribute(string? displayName = null, DocumentType type = DocumentType.CPF) : base(displayName)
+        {
+            IsSubtitle = true;
+            IsSearchable = true;
+            SubtitleOrder = 0;
+            Order = 30;
+
+            if (type == DocumentType.CPF)
+            {
+                SubtitlePrefix = "CPF: ";
+                Format = "###.###.###-##";
+                DisplayName = displayName ?? "CPF";
+            }
+            else if (type == DocumentType.CNPJ)
+            {
+                SubtitlePrefix = "CNPJ: ";
+                Format = "##.###.###/####-##";
+                DisplayName = displayName ?? "CNPJ";
+            }
+        }
+    }
+
+    public enum DocumentType
+    {
+        CPF,
+        CNPJ
+    }
+
+    /// <summary>
+    /// Atalho para campos de contato (Email/Telefone/Celular)
+    /// Automaticamente: IsSubtitle = true, IsSearchable = true
+    /// Uso: [GridContact] (detecta pelo nome da propriedade) ou [GridContact("E-mail")]
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class GridContactAttribute : GridFieldAttribute
+    {
+        public GridContactAttribute(string? displayName = null) : base(displayName)
+        {
+            IsSubtitle = true;
+            IsSearchable = true;
+            SubtitleOrder = 1;
+            Order = 50;
+        }
+    }
+}

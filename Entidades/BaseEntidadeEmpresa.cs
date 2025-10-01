@@ -7,8 +7,6 @@ namespace AutoGestao.Entidades
     {
         public long IdEmpresa { get; set; }
 
-        public bool Ativo { get; set; } = true;
-
         // Navigation properties para auditoria
         public virtual Empresa? Empresa { get; set; }
     }

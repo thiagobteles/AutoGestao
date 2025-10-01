@@ -9,9 +9,11 @@ namespace AutoGestao.Entidades
     [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users", EnableAjaxSubmit = true)]
     public class Usuario : BaseEntidadeEmpresa
     {
+        [GridMain("Nome")]
         [FormField(Name = "Nome Completo", Icon = "fas fa-user", Type = EnumFieldType.Text, Required = true, Order = 1, Section = "Dados Básicos")]
         public string Nome { get; set; } = "";
 
+        [GridContact("E-mail/Login")]
         [FormField(Name = "Email/Login", Icon = "fas fa-envelope", Type = EnumFieldType.Email, Required = true, Order = 2, Section = "Dados Básicos")]
         public string Email { get; set; } = "";
 
@@ -22,18 +24,19 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Confirmar Senha", Icon = "fas fa-lock", Type = EnumFieldType.Password, Order = 4, Section = "Dados Básicos")]
         public string? ConfirmarSenha { get; set; }
 
+        [GridDocument("CPF", DocumentType.CPF)]
         [FormField(Name = "CPF", Icon = "fas fa-fingerprint", Type = EnumFieldType.Cpf, Order = 4, Section = "Dados Básicos")]
         public string? CPF { get; set; }
 
+        [GridField("Telefone", IsSubtitle = true, SubtitleOrder = 2, Order = 60)]
         [FormField(Name = "Telefone", Icon = "fas fa-phone", Type = EnumFieldType.Phone, Order = 5, Section = "Contato")]
         public string? Telefone { get; set; }
 
+        [GridField("Perfil", Order = 85, Width = "120px")]
         [FormField(Name = "Perfil", Icon = "fas fa-user-tag", Type = EnumFieldType.Select, Required = true, Order = 10, Section = "Permissões")]
         public EnumPerfilUsuario Perfil { get; set; }
 
-        [FormField(Name = "Ativo", Icon = "fas fa-toggle-on", Type = EnumFieldType.Checkbox, Order = 11, Section = "Permissões")]
-        public bool Ativo { get; set; } = true;
-
+        [GridField("Último Login", Order = 87, Width = "140px")]
         [FormField(Name = "Último Login", Icon = "fas fa-clock", Type = EnumFieldType.DateTime, ReadOnly = true, Order = 20, Section = "Informações")]
         public DateTime? UltimoLogin { get; set; }
 

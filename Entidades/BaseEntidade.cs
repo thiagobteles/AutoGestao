@@ -1,4 +1,5 @@
 using AutoGestao.Attributes;
+using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Interfaces;
 
 namespace AutoGestao.Entidades
@@ -7,6 +8,10 @@ namespace AutoGestao.Entidades
     public class BaseEntidade : IAuditable
     {
         public long Id { get; set; }
+
+        [GridStatus]
+        [FormField(Order = 10, Name = "Ativo", Section = "Status", Icon = "fas fa-toggle-on", Type = EnumFieldType.Checkbox)]
+        public bool Ativo { get; set; } = true;
 
         [AuditIgnore]
         public DateTime DataCadastro { get; set; }

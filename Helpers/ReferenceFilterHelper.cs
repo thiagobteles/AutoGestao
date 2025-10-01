@@ -48,7 +48,7 @@ namespace AutoGestao.Helpers
             var config = GetFilterConfig(property);
             if (config == null)
             {
-                return new Dictionary<string, string>();
+                return [];
             }
 
             var resolvedFilters = new Dictionary<string, string>();

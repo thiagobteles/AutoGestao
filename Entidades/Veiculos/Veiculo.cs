@@ -116,7 +116,7 @@ namespace AutoGestao.Entidades.Veiculos
         // Propriedades de navegação (serão ignoradas automaticamente)
         public virtual VeiculoMarca? VeiculoMarca { get; set; }
         public virtual VeiculoMarcaModelo? VeiculoMarcaModelo { get; set; }
-        public virtual Cliente? Proprietario { get; set; }
+        public virtual Cliente? Cliente { get; set; }
         public virtual VeiculoCor? VeiculoCor { get; set; }
         public virtual VeiculoFilial? VeiculoFilial { get; set; }
         public virtual VeiculoLocalizacao? VeiculoLocalizacao { get; set; }
