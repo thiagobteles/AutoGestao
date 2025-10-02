@@ -177,7 +177,7 @@ namespace AutoGestao.Controllers
             int pageSize = 50,
             int page = 1)
         {
-            var gridConfig = ConfigureGrid();
+            var gridConfig = ConfigureGrid(ControllerContext.ActionDescriptor.ControllerName);
             ConfigureCustomGrid(gridConfig);
             var query = GetBaseQuery();
 
@@ -239,7 +239,7 @@ namespace AutoGestao.Controllers
             int pageSize = 50,
             int page = 1)
         {
-            var gridConfig = ConfigureGrid();
+            var gridConfig = ConfigureGrid(ControllerContext.ActionDescriptor.ControllerName);
             var query = GetBaseQuery();
 
             // Aplicar filtros
@@ -545,6 +545,52 @@ namespace AutoGestao.Controllers
             }
         }
 
+        [HttpGet]
+        public virtual async Task<IActionResult> Export()
+        {
+            try
+            {
+                // Obter configuração de colunas automaticamente
+                var columns = GridColumnBuilder.BuildColumns<T>()
+                    .Where(c => c.Type != EnumGridColumnType.Actions)
+                    .ToList();
+
+                // Aplicar query base e filtros
+                var filters = ExtractFiltersFromRequest();
+                var query = GetBaseQuery();
+                query = ApplyFilters(query, filters);
+
+                // Obter dados
+                var data = await query.ToListAsync();
+
+                // Gerar CSV
+                var csv = new System.Text.StringBuilder();
+
+                // Header
+                var headers = columns.Select(c => c.DisplayName);
+                csv.AppendLine(string.Join(",", headers));
+
+                // Dados
+                foreach (var item in data)
+                {
+                    var values = columns.Select(column => FormatValueForExport(item, column));
+                    var line = string.Join(",", values.Select(v => EscapeCsvValue(v)));
+                    csv.AppendLine(line);
+                }
+
+                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+                var entityName = typeof(T).Name.ToLower();
+                var fileName = $"{entityName}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
+
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
         #endregion
 
         #region Métodos para Sistema de Abas
@@ -650,19 +696,17 @@ namespace AutoGestao.Controllers
 
         #region Métodos Privados
 
-        private static StandardGridViewModel ConfigureGrid()
+        private static StandardGridViewModel ConfigureGrid(string controllerName)
         {
-            var nomeEntidade = $"{typeof(T).Name}s";
-
             var standardGridViewModel = new StandardGridViewModel
             {
-                Title = nomeEntidade,
-                SubTitle = $"Gerencie todos os {nomeEntidade}",
-                EntityName = nomeEntidade,
-                ControllerName = nomeEntidade,
+                Title = controllerName,
+                SubTitle = $"Gerencie todos os {controllerName}",
+                EntityName = typeof(T).Name,
+                ControllerName = controllerName,
                 Columns = GridColumnBuilder.BuildColumns<T>(),
-                HeaderActions = ObterHeaderActionsPadrao(nomeEntidade),
-                RowActions = ObterRowActionsPadrao(nomeEntidade)
+                HeaderActions = ObterHeaderActionsPadrao(controllerName),
+                RowActions = ObterRowActionsPadrao(controllerName)
             };
 
             return standardGridViewModel;
@@ -1080,6 +1124,102 @@ namespace AutoGestao.Controllers
             return viewResult?.Success ?? false;
         }
 
+        private static string FormatValueForExport(T item, GridColumn column)
+        {
+            try
+            {
+                // Para campos compostos, usar o CustomRender se existir
+                if (column.Type == EnumGridColumnType.Custom && column.CustomRender != null)
+                {
+                    var rendered = column.CustomRender(item);
+                    // Remover tags HTML
+                    return System.Text.RegularExpressions.Regex.Replace(rendered, "<.*?>", string.Empty).Trim();
+                }
+
+                // Obter valor da propriedade
+                var property = typeof(T).GetProperty(column.Name);
+                if (property == null)
+                {
+                    return "";
+                }
+
+                var value = property.GetValue(item);
+                if (value == null)
+                {
+                    return "";
+                }
+
+                // Formatação por tipo
+                return column.Type switch
+                {
+                    EnumGridColumnType.Date => value is DateTime date ? date.ToString("dd/MM/yyyy") : value.ToString() ?? "",
+                    EnumGridColumnType.Number => FormatNumber(value),
+                    EnumGridColumnType.Enumerador => FormatEnum(value),
+                    _ => value.ToString() ?? ""
+                };
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        private static string FormatNumber(object value)
+        {
+            if (value == null) return "";
+
+            return value switch
+            {
+                decimal d => d.ToString("F2"),
+                double db => db.ToString("F2"),
+                float f => f.ToString("F2"),
+                _ => value.ToString() ?? ""
+            };
+        }
+
+        private static string FormatEnum(object value)
+        {
+            if (value == null) return "";
+
+            var type = value.GetType();
+            if (type.IsEnum)
+            {
+                return value.GetDescription();
+            }
+
+            // Para Nullable<Enum>
+            var underlyingType = Nullable.GetUnderlyingType(type);
+            if (underlyingType?.IsEnum == true)
+            {
+                return value.GetDescription();
+            }
+
+            if (value is bool boolValue)
+            {
+                return boolValue ? "Sim" : "Não";
+            }
+
+            return value.ToString() ?? "";
+        }
+
+        private static string EscapeCsvValue(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return "";
+            }
+
+            // Se contém vírgula, aspas ou quebra de linha, envolver em aspas
+            if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
+            {
+                // Duplicar aspas internas
+                value = value.Replace("\"", "\"\"");
+                return $"\"{value}\"";
+            }
+
+            return value;
+        }
+
         #endregion
 
         #region Automated Enum Detection and Population
@@ -1143,9 +1283,6 @@ namespace AutoGestao.Controllers
             }
         }
 
-        /// <summary>
-        /// CreateFieldFromProperty para usar automação
-        /// </summary>
         private FormFieldViewModel? CreateFieldFromProperty(PropertyInfo property, T entity, string action)
         {
             var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
@@ -1192,6 +1329,12 @@ namespace AutoGestao.Controllers
                     referenceFilters = ReferenceFilterHelper.SerializeFilterConfig(filterConfig);
                 }
 
+                // ============================================================
+                // OBTER E FORMATAR O VALOR DO CAMPO
+                // ============================================================
+                var rawValue = property.GetValue(entity);
+                var formattedValue = FormatFieldValue(rawValue, formFieldAttr.Type, property);
+
                 return new FormFieldViewModel
                 {
                     PropertyName = property.Name,
@@ -1201,7 +1344,7 @@ namespace AutoGestao.Controllers
                     Type = formFieldAttr.Type,
                     Required = isRequired,
                     ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
-                    Value = property.GetValue(entity),
+                    Value = formattedValue,  // Usar valor formatado
                     Reference = formFieldAttr.Reference ?? null,
                     ValidationRegex = formFieldAttr.ValidationRegex ?? "",
                     ValidationMessage = formFieldAttr.ValidationMessage ?? "",
@@ -1227,6 +1370,60 @@ namespace AutoGestao.Controllers
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Formata o valor do campo de acordo com o tipo
+        /// </summary>
+        private static object? FormatFieldValue(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
+        {
+            if (rawValue == null)
+            {
+                return null;
+            }
+
+            // Para campos Select (Enums), converter para o valor string do enum
+            if (fieldType == EnumFieldType.Select)
+            {
+                var propertyType = property.PropertyType;
+                var underlyingType = Nullable.GetUnderlyingType(propertyType);
+
+                // Se for um Enum (direto ou Nullable<Enum>)
+                if (propertyType.IsEnum || (underlyingType?.IsEnum ?? false))
+                {
+                    // Converter para o valor numérico do enum como string
+                    // Isso garante compatibilidade com os SelectListItems que usam valores numéricos
+                    return Convert.ToInt32(rawValue).ToString();
+                }
+
+                // Para outros tipos de Select (não-enum), retornar como string
+                return rawValue.ToString();
+            }
+
+            // Para campos Reference, converter para string (ID da entidade)
+            if (fieldType == EnumFieldType.Reference)
+            {
+                // Se for 0, retornar null para não pré-selecionar nada
+                if (rawValue is long longValue && longValue == 0)
+                {
+                    return null;
+                }
+                if (rawValue is int intValue && intValue == 0)
+                {
+                    return null;
+                }
+
+                return rawValue.ToString();
+            }
+
+            // Para campos Checkbox (bool), garantir que seja bool
+            if (fieldType == EnumFieldType.Checkbox)
+            {
+                return rawValue is bool boolValue && boolValue;
+            }
+
+            // Para outros tipos, retornar o valor original
+            return rawValue;
         }
 
         // <summary>

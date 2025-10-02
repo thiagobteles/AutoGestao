@@ -108,9 +108,30 @@
         break;
 
     case EnumGridColumnType.Currency:
-        @if (value != null && decimal.TryParse(value.ToString(), out decimal currencyValue))
+        @if (value != null)
         {
-            <span class="currency-value">@currencyValue.ToString("C")</span>
+            decimal currencyValue = 0;
+            bool parsed = false;
+
+            if (value is decimal decVal)
+            {
+                currencyValue = decVal;
+                parsed = true;
+            }
+            else if (decimal.TryParse(value.ToString(), out decimal parsedVal))
+            {
+                currencyValue = parsedVal;
+                parsed = true;
+            }
+
+            if (parsed)
+            {
+                <span class="currency-value">@currencyValue.ToString("C2")</span>
+            }
+            else
+            {
+                <span class="text-muted">-</span>
+            }
         }
         else
         {
@@ -130,9 +151,39 @@
         break;
 
     case EnumGridColumnType.Number:
-        @if (value != null && decimal.TryParse(value.ToString(), out decimal numberValue))
+        @if (value != null)
         {
-            @numberValue.ToString("N0")
+            decimal numberValue = 0;
+            bool parsed = false;
+
+            if (value is decimal decVal)
+            {
+                numberValue = decVal;
+                parsed = true;
+            }
+            else if (decimal.TryParse(value.ToString(), out decimal parsedVal))
+            {
+                numberValue = parsedVal;
+                parsed = true;
+            }
+
+            if (parsed)
+            {
+                // Usar o formato especificado na coluna, ou N0 como padrão
+                var format = !string.IsNullOrEmpty(Model.Column.Format) ? Model.Column.Format : "N0";
+
+                // Se o formato for P (porcentagem), dividir por 100
+                if (format.StartsWith("P", StringComparison.OrdinalIgnoreCase))
+                {
+                    numberValue = numberValue / 100;
+                }
+
+                <span class="number-value">@numberValue.ToString(format)</span>
+            }
+            else
+            {
+                <span class="text-muted">-</span>
+            }
         }
         else
         {

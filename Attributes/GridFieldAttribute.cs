@@ -63,7 +63,7 @@ namespace AutoGestao.Attributes
 
         /// <summary>
         /// Máscara de formatação
-        /// Exemplos: "###.###.###-##" (CPF), "##.###.###/####-##" (CNPJ)
+        /// Exemplos: "###.###.###-##" (CPF), "##.###.###/####-##" (CNPJ), C "Financeiro"
         /// </summary>
         public string? Format { get; set; }
 

@@ -154,20 +154,15 @@
                                         name="@field.PropertyName"
                                         @(field.Required || field.IsConditionallyRequired ? "required" : "")
                                         @(field.ReadOnly ? "disabled" : string.Empty)>
-
-                                        @if (field.ReadOnly)
-                                        {
-                                            <option value=""></option>
-                                        }
-                                        else
-                                        {
-                                            <option value="">Selecione...</option>
+                                        <option value="">Selecione...</option>
+                                        @{
+                                            var selectedValue = field.Value?.ToString() ?? "";
                                         }
 
                                         @foreach (var option in field.Options)
                                         {
                                             <option value="@option.Value"
-                                                selected = "@(field.Value?.ToString() == option.Value)">
+                                                selected="@(selectedValue == option.Value)">
                                                 @option.Text
                                             </option>
                                         }
@@ -265,19 +260,16 @@
                                     break;
 
                                 case EnumFieldType.Percentage:
-                                    var percentValue = field.Value?.ToString();
-                                    if (!string.IsNullOrEmpty(percentValue) && !percentValue.Contains("%"))
-                                    {
-                                        percentValue += "%";
-                                    }
+                                    var percentValue = field.Value?.ToString().Replace("%", "");
                                     <input type="text"
-                                        class="form-control-modern percentage-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        name="@field.PropertyName"
-                                        value="@percentValue"
-                                        placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "1,50%" : field.Placeholder)"
-                                        @(field.Required && !Model.IsDetailsMode ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
+                                           class="form-control percentage-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@percentValue"
+                                           placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "0,00%" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
                                     break;
 
                                 case EnumFieldType.Reference:

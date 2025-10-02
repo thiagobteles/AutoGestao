@@ -59,14 +59,6 @@ function initializeMasks() {
         });
     });
 
-    // Máscara para Porcentagem
-    document.querySelectorAll('.percentage-mask').forEach(function (input) {
-        input.addEventListener('input', function () {
-            let value = this.value.replace(/\D/g, '');
-            this.value = value + "%";
-        });
-    });
-
     // Máscara para CEP
     document.querySelectorAll('.cep-mask').forEach(function (input) {
         input.addEventListener('input', function () {
@@ -76,8 +68,83 @@ function initializeMasks() {
         });
     });
 
+    // Máscara para Porcentagem
+    document.querySelectorAll('.percentage-mask').forEach(function (input) {
+        // Formatar valor inicial se já existir
+        formatPercentageValue(input);
+
+        input.addEventListener('input', function (e) {
+            // Pegar posição do cursor
+            let cursorPosition = this.selectionStart;
+            let oldLength = this.value.length;
+
+            // Remover tudo exceto números e vírgula
+            let value = this.value.replace(/[^\d,]/g, '');
+
+            // Permitir apenas uma vírgula
+            const parts = value.split(',');
+            if (parts.length > 2) {
+                value = parts[0] + ',' + parts.slice(1).join('');
+            }
+
+            // Limitar casas decimais a 2
+            if (parts.length === 2 && parts[1].length > 2) {
+                value = parts[0] + ',' + parts[1].substring(0, 2);
+            }
+
+            // Adicionar % no final
+            if (value !== '') {
+                this.value = value + '%';
+            } else {
+                this.value = '';
+            }
+
+            // Ajustar posição do cursor
+            let newLength = this.value.length;
+            let diff = newLength - oldLength;
+
+            // Se o cursor estava no final (onde está o %), manter antes do %
+            if (cursorPosition === oldLength) {
+                this.setSelectionRange(newLength - 1, newLength - 1);
+            } else {
+                this.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+            }
+        });
+
+        input.addEventListener('focus', function () {
+            // Remover % ao focar para facilitar edição
+            this.value = this.value.replace('%', '');
+
+            // Colocar cursor no final
+            setTimeout(() => {
+                this.setSelectionRange(this.value.length, this.value.length);
+            }, 10);
+        });
+
+        input.addEventListener('blur', function () {
+            formatPercentageValue(this);
+        });
+
+        // Prevenir que o usuário delete o % manualmente
+        input.addEventListener('keydown', function (e) {
+            // Se está tentando deletar e o cursor está no final (antes do %)
+            if ((e.key === 'Backspace' || e.key === 'Delete') &&
+                this.value.endsWith('%') &&
+                this.selectionStart === this.value.length - 1) {
+                // Permitir deletar o número, não o %
+                e.preventDefault();
+                let newValue = this.value.substring(0, this.value.length - 2) + '%';
+                this.value = newValue === '%' ? '' : newValue;
+                this.setSelectionRange(this.value.length - 1, this.value.length - 1);
+            }
+        });
+    });
+
     // Máscara para moeda
     document.querySelectorAll('.currency-mask').forEach(function (input) {
+        // IMPORTANTE: Formatar valor inicial se já existir
+        formatCurrencyValue(input);
+
         input.addEventListener('input', function () {
             let value = this.value.replace(/\D/g, '');
 
@@ -106,14 +173,62 @@ function initializeMasks() {
 
         // Aplicar formato ao sair do campo
         input.addEventListener('blur', function () {
-            if (this.value && !this.value.startsWith('R$')) {
-                let value = parseFloat(this.value);
-                if (!isNaN(value)) {
-                    this.value = 'R$ ' + value.toFixed(2).replace('.', ',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-                }
-            }
+            formatCurrencyValue(this);
         });
     });
+}
+
+// Função auxiliar para formatar valores de porcentagem
+function formatPercentageValue(input) {
+    if (!input.value || input.value.trim() === '' || input.value === '%') {
+        input.value = '';
+        return;
+    }
+
+    // Se já está formatado corretamente, não fazer nada
+    if (input.value.endsWith('%') && !input.value.includes('%%')) {
+        return;
+    }
+
+    // Remover % e espaços
+    let value = input.value.replace(/[^\d,]/g, '');
+
+    if (value === '') {
+        input.value = '';
+        return;
+    }
+
+    // Garantir formato correto com vírgula
+    if (!value.includes(',') && value.includes('.')) {
+        value = value.replace('.', ',');
+    }
+
+    // Adicionar %
+    input.value = value + '%';
+}
+
+// Função auxiliar para formatar valores currency
+function formatCurrencyValue(input) {
+    if (!input.value || input.value.trim() === '') {
+        return;
+    }
+
+    // Se já está formatado, não fazer nada
+    if (input.value.startsWith('R$')) {
+        return;
+    }
+
+    // Tentar parsear o valor
+    let value = input.value.replace(/[^\d,.]/g, '').replace(',', '.');
+    let numericValue = parseFloat(value);
+
+    if (!isNaN(numericValue)) {
+        // Formatar como moeda brasileira
+        let formatted = numericValue.toFixed(2);
+        formatted = formatted.replace('.', ',');
+        formatted = formatted.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+        input.value = 'R$ ' + formatted;
+    }
 }
 
 // ================================================================================================

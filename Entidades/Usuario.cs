@@ -10,37 +10,37 @@ namespace AutoGestao.Entidades
     public class Usuario : BaseEntidadeEmpresa
     {
         [GridMain("Nome")]
-        [FormField(Name = "Nome Completo", Icon = "fas fa-user", Type = EnumFieldType.Text, Required = true, Order = 1, Section = "Dados Básicos")]
+        [FormField(Name = "Nome Completo", Order = 1, Section = "Dados Básicos", Icon = "fas fa-user", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]
         public string Nome { get; set; } = "";
 
         [GridContact("E-mail/Login")]
-        [FormField(Name = "Email/Login", Icon = "fas fa-envelope", Type = EnumFieldType.Email, Required = true, Order = 2, Section = "Dados Básicos")]
+        [FormField(Name = "Email/Login", Order = 2, Section = "Dados Básicos", Icon = "fas fa-envelope", Type = EnumFieldType.Email, Required = true)]
         public string Email { get; set; } = "";
 
-        [AuditSensitive(MaskPattern = "***")]
-        [FormField(Name = "Senha", Icon = "fas fa-lock", Type = EnumFieldType.Password, Required = true, Order = 3, Section = "Dados Básicos")]
-        public string SenhaHash { get; set; } = "";
-
-        [FormField(Name = "Confirmar Senha", Icon = "fas fa-lock", Type = EnumFieldType.Password, Order = 4, Section = "Dados Básicos")]
-        public string? ConfirmarSenha { get; set; }
-
         [GridDocument("CPF", DocumentType.CPF)]
-        [FormField(Name = "CPF", Icon = "fas fa-fingerprint", Type = EnumFieldType.Cpf, Order = 4, Section = "Dados Básicos")]
-        public string? CPF { get; set; }
+        [FormField(Name = "CPF", Order = 3, Section = "Dados Básicos", Icon = "fas fa-fingerprint", Type = EnumFieldType.Cpf)]
+        public string? Cpf { get; set; }
 
         [GridField("Telefone", IsSubtitle = true, SubtitleOrder = 2, Order = 60)]
-        [FormField(Name = "Telefone", Icon = "fas fa-phone", Type = EnumFieldType.Phone, Order = 5, Section = "Contato")]
+        [FormField(Name = "Telefone", Order = 4, Section = "Dados Básicos", Icon = "fas fa-phone", Type = EnumFieldType.Phone)]
         public string? Telefone { get; set; }
 
-        [GridField("Perfil", Order = 85, Width = "120px")]
-        [FormField(Name = "Perfil", Icon = "fas fa-user-tag", Type = EnumFieldType.Select, Required = true, Order = 10, Section = "Permissões")]
+        [GridField("Perfil", Order = 10, Width = "120px")]
+        [FormField(Name = "Perfil", Order = 10, Section = "Informações", Icon = "fas fa-user-tag", Type = EnumFieldType.Select, Required = true, GridColumns = 2)]
         public EnumPerfilUsuario Perfil { get; set; }
 
-        [GridField("Último Login", Order = 87, Width = "140px")]
-        [FormField(Name = "Último Login", Icon = "fas fa-clock", Type = EnumFieldType.DateTime, ReadOnly = true, Order = 20, Section = "Informações")]
+        [GridField("Último Login", Order = 11, Width = "140px")]
+        [FormField(Name = "Último Login", Order = 11, Section = "Informações", Icon = "fas fa-clock", Type = EnumFieldType.DateTime, ReadOnly = true)]
         public DateTime? UltimoLogin { get; set; }
 
-        [FormField(Name = "Observações", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea, Order = 30, Section = "Observações")]
+        [AuditSensitive(MaskPattern = "***")]
+        [FormField(Name = "Senha", Order = 20, Section = "Login", Icon = "fas fa-lock", Type = EnumFieldType.Password, Required = true)]
+        public string SenhaHash { get; set; } = "";
+
+        [FormField(Name = "Confirmar Senha", Order = 21, Section = "Login", Icon = "fas fa-lock", Type = EnumFieldType.Password)]
+        public string? ConfirmarSenha { get; set; }
+
+        [FormField(Name = "Observações", Order = 30, Section = "Observações", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea, GridColumns = 1)]
         public string? Observacoes { get; set; }
 
         // Navigation properties

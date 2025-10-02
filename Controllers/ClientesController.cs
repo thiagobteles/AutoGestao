@@ -220,45 +220,5 @@ namespace AutoGestao.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
-        [HttpGet]
-        public async Task<IActionResult> Export()
-        {
-            try
-            {
-                var clientes = await _context.Clientes
-                    .OrderBy(c => c.Nome)
-                    .ToListAsync();
-
-                var csv = new System.Text.StringBuilder();
-                csv.AppendLine("ID,Tipo,Nome,CPF/CNPJ,Email,Telefone,Celular,Cidade,Estado,Status,Data Cadastro");
-
-                foreach (var cliente in clientes)
-                {
-                    var documento = !string.IsNullOrEmpty(cliente.Cpf) ? cliente.Cpf : cliente.Cnpj;
-                    csv.AppendLine($"{cliente.Id}," +
-                                  $"{cliente.TipoPessoa.GetDescription()}," +
-                                  $"\"{cliente.Nome}\"," +
-                                  $"{documento}," +
-                                  $"{cliente.Email}," +
-                                  $"{cliente.Telefone}," +
-                                  $"{cliente.Celular}," +
-                                  $"{cliente.Cidade}," +
-                                  $"{cliente.Estado.GetDescription()}," +
-                                  $"{(cliente.Ativo ? "Ativo" : "Inativo")}," +
-                                  $"{cliente.DataCadastro:dd/MM/yyyy}");
-                }
-
-                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-                var fileName = $"clientes_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
-
-                return File(bytes, "text/csv", fileName);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
-                return RedirectToAction(nameof(Index));
-            }
-        }
     }
 }

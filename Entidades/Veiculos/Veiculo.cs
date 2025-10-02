@@ -19,7 +19,7 @@ namespace AutoGestao.Entidades.Veiculos
     public class Veiculo : BaseEntidadeEmpresa
     {
         [GridId()]
-        [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Text, ReadOnly = true, GridColumns = 2)]
+        [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Text, ReadOnly = true, Required = false, GridColumns = 2)]
         public string Codigo { get; set; } = string.Empty;
 
         // ============================================================
@@ -53,7 +53,7 @@ namespace AutoGestao.Entidades.Veiculos
         // ============================================================
         [GridField("Situação", Order = 50, Width = "100px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Order = 30, Name = "Situação", Section = "Status", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true)]
-        public EnumSituacaoVeiculo Situacao { get; set; }
+        public EnumSituacaoVeiculo Situacao { get; set; } = EnumSituacaoVeiculo.Estoque;
 
         // ============================================================
         // PREÇO DE VENDA - Formatado como moeda
@@ -93,17 +93,14 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 10, Name = "Motorização", Section = "Especificações", Type = EnumFieldType.Text)]
         public string? Motorizacao { get; set; }
 
-        [FormField(Order = 10, Name = "Quilometragem", Section = "Especificações", Type = EnumFieldType.Number)]
-        public int? Quilometragem { get; set; }
-
         [FormField(Order = 10, Name = "Capacidade porta malas", Section = "Especificações", Type = EnumFieldType.Number)]
         public int? CapacidadePortaMalas { get; set; }
 
         [FormField(Order = 10, Name = "Combustível", Section = "Especificações", Type = EnumFieldType.Select)]
-        public EnumCombustivelVeiculo Combustivel { get; set; }
+        public EnumCombustivelVeiculo Combustivel { get; set; } = EnumCombustivelVeiculo.Flex;
 
         [FormField(Order = 10, Name = "Câmbio", Section = "Especificações", Type = EnumFieldType.Select)]
-        public EnumCambioVeiculo Cambio { get; set; }
+        public EnumCambioVeiculo Cambio { get; set; } = EnumCambioVeiculo.Manual;
 
         [FormField(Order = 10, Name = "Tipo", Section = "Especificações", Type = EnumFieldType.Select)]
         public EnumTipoVeiculo TipoVeiculo { get; set; } = EnumTipoVeiculo.Proprio;
@@ -123,17 +120,20 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 20, Name = "Proprietário", Section = "Financeiro", Icon = "fas fa-user", Type = EnumFieldType.Reference, Reference = typeof(Cliente), GridColumns = 2)]
         public long IdCliente { get; set; }
 
-        [FormField(Order = 20, Name = "Data entrada", Section = "Financeiro", Type = EnumFieldType.Date)]
-        public DateTime? DataEntrada { get; set; }
-
-        [FormField(Order = 20, Name = "Preço de Compra", Section = "Financeiro", Icon = "fas fa-money-bill", Type = EnumFieldType.Currency)]
+        [FormField(Order = 21, Name = "Preço de Compra", Section = "Financeiro", Icon = "fas fa-money-bill", Type = EnumFieldType.Currency)]
         public decimal? PrecoCompra { get; set; }
 
-        [FormField(Order = 20, Name = "Km saida", Section = "Financeiro", Type = EnumFieldType.Number)]
-        public long? KmSaida { get; set; }
+        [FormField(Order = 22, Name = "Data entrada", Section = "Financeiro", Type = EnumFieldType.Date)]
+        public DateTime? DataEntrada { get; set; } = DateTime.Now;
 
-        [FormField(Order = 20, Name = "Data saída", Section = "Financeiro", Type = EnumFieldType.Date)]
+        [FormField(Order = 23, Name = "Km entrada", Section = "Financeiro", Type = EnumFieldType.Decimal)]
+        public decimal? KmEntrada { get; set; }
+
+        [FormField(Order = 24, Name = "Data saída", Section = "Financeiro", Type = EnumFieldType.Date)]
         public DateTime? DataSaida { get; set; }
+
+        [FormField(Order = 25, Name = "Km saida", Section = "Financeiro", Type = EnumFieldType.Decimal)]
+        public decimal? KmSaida { get; set; }
 
         [FormField(Order = 30, Name = "Status", Section = "Status", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true, GridColumns = 2)]
         public EnumStatusVeiculo Status { get; set; } = EnumStatusVeiculo.Usado;

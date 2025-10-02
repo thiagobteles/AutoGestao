@@ -2,10 +2,12 @@ using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace AutoGestao.Controllers
 {
@@ -27,9 +29,8 @@ namespace AutoGestao.Controllers
                         Name = "status",
                         DisplayName = "Status",
                         Type = EnumGridFilterType.Select,
-                        Options =
+                        Options = 
                         [
-                            new() { Value = "", Text = "Todos os Status", Selected = true },
                             new() { Value = "true", Text = "✅ Ativo" },
                             new() { Value = "false", Text = "❌ Inativo" }
                         ]

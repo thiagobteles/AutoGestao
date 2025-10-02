@@ -1,9 +1,9 @@
-using AutoGestao.Data;
 using AutoGestao.Entidades;
-using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Models;
 using AutoGestao.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace AutoGestao.Controllers
 {
@@ -14,16 +14,10 @@ namespace AutoGestao.Controllers
         private readonly GenericReferenceService _referenceService = referenceService;
         private readonly ILogger<ReferenceController> _logger = logger;
 
-        // Mapeamento de EntityType para Type real
-        private static readonly Dictionary<string, Type> EntityTypeMap = new()
-        {
-            { "cliente", typeof(Cliente) },
-            { "fornecedor", typeof(Fornecedor) },
-            { "vendedor", typeof(Vendedor) },
-            { "veiculomarca", typeof(VeiculoMarca) },
-            { "veiculomarcamodelo", typeof(VeiculoMarcaModelo) },
-            { "veiculocor", typeof(VeiculoCor) }
-        };
+        // Cache thread-safe para mapeamento de entidades
+        private static readonly ConcurrentDictionary<string, Type> _entityTypeCache = new();
+        private static bool _cacheInitialized = false;
+        private static readonly Lock _cacheLock = new();
 
         /// <summary>
         /// Busca referências usando termo de pesquisa
@@ -51,7 +45,8 @@ namespace AutoGestao.Controllers
                 var entityType = GetEntityType(request.EntityType);
                 if (entityType == null)
                 {
-                    return BadRequest(new { error = $"EntityType '{request.EntityType}' não suportado" });
+                    _logger.LogWarning("EntityType '{EntityType}' não encontrado", request.EntityType);
+                    return BadRequest(new { error = $"EntityType '{request.EntityType}' não encontrado. Entidades disponíveis: {string.Join(", ", GetAvailableEntityTypes())}" });
                 }
 
                 _logger.LogInformation("Buscando {EntityType} com termo '{SearchTerm}'",
@@ -90,7 +85,8 @@ namespace AutoGestao.Controllers
                 var entityType = GetEntityType(request.EntityType);
                 if (entityType == null)
                 {
-                    return BadRequest(new { error = $"EntityType '{request.EntityType}' não suportado" });
+                    _logger.LogWarning("EntityType '{EntityType}' não encontrado", request.EntityType);
+                    return BadRequest(new { error = $"EntityType '{request.EntityType}' não encontrado. Entidades disponíveis: {string.Join(", ", GetAvailableEntityTypes())}" });
                 }
 
                 _logger.LogInformation("Buscando {EntityType} com ID '{Id}'", request.EntityType, request.Id);
@@ -112,11 +108,115 @@ namespace AutoGestao.Controllers
             }
         }
 
+        /// <summary>
+        /// Endpoint para listar todas as entidades disponíveis (útil para debugging)
+        /// </summary>
+        [HttpGet("AvailableEntities")]
+        public ActionResult<List<string>> GetAvailableEntities()
+        {
+            InitializeEntityCache();
+            return Ok(_entityTypeCache.Keys.OrderBy(k => k).ToList());
+        }
+
         #region Helper Methods
 
-        private static Type? GetEntityType(string entityType)
+        /// <summary>
+        /// Obtém o tipo da entidade de forma dinâmica
+        /// </summary>
+        private static Type? GetEntityType(string entityTypeName)
         {
-            return EntityTypeMap.TryGetValue(entityType.ToLower(), out var type) ? type : null;
+            if (string.IsNullOrWhiteSpace(entityTypeName))
+            {
+                return null;
+            }
+
+            InitializeEntityCache();
+
+            // Busca case-insensitive
+            var normalizedName = entityTypeName.Trim().ToLowerInvariant();
+
+            if (_entityTypeCache.TryGetValue(normalizedName, out var type))
+            {
+                return type;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Inicializa o cache de entidades automaticamente
+        /// </summary>
+        private static void InitializeEntityCache()
+        {
+            if (_cacheInitialized)
+            {
+                return;
+            }
+
+            lock (_cacheLock)
+            {
+                if (_cacheInitialized)
+                {
+                    return;
+                }
+
+                try
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+
+                    // Buscar todas as classes que herdam de BaseEntidade
+                    var entityTypes = assembly.GetTypes()
+                        .Where(t => t.IsClass && !t.IsAbstract && IsEntity(t))
+                        .ToList();
+
+                    foreach (var type in entityTypes)
+                    {
+                        var key = type.Name.ToLowerInvariant();
+                        _entityTypeCache.TryAdd(key, type);
+
+                        // Adicionar também versões sem sufixos comuns para facilitar busca
+                        if (type.Name.EndsWith("Entity", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var alternativeKey = type.Name[..^6].ToLowerInvariant(); // Remove "Entity"
+                            _entityTypeCache.TryAdd(alternativeKey, type);
+                        }
+                    }
+
+                    _cacheInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao inicializar cache de entidades: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verifica se um tipo é uma entidade válida
+        /// </summary>
+        private static bool IsEntity(Type type)
+        {
+            // Verifica se herda de BaseEntidade ou BaseEntidadeEmpresa
+            var baseType = type;
+            while (baseType != null && baseType != typeof(object))
+            {
+                if (baseType == typeof(BaseEntidade) || baseType == typeof(BaseEntidadeEmpresa))
+                {
+                    return true;
+                }
+                baseType = baseType.BaseType;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Obtém lista de entidades disponíveis
+        /// </summary>
+        private static List<string> GetAvailableEntityTypes()
+        {
+            InitializeEntityCache();
+            return _entityTypeCache.Keys.OrderBy(k => k).Take(10).ToList();
         }
 
         /// <summary>

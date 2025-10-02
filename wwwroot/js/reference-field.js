@@ -757,14 +757,35 @@ class ReferenceFieldHandler {
                 }
             }
         }
+
+        const referenceInputs = document.querySelectorAll('.reference-search-input');
+
+        for (const searchInput of referenceInputs) {
+            const targetField = searchInput.dataset.targetField;
+            const hiddenInput = document.getElementById(`${targetField}_value`);
+
+            if (hiddenInput && hiddenInput.value && hiddenInput.value !== '0' && hiddenInput.value !== '') {
+                const referenceType = searchInput.dataset.referenceType;
+                if (referenceType) {
+                    await this.loadDisplayValue(searchInput, hiddenInput.value, referenceType);
+                }
+            }
+        }
     }
 
     async loadDisplayValue(element, id, referenceType) {
+        if (!id || id === '0' || id === '') {
+            return;
+        }
+
         if (!referenceType) {
             referenceType = element.dataset?.referenceType;
         }
 
-        if (!referenceType) return;
+        if (!referenceType) {
+            console.warn('Tipo de referência não definido para o campo');
+            return;
+        }
 
         try {
             const response = await fetch('/api/Reference/GetById', {
@@ -785,11 +806,20 @@ class ReferenceFieldHandler {
                 if (element.tagName === 'INPUT') {
                     element.value = item.text;
                     element.classList.add('selected');
+
+                    // Garantir que o valor hidden também está correto
+                    const targetField = element.dataset.targetField;
+                    if (targetField) {
+                        const hiddenInput = document.getElementById(`${targetField}_value`);
+                        if (hiddenInput && (!hiddenInput.value || hiddenInput.value === '0')) {
+                            hiddenInput.value = item.value;
+                        }
+                    }
                 } else if (element.tagName === 'SPAN') {
                     element.textContent = item.text;
                 }
             } else {
-                console.warn(`Não foi possível carregar item ${id} do tipo ${referenceType}`);
+                console.warn(`Não foi possível carregar item ${id} do tipo ${referenceType} - Status: ${response.status}`);
                 if (element.tagName === 'SPAN') {
                     element.textContent = `ID: ${id}`;
                 }

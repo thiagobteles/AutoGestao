@@ -3,6 +3,7 @@ using System;
 using AutoGestao.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoGestao.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251002055050_AlteracoesVeiculo")]
+    partial class AlteracoesVeiculo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -957,14 +960,14 @@ namespace AutoGestao.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("ativo");
 
-                    b.Property<string>("ConfirmarSenha")
-                        .HasColumnType("text")
-                        .HasColumnName("confirmar_senha");
-
-                    b.Property<string>("Cpf")
+                    b.Property<string>("CPF")
                         .HasMaxLength(14)
                         .HasColumnType("character varying(14)")
                         .HasColumnName("cpf");
+
+                    b.Property<string>("ConfirmarSenha")
+                        .HasColumnType("text")
+                        .HasColumnName("confirmar_senha");
 
                     b.Property<long?>("CriadoPorUsuarioId")
                         .HasColumnType("bigint")

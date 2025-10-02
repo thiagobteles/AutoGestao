@@ -236,7 +236,7 @@ namespace AutoGestao.Helpers
                     Name = prop.Name,
                     DisplayName = compositeAttr.DisplayName ?? prop.Name,
                     Width = compositeAttr.Width,
-                    Sortable = false, // Campos compostos não são ordenáveis
+                    Sortable = false,
                     Type = EnumGridColumnType.Custom,
                     CustomRender = item => RenderCompositeField(item, compositeAttr)
                 };
@@ -256,6 +256,7 @@ namespace AutoGestao.Helpers
                 Format = attr.Format
             };
 
+            // Determinar o tipo da coluna
             if (prop.PropertyType.IsEnum || Nullable.GetUnderlyingType(prop.PropertyType)?.IsEnum == true)
             {
                 column.Type = EnumGridColumnType.Enumerador;
@@ -267,7 +268,20 @@ namespace AutoGestao.Helpers
             }
             else if (IsNumericType(prop.PropertyType))
             {
-                column.Type = EnumGridColumnType.Number;
+                // CORREÇÃO: Verificar se tem formato "C" para Currency
+                if (!string.IsNullOrEmpty(attr.Format) && attr.Format.ToUpper() == "C")
+                {
+                    column.Type = EnumGridColumnType.Currency;
+                }
+                else if (prop.PropertyType == typeof(int) || prop.PropertyType == typeof(int?) ||
+                         prop.PropertyType == typeof(long) || prop.PropertyType == typeof(long?))
+                {
+                    column.Type = EnumGridColumnType.Integer;
+                }
+                else
+                {
+                    column.Type = EnumGridColumnType.Number;
+                }
             }
             else if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
             {

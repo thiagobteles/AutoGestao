@@ -5,6 +5,7 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumTipoPessoa
     {
+        [Icone("❓")]
         [Description("Nenhum")]
         Nenhum = 0,
 

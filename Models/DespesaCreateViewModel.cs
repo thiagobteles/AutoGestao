@@ -2,7 +2,7 @@ namespace AutoGestao.Models
 {
     public class DespesaCreateViewModel
     {
-        public int FornecedorId { get; set; }
+        public int IdFornecedor { get; set; }
         public string Descricao { get; set; } = "";
         public decimal Valor { get; set; }
         public DateTime DataDespesa { get; set; } = DateTime.Today;

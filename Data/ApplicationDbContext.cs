@@ -184,13 +184,14 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Veiculo>().ToTable("veiculos");
             modelBuilder.Entity<Veiculo>(entity =>
             {
-                entity.Property(e => e.Codigo).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Codigo).HasMaxLength(50);
                 entity.Property(e => e.Placa).HasMaxLength(10).IsRequired();
                 entity.Property(e => e.Chassi).HasMaxLength(17);
                 entity.Property(e => e.Renavam).HasMaxLength(11);
                 entity.Property(e => e.AnoFabricacao).IsRequired();
                 entity.Property(e => e.AnoModelo).IsRequired();
                 entity.Property(e => e.KmSaida).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.KmEntrada).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Combustivel).IsRequired();
                 entity.Property(e => e.Cambio).IsRequired();
                 entity.Property(e => e.NumeroPortas).IsRequired();
@@ -375,7 +376,7 @@ namespace AutoGestao.Data
                 entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
                 entity.Property(e => e.Email).HasMaxLength(150).IsRequired();
                 entity.Property(e => e.SenhaHash).HasMaxLength(255).IsRequired();
-                entity.Property(e => e.CPF).HasMaxLength(14);
+                entity.Property(e => e.Cpf).HasMaxLength(14);
                 entity.Property(e => e.Telefone).HasMaxLength(20);
                 entity.Property(e => e.Perfil).IsRequired();
                 entity.Property(e => e.Ativo).IsRequired().HasDefaultValue(true);

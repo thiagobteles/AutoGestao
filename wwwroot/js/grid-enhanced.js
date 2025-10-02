@@ -550,10 +550,10 @@ window.novaAvaliacao = function (clienteId) {
     }
 };
 
-window.venderVeiculo = function (veiculoId) {
+window.venderVeiculo = function (idVeiculo) {
     window.showLoading(true);
-    if (veiculoId) {
-        window.location.href = `/Vendas/Create?veiculoId=${veiculoId}`;
+    if (idVeiculo) {
+        window.location.href = `/Vendas/Create?idVeiculo=${idVeiculo}`;
     }
 };
 

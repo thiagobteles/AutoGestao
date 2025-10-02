@@ -5,7 +5,7 @@ namespace AutoGestao.Enumerador.Veiculo
 {
     public enum EnumSituacaoVeiculo
     {
-        [Icone("")]
+        [Icone("❓")]
         [Description("Nenhum")]
         Nenhum = 0,
 

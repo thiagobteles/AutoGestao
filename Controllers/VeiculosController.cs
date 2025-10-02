@@ -53,7 +53,7 @@ namespace AutoGestao.Controllers
                         Name = "Sell",
                         DisplayName = "Vender",
                         Icon = "fas fa-handshake",
-                        Url = "/Vendas/Create?veiculoId={id}",
+                        Url = "/Vendas/Create?idVeiculo={id}",
                         ShowCondition = (x) => ((Veiculo)x).Situacao == EnumSituacaoVeiculo.Estoque
                     },
                     new()
@@ -61,7 +61,7 @@ namespace AutoGestao.Controllers
                         Name = "Reserve",
                         DisplayName = "Reservar",
                         Icon = "fas fa-bookmark",
-                        Url = "/Veiculos/Reserve/{id}",
+                        Url = "/Veiculos/Reservar/{id}",
                         ShowCondition = (x) => ((Veiculo)x).Situacao == EnumSituacaoVeiculo.Estoque
                     },
                     new()
@@ -69,7 +69,7 @@ namespace AutoGestao.Controllers
                         Name = "Unreserve",
                         DisplayName = "Liberar",
                         Icon = "fas fa-bookmark-o",
-                        Url = "/Veiculos/Unreserve/{id}",
+                        Url = "/Veiculos/Liberar/{id}",
                         ShowCondition = (x) => ((Veiculo)x).Situacao == EnumSituacaoVeiculo.Reservado
                     }
                 ]);
@@ -186,9 +186,9 @@ namespace AutoGestao.Controllers
         #region Endpoints Específicos
 
         [HttpPost]
-        public async Task<IActionResult> AdicionarDocumento(int veiculoId, IFormFile arquivo, string descricao)
+        public async Task<IActionResult> AdicionarDocumento(long id, IFormFile arquivo, string descricao)
         {
-            var veiculo = await _context.Veiculos.FindAsync(veiculoId);
+            var veiculo = await _context.Veiculos.FindAsync(id);
             if (veiculo == null)
             {
                 return NotFound();
@@ -196,7 +196,7 @@ namespace AutoGestao.Controllers
 
             var documento = new VeiculoDocumento
             {
-                IdVeiculo = veiculoId,
+                IdVeiculo = id,
                 NomeArquivo = arquivo.FileName,
                 Observacoes = descricao,
                 DataUpload = DateTime.UtcNow
@@ -226,9 +226,9 @@ namespace AutoGestao.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AdicionarFoto(int veiculoId, IFormFile foto, string descricao)
+        public async Task<IActionResult> AdicionarFoto(long id, IFormFile foto, string descricao)
         {
-            var veiculo = await _context.Veiculos.FindAsync(veiculoId);
+            var veiculo = await _context.Veiculos.FindAsync(id);
             if (veiculo == null)
             {
                 return NotFound();
@@ -236,7 +236,7 @@ namespace AutoGestao.Controllers
 
             var fotoEntidade = new VeiculoFoto
             {
-                IdVeiculo = veiculoId,
+                IdVeiculo = id,
                 NomeArquivo = foto.FileName,
                 Descricao = descricao,
                 DataUpload = DateTime.UtcNow
@@ -250,14 +250,14 @@ namespace AutoGestao.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AdicionarDespesa(int veiculoId, DespesaCreateViewModel model)
+        public async Task<IActionResult> AdicionarDespesa(long id, DespesaCreateViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var despesa = new Despesa
                 {
-                    IdVeiculo = veiculoId,
-                    IdFornecedor = model.FornecedorId,
+                    IdVeiculo = id,
+                    IdFornecedor = model.IdFornecedor,
                     Descricao = model.Descricao,
                     Valor = model.Valor,
                     DataDespesa = model.DataDespesa,
@@ -274,7 +274,7 @@ namespace AutoGestao.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Reserve(int id)
+        public async Task<IActionResult> Reservar(long id)
         {
             var veiculo = await _context.Veiculos.FindAsync(id);
             if (veiculo != null && veiculo.Situacao == EnumSituacaoVeiculo.Estoque)
@@ -294,7 +294,7 @@ namespace AutoGestao.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Unreserve(int id)
+        public async Task<IActionResult> Liberar(long id)
         {
             var veiculo = await _context.Veiculos.FindAsync(id);
             if (veiculo != null && veiculo.Situacao == EnumSituacaoVeiculo.Reservado)
@@ -311,49 +311,6 @@ namespace AutoGestao.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Export()
-        {
-            try
-            {
-                var veiculos = await _context.Veiculos
-                    .Include(v => v.VeiculoMarca)
-                    .Include(v => v.VeiculoMarcaModelo)
-                    .Include(v => v.VeiculoCor)
-                    .OrderBy(v => v.Codigo)
-                    .ToListAsync();
-
-                var csv = new System.Text.StringBuilder();
-                csv.AppendLine("ID,Código,Marca,Modelo,Ano,Placa,KM,Preço Compra,Preço Venda,Situação,Status,Data Cadastro");
-
-                foreach (var veiculo in veiculos)
-                {
-                    csv.AppendLine($"{veiculo.Id}," +
-                                  $"{veiculo.Codigo}," +
-                                  $"\"{veiculo.VeiculoMarca?.Descricao}\"," +
-                                  $"\"{veiculo.VeiculoMarcaModelo?.Descricao}\"," +
-                                  $"{veiculo.AnoFabricacao}," +
-                                  $"{veiculo.Placa}," +
-                                  $"{veiculo.KmSaida}," +
-                                  $"{veiculo.PrecoCompra:F2}," +
-                                  $"{veiculo.PrecoVenda:F2}," +
-                                  $"{veiculo.Situacao.GetDescription()}," +
-                                  $"{veiculo.Status.GetDescription()}," +
-                                  $"{veiculo.DataCadastro:dd/MM/yyyy}");
-                }
-
-                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-                var fileName = $"veiculos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
-
-                return File(bytes, "text/csv", fileName);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
-                return RedirectToAction(nameof(Index));
-            }
         }
 
         #endregion ENDPOINTS ESPECÍFICOS

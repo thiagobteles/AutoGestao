@@ -192,7 +192,7 @@ class TabbedFormManager {
 
         const form = event.target;
         const formData = new FormData(form);
-        formData.append('veiculoId', this.currentEntityId);
+        formData.append('idVeiculo', this.currentEntityId);
 
         try {
             this.setFormLoading(form, true);
@@ -226,7 +226,7 @@ class TabbedFormManager {
 
         const form = event.target;
         const formData = new FormData(form);
-        formData.append('veiculoId', this.currentEntityId);
+        formData.append('idVeiculo', this.currentEntityId);
 
         try {
             this.setFormLoading(form, true);
@@ -286,7 +286,7 @@ class TabbedFormManager {
 
         const form = event.target;
         const formData = new FormData(form);
-        formData.append('veiculoId', this.currentEntityId);
+        formData.append('idVeiculo', this.currentEntityId);
 
         try {
             this.setFormLoading(form, true);
@@ -448,7 +448,7 @@ class TabbedFormManager {
     }
 
     async loadFornecedores(tabContent) {
-        const select = tabContent.querySelector('select[name="fornecedorId"]');
+        const select = tabContent.querySelector('select[name="IdFornecedor"]');
         if (!select) return;
 
         try {
@@ -522,6 +522,9 @@ class TabbedFormManager {
     }
 
     applyCurrencyMask(input) {
+        // Formatar valor inicial se já existir
+        formatCurrencyValueOnLoad(input);
+
         input.addEventListener('input', function () {
             let value = this.value.replace(/\D/g, '');
             if (value === '') {
@@ -532,6 +535,17 @@ class TabbedFormManager {
             value = value.replace('.', ',');
             value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
             this.value = 'R$ ' + value;
+        });
+
+        input.addEventListener('focus', function () {
+            let value = this.value.replace(/[^\d,]/g, '');
+            if (value) {
+                this.value = value.replace(',', '.');
+            }
+        });
+
+        input.addEventListener('blur', function () {
+            formatCurrencyValueOnLoad(this);
         });
     }
 
@@ -573,6 +587,29 @@ class TabbedFormManager {
 // ================================================================================================
 // INICIALIZAÇÃO
 // ================================================================================================
+
+function formatCurrencyValueOnLoad(input) {
+    if (!input.value || input.value.trim() === '') {
+        return;
+    }
+
+    // Se já está formatado, não fazer nada
+    if (input.value.startsWith('R$')) {
+        return;
+    }
+
+    // Tentar parsear o valor
+    let value = input.value.replace(/[^\d,.]/g, '').replace(',', '.');
+    let numericValue = parseFloat(value);
+
+    if (!isNaN(numericValue)) {
+        // Formatar como moeda brasileira
+        let formatted = numericValue.toFixed(2);
+        formatted = formatted.replace('.', ',');
+        formatted = formatted.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+        input.value = 'R$ ' + formatted;
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     // Verificar se é uma página com abas

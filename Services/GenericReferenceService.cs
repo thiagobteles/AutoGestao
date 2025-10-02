@@ -24,7 +24,7 @@ namespace AutoGestao.Services
         /// </summary>
         public async Task<ReferenceItem?> GetByIdAsync<T>(string id) where T : class
         {
-            if (!int.TryParse(id, out var entityId))
+            if (!long.TryParse(id, out var entityId))
             {
                 return null;
             }
@@ -49,21 +49,15 @@ namespace AutoGestao.Services
             var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
 
             var entity = await query.FirstOrDefaultAsync(lambda);
-            if (entity == null)
-            {
-                return null;
-            }
-
-            return BuildReferenceItem(entity, metadata);
+            return entity == null 
+                ? null
+                : BuildReferenceItem(entity, metadata);
         }
 
         /// <summary>
         /// Busca itens usando termo de pesquisa
         /// </summary>
-        public async Task<List<ReferenceItem>> SearchAsync<T>(
-            string searchTerm,
-            int pageSize,
-            Dictionary<string, string>? filters = null) where T : class
+        public async Task<List<ReferenceItem>> SearchAsync<T>(string searchTerm, int pageSize, Dictionary<string, string>? filters = null) where T : class
         {
             var metadata = GetMetadata<T>();
             var query = _context.Set<T>().AsQueryable();
@@ -251,10 +245,7 @@ namespace AutoGestao.Services
         /// <summary>
         /// Aplica filtro de busca em campos searchable
         /// </summary>
-        private static IQueryable<T> ApplySearchFilter<T>(
-            IQueryable<T> query,
-            string searchTerm,
-            ReferenceMetadata metadata) where T : class
+        private static IQueryable<T> ApplySearchFilter<T>(IQueryable<T> query, string searchTerm, ReferenceMetadata metadata) where T : class
         {
             var termLower = searchTerm.ToLower();
             var parameter = Expression.Parameter(typeof(T), "e");
@@ -294,7 +285,7 @@ namespace AutoGestao.Services
         /// <summary>
         /// Aplica filtros dinâmicos
         /// </summary>
-        private IQueryable<T> ApplyDynamicFilters<T>(IQueryable<T> query, Dictionary<string, string> filters) where T : class
+        private static IQueryable<T> ApplyDynamicFilters<T>(IQueryable<T> query, Dictionary<string, string> filters) where T : class
         {
             foreach (var filter in filters)
             {
@@ -323,33 +314,19 @@ namespace AutoGestao.Services
             return query;
         }
 
-        private object? ConvertFilterValue(string value, Type targetType)
+        private static object? ConvertFilterValue(string value, Type targetType)
         {
             try
             {
                 var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
-                if (underlyingType == typeof(int))
-                {
-                    return int.Parse(value);
-                }
-
-                if (underlyingType == typeof(bool))
-                {
-                    return bool.Parse(value);
-                }
-
-                if (underlyingType == typeof(DateTime))
-                {
-                    return DateTime.Parse(value);
-                }
-
-                if (underlyingType == typeof(decimal))
-                {
-                    return decimal.Parse(value);
-                }
-
-                return value;
+                return underlyingType == typeof(int) ? int.Parse(value)
+                    : underlyingType == typeof(long) ? long.Parse(value)
+                    : underlyingType == typeof(bool) ? bool.Parse(value)
+                    : underlyingType == typeof(DateTime) ? DateTime.Parse(value)
+                    : underlyingType == typeof(TimeSpan) ? TimeSpan.Parse(value)
+                    : underlyingType == typeof(decimal) ? decimal.Parse(value)
+                    : value;
             }
             catch
             {

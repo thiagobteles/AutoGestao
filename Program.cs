@@ -1,18 +1,21 @@
-using AutoGestao.Configuration;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Configurar cultura padrão para português do Brasil
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("pt-BR");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
 
 // Add Entity Framework com PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -44,7 +47,6 @@ builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
 builder.Services.AddScoped<GenericReferenceService>();
 builder.Services.AddHttpContextAccessor();
 
-
 // Criar um background service para executar limpeza:
 builder.Services.AddHostedService<AuditCleanupBackgroundService>();
 
@@ -68,6 +70,16 @@ app.UseMiddleware<AutoGestao.Middleware.AuditMiddleware>();
 // 🔧 MIDDLEWARE DE AUTENTICAÇÃO
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Configurar cultura padrão para português do Brasil
+var supportedCultures = new[] { new CultureInfo("pt-BR") };
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("pt-BR"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+};
+app.UseRequestLocalization(localizationOptions);
 
 // 🔧 MIDDLEWARE SIMPLES DE REDIRECIONAMENTO
 app.Use(async (context, next) =>
@@ -134,7 +146,7 @@ static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioS
             Observacoes = "Empresa e dados teste",
             Ativo = true
         };
-        
+
         await empresaService.CriarEmpresaAsync(empresa);
 
         var adminUser = new Usuario
