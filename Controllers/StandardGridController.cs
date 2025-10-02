@@ -385,7 +385,7 @@ namespace AutoGestao.Controllers
         /// GET: Edit - Exibir formulário de edição
         /// </summary>
         [HttpGet]
-        public virtual async Task<IActionResult> Edit(int id)
+        public virtual async Task<IActionResult> Edit(long id)
         {
             var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (entity == null)
@@ -419,7 +419,7 @@ namespace AutoGestao.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public virtual async Task<IActionResult> Edit(int id, T entity)
+        public virtual async Task<IActionResult> Edit(long id, T entity)
         {
             if (id != entity.Id)
             {
@@ -473,7 +473,7 @@ namespace AutoGestao.Controllers
         /// GET: Details - Exibir detalhes da entidade
         /// </summary>
         [HttpGet]
-        public virtual async Task<IActionResult> Details(int id)
+        public virtual async Task<IActionResult> Details(long id)
         {
             var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (entity == null)
@@ -501,7 +501,7 @@ namespace AutoGestao.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public virtual async Task<IActionResult> Delete(int id)
+        public virtual async Task<IActionResult> Delete(long id)
         {
             var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (entity == null)
@@ -657,7 +657,7 @@ namespace AutoGestao.Controllers
         /// Renderizar conteúdo de uma aba específica
         /// </summary>
         [HttpGet]
-        public virtual async Task<IActionResult> RenderTab(int id, string tabId)
+        public virtual async Task<IActionResult> RenderTab(long id, string tabId)
         {
             var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (entity == null)
