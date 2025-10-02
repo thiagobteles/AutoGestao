@@ -17,7 +17,7 @@ namespace AutoGestao.Services
         private readonly ILogger<GenericReferenceService> _logger = logger;
 
         // Cache de metadados para performance
-        private static readonly Dictionary<Type, ReferenceMetadata> _metadataCache = new();
+        private static readonly Dictionary<Type, ReferenceMetadata> _metadataCache = [];
 
         /// <summary>
         /// Busca um item por ID de forma genérica
@@ -85,7 +85,7 @@ namespace AutoGestao.Services
 
             // Buscar e converter
             var entities = await query.Take(pageSize).ToListAsync();
-            return entities.Select(e => BuildReferenceItem(e, metadata)).ToList();
+            return [.. entities.Select(e => BuildReferenceItem(e, metadata))];
         }
 
         /// <summary>
@@ -195,16 +195,16 @@ namespace AutoGestao.Services
             return format switch
             {
                 "###.###.###-##" when str.Length == 11
-                    => $"{str.Substring(0, 3)}.{str.Substring(3, 3)}.{str.Substring(6, 3)}-{str.Substring(9, 2)}",
+                    => $"{str[..3]}.{str.Substring(3, 3)}.{str.Substring(6, 3)}-{str.Substring(9, 2)}",
 
                 "##.###.###/####-##" when str.Length == 14
-                    => $"{str.Substring(0, 2)}.{str.Substring(2, 3)}.{str.Substring(5, 3)}/{str.Substring(8, 4)}-{str.Substring(12, 2)}",
+                    => $"{str[..2]}.{str.Substring(2, 3)}.{str.Substring(5, 3)}/{str.Substring(8, 4)}-{str.Substring(12, 2)}",
 
                 "(##) ####-####" when str.Length == 10
-                    => $"({str.Substring(0, 2)}) {str.Substring(2, 4)}-{str.Substring(6, 4)}",
+                    => $"({str[..2]}) {str.Substring(2, 4)}-{str.Substring(6, 4)}",
 
                 "(##) #####-####" when str.Length == 11
-                    => $"({str.Substring(0, 2)}) {str.Substring(2, 5)}-{str.Substring(7, 4)}",
+                    => $"({str[..2]}) {str.Substring(2, 5)}-{str.Substring(7, 4)}",
 
                 _ => str
             };

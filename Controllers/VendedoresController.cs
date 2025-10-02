@@ -5,29 +5,15 @@ using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
     public class VendedoresController(ApplicationDbContext context) : StandardGridController<Vendedor>(context)
     {
-        protected override StandardGridViewModel ConfigureGrid()
+        protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
-            var retorno = new StandardGridViewModel ("Vendedores", "Gerencie todos os vendedores", "Vendedores")
-            {
-                Columns =
-                [
-                    new() { Name = nameof(Vendedor.Id), DisplayName = "Cód", Type = EnumGridColumnType.Number, Sortable = true, Width = "65px" },
-                    new() { Name = nameof(Vendedor.Nome), DisplayName = "Nome Completo", Sortable = true },
-                    new() { Name = nameof(Vendedor.CPF), DisplayName = "CPF", Sortable = true, Type = EnumGridColumnType.Custom, CustomRender = RenderDocumento },
-                    new() { Name = nameof(Vendedor.Email), DisplayName = "Email", Sortable = true },
-                    new() { Name = nameof(Vendedor.Celular), DisplayName = "Celular", Sortable = true },
-                    new() { Name = nameof(Vendedor.Ativo), DisplayName = "Ativo", Type = EnumGridColumnType.Enumerador, Sortable = true, Width = "65px" },
-                    new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
-                ],
-
-                Filters =
+            standardGridViewModel.Filters =
                 [
                     new()
                     {
@@ -48,10 +34,9 @@ namespace AutoGestao.Controllers
                             new() { Value = "false", Text = "❌ Inativo" }
                         ]
                     }
-                ],
-            };
+                ];
 
-            retorno.RowActions.AddRange(
+            standardGridViewModel.RowActions.AddRange(
                 [
                     new()
                     {
@@ -79,7 +64,7 @@ namespace AutoGestao.Controllers
                     }
                 ]);
 
-            return retorno;
+            return standardGridViewModel;
         }
 
         protected override IQueryable<Vendedor> ApplyFilters(IQueryable<Vendedor> query, Dictionary<string, object> filters)

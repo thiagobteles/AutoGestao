@@ -32,6 +32,11 @@ namespace AutoGestao.Extensions
         public static string GetIcone<T>(this T source)
         {
             var field = source.GetType().GetField(source.ToString());
+            if (field== null)
+            {
+                return null;
+            }
+
             var attributes = (IconeAttribute[])field.GetCustomAttributes(typeof(IconeAttribute), false);
 
             // Retorna o ícone apenas se o atributo existir

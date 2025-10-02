@@ -1,15 +1,10 @@
+using AutoGestao.Entidades;
+using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
 using System;
 
 namespace AutoGestao.Attributes
 {
-    /// <summary>
-    /// Anotação ÚNICA que controla tudo: Grid + ReferenceItem + Busca
-    /// Simplifica o uso no dia a dia, complexidade fica no helper genérico
-    /// </summary>
-    /// <remarks>
-    /// Construtor simplificado - apenas DisplayName
-    /// Exemplo: [GridField("Nome do Cliente")]
-    /// </remarks>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class GridFieldAttribute(string? displayName = null) : Attribute
     {
@@ -81,12 +76,12 @@ namespace AutoGestao.Attributes
         /// Se false, campo NÃO aparece na grid (mas pode aparecer no ReferenceItem)
         /// </summary>
         public bool ShowInGrid { get; set; } = true;
+
+        public DocumentType DocumentType { get; set; }
+
+        public EnumRenderType EnumRender { get; set; } = EnumRenderType.Description;
     }
 
-    /// <summary>
-    /// Atalho para campo de ID - sempre primeira coluna, não editável
-    /// Uso: [GridId] ou [GridId("Código")]
-    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class GridIdAttribute : GridFieldAttribute
     {
@@ -99,10 +94,6 @@ namespace AutoGestao.Attributes
         }
     }
 
-    /// <summary>
-    /// Atalho para campo Ativo/Status - sempre última coluna
-    /// Uso: [GridStatus] ou [GridStatus("Situação")]
-    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class GridStatusAttribute : GridFieldAttribute
     {
@@ -114,11 +105,6 @@ namespace AutoGestao.Attributes
         }
     }
 
-    /// <summary>
-    /// Atalho para campo principal da entidade
-    /// Automaticamente: IsText = true, IsSearchable = true, IsLink = true
-    /// Uso: [GridMain("Nome Completo")] ou apenas [GridMain]
-    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class GridMainAttribute : GridFieldAttribute
     {
@@ -131,20 +117,15 @@ namespace AutoGestao.Attributes
         }
     }
 
-    /// <summary>
-    /// Atalho para campos de documento (CPF/CNPJ)
-    /// Automaticamente: IsSubtitle = true, IsSearchable = true, com formatação
-    /// Uso: [GridDocument("CPF", DocumentType.CPF)] ou [GridDocument("CNPJ", DocumentType.CNPJ)]
-    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class GridDocumentAttribute : GridFieldAttribute
     {
-        public GridDocumentAttribute(string? displayName = null, DocumentType type = DocumentType.CPF) : base(displayName)
+        public GridDocumentAttribute(string? displayName = null, DocumentType type = DocumentType.CPF, int order = 30) : base(displayName)
         {
             IsSubtitle = true;
             IsSearchable = true;
             SubtitleOrder = 0;
-            Order = 30;
+            Order = order;
 
             if (type == DocumentType.CPF)
             {
@@ -161,17 +142,6 @@ namespace AutoGestao.Attributes
         }
     }
 
-    public enum DocumentType
-    {
-        CPF,
-        CNPJ
-    }
-
-    /// <summary>
-    /// Atalho para campos de contato (Email/Telefone/Celular)
-    /// Automaticamente: IsSubtitle = true, IsSearchable = true
-    /// Uso: [GridContact] (detecta pelo nome da propriedade) ou [GridContact("E-mail")]
-    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class GridContactAttribute : GridFieldAttribute
     {
@@ -182,5 +152,11 @@ namespace AutoGestao.Attributes
             SubtitleOrder = 1;
             Order = 50;
         }
+    }
+
+    public enum DocumentType
+    {
+        CPF,
+        CNPJ
     }
 }

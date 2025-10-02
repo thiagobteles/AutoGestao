@@ -5,6 +5,7 @@ using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
+using AutoGestao.Models.Grid;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -19,19 +20,16 @@ namespace AutoGestao.Controllers
     {
         protected readonly ApplicationDbContext _context = context;
 
-        protected virtual StandardGridViewModel ConfigureGrid()
+        protected virtual StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
-            var retorno = new StandardGridViewModel($"{typeof(T).Name}s", $"Gerencie todos os {typeof(T).Name}s", $"{typeof(T).Name}s")
-            {
-                Columns = GridColumnBuilder.BuildColumns<T>()
-            };
-
-            return retorno;
+            return standardGridViewModel;
         }
 
         protected virtual IQueryable<T> GetBaseQuery()
         {
-            return _context.Set<T>().AsQueryable();
+            return _context.Set<T>()
+                .OrderByDescending(x => x.Id)
+                .AsQueryable();
         }
 
         protected virtual IQueryable<T> ApplyFilters(IQueryable<T> query, Dictionary<string, object> filters)
@@ -180,6 +178,7 @@ namespace AutoGestao.Controllers
             int page = 1)
         {
             var gridConfig = ConfigureGrid();
+            ConfigureCustomGrid(gridConfig);
             var query = GetBaseQuery();
 
             // Aplicar filtros
@@ -644,13 +643,30 @@ namespace AutoGestao.Controllers
         /// </summary>
         protected virtual Task<IActionResult> RenderCustomTab(T entity, FormTabViewModel tab)
         {
-            // Implementação padrão - pode ser sobrescrita
             return Task.FromResult<IActionResult>(PartialView($"_Tab{tab.TabId}", entity));
         }
 
         #endregion
 
         #region Métodos Privados
+
+        private static StandardGridViewModel ConfigureGrid()
+        {
+            var nomeEntidade = $"{typeof(T).Name}s";
+
+            var standardGridViewModel = new StandardGridViewModel
+            {
+                Title = nomeEntidade,
+                SubTitle = $"Gerencie todos os {nomeEntidade}",
+                EntityName = nomeEntidade,
+                ControllerName = nomeEntidade,
+                Columns = GridColumnBuilder.BuildColumns<T>(),
+                HeaderActions = ObterHeaderActionsPadrao(nomeEntidade),
+                RowActions = ObterRowActionsPadrao(nomeEntidade)
+            };
+
+            return standardGridViewModel;
+        }
 
         /// <summary>
         /// Constrói o ViewModel do formulário baseado nos atributos da entidade
@@ -736,6 +752,57 @@ namespace AutoGestao.Controllers
             // Não incluir propriedades comuns que são gerenciadas automaticamente
             var ignoredNames = new[] { "Id", "DataCadastro", "DataAlteracao", "UsuarioCadastro", "UsuarioAlteracao", "CriadoPorUsuarioId", "AlteradoPorUsuarioId" };
             return !ignoredNames.Contains(property.Name);
+        }
+
+        private static List<GridAction> ObterHeaderActionsPadrao(string controllerNome)
+        {
+            return
+                [
+                    new()
+                    {
+                        Name = "Export",
+                        DisplayName = "Exportar",
+                        Icon = "fas fa-download",
+                        CssClass = "btn-modern btn-outline-modern",
+                        Url = "/" + controllerNome + "/Export"
+                    },
+                    new()
+                    {
+                        Name = "Create",
+                        DisplayName = "Novo ",
+                        Icon = "fas fa-plus",
+                        CssClass = "btn-new",
+                        Url = "/" + controllerNome + "/Create"
+                    }
+                ];
+        }
+
+        private static List<GridAction> ObterRowActionsPadrao(string controllerNome)
+        {
+            return
+                [
+                    new()
+                    {
+                        Name = "Details",
+                        DisplayName = "Visualizar",
+                        Icon = "fas fa-eye",
+                        Url = "/" + controllerNome + "/Details/{id}"
+                    },
+                    new()
+                    {
+                        Name = "Edit",
+                        DisplayName = "Editar",
+                        Icon = "fas fa-edit",
+                        Url = "/" + controllerNome + "/Edit/{id}"
+                    },
+                    new()
+                    {
+                        Name = "Delete",
+                        DisplayName = "Excluir",
+                        Icon = "fas fa-trash",
+                        Url = "/" + controllerNome + "/Delete/{id}"
+                    },
+                ];
         }
 
         private Dictionary<string, object> ExtractFiltersFromRequest()
@@ -963,9 +1030,6 @@ namespace AutoGestao.Controllers
             }
         }
 
-        /// <summary>
-        /// Construir ViewModel para formulário com abas
-        /// </summary>
         private TabbedFormViewModel BuildTabbedFormViewModel(T entity, string action)
         {
             var formConfig = typeof(T).GetCustomAttribute<FormConfigAttribute>() ?? new FormConfigAttribute();
@@ -1372,7 +1436,7 @@ namespace AutoGestao.Controllers
                             .Where(x => x.Value?.Errors.Count > 0)
                             .ToDictionary(
                                 kvp => kvp.Key,
-                                kvp => string.Join("; ", kvp.Value?.Errors.Select(e => e.ErrorMessage) ?? new string[0])
+                                kvp => string.Join("; ", kvp.Value?.Errors.Select(e => e.ErrorMessage) ?? [])
                             );
 
                         return controller.Json(new

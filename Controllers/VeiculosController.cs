@@ -21,15 +21,13 @@ namespace AutoGestao.Controllers
                 .Include(v => v.VeiculoMarca)
                 .Include(v => v.VeiculoMarcaModelo)
                 .Include(v => v.Cliente)
+                .OrderByDescending(v => v.Id)
                 .AsQueryable();
         }
 
-        protected override StandardGridViewModel ConfigureGrid()
+        protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
-            var retorno = new StandardGridViewModel("Veículos", "Gerencie o estoque de veículos", "Veiculos")
-            {
-                // Configuração dos filtros
-                Filters =
+            standardGridViewModel.Filters =
                 [
                     new()
                     {
@@ -46,10 +44,9 @@ namespace AutoGestao.Controllers
                         Placeholder = "Situação do veiculo...",
                         Options = EnumExtension.GetSelectListItems<EnumSituacaoVeiculo>(true)
                     }
-                ],
-            };
+                ];
 
-            retorno.RowActions.AddRange(
+            standardGridViewModel.RowActions.AddRange(
                 [
                     new()
                     {
@@ -77,7 +74,9 @@ namespace AutoGestao.Controllers
                     }
                 ]);
 
-            return retorno;
+            standardGridViewModel.RowActions.FirstOrDefault(x => x.Name == "Delete").ShowCondition = (x) => ((Veiculo)x).Situacao != EnumSituacaoVeiculo.Vendido;
+
+            return standardGridViewModel;
         }
 
         protected override IQueryable<Veiculo> ApplyFilters(IQueryable<Veiculo> query, Dictionary<string, object> filters)
@@ -106,9 +105,24 @@ namespace AutoGestao.Controllers
                 }
             }
 
-            // Aplicar filtro de período usando o helper
-            //query = ApplyDateRangeFilter(query, filters, "periodo_cadastro", v => v.DataCadastro);
             return query;
+        }
+
+        protected override void ConfigureFormFields(List<FormFieldViewModel> fields, Veiculo entity, string action)
+        {
+            if (action == "Details")
+            {
+                // Adicionar tempo em estoque
+                var tempoEstoque = DateTime.UtcNow - entity.DataCadastro;
+                fields.Add(new FormFieldViewModel
+                {
+                    PropertyName = "TempoEstoque",
+                    DisplayName = "Tempo em Estoque",
+                    Value = $"{tempoEstoque.Days} dias",
+                    ReadOnly = true,
+                    Section = "Informações Adicionais"
+                });
+            }
         }
 
         protected override Task BeforeCreate(Veiculo entity)
@@ -116,7 +130,6 @@ namespace AutoGestao.Controllers
             entity.DataCadastro = DateTime.UtcNow;
             entity.Situacao = EnumSituacaoVeiculo.Estoque;
 
-            // Gerar código se não informado
             if (string.IsNullOrEmpty(entity.Codigo))
             {
                 entity.Codigo = GerarCodigoVeiculo();
@@ -138,36 +151,39 @@ namespace AutoGestao.Controllers
             return entity.Situacao != EnumSituacaoVeiculo.Vendido;
         }
 
-        protected override void ConfigureFormFields(List<FormFieldViewModel> fields, Veiculo entity, string action)
+        private void ValidarVeiculo(Veiculo entity)
         {
-            if (action == "Details")
+            // Validar placa única
+            var placaExistente = _context.Veiculos.Any(v => v.Id != entity.Id && v.Placa == entity.Placa);
+            if (placaExistente)
             {
-                // Adicionar tempo em estoque
-                var tempoEstoque = DateTime.UtcNow - entity.DataCadastro;
-                fields.Add(new FormFieldViewModel
-                {
-                    PropertyName = "TempoEstoque",
-                    DisplayName = "Tempo em Estoque",
-                    Value = $"{tempoEstoque.Days} dias",
-                    ReadOnly = true,
-                    Section = "Informações Adicionais"
-                });
+                ModelState.AddModelError(nameof(entity.Placa), "Placa já cadastrada");
+            }
+
+            // Validar anos
+            if (entity.AnoModelo < entity.AnoFabricacao)
+            {
+                ModelState.AddModelError(nameof(entity.AnoModelo), "Ano do modelo não pode ser menor que ano de fabricação");
             }
         }
 
-        protected override async Task<IActionResult> RenderCustomTab(Veiculo entity, FormTabViewModel tab)
+        private string GerarCodigoVeiculo()
         {
-            return tab.TabId switch
+            var ultimoCodigo = _context.Veiculos
+                .OrderByDescending(v => v.Id)
+                .Select(v => v.Codigo)
+                .FirstOrDefault();
+
+            if (ultimoCodigo == null)
             {
-                "arquivos" => await RenderArquivosTab(entity),
-                "midias" => await RenderMidiasTab(entity),
-                "financeiro" => await RenderFinanceiroTab(entity),
-                "resumo" => await RenderResumoTab(entity),
-                _ => await base.RenderCustomTab(entity, tab)
-            };
+                return "VEI001";
+            }
+
+            // Lógica para gerar próximo código
+            return "VEI" + (int.Parse(ultimoCodigo[3..]) + 1).ToString("D3");
         }
 
-        #region ENDPOINTS ESPECÍFICOS
+        #region Endpoints Específicos
 
         [HttpPost]
         public async Task<IActionResult> AdicionarDocumento(int veiculoId, IFormFile arquivo, string descricao)
@@ -187,7 +203,7 @@ namespace AutoGestao.Controllers
             };
 
             // Salvar arquivo e documento
-            SalvarArquivo(arquivo, documento);
+            //SalvarArquivo(arquivo, documento);
             _context.VeiculoDocumentos.Add(documento);
             await _context.SaveChangesAsync();
 
@@ -226,7 +242,7 @@ namespace AutoGestao.Controllers
                 DataUpload = DateTime.UtcNow
             };
 
-            SalvarFoto(foto, fotoEntidade);
+            //SalvarFoto(foto, fotoEntidade);
             _context.VeiculoFotos.Add(fotoEntidade);
             await _context.SaveChangesAsync();
 
@@ -341,113 +357,5 @@ namespace AutoGestao.Controllers
         }
 
         #endregion ENDPOINTS ESPECÍFICOS
-
-        #region Métodos privados
-
-        private void ValidarVeiculo(Veiculo entity)
-        {
-            // Validar placa única
-            var placaExistente = _context.Veiculos.Any(v => v.Id != entity.Id && v.Placa == entity.Placa);
-            if (placaExistente)
-            {
-                ModelState.AddModelError(nameof(entity.Placa), "Placa já cadastrada");
-            }
-
-            // Validar anos
-            if (entity.AnoModelo < entity.AnoFabricacao)
-            {
-                ModelState.AddModelError(nameof(entity.AnoModelo), "Ano do modelo não pode ser menor que ano de fabricação");
-            }
-        }
-
-        private string GerarCodigoVeiculo()
-        {
-            var ultimoCodigo = _context.Veiculos
-                .OrderByDescending(v => v.Id)
-                .Select(v => v.Codigo)
-                .FirstOrDefault();
-
-            if (ultimoCodigo == null)
-            {
-                return "VEI001";
-            }
-
-            // Lógica para gerar próximo código
-            return "VEI" + (int.Parse(ultimoCodigo.Substring(3)) + 1).ToString("D3");
-        }
-
-        private static string RenderMarcaModelo(object item)
-        {
-            var veiculo = (Veiculo)item;
-            var marca = veiculo.VeiculoMarca?.Descricao ?? "N/A";
-            var modelo = veiculo.VeiculoMarcaModelo?.Descricao ?? "N/A";
-
-            return $@"
-                <div class=""vehicle-info"">
-                    <div class=""fw-semibold"">{marca}</div>
-                    <div class=""text-muted small"">{modelo}</div>
-                </div>";
-        }
-
-        private async Task<IActionResult> RenderArquivosTab(Veiculo veiculo)
-        {
-            var documentos = await _context.VeiculoDocumentos
-                .Where(d => d.IdVeiculo == veiculo.Id)
-                .ToListAsync();
-
-            return PartialView("_TabArquivos", documentos);
-        }
-
-        private async Task<IActionResult> RenderMidiasTab(Veiculo veiculo)
-        {
-            var fotos = await _context.VeiculoFotos
-                .Where(f => f.IdVeiculo == veiculo.Id)
-                .ToListAsync();
-
-            return PartialView("_TabMidias", fotos);
-        }
-
-        private async Task<IActionResult> RenderFinanceiroTab(Veiculo veiculo)
-        {
-            var despesas = await _context.Despesas
-                .Where(d => d.IdVeiculo == veiculo.Id)
-                .Include(d => d.Fornecedor)
-                .ToListAsync();
-
-            return PartialView("_TabFinanceiro", despesas);
-        }
-
-        private async Task<IActionResult> RenderResumoTab(Veiculo veiculo)
-        {
-            var resumo = new VeiculoResumoViewModel
-            {
-                Veiculo = veiculo,
-                TotalDespesas = await _context.Despesas
-                    .Where(d => d.IdVeiculo == veiculo.Id)
-                    .SumAsync(d => d.Valor),
-                QtdDocumentos = await _context.VeiculoDocumentos
-                    .CountAsync(d => d.IdVeiculo == veiculo.Id),
-                QtdFotos = await _context.VeiculoFotos
-                    .CountAsync(f => f.IdVeiculo == veiculo.Id)
-            };
-
-            return PartialView("_TabResumo", resumo);
-        }
-
-        private void SalvarArquivo(IFormFile arquivo, VeiculoDocumento documento)
-        {
-            // Implementar lógica de salvamento do arquivo
-            var caminho = Path.Combine("uploads", "documentos", $"{documento.Id}_{arquivo.FileName}");
-            // ... lógica de salvamento
-        }
-
-        private void SalvarFoto(IFormFile foto, VeiculoFoto fotoEntidade)
-        {
-            // Implementar lógica de salvamento da foto
-            var caminho = Path.Combine("uploads", "fotos", $"{fotoEntidade.Id}_{foto.FileName}");
-            // ... lógica de salvamento
-        }
-
-        #endregion Métodos privados
     }
 }

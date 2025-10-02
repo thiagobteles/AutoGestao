@@ -108,7 +108,7 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Cliente>().ToTable("clientes");
             modelBuilder.Entity<Cliente>(entity =>
             {
-                entity.Property(e => e.TipoCliente).IsRequired();
+                entity.Property(e => e.TipoPessoa).IsRequired();
                 entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
                 entity.Property(e => e.Cpf).HasMaxLength(14);
                 entity.Property(e => e.Cnpj).HasMaxLength(18);
@@ -153,11 +153,11 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Fornecedor>().ToTable("fornecedores");
             modelBuilder.Entity<Fornecedor>(entity =>
             {
-                entity.Property(e => e.TipoFornecedor).IsRequired();
+                entity.Property(e => e.TipoPessoa).IsRequired();
                 entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
-                entity.Property(e => e.CPF).HasMaxLength(14);
-                entity.Property(e => e.CNPJ).HasMaxLength(18);
-                entity.Property(e => e.RG).HasMaxLength(20);
+                entity.Property(e => e.Cpf).HasMaxLength(14);
+                entity.Property(e => e.Cnpj).HasMaxLength(18);
+                entity.Property(e => e.Rg).HasMaxLength(20);
                 entity.Property(e => e.Email).HasMaxLength(150);
                 entity.Property(e => e.Telefone).HasMaxLength(20);
                 entity.Property(e => e.Celular).HasMaxLength(20);
@@ -528,8 +528,8 @@ namespace AutoGestao.Data
             // ===========================================
             // ÍNDICES ÚNICOS - FORNECEDOR
             // ===========================================
-            modelBuilder.Entity<Fornecedor>().HasIndex(f => f.CPF).IsUnique().HasFilter("cpf IS NOT NULL");
-            modelBuilder.Entity<Fornecedor>().HasIndex(f => f.CNPJ).IsUnique().HasFilter("cnpj IS NOT NULL");
+            modelBuilder.Entity<Fornecedor>().HasIndex(f => f.Cpf).IsUnique().HasFilter("cpf IS NOT NULL");
+            modelBuilder.Entity<Fornecedor>().HasIndex(f => f.Cnpj).IsUnique().HasFilter("cnpj IS NOT NULL");
 
             // ===========================================
             // ÍNDICES ÚNICOS - VEÍCULO

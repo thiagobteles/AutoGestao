@@ -1,6 +1,6 @@
 using AutoGestao.Attributes;
 using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models;
+using AutoGestao.Models.Grid;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -60,15 +60,60 @@ namespace AutoGestao.Helpers
             return columns;
         }
 
-        /// <summary>
-        /// Context class para simplificar lógica de detecção
-        /// </summary>
-        private class PropertyContext(PropertyInfo property)
+        public static ReferenceMetadata GetReferenceMetadata<T>() where T : class
         {
-            public PropertyInfo Property { get; } = property;
-            public GridFieldAttribute? GridField { get; } = property.GetCustomAttribute<GridFieldAttribute>();
-            public bool HasGridField => GridField != null;
+            var metadata = new ReferenceMetadata();
+            var properties = typeof(T).GetProperties();
+
+            foreach (var prop in properties)
+            {
+                var attr = prop.GetCustomAttribute<GridFieldAttribute>();
+                if (attr == null)
+                {
+                    continue;
+                }
+
+                // TextField (IsText = true)
+                if (attr.IsText)
+                {
+                    metadata.TextProperty = new ReferencePropertyInfo
+                    {
+                        Property = prop,
+                        NavigationPath = attr.NavigationPath
+                    };
+                }
+
+                // Searchable fields
+                if (attr.IsSearchable)
+                {
+                    metadata.SearchableProperties.Add(new ReferencePropertyInfo
+                    {
+                        Property = prop,
+                        NavigationPath = attr.NavigationPath
+                    });
+                }
+
+                // Subtitle fields
+                if (attr.IsSubtitle)
+                {
+                    metadata.SubtitleProperties.Add(new ReferencePropertyInfo
+                    {
+                        Property = prop,
+                        NavigationPath = attr.NavigationPath,
+                        Prefix = attr.SubtitlePrefix,
+                        Order = attr.SubtitleOrder,
+                        Format = attr.Format
+                    });
+                }
+            }
+
+            // Ordenar subtitles
+            metadata.SubtitleProperties = [.. metadata.SubtitleProperties.OrderBy(p => p.Order)];
+
+            return metadata;
         }
+
+        #region MÉTODOS PRIVADOS
 
         private static bool ShouldIncludeProperty(PropertyContext context)
         {
@@ -183,254 +228,197 @@ namespace AutoGestao.Helpers
             var prop = context.Property;
             var attr = context.GridField;
 
+            var compositeAttr = prop.GetCustomAttribute<GridCompositeAttribute>();
+            if (compositeAttr != null)
+            {
+                return new GridColumn
+                {
+                    Name = prop.Name,
+                    DisplayName = compositeAttr.DisplayName ?? prop.Name,
+                    Width = compositeAttr.Width,
+                    Sortable = false, // Campos compostos não são ordenáveis
+                    Type = EnumGridColumnType.Custom,
+                    CustomRender = item => RenderCompositeField(item, compositeAttr)
+                };
+            }
+
+            if (attr == null)
+            {
+                return null;
+            }
+
             var column = new GridColumn
             {
                 Name = prop.Name,
-                DisplayName = GetDisplayName(context),
-                Sortable = attr?.Sortable ?? true,
-                Width = attr?.Width ?? GetDefaultWidth(prop),
-                Type = DetermineColumnType(prop)
+                DisplayName = attr.DisplayName ?? GetDisplayName(prop),
+                Width = attr.Width,
+                Sortable = attr.Sortable,
+                Format = attr.Format
             };
 
-            // Se IsLink = true, criar link para Details
-            if (attr?.IsLink == true)
+            if (prop.PropertyType.IsEnum || Nullable.GetUnderlyingType(prop.PropertyType)?.IsEnum == true)
+            {
+                column.Type = EnumGridColumnType.Enumerador;
+                column.EnumRender = attr.EnumRender;
+            }
+            else if (prop.PropertyType == typeof(bool) || prop.PropertyType == typeof(bool?))
+            {
+                column.Type = EnumGridColumnType.Enumerador;
+            }
+            else if (IsNumericType(prop.PropertyType))
+            {
+                column.Type = EnumGridColumnType.Number;
+            }
+            else if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
+            {
+                column.Type = EnumGridColumnType.Date;
+            }
+            else
+            {
+                column.Type = EnumGridColumnType.Text;
+            }
+
+            // Link para Details se for GridMain
+            if (prop.GetCustomAttribute<GridMainAttribute>() != null)
             {
                 column.UrlAction = "Details";
             }
 
-            // Se tem formato, criar CustomRender
-            if (!string.IsNullOrEmpty(attr?.Format))
+            var docAttr = prop.GetCustomAttribute<GridDocumentAttribute>();
+            if (docAttr != null)
             {
-                column.Format = attr.Format;
                 column.Type = EnumGridColumnType.Custom;
-                column.CustomRender = (obj) => FormatValue(obj, prop, attr.Format);
+                column.CustomRender = item => RenderDocumentField(item, prop, docAttr);
             }
 
             return column;
         }
 
-        private static string GetDisplayName(PropertyContext context)
+        private static string RenderCompositeField(object item, GridCompositeAttribute attr)
         {
-            var prop = context.Property;
-            var attr = context.GridField;
+            var values = new List<string>();
 
-            // 1. [GridField(DisplayName)]
-            if (!string.IsNullOrEmpty(attr?.DisplayName))
+            foreach (var navPath in attr.NavigationPaths)
             {
-                return attr.DisplayName;
+                var value = GetNestedPropertyValue(item, navPath);
+                values.Add(value?.ToString() ?? "N/A");
             }
 
-            // 2. [Display(Name)]
-            var display = prop.GetCustomAttribute<DisplayAttribute>();
-            if (!string.IsNullOrEmpty(display?.Name))
+            return !string.IsNullOrEmpty(attr.Template) 
+                ? string.Format(attr.Template, [.. values])
+                : string.Join(attr.Separator, values);
+        }
+
+        private static string RenderDocumentField(object item, PropertyInfo property, GridDocumentAttribute attr)
+        {
+            var value = property.GetValue(item);
+            if (value == null || string.IsNullOrEmpty(value.ToString()))
+            {
+                return "<span class='text-muted'>—</span>";
+            }
+
+            var formatted = ApplyFormat(value.ToString()!, attr.Format ?? "");
+
+            if (attr.DocumentType == DocumentType.CPF)
+            {
+                return $"<span class='badge bg-primary bg-opacity-10 text-primary'>{formatted}</span>";
+            }
+            else if (attr.DocumentType == DocumentType.CNPJ)
+            {
+                return $"<span class='badge bg-success bg-opacity-10 text-success'>{formatted}</span>";
+            }
+
+            return formatted;
+        }
+
+        private static object? GetNestedPropertyValue(object obj, string propertyPath)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+
+            foreach (var propName in propertyPath.Split('.'))
+            {
+                var propInfo = obj.GetType().GetProperty(propName);
+                if (propInfo == null)
+                {
+                    return null;
+                }
+
+                obj = propInfo.GetValue(obj);
+                if (obj == null)
+                {
+                    return null;
+                }
+            }
+
+            return obj;
+        }
+
+        private static bool IsNumericType(Type type)
+        {
+            type = Nullable.GetUnderlyingType(type) ?? type;
+
+            return type == typeof(int) || type == typeof(long) ||
+                   type == typeof(short) || type == typeof(byte) ||
+                   type == typeof(decimal) || type == typeof(double) ||
+                   type == typeof(float);
+        }
+
+        private static string GetDisplayName(PropertyInfo property)
+        {
+            var display = property.GetCustomAttribute<DisplayAttribute>();
+            if (display?.Name != null)
             {
                 return display.Name;
             }
 
-            // 3. [DisplayName]
-            var displayName = prop.GetCustomAttribute<DisplayNameAttribute>();
-            if (!string.IsNullOrEmpty(displayName?.DisplayName))
-            {
-                return displayName.DisplayName;
-            }
-
-            // 4. Gerar nome amigável
-            return GenerateFriendlyName(prop.Name);
+            var displayName = property.GetCustomAttribute<DisplayNameAttribute>();
+            return displayName?.DisplayName != null 
+                ? displayName.DisplayName
+                : property.Name;
         }
 
-        private static string GenerateFriendlyName(string propertyName)
+        private static string ApplyFormat(string str, string format)
         {
-            // Casos especiais comuns
-            return propertyName switch
+            if (string.IsNullOrEmpty(format) || string.IsNullOrEmpty(str))
             {
-                "CPF" => "CPF",
-                "CNPJ" => "CNPJ",
-                "RG" => "RG",
-                "CEP" => "CEP",
-                _ => System.Text.RegularExpressions.Regex.Replace(propertyName, "([a-z])([A-Z])", "$1 $2")
-            };
-        }
-
-        private static string? GetDefaultWidth(PropertyInfo property)
-        {
-            var propType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-
-            // Width por tipo
-            if (propType == typeof(bool))
-            {
-                return "65px";
+                return str ?? "";
             }
 
-            if (propType == typeof(int) || propType == typeof(long))
+            // Remove caracteres não numéricos
+            str = new string([.. str.Where(char.IsDigit)]);
+            if (string.IsNullOrEmpty(str))
             {
-                return "80px";
+                return str ?? "";
             }
-
-            if (propType == typeof(DateTime) || propType == typeof(DateOnly))
-            {
-                return "110px";
-            }
-
-            // Width por nome da propriedade
-            return property.Name.ToLower() switch
-            {
-                "id" => "65px",
-                "cpf" => "130px",
-                "cnpj" => "160px",
-                "cep" => "100px",
-                "estado" or "uf" => "65px",
-                "ativo" or "status" => "65px",
-                _ => null // Auto
-            };
-        }
-
-        private static EnumGridColumnType DetermineColumnType(PropertyInfo property)
-        {
-            var propType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-
-            if (propType == typeof(bool))
-            {
-                return EnumGridColumnType.Boolean;
-            }
-
-            if (propType == typeof(DateTime) || propType == typeof(DateOnly))
-            {
-                return EnumGridColumnType.Date;
-            }
-
-            if (propType == typeof(decimal) || propType == typeof(double) || propType == typeof(float))
-            {
-                // Detectar Currency por nome
-                var name = property.Name.ToLower();
-                if (name.Contains("valor") || name.Contains("preco") || name.Contains("total") ||
-                    name.Contains("custo") || name.Contains("desconto"))
-                {
-                    return EnumGridColumnType.Currency;
-                }
-
-                return EnumGridColumnType.Number;
-            }
-
-            if (propType == typeof(int) || propType == typeof(long) || propType == typeof(short))
-            {
-                return EnumGridColumnType.Integer;
-            }
-
-            if (propType.IsEnum)
-            {
-                return EnumGridColumnType.Enumerador;
-            }
-
-            return EnumGridColumnType.Text;
-        }
-
-        private static string FormatValue(object obj, PropertyInfo property, string format)
-        {
-            var value = property.GetValue(obj);
-            if (value == null)
-            {
-                return "-";
-            }
-
-            var str = value.ToString() ?? "";
 
             return format switch
             {
                 "###.###.###-##" when str.Length == 11
-                    => $"{str.Substring(0, 3)}.{str.Substring(3, 3)}.{str.Substring(6, 3)}-{str.Substring(9, 2)}",
+                    => $"{str[..3]}.{str.Substring(3, 3)}.{str.Substring(6, 3)}-{str.Substring(9, 2)}",
 
                 "##.###.###/####-##" when str.Length == 14
-                    => $"{str.Substring(0, 2)}.{str.Substring(2, 3)}.{str.Substring(5, 3)}/{str.Substring(8, 4)}-{str.Substring(12, 2)}",
+                    => $"{str[..2]}.{str.Substring(2, 3)}.{str.Substring(5, 3)}/{str.Substring(8, 4)}-{str.Substring(12, 2)}",
 
                 "(##) ####-####" when str.Length == 10
-                    => $"({str.Substring(0, 2)}) {str.Substring(2, 4)}-{str.Substring(6, 4)}",
+                    => $"({str[..2]}) {str.Substring(2, 4)}-{str.Substring(6, 4)}",
 
                 "(##) #####-####" when str.Length == 11
-                    => $"({str.Substring(0, 2)}) {str.Substring(2, 5)}-{str.Substring(7, 4)}",
+                    => $"({str[..2]}) {str.Substring(2, 5)}-{str.Substring(7, 4)}",
 
                 "#####-###" when str.Length == 8
-                    => $"{str.Substring(0, 5)}-{str.Substring(5, 3)}",
+                    => $"{str[..5]}-{str.Substring(5, 3)}",
+
+                "C" => decimal.TryParse(str, out var currency)
+                    ? currency.ToString("C2")
+                    : str,
 
                 _ => str
             };
         }
 
-        /// <summary>
-        /// Extrai metadados para ReferenceItem de uma entidade
-        /// </summary>
-        public static ReferenceMetadata GetReferenceMetadata<T>() where T : class
-        {
-            var metadata = new ReferenceMetadata();
-            var properties = typeof(T).GetProperties();
-
-            foreach (var prop in properties)
-            {
-                var attr = prop.GetCustomAttribute<GridFieldAttribute>();
-                if (attr == null)
-                {
-                    continue;
-                }
-
-                // TextField (IsText = true)
-                if (attr.IsText)
-                {
-                    metadata.TextProperty = new ReferencePropertyInfo
-                    {
-                        Property = prop,
-                        NavigationPath = attr.NavigationPath
-                    };
-                }
-
-                // Searchable fields
-                if (attr.IsSearchable)
-                {
-                    metadata.SearchableProperties.Add(new ReferencePropertyInfo
-                    {
-                        Property = prop,
-                        NavigationPath = attr.NavigationPath
-                    });
-                }
-
-                // Subtitle fields
-                if (attr.IsSubtitle)
-                {
-                    metadata.SubtitleProperties.Add(new ReferencePropertyInfo
-                    {
-                        Property = prop,
-                        NavigationPath = attr.NavigationPath,
-                        Prefix = attr.SubtitlePrefix,
-                        Order = attr.SubtitleOrder,
-                        Format = attr.Format
-                    });
-                }
-            }
-
-            // Ordenar subtitles
-            metadata.SubtitleProperties = metadata.SubtitleProperties
-                .OrderBy(p => p.Order)
-                .ToList();
-
-            return metadata;
-        }
+        #endregion MÉTODOS PRIVADOS
     }
-
-    #region Metadata Classes para ReferenceItem
-
-    public class ReferenceMetadata
-    {
-        public ReferencePropertyInfo? TextProperty { get; set; }
-        public List<ReferencePropertyInfo> SubtitleProperties { get; set; } = new();
-        public List<ReferencePropertyInfo> SearchableProperties { get; set; } = new();
-    }
-
-    public class ReferencePropertyInfo
-    {
-        public PropertyInfo Property { get; set; } = null!;
-        public string? NavigationPath { get; set; }
-        public string? Prefix { get; set; }
-        public int Order { get; set; }
-        public string? Format { get; set; }
-    }
-
-    #endregion
 }

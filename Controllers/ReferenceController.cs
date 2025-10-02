@@ -156,19 +156,19 @@ namespace AutoGestao.Controllers
 
             if (method == null)
             {
-                return new List<ReferenceItem>();
+                return [];
             }
 
             var task = (Task?)method.Invoke(_referenceService, new object?[] { searchTerm, pageSize, filters });
             if (task == null)
             {
-                return new List<ReferenceItem>();
+                return [];
             }
 
             await task.ConfigureAwait(false);
 
             var resultProperty = task.GetType().GetProperty("Result");
-            return (resultProperty?.GetValue(task) as List<ReferenceItem>) ?? new List<ReferenceItem>();
+            return (resultProperty?.GetValue(task) as List<ReferenceItem>) ?? [];
         }
 
         #endregion

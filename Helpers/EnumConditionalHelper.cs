@@ -112,7 +112,7 @@ namespace AutoGestao.Helpers
 
             if (conditionalValue.StartsWith("!"))
             {
-                var notValue = conditionalValue.Substring(1);
+                var notValue = conditionalValue[1..];
                 return currentValue != notValue;
             }
 

@@ -365,9 +365,9 @@ namespace AutoGestao.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("telefone");
 
-                    b.Property<int>("TipoCliente")
+                    b.Property<int>("TipoPessoa")
                         .HasColumnType("integer")
-                        .HasColumnName("tipo_cliente");
+                        .HasColumnName("tipo_pessoa");
 
                     b.HasKey("Id")
                         .HasName("pk_clientes");
@@ -657,16 +657,6 @@ namespace AutoGestao.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("cep");
 
-                    b.Property<string>("CNPJ")
-                        .HasMaxLength(18)
-                        .HasColumnType("character varying(18)")
-                        .HasColumnName("cnpj");
-
-                    b.Property<string>("CPF")
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)")
-                        .HasColumnName("cpf");
-
                     b.Property<string>("Celular")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
@@ -677,10 +667,20 @@ namespace AutoGestao.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("cidade");
 
+                    b.Property<string>("Cnpj")
+                        .HasMaxLength(18)
+                        .HasColumnType("character varying(18)")
+                        .HasColumnName("cnpj");
+
                     b.Property<string>("Complemento")
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)")
                         .HasColumnName("complemento");
+
+                    b.Property<string>("Cpf")
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)")
+                        .HasColumnName("cpf");
 
                     b.Property<long?>("CriadoPorUsuarioId")
                         .HasColumnType("bigint")
@@ -712,9 +712,9 @@ namespace AutoGestao.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("endereco");
 
-                    b.Property<string>("Estado")
+                    b.Property<int>("Estado")
                         .HasMaxLength(2)
-                        .HasColumnType("character varying(2)")
+                        .HasColumnType("integer")
                         .HasColumnName("estado");
 
                     b.Property<long>("IdEmpresa")
@@ -737,7 +737,7 @@ namespace AutoGestao.Migrations
                         .HasColumnType("character varying(2000)")
                         .HasColumnName("observacoes");
 
-                    b.Property<string>("RG")
+                    b.Property<string>("Rg")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("rg");
@@ -747,18 +747,18 @@ namespace AutoGestao.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("telefone");
 
-                    b.Property<int>("TipoFornecedor")
+                    b.Property<int>("TipoPessoa")
                         .HasColumnType("integer")
-                        .HasColumnName("tipo_fornecedor");
+                        .HasColumnName("tipo_pessoa");
 
                     b.HasKey("Id")
                         .HasName("pk_fornecedores");
 
-                    b.HasIndex("CNPJ")
+                    b.HasIndex("Cnpj")
                         .IsUnique()
                         .HasFilter("cnpj IS NOT NULL");
 
-                    b.HasIndex("CPF")
+                    b.HasIndex("Cpf")
                         .IsUnique()
                         .HasFilter("cpf IS NOT NULL");
 
@@ -2002,7 +2002,7 @@ namespace AutoGestao.Migrations
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.Veiculo", b =>
                 {
-                    b.HasOne("AutoGestao.Entidades.Cliente", "Proprietario")
+                    b.HasOne("AutoGestao.Entidades.Cliente", "Cliente")
                         .WithMany("Veiculos")
                         .HasForeignKey("IdCliente")
                         .OnDelete(DeleteBehavior.SetNull)
@@ -2041,9 +2041,9 @@ namespace AutoGestao.Migrations
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
-                    b.Navigation("Empresa");
+                    b.Navigation("Cliente");
 
-                    b.Navigation("Proprietario");
+                    b.Navigation("Empresa");
 
                     b.Navigation("VeiculoCor");
 

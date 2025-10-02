@@ -24,13 +24,13 @@ namespace AutoGestao.Helpers
             var config = new ReferenceFilterConfig
             {
                 PropertyName = property.Name,
-                Filters = filterAttributes.Select(attr => new ReferenceFilterInfo
+                Filters = [.. filterAttributes.Select(attr => new ReferenceFilterInfo
                 {
                     FilterField = attr.FilterField,
                     FilterValue = attr.FilterValue,
                     Operator = attr.Operator,
                     IsPropertyReference = attr.IsPropertyReference
-                }).ToList()
+                })]
             };
 
             return config;

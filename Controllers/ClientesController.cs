@@ -1,23 +1,19 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
-using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
     public class ClientesController(ApplicationDbContext context) : StandardGridController<Cliente>(context)
     {
-        protected override StandardGridViewModel ConfigureGrid()
+        protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
-            var retorno = new StandardGridViewModel("Clientes", "Gerencie todos os clientes", "Clientes")
-            {
-                Filters =
+            standardGridViewModel.Filters =
                     [
                         new()
                         {
@@ -46,23 +42,9 @@ namespace AutoGestao.Controllers
                                 new() { Value = "false", Text = "❌ Inativo" }
                             ]
                         }
-                    ],
+                    ];
 
-                Columns =
-                    [
-                        new() { Name = nameof(Cliente.Id), DisplayName = "Cód", Type = EnumGridColumnType.Text, Sortable = true, Width = "65px" },
-                        new() { Name = nameof(Cliente.TipoCliente), DisplayName = "Tipo", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Icon, Sortable = true, Width = "65px"},
-                        new() { Name = nameof(Cliente.Nome), DisplayName = "Nome/Razão Social", Sortable = true, Type = EnumGridColumnType.Text, UrlAction = "Details" },
-                        new() { Name = "Documento", DisplayName = "CPF/CNPJ", Sortable = true, Type = EnumGridColumnType.Custom, CustomRender = RenderDocumento},
-                        new() { Name = nameof(Cliente.Celular), DisplayName = "Telefone", Sortable = true },
-                        new() { Name = nameof(Cliente.Cidade), DisplayName = "Cidade", Sortable = true },
-                        new() { Name = nameof(Cliente.Estado), DisplayName = "UF", Type = EnumGridColumnType.Enumerador, EnumRender = EnumRenderType.Description, Sortable = true, Width = "65px"},
-                        new() { Name = nameof(Cliente.Ativo), DisplayName = "Ativo", Type = EnumGridColumnType.Enumerador, Sortable = true, Width = "65px" },
-                        new() { Name = "Actions", DisplayName = "Ações", Type = EnumGridColumnType.Actions, Sortable = false, Width = "100px" }
-                    ]
-            };
-
-            retorno.RowActions.AddRange(
+            standardGridViewModel.RowActions.AddRange(
                 [
                     new()
                     {
@@ -98,7 +80,7 @@ namespace AutoGestao.Controllers
                     }
                 ]);
 
-            return retorno;
+            return standardGridViewModel;
         }
 
         protected override IQueryable<Cliente> ApplyFilters(IQueryable<Cliente> query, Dictionary<string, object> filters)
@@ -129,7 +111,7 @@ namespace AutoGestao.Controllers
                         break;
 
                     case "tipocliente":
-                        query = ApplyEnumFilter(query, filters, filter.Key, c => c.TipoCliente);
+                        query = ApplyEnumFilter(query, filters, filter.Key, c => c.TipoPessoa);
                         break;
                 }
             }
@@ -171,13 +153,11 @@ namespace AutoGestao.Controllers
                 : base.BeforeDelete(entity);
         }
 
-        // Só pode editar clientes ativos
         protected override bool CanEdit(Cliente entity)
         {
             return entity.Ativo;
         }
 
-        // Só pode deletar clientes que não estão vinculados a compras
         protected override bool CanDelete(Cliente entity)
         {
             var temVendas = _context.Vendas.Any(v => v.IdCliente == entity.Id);
@@ -200,12 +180,12 @@ namespace AutoGestao.Controllers
         private void ValidarCliente(Cliente entity)
         {
             // Validações específicas
-            if (entity.TipoCliente == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.Cpf))
+            if (entity.TipoPessoa == EnumTipoPessoa.PessoaFisica && string.IsNullOrEmpty(entity.Cpf))
             {
                 ModelState.AddModelError(nameof(entity.Cpf), "CPF é obrigatório para Pessoa Física");
             }
 
-            if (entity.TipoCliente == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(entity.Cnpj))
+            if (entity.TipoPessoa == EnumTipoPessoa.PessoaJuridica && string.IsNullOrEmpty(entity.Cnpj))
             {
                 ModelState.AddModelError(nameof(entity.Cnpj), "CNPJ é obrigatório para Pessoa Jurídica");
             }
@@ -220,18 +200,6 @@ namespace AutoGestao.Controllers
                 }
             }
         }
-
-        private static string RenderDocumento(object item)
-        {
-            var cliente = (Cliente)item;
-            var documento = cliente.TipoCliente == EnumTipoPessoa.PessoaJuridica
-                ? cliente.Cnpj.AplicarMascaraCnpj()
-                : cliente.Cpf.AplicarMascaraCpf();
-
-            return $@"{documento}";
-        }
-
-        #region ENDPOINTS ESPECÍFICOS
 
         [HttpPost]
         public async Task<IActionResult> AlterarStatus(int id)
@@ -269,7 +237,7 @@ namespace AutoGestao.Controllers
                 {
                     var documento = !string.IsNullOrEmpty(cliente.Cpf) ? cliente.Cpf : cliente.Cnpj;
                     csv.AppendLine($"{cliente.Id}," +
-                                  $"{cliente.TipoCliente.GetDescription()}," +
+                                  $"{cliente.TipoPessoa.GetDescription()}," +
                                   $"\"{cliente.Nome}\"," +
                                   $"{documento}," +
                                   $"{cliente.Email}," +
@@ -292,14 +260,5 @@ namespace AutoGestao.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        [HttpGet]
-        public IActionResult Import()
-        {
-            TempData["ErrorMessage"] = $"Operação ainda não implementada!";
-            return RedirectToAction(nameof(Index));
-        }
-
-        #endregion ENDPOINTS ESPECÍFICOS
     }
 }

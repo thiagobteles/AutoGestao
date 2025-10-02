@@ -1,52 +1,38 @@
 using AutoGestao.Attributes;
 using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Entidades
 {
-    public class Fornecedor : BaseEntidadeEmpresa
+    [FormConfig(Title = "Fornecedor", Subtitle = "Gerencie os fornecedores", Icon = "fas fa-truck", EnableAjaxSubmit = true)]
+    public class Fornecedor : BaseEntidadeDocumento
     {
-        [GridField("Tipo", Order = 5, Width = "100px")]
-        public EnumTipoPessoa TipoFornecedor { get; set; } = EnumTipoPessoa.Nenhum;
-
-        [GridMain("Nome/Razão Social")]
-        public string Nome { get; set; } = string.Empty;
-
-        [GridDocument("CPF", DocumentType.CPF)]
-        public string? CPF { get; set; }
-
-        [GridDocument("CNPJ", DocumentType.CNPJ)]
-        public string? CNPJ { get; set; }
-
-        [GridField("RG", Order = 32, Width = "120px")]
-        public string? RG { get; set; }
-
-        [GridField("Data Nascimento", Order = 35, Width = "120px")]
-        public DateTime? DataNascimento { get; set; }
-
-        [GridContact("E-mail")]
-        public string? Email { get; set; }
-
-        [GridContact("Telefone")]
-        public string? Telefone { get; set; }
-
-        [GridField("Celular", IsSubtitle = true, SubtitleOrder = 3, Order = 65)]
-        public string? Celular { get; set; }
-
         [GridField("Endereço", Order = 70, ShowInGrid = false)]
+        [FormField(Order = 30, Name = "Endereço", Section = "Endereço", Icon = "fas fa-road", Type = EnumFieldType.Text, GridColumns = 3)]
         public string? Endereco { get; set; }
 
         [GridField("Cidade", Order = 72)]
+        [FormField(Order = 30, Name = "Cidade", Section = "Endereço", Icon = "fas fa-city", Type = EnumFieldType.Text)]
         public string? Cidade { get; set; }
 
         [GridField("Estado", Order = 75, Width = "65px")]
-        public string? Estado { get; set; }
+        [FormField(Order = 30, Name = "Estado", Section = "Endereço", Icon = "fas fa-flag", Type = EnumFieldType.Select)]
+        public EnumEstado Estado { get; set; }
 
         [GridField("CEP", Order = 77, Width = "100px", Format = "#####-###")]
+        [FormField(Order = 30, Name = "CEP", Section = "Endereço", Icon = "fas fa-mail-bulk", Type = EnumFieldType.Cep)]
         public string? CEP { get; set; }
 
+        [FormField(Order = 30, Name = "Número", Section = "Endereço", Icon = "fas fa-hashtag", Type = EnumFieldType.Text)]
         public string? Numero { get; set; }
+
+        [FormField(Order = 30, Name = "Complemento", Section = "Endereço", Icon = "fas fa-map-marker", Type = EnumFieldType.Text)]
         public string? Complemento { get; set; }
+
+        [FormField(Order = 30, Name = "Bairro", Section = "Endereço", Icon = "fas fa-map", Type = EnumFieldType.Text)]
         public string? Bairro { get; set; }
+
+        [FormField(Order = 40, Name = "Observações", Section = "Informações Adicionais", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea, Placeholder = "Observações sobre o fornecedor...")]
         public string? Observacoes { get; set; }
     }
 }
