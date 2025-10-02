@@ -79,7 +79,7 @@ namespace AutoGestao.Controllers
                         {
                             query = ApplyTextFilter(query, searchTerm,
                                 v => v.Nome,
-                                v => v.CPF,
+                                v => v.Cpf,
                                 v => v.Email,
                                 v => v.Telefone,
                                 v => v.Celular);
@@ -96,12 +96,6 @@ namespace AutoGestao.Controllers
             }
 
             return query;
-        }
-
-        private static string RenderDocumento(object item)
-        {
-            var vendedor = (Vendedor)item;
-            return vendedor.CPF.AplicarMascaraCpf();
         }
 
         #region Ações Específicas
@@ -142,7 +136,7 @@ namespace AutoGestao.Controllers
                 {
                     csv.AppendLine($"{vendedor.Id}," +
                                   $"\"{vendedor.Nome}\"," +
-                                  $"{vendedor.CPF}," +
+                                  $"{vendedor.Cpf}," +
                                   $"{vendedor.Email}," +
                                   $"{vendedor.Telefone}," +
                                   $"{vendedor.Celular}," +

@@ -18,6 +18,11 @@ namespace AutoGestao.Extensions
         public static string GetDescription<T>(this T source)
         {
             var field = source.GetType().GetField(source?.ToString());
+            if (field == null)
+            {
+                return source.ToString() ?? string.Empty;
+            }
+
             var attributes = (DescriptionAttribute[])field.GetCustomAttributes(typeof(DescriptionAttribute), false);
             return attributes != null && attributes.Length > 0 ? attributes[0].Description : source.ToString();
         }
@@ -25,6 +30,11 @@ namespace AutoGestao.Extensions
         public static string GetCategory<T>(this T source)
         {
             var field = source.GetType().GetField(source.ToString());
+            if (field == null)
+            {
+                return source.ToString() ?? string.Empty;
+            }
+
             var attributes = (CategoryAttribute[])field.GetCustomAttributes(typeof(CategoryAttribute), false);
             return attributes != null && attributes.Length > 0 ? attributes[0].Category : source.ToString();
         }
@@ -32,7 +42,7 @@ namespace AutoGestao.Extensions
         public static string GetIcone<T>(this T source)
         {
             var field = source.GetType().GetField(source.ToString());
-            if (field== null)
+            if (field == null)
             {
                 return null;
             }
@@ -52,6 +62,11 @@ namespace AutoGestao.Extensions
             }
 
             var field = source.GetType().GetField(source?.ToString());
+            if (field == null)
+            {
+                return source.ToString() ?? string.Empty;
+            }
+
             return field.GetValue(source).ToString();
         }
 

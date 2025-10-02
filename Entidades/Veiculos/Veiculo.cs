@@ -31,7 +31,7 @@ namespace AutoGestao.Entidades.Veiculos
             NavigationPaths = new[] { "VeiculoMarca.Descricao", "VeiculoMarcaModelo.Descricao" },
             Template = @"<div class=""vehicle-info"">
                     <div class=""fw-semibold"">{0}</div>
-                    <div class=""text-muted small"">{1}</div>'
+                    <div class=""text-muted small"">{1}</div>
                 </div>")]
         public string MarcaModelo => $"{VeiculoMarca?.Descricao ?? "N/A"} - {VeiculoMarcaModelo?.Descricao ?? "N/A"}";
 

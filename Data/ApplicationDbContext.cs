@@ -135,8 +135,12 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Vendedor>().ToTable("vendedores");
             modelBuilder.Entity<Vendedor>(entity =>
             {
+                entity.Property(e => e.TipoPessoa).IsRequired();
                 entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
-                entity.Property(e => e.CPF).HasMaxLength(14).IsRequired();
+                entity.Property(e => e.Cpf).HasMaxLength(14).IsRequired();
+                entity.Property(e => e.Email).HasMaxLength(150);
+                entity.Property(e => e.Cnpj).HasMaxLength(18);
+                entity.Property(e => e.Rg).HasMaxLength(20);
                 entity.Property(e => e.Email).HasMaxLength(150);
                 entity.Property(e => e.Telefone).HasMaxLength(20);
                 entity.Property(e => e.Celular).HasMaxLength(20);
@@ -523,7 +527,7 @@ namespace AutoGestao.Data
             // ===========================================
             // ÍNDICES ÚNICOS - VENDEDOR
             // ===========================================
-            modelBuilder.Entity<Vendedor>().HasIndex(v => v.CPF).IsUnique();
+            modelBuilder.Entity<Vendedor>().HasIndex(v => v.Cpf).IsUnique();
 
             // ===========================================
             // ÍNDICES ÚNICOS - FORNECEDOR
