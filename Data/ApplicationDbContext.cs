@@ -48,12 +48,12 @@ namespace AutoGestao.Data
                 // Verifica se a entidade herda de BaseEntidade
                 if (typeof(BaseEntidade).IsAssignableFrom(entityType.ClrType))
                 {
-                    // Ignora as propriedades de navegação de auditoria para evitar conflitos
-                    modelBuilder.Entity(entityType.ClrType)
-                        .Ignore(nameof(BaseEntidade.CriadoPorUsuario));
+                    // Configura Id como auto-incremento
+                    modelBuilder.Entity(entityType.ClrType).Property("Id").ValueGeneratedOnAdd();
 
-                    modelBuilder.Entity(entityType.ClrType)
-                        .Ignore(nameof(BaseEntidade.AlteradoPorUsuario));
+                    // Ignora as propriedades de navegação de auditoria para evitar conflitos
+                    modelBuilder.Entity(entityType.ClrType).Ignore(nameof(BaseEntidade.CriadoPorUsuario));
+                    modelBuilder.Entity(entityType.ClrType).Ignore(nameof(BaseEntidade.AlteradoPorUsuario));
                 }
             }
 

@@ -494,17 +494,17 @@ class ReferenceFieldManager {
         modal.setAttribute('data-controller', controller);
 
         modal.innerHTML = `
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
+            <div class="modal-dialog modal-xl" style="max-width: 90%; width: 1400px;">
+                <div class="modal-content" style="min-height: 85vh; max-height: 95vh; display: flex; flex-direction: column;">
+                    <div class="modal-header bg-primary text-white" style="flex-shrink: 0;">
                         <h5 class="modal-title">
                             <i class="fas fa-plus me-2"></i>
                             Criar ${referenceType}
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body p-0">
-                        <div class="d-flex justify-content-center align-items-center py-5">
+                    <div class="modal-body p-0" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+                        <div class="d-flex justify-content-center align-items-center py-5" style="flex: 1;">
                             <div class="text-center">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Carregando...</span>
@@ -513,7 +513,7 @@ class ReferenceFieldManager {
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer" style="flex-shrink: 0; background: #f8f9fa; border-top: 1px solid #dee2e6;">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <i class="fas fa-times me-2"></i>
                             Cancelar
@@ -546,13 +546,17 @@ class ReferenceFieldManager {
                 const html = await response.text();
                 const modalBody = modal.querySelector('.modal-body');
 
-                modalBody.innerHTML = `<div class="container-fluid p-4">${html}</div>`;
+                // Manter a estrutura flex do modal-body
+                modalBody.style.overflow = 'auto';
+                modalBody.innerHTML = html;
 
                 this.setupModalForm(modal, controller);
                 this.initializeFormElements(modalBody);
 
                 const saveBtn = modal.querySelector('.btn-save-modal');
-                saveBtn.disabled = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                }
 
             } else {
                 throw new Error(`Erro ${response.status}: ${response.statusText}`);
@@ -584,6 +588,7 @@ class ReferenceFieldManager {
         saveBtn.addEventListener('click', async (e) => {
             e.preventDefault();
 
+            // Validar formulário
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
@@ -591,10 +596,13 @@ class ReferenceFieldManager {
 
             const formData = new FormData(form);
             const originalBtnContent = saveBtn.innerHTML;
+            const spinner = saveBtn.querySelector('.spinner-border');
 
             try {
                 saveBtn.disabled = true;
-                saveBtn.querySelector('.spinner-border').classList.remove('d-none');
+                if (spinner) {
+                    spinner.classList.remove('d-none');
+                }
 
                 const response = await fetch(form.action, {
                     method: 'POST',
@@ -611,6 +619,7 @@ class ReferenceFieldManager {
                         const result = await response.json();
 
                         if (result.success) {
+                            // Sucesso - fechar modal e preencher campo
                             this.showToast(result.message || 'Registro criado com sucesso!', 'success');
 
                             const targetField = modal.dataset.targetField;
@@ -618,26 +627,42 @@ class ReferenceFieldManager {
                             const searchInput = document.querySelector(`input.reference-search-input[data-target-field="${targetField}"]`);
 
                             if (hiddenInput && searchInput) {
+                                // Preencher valores
                                 hiddenInput.value = result.id;
                                 searchInput.value = result.text || result.name;
                                 searchInput.classList.add('selected');
 
+                                // Disparar eventos
                                 hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
                                 searchInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+                                // Limpar cache para forçar nova busca se necessário
+                                const referenceType = searchInput.dataset.referenceType;
+                                if (referenceType && this.cache) {
+                                    // Limpar apenas o cache deste tipo de referência
+                                    for (const [key] of this.cache) {
+                                        if (key.startsWith(`${referenceType}:`)) {
+                                            this.cache.delete(key);
+                                        }
+                                    }
+                                }
                             }
 
+                            // Fechar modal
                             const bsModal = bootstrap.Modal.getInstance(modal);
                             if (bsModal) {
                                 bsModal.hide();
                             }
 
                         } else {
+                            // Erros de validação
                             this.showValidationErrors(form, result.errors || {});
                         }
                     } else {
+                        // Resposta HTML - recarregar formulário com erros
                         const html = await response.text();
                         const modalBody = modal.querySelector('.modal-body');
-                        modalBody.innerHTML = `<div class="container-fluid p-4">${html}</div>`;
+                        modalBody.innerHTML = html;
                         this.setupModalForm(modal, controller);
                         this.initializeFormElements(modalBody);
                     }
