@@ -1166,7 +1166,10 @@ namespace AutoGestao.Controllers
 
         private static string FormatNumber(object value)
         {
-            if (value == null) return "";
+            if (value == null)
+            {
+                return "";
+            }
 
             return value switch
             {
@@ -1179,7 +1182,10 @@ namespace AutoGestao.Controllers
 
         private static string FormatEnum(object value)
         {
-            if (value == null) return "";
+            if (value == null)
+            {
+                return "";
+            }
 
             var type = value.GetType();
             if (type.IsEnum)

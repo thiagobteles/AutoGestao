@@ -6,23 +6,21 @@
     {
         var attrs = new List<string>();
 
-        if (!string.IsNullOrEmpty(field.ConditionalDisplayRule) || !string.IsNullOrEmpty(field.ConditionalRequiredRule))
+        // SEMPRE adicionar data-field-name para facilitar busca de DisplayName
+        attrs.Add($"data-field-name=\"{field.PropertyName}\"");
+
+        if (!string.IsNullOrEmpty(field.ConditionalDisplayRule))
         {
-            attrs.Add($"data-field-name=\"{field.PropertyName}\"");
+            attrs.Add($"data-conditional-display-rule=\"{field.ConditionalDisplayRule}\"");
+        }
 
-            if (!string.IsNullOrEmpty(field.ConditionalDisplayRule))
+        if (!string.IsNullOrEmpty(field.ConditionalRequiredRule))
+        {
+            attrs.Add($"data-conditional-required-rule=\"{field.ConditionalRequiredRule}\"");
+
+            if (!string.IsNullOrEmpty(field.ConditionalRequiredMessage))
             {
-                attrs.Add($"data-conditional-display-rule=\"{field.ConditionalDisplayRule}\"");
-            }
-
-            if (!string.IsNullOrEmpty(field.ConditionalRequiredRule))
-            {
-                attrs.Add($"data-conditional-required-rule=\"{field.ConditionalRequiredRule}\"");
-
-                if (!string.IsNullOrEmpty(field.ConditionalRequiredMessage))
-                {
-                    attrs.Add($"data-conditional-required-message=\"{field.ConditionalRequiredMessage}\"");
-                }
+                attrs.Add($"data-conditional-required-message=\"{field.ConditionalRequiredMessage}\"");
             }
         }
 

@@ -414,22 +414,9 @@
         window.location.href = '@Url.Action("Details")/' + id;
     }
 
+    // Usar função genérica - SEM mapeamento manual
     function verEntidade(entidade, id) {
-        const controllerMap = {
-            'Usuario': 'Usuarios',
-            'Veiculo': 'Veiculos',
-            'Cliente': 'Clientes',
-            'Vendedor': 'Vendedores',
-            'Fornecedor': 'Fornecedores',
-            'Produto': 'Produtos',
-            'Venda': 'Vendas',
-            'Despesa': 'Despesas'
-        };
-
-        const controller = controllerMap[entidade];
-        if (controller) {
-            window.open(`/${controller}/Details/${id}`, '_blank');
-        }
+        window.openDetailsInNewTab(entidade, id);
     }
 
     function exportarAuditoria() {

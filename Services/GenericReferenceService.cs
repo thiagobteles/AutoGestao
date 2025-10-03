@@ -283,7 +283,8 @@ namespace AutoGestao.Services
         }
 
         /// <summary>
-        /// Aplica filtros dinâmicos
+        /// Aplica filtros dinâmicos com suporte a propriedades nullable
+        /// VERSÃO SIMPLIFICADA E ROBUSTA
         /// </summary>
         private static IQueryable<T> ApplyDynamicFilters<T>(IQueryable<T> query, Dictionary<string, string> filters) where T : class
         {
@@ -298,13 +299,20 @@ namespace AutoGestao.Services
                 var parameter = Expression.Parameter(typeof(T), "e");
                 var propertyAccess = Expression.Property(parameter, property);
 
-                object? convertedValue = ConvertFilterValue(filter.Value, property.PropertyType);
+                // Obter o tipo da propriedade (pode ser nullable)
+                var propertyType = property.PropertyType;
+
+                // Converter o valor do filtro para o tipo correto
+                object? convertedValue = ConvertFilterValue(filter.Value, propertyType);
                 if (convertedValue == null)
                 {
                     continue;
                 }
 
-                var constant = Expression.Constant(convertedValue);
+                // Criar constante com o tipo exato da propriedade
+                var constant = Expression.Constant(convertedValue, propertyType);
+
+                // Criar expressão de igualdade
                 var equals = Expression.Equal(propertyAccess, constant);
                 var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
 
@@ -314,22 +322,75 @@ namespace AutoGestao.Services
             return query;
         }
 
+        /// <summary>
+        /// Converte valor string para o tipo apropriado (incluindo nullable)
+        /// </summary>
         private static object? ConvertFilterValue(string value, Type targetType)
         {
             try
             {
-                var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+                // Se for nullable, obter o tipo base
+                var underlyingType = Nullable.GetUnderlyingType(targetType);
+                var isNullable = underlyingType != null;
+                var typeToConvert = underlyingType ?? targetType;
 
-                return underlyingType == typeof(int) ? int.Parse(value)
-                    : underlyingType == typeof(long) ? long.Parse(value)
-                    : underlyingType == typeof(bool) ? bool.Parse(value)
-                    : underlyingType == typeof(DateTime) ? DateTime.Parse(value)
-                    : underlyingType == typeof(TimeSpan) ? TimeSpan.Parse(value)
-                    : underlyingType == typeof(decimal) ? decimal.Parse(value)
-                    : value;
+                // Converter para o tipo base
+                object convertedValue;
+
+                if (typeToConvert == typeof(int))
+                {
+                    convertedValue = int.Parse(value);
+                }
+                else if (typeToConvert == typeof(long))
+                {
+                    convertedValue = long.Parse(value);
+                }
+                else if (typeToConvert == typeof(bool))
+                {
+                    convertedValue = bool.Parse(value);
+                }
+                else if (typeToConvert == typeof(DateTime))
+                {
+                    convertedValue = DateTime.Parse(value);
+                }
+                else if (typeToConvert == typeof(TimeSpan))
+                {
+                    convertedValue = TimeSpan.Parse(value);
+                }
+                else if (typeToConvert == typeof(decimal))
+                {
+                    convertedValue = decimal.Parse(value);
+                }
+                else if (typeToConvert == typeof(double))
+                {
+                    convertedValue = double.Parse(value);
+                }
+                else if (typeToConvert == typeof(float))
+                {
+                    convertedValue = float.Parse(value);
+                }
+                else if (typeToConvert == typeof(Guid))
+                {
+                    convertedValue = Guid.Parse(value);
+                }
+                else
+                {
+                    convertedValue = value; // Fallback: retornar string
+                }
+
+                // Se a propriedade é nullable, converter para Nullable<T>
+                if (isNullable)
+                {
+                    var nullableType = typeof(Nullable<>).MakeGenericType(typeToConvert);
+                    return Activator.CreateInstance(nullableType, convertedValue);
+                }
+
+                return convertedValue;
             }
-            catch
+            catch (Exception ex)
             {
+                // Log para debug (remover em produção se necessário)
+                System.Diagnostics.Debug.WriteLine($"Erro ao converter '{value}' para {targetType.Name}: {ex.Message}");
                 return null;
             }
         }

@@ -364,23 +364,15 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
 
 <script>
+    // Usar função genérica - SEM mapeamento manual
     function verEntidadeAuditada() {
-        const controllerMap = {
-            'Usuario': 'Usuarios',
-            'Veiculo': 'Veiculos',
-            'Cliente': 'Clientes',
-            'Vendedor': 'Vendedores',
-            'Fornecedor': 'Fornecedores',
-            'Produto': 'Produtos',
-            'Venda': 'Vendas',
-            'Despesa': 'Despesas'
-        };
+        const entidadeNome = '@Model.EntidadeNome';
+        const entidadeId = '@Model.EntidadeId';
 
-        const controller = controllerMap['@Model.EntidadeNome'];
-        if (controller) {
-            window.open(`/${controller}/Details/@Model.EntidadeId`, '_blank');
+        if (entidadeNome && entidadeId) {
+            window.openDetailsInNewTab(entidadeNome, entidadeId);
         } else {
-            alert('Tipo de entidade não suportado para visualização direta.');
+            alert('Informações da entidade não disponíveis.');
         }
     }
 

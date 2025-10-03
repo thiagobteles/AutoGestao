@@ -1,4 +1,5 @@
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Helpers;
 using AutoGestao.Models;
 
 namespace AutoGestao.Extensions
@@ -24,8 +25,8 @@ namespace AutoGestao.Extensions
             field.Reference = referenceType;
             field.ReferenceConfig = ReferenceFieldConfig.GetDefault(referenceType);
 
-            // Configurações específicas por tipo
-            field.ReferenceConfig.ControllerName = GetControllerName(referenceType);
+            // Configurações genéricas por convenção
+            field.ReferenceConfig.ControllerName = ControllerNameHelper.GetControllerName(referenceType);
             field.ReferenceConfig.DisplayField = GetDisplayField(referenceType);
             field.ReferenceConfig.SearchFields = GetSearchFields(referenceType);
             field.ReferenceConfig.SubtitleFields = GetSubtitleFields(referenceType);
@@ -34,92 +35,40 @@ namespace AutoGestao.Extensions
         }
 
         /// <summary>
-        /// Obtém o nome do controller baseado no tipo da entidade
-        /// </summary>
-        private static string GetControllerName(Type referenceType)
-        {
-            var typeName = referenceType.Name;
-
-            // Mapeamento específico para controllers conhecidos
-            var controllerMap = new Dictionary<string, string>
-            {
-                ["Cliente"] = "Clientes",
-                ["Fornecedor"] = "Fornecedores",
-                ["Vendedor"] = "Vendedores",
-                ["VeiculoMarca"] = "VeiculoMarcas",
-                ["VeiculoMarcaModelo"] = "VeiculoMarcaModelos",
-                ["VeiculoCor"] = "VeiculoCores",
-                ["Usuario"] = "Usuarios"
-            };
-
-            return controllerMap.TryGetValue(typeName, out var controller)
-                ? controller
-                : typeName + "s"; // Convenção padrão: nome + s
-        }
-
-        /// <summary>
-        /// Obtém o campo principal para exibição
+        /// Obtém o campo de exibição principal baseado em atributos
         /// </summary>
         private static string GetDisplayField(Type referenceType)
         {
-            var properties = referenceType.GetProperties();
+            // Buscar propriedade com [ReferenceText] ou [GridMain]
+            var property = referenceType.GetProperties()
+                .FirstOrDefault(p => p.GetCustomAttributes(typeof(Attributes.ReferenceTextAttribute), false).Any() ||
+                                   p.GetCustomAttributes(typeof(Attributes.GridMainAttribute), false).Any());
 
-            // Prioridade para campos de exibição
-            var displayCandidates = new[] { "Nome", "Descricao", "Titulo", "RazaoSocial", "Codigo" };
-
-            foreach (var candidate in displayCandidates)
-            {
-                if (properties.Any(p => p.Name == candidate && p.PropertyType == typeof(string)))
-                {
-                    return candidate;
-                }
-            }
-
-            return "Id"; // Fallback
+            return property?.Name ?? "Id";
         }
 
         /// <summary>
-        /// Obtém os campos para busca
+        /// Obtém os campos de busca baseado em atributos
         /// </summary>
         private static List<string> GetSearchFields(Type referenceType)
         {
-            var fields = new List<string>();
-            var properties = referenceType.GetProperties();
-
-            // Campos comuns para busca
-            var searchCandidates = new[] { "Nome", "Descricao", "CPF", "CNPJ", "Email", "Codigo", "Placa" };
-
-            foreach (var candidate in searchCandidates)
-            {
-                if (properties.Any(p => p.Name == candidate && p.PropertyType == typeof(string)))
-                {
-                    fields.Add(candidate);
-                }
-            }
-
-            return fields.Any() ? fields : ["Nome"];
+            // Buscar propriedades com [ReferenceSearchable]
+            return referenceType.GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(Attributes.ReferenceSearchableAttribute), false).Any())
+                .Select(p => p.Name)
+                .ToList();
         }
 
         /// <summary>
-        /// Obtém os campos para subtitle
+        /// Obtém os campos de subtitle baseado em atributos
         /// </summary>
         private static List<string> GetSubtitleFields(Type referenceType)
         {
-            var fields = new List<string>();
-            var properties = referenceType.GetProperties();
-
-            // Campos para informações adicionais
-            var subtitleCandidates = new[] { "CPF", "CNPJ", "Email", "Telefone", "Codigo" };
-
-            foreach (var candidate in subtitleCandidates)
-            {
-                if (properties.Any(p => p.Name == candidate && p.PropertyType == typeof(string)))
-                {
-                    fields.Add(candidate);
-                }
-            }
-
-            return fields;
+            // Buscar propriedades com [ReferenceSubtitle]
+            return referenceType.GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(Attributes.ReferenceSubtitleAttribute), false).Any())
+                .Select(p => p.Name)
+                .ToList();
         }
     }
 }

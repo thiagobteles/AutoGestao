@@ -2,6 +2,7 @@ using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
+using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Models.Auth;
 using AutoGestao.Services.Interface;
@@ -261,21 +262,15 @@ namespace AutoGestao.Controllers
 
         private static string GetEntityLink(string entidadeNome, string entidadeId)
         {
-            var controllerMap = new Dictionary<string, string>
+            try
             {
-                { "Usuario", "Usuarios" },
-                { "Veiculo", "Veiculos" },
-                { "Cliente", "Clientes" },
-                { "Vendedor", "Vendedores" },
-                { "Fornecedor", "Fornecedores" },
-                { "Produto", "Produtos" },
-                { "Venda", "Vendas" },
-                { "Despesa", "Despesas" }
-            };
-
-            return controllerMap.TryGetValue(entidadeNome, out string? controller)
-                ? $"<a href='/{controller}/Details/{entidadeId}' target='_blank' class='btn btn-sm btn-outline-primary'><i class='fas fa-external-link-alt me-1'></i>Ver {entidadeNome}</a>"
-                : $"{entidadeNome} #{entidadeId}";
+                var controller = ControllerNameHelper.GetControllerName(entidadeNome);
+                return $"/{controller}/Details/{entidadeId}";
+            }
+            catch
+            {
+                return "#";
+            }
         }
 
         private static string GenerateCSV(List<AuditLog> logs)
