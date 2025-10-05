@@ -27,6 +27,8 @@ namespace AutoGestao.Controllers
 
         protected virtual IQueryable<T> GetBaseQuery()
         {
+            List<string> listaIgnorada = ["CriadoPorUsuario", "AlteradoPorUsuario", "Empresa"];
+
             var query = _context.Set<T>().AsQueryable();
 
             // Buscar todas as propriedades virtuais da entidade
@@ -39,7 +41,7 @@ namespace AutoGestao.Controllers
                 .ToList();
 
             // Aplicar Include para cada propriedade virtual
-            foreach (var prop in virtualProperties)
+            foreach (var prop in virtualProperties.Where(x => !listaIgnorada.Contains(x.Name)))
             {
                 query = query.Include(prop.Name);
             }
