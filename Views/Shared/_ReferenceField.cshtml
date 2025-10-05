@@ -1,4 +1,3 @@
-@* Views/Shared/_ReferenceField.cshtml *@
 @model AutoGestao.Models.FormFieldViewModel
 
 @{
@@ -13,7 +12,12 @@
 }
 
 <div class="reference-field-container position-relative reference-search-wrapper">
-    <input type="hidden" name="@fieldId" value="@fieldValue" id="@(fieldId)_value" />
+    @* CAMPO HIDDEN - ESTE É O CAMPO QUE SERÁ ENVIADO NO FORM *@
+    <input type="hidden"
+           name="@fieldId"
+           id="@(fieldId)_value"
+           value="@fieldValue"
+           data-original-value="@fieldValue" />
 
     <div class="input-group">
         <input type="text"
@@ -42,8 +46,7 @@
             <button type="button"
                     class="btn btn-outline-secondary reference-clear-btn"
                     id="@(fieldId)_clear"
-                    title="Limpar seleção"
-                    onclick="clearReferenceField('@fieldId')">
+                    title="Limpar seleção">
                 <i class="fas fa-times"></i>
             </button>
         }

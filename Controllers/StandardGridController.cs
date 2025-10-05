@@ -387,7 +387,31 @@ namespace AutoGestao.Controllers
         [HttpGet]
         public virtual async Task<IActionResult> Edit(long id)
         {
-            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
+            // Carregar entidade COM TODAS as referências
+            var query = GetBaseQuery();
+
+            // Include automático de todas as navigation properties
+            var entityType = typeof(T);
+            var navigationProperties = entityType.GetProperties()
+                .Where(p => p.PropertyType.IsClass &&
+                            p.PropertyType != typeof(string) &&
+                            !p.PropertyType.IsArray &&
+                            p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
+
+            foreach (var navProp in navigationProperties)
+            {
+                var propertyName = navProp.Name.StartsWith("Id") ? navProp.Name.Substring(2) : navProp.Name;
+                var property = entityType.GetProperty(propertyName);
+
+                if (property != null)
+                {
+                    query = query.Include(propertyName);
+                    Console.WriteLine($"Include adicionado: {propertyName}");
+                }
+            }
+
+            var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
+
             if (entity == null)
             {
                 return NotFound();
@@ -400,7 +424,7 @@ namespace AutoGestao.Controllers
             }
 
             PopulateEnumsInViewBag();
-            
+
             var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
             if (formTabs?.EnableTabs == true)
             {
@@ -421,19 +445,33 @@ namespace AutoGestao.Controllers
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Edit(long id, T entity)
         {
+            // LOG: Verificar valores recebidos
+            var properties = typeof(T).GetProperties()
+                .Where(p => p.Name.StartsWith("Id") && p.PropertyType == typeof(long) || p.PropertyType == typeof(long?));
+
+            foreach (var prop in properties)
+            {
+                var value = prop.GetValue(entity);
+                Console.WriteLine($"Campo recebido: {prop.Name} = {value}");
+            }
+
             if (id != entity.Id)
             {
-                return Request.IsAjaxRequest() 
-                    ? Json(new { success = false, message = "ID inconsistente." })
-                    : NotFound();
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "ID inconsistente." });
+                }
+                return NotFound();
             }
 
             var existingEntity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (existingEntity == null)
             {
-                return Request.IsAjaxRequest() 
-                    ? Json(new { success = false, message = "Registro não encontrado." })
-                    : NotFound();
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "Registro não encontrado." });
+                }
+                return NotFound();
             }
 
             if (!CanEdit(existingEntity))
@@ -455,7 +493,13 @@ namespace AutoGestao.Controllers
                     entity.DataCadastro = existingEntity.DataCadastro;
                     entity.CriadoPorUsuarioId = existingEntity.CriadoPorUsuarioId;
 
-                    // DataAlteracao e AlteradoPorUsuarioId são atualizados automaticamente pelo interceptor
+                    // LOG: Verificar valores antes de atualizar
+                    foreach (var prop in properties)
+                    {
+                        var oldValue = prop.GetValue(existingEntity);
+                        var newValue = prop.GetValue(entity);
+                        Console.WriteLine($"Atualizando {prop.Name}: {oldValue} -> {newValue}");
+                    }
 
                     // Atualizar propriedades
                     _context.Entry(existingEntity).CurrentValues.SetValues(entity);
@@ -474,15 +518,28 @@ namespace AutoGestao.Controllers
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"ERRO: {ex.Message}");
+                    Console.WriteLine($"Stack: {ex.StackTrace}");
+
                     if (Request.IsAjaxRequest())
                     {
-                        return Json(new { success = false, message = $"Erro ao atualizar registro: {ex.Message}" });
+                        return Json(new { success = false, message = $"Erro ao atualizar: {ex.Message}" });
                     }
                     ModelState.AddModelError("", $"Erro ao atualizar registro: {ex.Message}");
                 }
             }
+            else
+            {
+                // LOG: Mostrar erros de validação
+                foreach (var error in ModelState)
+                {
+                    if (error.Value.Errors.Any())
+                    {
+                        Console.WriteLine($"Erro validação {error.Key}: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+                    }
+                }
+            }
 
-            // Se chegou aqui, há erros de validação
             if (Request.IsAjaxRequest())
             {
                 var errors = ModelState
@@ -495,7 +552,7 @@ namespace AutoGestao.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "Erro de validação. Verifique os campos.",
+                    message = "Erro de validação.",
                     errors = errors
                 });
             }
@@ -1429,7 +1486,7 @@ namespace AutoGestao.Controllers
         /// <summary>
         /// Obtém o texto de exibição de uma entidade referenciada
         /// </summary>
-        private static string? GetReferenceDisplayText(T entity, PropertyInfo property, Type? referenceType)
+        private string? GetReferenceDisplayText(T entity, PropertyInfo property, Type? referenceType)
         {
             if (referenceType == null)
             {
@@ -1439,11 +1496,15 @@ namespace AutoGestao.Controllers
             try
             {
                 // Buscar a navigation property (ex: IdVeiculoMarca -> VeiculoMarca)
-                var navigationPropertyName = property.Name.Replace("Id", "");
+                var navigationPropertyName = property.Name.StartsWith("Id")
+                    ? property.Name.Substring(2)
+                    : property.Name;
+
                 var navigationProperty = typeof(T).GetProperty(navigationPropertyName);
 
                 if (navigationProperty == null)
                 {
+                    Console.WriteLine($"Navigation property não encontrada: {navigationPropertyName}");
                     return null;
                 }
 
@@ -1451,32 +1512,41 @@ namespace AutoGestao.Controllers
                 var relatedEntity = navigationProperty.GetValue(entity);
                 if (relatedEntity == null)
                 {
+                    Console.WriteLine($"Entidade relacionada é null para: {navigationPropertyName}");
                     return null;
                 }
 
                 // Buscar propriedade com [ReferenceText] ou [GridMain]
                 var displayProperty = referenceType.GetProperties()
                     .FirstOrDefault(p =>
-                        p.GetCustomAttributes(typeof(ReferenceTextAttribute), false).Any() ||
-                        p.GetCustomAttributes(typeof(GridMainAttribute), false).Any());
+                        p.GetCustomAttributes(typeof(Attributes.ReferenceTextAttribute), false).Any() ||
+                        p.GetCustomAttributes(typeof(Attributes.GridMainAttribute), false).Any());
 
                 if (displayProperty == null)
                 {
-                    // Fallback: tentar Nome ou Descricao
+                    // Fallback: tentar Nome, Descricao ou qualquer string
                     displayProperty = referenceType.GetProperty("Nome") ??
-                                    referenceType.GetProperty("Descricao");
+                                    referenceType.GetProperty("Descricao") ??
+                                    referenceType.GetProperties()
+                                        .FirstOrDefault(p => p.PropertyType == typeof(string) && p.Name != "Id");
                 }
 
                 if (displayProperty != null)
                 {
                     var value = displayProperty.GetValue(relatedEntity);
-                    return value?.ToString();
+                    var displayText = value?.ToString();
+
+                    Console.WriteLine($"DisplayText para {property.Name}: {displayText}");
+
+                    return displayText;
                 }
 
+                Console.WriteLine($"DisplayProperty não encontrada para tipo: {referenceType.Name}");
                 return null;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Erro ao obter DisplayText para {property.Name}: {ex.Message}");
                 return null;
             }
         }

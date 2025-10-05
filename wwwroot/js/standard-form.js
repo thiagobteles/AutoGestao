@@ -321,10 +321,24 @@ async function submitFormAjax(form) {
 
         const formData = new FormData(form);
 
+        // IMPORTANTE: Atualizar valores dos campos de referência
+        // Os campos hidden podem não estar sincronizados com o FormData
+        const referenceHiddenInputs = form.querySelectorAll('input[type="hidden"][id$="_value"]');
+        referenceHiddenInputs.forEach(hiddenInput => {
+            const fieldName = hiddenInput.name;
+            const fieldValue = hiddenInput.value || '0';
+
+            console.log(`Campo referência: ${fieldName} = ${fieldValue}`);
+
+            // Forçar atualização no FormData
+            formData.set(fieldName, fieldValue);
+        });
+
         // Processar campos currency
         const currencyInputs = form.querySelectorAll('.currency-mask');
         currencyInputs.forEach(input => {
             const rawValue = parseCurrencyToDecimal(input.value);
+            console.log(`Currency: ${input.name} = ${input.value} -> ${rawValue}`);
             formData.set(input.name, rawValue);
         });
 
@@ -341,6 +355,13 @@ async function submitFormAjax(form) {
             const rawValue = input.value.replace(/\D/g, '');
             formData.set(input.name, rawValue);
         });
+
+        // DEBUG: Mostrar todos os valores sendo enviados
+        console.log('=== Dados sendo enviados ===');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        console.log('===========================');
 
         const response = await fetch(form.action, {
             method: 'POST',
