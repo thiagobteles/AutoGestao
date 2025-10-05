@@ -24,10 +24,6 @@ namespace AutoGestao.Controllers
                 .Include(v => v.VeiculoFilial)
                 .Include(v => v.VeiculoLocalizacao)
                 .Include(v => v.Cliente)
-                .Include(v => v.Vendas)
-                .Include(v => v.Fotos)
-                .Include(v => v.Despesas)
-                .Include(v => v.Documentos)
                 .OrderByDescending(v => v.Id)
                 .AsQueryable();
         }
