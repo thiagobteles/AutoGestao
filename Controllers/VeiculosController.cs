@@ -20,7 +20,14 @@ namespace AutoGestao.Controllers
             return _context.Veiculos
                 .Include(v => v.VeiculoMarca)
                 .Include(v => v.VeiculoMarcaModelo)
+                .Include(v => v.VeiculoCor)
+                .Include(v => v.VeiculoFilial)
+                .Include(v => v.VeiculoLocalizacao)
                 .Include(v => v.Cliente)
+                .Include(v => v.Vendas)
+                .Include(v => v.Fotos)
+                .Include(v => v.Despesas)
+                .Include(v => v.Documentos)
                 .OrderByDescending(v => v.Id)
                 .AsQueryable();
         }
