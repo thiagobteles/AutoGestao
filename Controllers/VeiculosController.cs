@@ -15,19 +15,6 @@ namespace AutoGestao.Controllers
 {
     public class VeiculosController(ApplicationDbContext context) : StandardGridController<Veiculo>(context)
     {
-        protected override IQueryable<Veiculo> GetBaseQuery()
-        {
-            return _context.Veiculos
-                .Include(v => v.VeiculoMarca)
-                .Include(v => v.VeiculoMarcaModelo)
-                .Include(v => v.VeiculoCor)
-                .Include(v => v.VeiculoFilial)
-                .Include(v => v.VeiculoLocalizacao)
-                .Include(v => v.Cliente)
-                .OrderByDescending(v => v.Id)
-                .AsQueryable();
-        }
-
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
             standardGridViewModel.Filters =

@@ -27,9 +27,24 @@ namespace AutoGestao.Controllers
 
         protected virtual IQueryable<T> GetBaseQuery()
         {
-            return _context.Set<T>()
-                .OrderByDescending(x => x.Id)
-                .AsQueryable();
+            var query = _context.Set<T>().AsQueryable();
+
+            // Buscar todas as propriedades virtuais da entidade
+            var virtualProperties = typeof(T).GetProperties()
+                .Where(p => p.GetGetMethod()?.IsVirtual == true
+                    && !p.GetGetMethod()?.IsFinal == true
+                    && p.PropertyType.IsClass
+                    && p.PropertyType != typeof(string)
+                    && !typeof(System.Collections.IEnumerable).IsAssignableFrom(p.PropertyType))
+                .ToList();
+
+            // Aplicar Include para cada propriedade virtual
+            foreach (var prop in virtualProperties)
+            {
+                query = query.Include(prop.Name);
+            }
+
+            return query.OrderByDescending(x => x.Id);
         }
 
         protected virtual IQueryable<T> ApplyFilters(IQueryable<T> query, Dictionary<string, object> filters)
@@ -861,12 +876,20 @@ namespace AutoGestao.Controllers
         /// <summary>
         /// Obtém as propriedades que devem aparecer no formulário
         /// </summary>
-        private static List<PropertyInfo> GetFormProperties()
+        //private static List<PropertyInfo> GetFormProperties()
+        //{
+        //    return [.. typeof(T).GetProperties()
+        //        .Where(p => p.CanRead && p.CanWrite)
+        //        .Where(p => !IsIgnoredProperty(p))
+        //        .OrderBy(p => GetPropertyOrder(p))];
+        //}
+
+        private List<PropertyInfo> GetFormProperties()
         {
-            return [.. typeof(T).GetProperties()
-                .Where(p => p.CanRead && p.CanWrite)
-                .Where(p => !IsIgnoredProperty(p))
-                .OrderBy(p => GetPropertyOrder(p))];
+            return typeof(T).GetProperties()
+                .Where(p => p.GetCustomAttribute<FormFieldAttribute>() != null)
+                .OrderBy(p => p.GetCustomAttribute<FormFieldAttribute>()?.Order ?? 0)
+                .ToList();
         }
 
         /// <summary>
