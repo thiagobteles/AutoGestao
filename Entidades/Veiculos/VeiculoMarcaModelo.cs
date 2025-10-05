@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades.Veiculos
 {
     [FormConfig(Title = "Modelo de Veículo", Subtitle = "Gerencie os modelos de veículos", Icon = "fas fa-car-side", EnableAjaxSubmit = true)]
-    public class VeiculoMarcaModelo : BaseEntidadeEmpresa
+    public class VeiculoMarcaModelo : BaseEntidade
     {
         [GridMain("Modelo")]
         [ReferenceSearchable]

@@ -11,10 +11,7 @@ namespace AutoGestao.Extensions
         /// <summary>
         /// Adiciona histórico de auditoria ao ViewBag para ser exibido na view de Details
         /// </summary>
-        public static async Task AddAuditHistoryToViewBag<T>(
-            this StandardGridController<T> controller,
-            ApplicationDbContext context,
-            T entity) where T : BaseEntidade, new()
+        public static async Task AddAuditHistoryToViewBag<T>(this StandardGridController<T> controller, ApplicationDbContext context, T entity) where T : BaseEntidade, new()
         {
             try
             {
@@ -32,7 +29,7 @@ namespace AutoGestao.Extensions
             {
                 // Log error but don't break the page
                 Console.WriteLine($"Erro ao carregar histórico de auditoria: {ex.Message}");
-                controller.ViewBag.AuditLogs = new List<AutoGestao.Entidades.AuditLog>();
+                controller.ViewBag.AuditLogs = new List<AuditLog>();
                 controller.ViewBag.AuditCount = 0;
             }
         }

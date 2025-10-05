@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades.Veiculos
 {
     [FormConfig(Title = "Filial", Subtitle = "Gerencie as filiais", Icon = "fas fa-building", EnableAjaxSubmit = true)]
-    public class VeiculoFilial : BaseEntidadeEmpresa
+    public class VeiculoFilial : BaseEntidade
     {
         [GridMain("Descrição")]
         [ReferenceSearchable]

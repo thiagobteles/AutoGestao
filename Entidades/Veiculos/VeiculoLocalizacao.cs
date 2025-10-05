@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades.Veiculos
 {
     [FormConfig(Title = "Localização", Subtitle = "Gerencie as localizações de veículos", Icon = "fas fa-map-marker-alt", EnableAjaxSubmit = true)]
-    public class VeiculoLocalizacao : BaseEntidadeEmpresa
+    public class VeiculoLocalizacao : BaseEntidade
     {
         [GridMain("Descrição")]
         [ReferenceSearchable]

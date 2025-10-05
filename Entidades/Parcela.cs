@@ -5,7 +5,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Parcela", Subtitle = "Gerencie as parcelas de vendas", Icon = "fas fa-file-invoice-dollar", EnableAjaxSubmit = true)]
-    public class Parcela : BaseEntidadeEmpresa
+    public class Parcela : BaseEntidade
     {
         [GridField("Nº", Order = 10, Width = "60px")]
         [FormField(Order = 1, Name = "Número da Parcela", Section = "Identificação", Icon = "fas fa-hashtag", Type = EnumFieldType.Number, Required = true, ReadOnly = true, GridColumns = 3)]

@@ -423,17 +423,25 @@ namespace AutoGestao.Controllers
         {
             if (id != entity.Id)
             {
-                return NotFound();
+                return Request.IsAjaxRequest() 
+                    ? Json(new { success = false, message = "ID inconsistente." })
+                    : NotFound();
             }
 
             var existingEntity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (existingEntity == null)
             {
-                return NotFound();
+                return Request.IsAjaxRequest() 
+                    ? Json(new { success = false, message = "Registro não encontrado." })
+                    : NotFound();
             }
 
             if (!CanEdit(existingEntity))
             {
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "Você não tem permissão para editar este registro." });
+                }
                 TempData["Error"] = "Você não tem permissão para editar este registro.";
                 return RedirectToAction(nameof(Index));
             }
@@ -442,6 +450,13 @@ namespace AutoGestao.Controllers
             {
                 try
                 {
+                    // Preservar valores que não devem ser alterados
+                    entity.IdEmpresa = existingEntity.IdEmpresa;
+                    entity.DataCadastro = existingEntity.DataCadastro;
+                    entity.CriadoPorUsuarioId = existingEntity.CriadoPorUsuarioId;
+
+                    // DataAlteracao e AlteradoPorUsuarioId são atualizados automaticamente pelo interceptor
+
                     // Atualizar propriedades
                     _context.Entry(existingEntity).CurrentValues.SetValues(entity);
 
@@ -459,14 +474,36 @@ namespace AutoGestao.Controllers
                 }
                 catch (Exception ex)
                 {
+                    if (Request.IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = $"Erro ao atualizar registro: {ex.Message}" });
+                    }
                     ModelState.AddModelError("", $"Erro ao atualizar registro: {ex.Message}");
                 }
+            }
+
+            // Se chegou aqui, há erros de validação
+            if (Request.IsAjaxRequest())
+            {
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Erro de validação. Verifique os campos.",
+                    errors = errors
+                });
             }
 
             var viewModel = BuildFormViewModel(entity, "Edit");
             AddModelStateToViewModel(viewModel);
 
-            return Request.IsAjaxRequest() ? PartialView("_StandardFormContent", viewModel) : View("_StandardForm", viewModel);
+            return View("_StandardForm", viewModel);
         }
 
         /// <summary>
@@ -1289,6 +1326,8 @@ namespace AutoGestao.Controllers
             }
         }
 
+        // Controllers/StandardGridController.cs
+
         private FormFieldViewModel? CreateFieldFromProperty(PropertyInfo property, T entity, string action)
         {
             var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
@@ -1341,6 +1380,15 @@ namespace AutoGestao.Controllers
                 var rawValue = property.GetValue(entity);
                 var formattedValue = FormatFieldValue(rawValue, formFieldAttr.Type, property);
 
+                // ============================================================
+                // OBTER DISPLAY TEXT PARA CAMPOS REFERENCE
+                // ============================================================
+                string? displayText = null;
+                if (formFieldAttr.Type == EnumFieldType.Reference && rawValue != null)
+                {
+                    displayText = GetReferenceDisplayText(entity, property, formFieldAttr.Reference);
+                }
+
                 return new FormFieldViewModel
                 {
                     PropertyName = property.Name,
@@ -1350,7 +1398,8 @@ namespace AutoGestao.Controllers
                     Type = formFieldAttr.Type,
                     Required = isRequired,
                     ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
-                    Value = formattedValue,  // Usar valor formatado
+                    Value = formattedValue,
+                    DisplayText = displayText,
                     Reference = formFieldAttr.Reference ?? null,
                     ValidationRegex = formFieldAttr.ValidationRegex ?? "",
                     ValidationMessage = formFieldAttr.ValidationMessage ?? "",
@@ -1370,12 +1419,66 @@ namespace AutoGestao.Controllers
                         ? GetSelectOptions(property.Name)
                         : [],
 
-                    // Adicionar configuração de filtros de referência
                     ReferenceFilters = referenceFilters
                 };
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Obtém o texto de exibição de uma entidade referenciada
+        /// </summary>
+        private static string? GetReferenceDisplayText(T entity, PropertyInfo property, Type? referenceType)
+        {
+            if (referenceType == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                // Buscar a navigation property (ex: IdVeiculoMarca -> VeiculoMarca)
+                var navigationPropertyName = property.Name.Replace("Id", "");
+                var navigationProperty = typeof(T).GetProperty(navigationPropertyName);
+
+                if (navigationProperty == null)
+                {
+                    return null;
+                }
+
+                // Obter a entidade relacionada
+                var relatedEntity = navigationProperty.GetValue(entity);
+                if (relatedEntity == null)
+                {
+                    return null;
+                }
+
+                // Buscar propriedade com [ReferenceText] ou [GridMain]
+                var displayProperty = referenceType.GetProperties()
+                    .FirstOrDefault(p =>
+                        p.GetCustomAttributes(typeof(ReferenceTextAttribute), false).Any() ||
+                        p.GetCustomAttributes(typeof(GridMainAttribute), false).Any());
+
+                if (displayProperty == null)
+                {
+                    // Fallback: tentar Nome ou Descricao
+                    displayProperty = referenceType.GetProperty("Nome") ??
+                                    referenceType.GetProperty("Descricao");
+                }
+
+                if (displayProperty != null)
+                {
+                    var value = displayProperty.GetValue(relatedEntity);
+                    return value?.ToString();
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>

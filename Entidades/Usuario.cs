@@ -7,7 +7,7 @@ namespace AutoGestao.Entidades
 {
     [Auditable(EntityDisplayName = "Usuário")]
     [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users", EnableAjaxSubmit = true)]
-    public class Usuario : BaseEntidadeEmpresa
+    public class Usuario : BaseEntidade
     {
         [GridMain("Nome")]
         [FormField(Name = "Nome Completo", Order = 1, Section = "Dados Básicos", Icon = "fas fa-user", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]

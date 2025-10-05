@@ -201,10 +201,11 @@ namespace AutoGestao.Controllers
             var baseType = type;
             while (baseType != null && baseType != typeof(object))
             {
-                if (baseType == typeof(BaseEntidade) || baseType == typeof(BaseEntidadeEmpresa))
+                if (baseType == typeof(BaseEntidade))
                 {
                     return true;
                 }
+
                 baseType = baseType.BaseType;
             }
             return false;

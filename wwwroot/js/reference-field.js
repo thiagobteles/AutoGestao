@@ -1,8 +1,3 @@
-/*!
- * Reference Field Manager - Sistema de busca e criação para campos de referência
- * Versão 2.0 - Atualizada para API /api/Reference/Search com POST
- */
-
 class ReferenceFieldManager {
     constructor() {
         this.debounceTimer = null;
@@ -26,6 +21,7 @@ class ReferenceFieldManager {
         this.attachClearHandlers();
         this.attachCreateHandlers();
         this.setupDependencyWatchers();
+        this.loadInitialDisplayTexts();
     }
 
     attachSearchHandlers() {
@@ -321,6 +317,21 @@ class ReferenceFieldManager {
         }
 
         return filters;
+    }
+
+    loadInitialDisplayTexts() {
+        const referenceInputs = document.querySelectorAll('.reference-search-input');
+
+        referenceInputs.forEach(input => {
+            const hiddenInput = document.querySelector(`input[name="${input.dataset.targetField}"]`);
+
+            if (hiddenInput && hiddenInput.value && hiddenInput.value !== '0') {
+                // Se o campo já tem um valor e um texto, marcar como selecionado
+                if (input.value && input.value.trim() !== '') {
+                    input.classList.add('selected');
+                }
+            }
+        });
     }
 
     setupDependencyWatchers() {

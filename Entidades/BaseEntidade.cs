@@ -8,6 +8,8 @@ namespace AutoGestao.Entidades
     {
         public long Id { get; set; }
 
+        public long IdEmpresa { get; set; }
+
         [GridStatus]
         public bool Ativo { get; set; } = true;
 
@@ -26,5 +28,6 @@ namespace AutoGestao.Entidades
         // Navigation properties para auditoria
         public virtual Usuario? CriadoPorUsuario { get; set; }
         public virtual Usuario? AlteradoPorUsuario { get; set; }
+        public virtual Empresa? Empresa { get; set; }
     }
 }

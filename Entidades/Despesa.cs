@@ -6,7 +6,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Despesa", Subtitle = "Gerencie as despesas com veículos", Icon = "fas fa-file-invoice", EnableAjaxSubmit = true)]
-    public class Despesa : BaseEntidadeEmpresa
+    public class Despesa : BaseEntidade
     {
         [GridMain("Descrição")]
         [FormField(Order = 1, Name = "Descrição", Section = "Dados Básicos", Icon = "fas fa-align-left", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]

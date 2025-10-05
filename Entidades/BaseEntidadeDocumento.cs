@@ -6,7 +6,7 @@ using AutoGestao.Extensions;
 namespace AutoGestao.Entidades
 {
     [Auditable(AuditCreate = true, AuditUpdate = true, AuditDelete = true)]
-    public class BaseEntidadeDocumento : BaseEntidadeEmpresa
+    public class BaseEntidadeDocumento : BaseEntidade
     {
         // ============================================================
         // TIPO PESSOA - Enum com ÍCONE na grid

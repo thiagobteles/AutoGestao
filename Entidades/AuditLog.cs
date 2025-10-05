@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Log de Auditoria", Subtitle = "Histórico completo de operações do sistema", Icon = "fas fa-history")]
-    public class AuditLog : BaseEntidadeEmpresa
+    public class AuditLog : BaseEntidade
     {
         [FormField(Name = "Usuário", Icon = "fas fa-user", Type = EnumFieldType.Text, ReadOnly = true, Order = 1, Section = "Identificação")]
         public long? UsuarioId { get; set; }

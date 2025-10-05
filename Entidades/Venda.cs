@@ -6,7 +6,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Venda", Subtitle = "Gerencie as vendas de veículos", Icon = "fas fa-shopping-cart", EnableAjaxSubmit = true)]
-    public class Venda : BaseEntidadeEmpresa
+    public class Venda : BaseEntidade
     {
         [GridField("Valor", Order = 20, Width = "120px", Format = "C")]
         [FormField(Order = 1, Name = "Valor da Venda", Section = "Valores", Icon = "fas fa-dollar-sign", Type = EnumFieldType.Currency, Required = true, GridColumns = 2)]

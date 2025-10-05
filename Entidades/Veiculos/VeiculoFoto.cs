@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades.Veiculos
 {
     [FormConfig(Title = "Foto do Veículo", Subtitle = "Gerencie as fotos dos veículos", Icon = "fas fa-image", EnableAjaxSubmit = true)]
-    public class VeiculoFoto : BaseEntidadeEmpresa
+    public class VeiculoFoto : BaseEntidade
     {
         [GridMain("Nome do Arquivo")]
         [FormField(Order = 1, Name = "Nome do Arquivo", Section = "Arquivo", Icon = "fas fa-file", Type = EnumFieldType.Text, Required = true, ReadOnly = true, GridColumns = 2)]

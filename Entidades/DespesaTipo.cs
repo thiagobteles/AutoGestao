@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Tipo de Despesa", Subtitle = "Gerencie os tipos de despesas", Icon = "fas fa-tags", EnableAjaxSubmit = true)]
-    public class DespesaTipo : BaseEntidadeEmpresa
+    public class DespesaTipo : BaseEntidade
     {
         [GridMain("Descrição")]
         [ReferenceSearchable]

@@ -5,7 +5,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Tarefa", Subtitle = "Gerencie as tarefas e atividades", Icon = "fas fa-tasks", EnableAjaxSubmit = true)]
-    public class Tarefa : BaseEntidadeEmpresa
+    public class Tarefa : BaseEntidade
     {
         [GridMain("Título")]
         [FormField(Order = 1, Name = "Título", Section = "Dados Básicos", Icon = "fas fa-heading", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]

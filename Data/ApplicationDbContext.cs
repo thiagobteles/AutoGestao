@@ -37,7 +37,6 @@ namespace AutoGestao.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Ignore<BaseEntidade>();
-            modelBuilder.Ignore<BaseEntidadeEmpresa>();
 
             // ===========================================
             // CONFIGURAÇÃO GLOBAL: IGNORAR PROPRIEDADES DE AUDITORIA

@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades.Veiculos
 {
     [FormConfig(Title = "Cor de Veículo", Subtitle = "Gerencie as cores disponíveis", Icon = "fas fa-palette", EnableAjaxSubmit = true)]
-    public class VeiculoCor : BaseEntidadeEmpresa
+    public class VeiculoCor : BaseEntidade
     {
         [GridMain("Descrição")]
         [ReferenceSearchable]

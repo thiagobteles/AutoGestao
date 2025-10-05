@@ -43,12 +43,37 @@
     }
 }
 
-<form asp-action="@Model.ActionName" method="post" class="slide-in-right standard-form" 
+<form asp-action="@Model.ActionName" method="post" class="slide-in-right standard-form"
       data-ajax="@(Model.EnableAjaxSubmit ? "true" : "false")">
-    
+
+    @* CAMPOS HIDDEN OBRIGATÓRIOS PARA EDIÇÃO *@
     @if (Model.IsEditMode && Model.Model != null)
     {
-        <input type="hidden" name="Id" value="@((dynamic)Model.Model).Id" />
+        var dynamicModel = (dynamic)Model.Model;
+        <input type="hidden" name="Id" value="@dynamicModel.Id" />
+
+        @* Se a entidade herda de BaseEntidadeEmpresa, incluir IdEmpresa *@
+        @if (Model.Model.GetType().IsSubclassOf(typeof(AutoGestao.Entidades.BaseEntidade)) ||
+            Model.Model.GetType() == typeof(AutoGestao.Entidades.BaseEntidade))
+        {
+            <input type="hidden" name="IdEmpresa" value="@dynamicModel.IdEmpresa" />
+        }
+
+        @* Campos de auditoria - preservar valores originais *@
+        @try
+        {
+            <input type="hidden" name="DataCadastro" value="@dynamicModel.DataCadastro" />
+            <input type="hidden" name="DataAlteracao" value="@dynamicModel.DataAlteracao" />
+
+            @if (dynamicModel.CriadoPorUsuarioId != null && dynamicModel.CriadoPorUsuarioId > 0)
+            {
+                <input type="hidden" name="CriadoPorUsuarioId" value="@dynamicModel.CriadoPorUsuarioId" />
+            }
+        }
+        catch
+        {
+            // Ignore se a entidade não tem campos de auditoria
+        }
     }
 
     <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
@@ -188,14 +213,25 @@
 
                                 case EnumFieldType.Currency:
                                     <input type="text"
-                                        class="form-control currency-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "R$ 0,00" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
+                                           class="form-control currency-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "R$ 0,00" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
+                                    break;
+
+                                case EnumFieldType.Decimal:
+                                    <input type="number"
+                                           step="0.01"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
                                 case EnumFieldType.Cpf:
@@ -242,17 +278,6 @@
                                         value="@field.Value"
                                         placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "00000-000" : field.Placeholder)"
                                         @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
-                                    break;
-
-                                case EnumFieldType.Decimal:
-                                    <input type="number"
-                                        class="form-control-modern @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "0,00" : field.Placeholder)"
-                                        @(field.Required && !Model.IsDetailsMode ? "required" : "")
                                         @(field.ReadOnly ? "readonly" : "")
                                         @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
                                     break;

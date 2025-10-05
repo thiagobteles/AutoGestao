@@ -23,11 +23,9 @@ function initializeMasks() {
             let value = this.value.replace(/\D/g, '');
 
             if (value.length <= 10) {
-                // Telefone fixo: (11) 1234-5678
                 value = value.replace(/(\d{2})(\d)/, '($1) $2');
                 value = value.replace(/(\d{4})(\d)/, '$1-$2');
             } else {
-                // Celular: (11) 91234-5678
                 value = value.replace(/(\d{2})(\d)/, '($1) $2');
                 value = value.replace(/(\d{5})(\d)/, '$1-$2');
             }
@@ -68,129 +66,153 @@ function initializeMasks() {
         });
     });
 
-    // Máscara para Porcentagem
-    document.querySelectorAll('.percentage-mask').forEach(function (input) {
+    // Máscara para Currency (APENAS para campos com tipo Currency)
+    document.querySelectorAll('.currency-mask').forEach(function (input) {
         // Formatar valor inicial se já existir
-        formatPercentageValue(input);
+        if (input.value && input.value.trim() !== '' && !input.value.includes('R$')) {
+            const numValue = parseFloat(input.value.replace(',', '.'));
+            if (!isNaN(numValue)) {
+                input.value = formatToCurrency(numValue);
+            }
+        }
 
         input.addEventListener('input', function (e) {
-            // Pegar posição do cursor
-            let cursorPosition = this.selectionStart;
-            let oldLength = this.value.length;
+            let value = this.value;
 
-            // Remover tudo exceto números e vírgula
-            let value = this.value.replace(/[^\d,]/g, '');
+            // Remove tudo exceto dígitos e vírgula
+            value = value.replace(/[^\d,]/g, '');
 
-            // Permitir apenas uma vírgula
+            // Remove vírgulas duplicadas
             const parts = value.split(',');
             if (parts.length > 2) {
                 value = parts[0] + ',' + parts.slice(1).join('');
             }
 
-            // Limitar casas decimais a 2
+            // Limita a 2 casas decimais após a vírgula
             if (parts.length === 2 && parts[1].length > 2) {
                 value = parts[0] + ',' + parts[1].substring(0, 2);
             }
 
-            // Adicionar % no final
-            if (value !== '') {
-                this.value = value + '%';
+            // Aplica formatação de milhar
+            if (value) {
+                const [inteiro, decimal] = value.split(',');
+                const inteiroFormatado = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                value = decimal !== undefined ? `${inteiroFormatado},${decimal}` : inteiroFormatado;
+                this.value = 'R$ ' + value;
             } else {
                 this.value = '';
             }
-
-            // Ajustar posição do cursor
-            let newLength = this.value.length;
-            let diff = newLength - oldLength;
-
-            // Se o cursor estava no final (onde está o %), manter antes do %
-            if (cursorPosition === oldLength) {
-                this.setSelectionRange(newLength - 1, newLength - 1);
-            } else {
-                this.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
-            }
-        });
-
-        input.addEventListener('focus', function () {
-            // Remover % ao focar para facilitar edição
-            this.value = this.value.replace('%', '');
-
-            // Colocar cursor no final
-            setTimeout(() => {
-                this.setSelectionRange(this.value.length, this.value.length);
-            }, 10);
         });
 
         input.addEventListener('blur', function () {
-            formatPercentageValue(this);
-        });
-
-        // Prevenir que o usuário delete o % manualmente
-        input.addEventListener('keydown', function (e) {
-            // Se está tentando deletar e o cursor está no final (antes do %)
-            if ((e.key === 'Backspace' || e.key === 'Delete') &&
-                this.value.endsWith('%') &&
-                this.selectionStart === this.value.length - 1) {
-                // Permitir deletar o número, não o %
-                e.preventDefault();
-                let newValue = this.value.substring(0, this.value.length - 2) + '%';
-                this.value = newValue === '%' ? '' : newValue;
-                this.setSelectionRange(this.value.length - 1, this.value.length - 1);
+            if (this.value && this.value !== 'R$ ') {
+                let value = this.value.replace(/[^\d,]/g, '');
+                if (value && !value.includes(',')) {
+                    this.value = 'R$ ' + value + ',00';
+                } else if (value && value.endsWith(',')) {
+                    this.value = 'R$ ' + value + '00';
+                } else if (value) {
+                    const [inteiro, decimal] = value.split(',');
+                    if (decimal && decimal.length === 1) {
+                        const inteiroFormatado = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        this.value = 'R$ ' + inteiroFormatado + ',' + decimal + '0';
+                    }
+                }
             }
         });
     });
 
-    // Máscara para moeda
-    document.querySelectorAll('.currency-mask').forEach(function (input) {
-        // IMPORTANTE: Formatar valor inicial se já existir
-        formatCurrencyValue(input);
+    // Máscara para Percentage
+    document.querySelectorAll('.percentage-mask').forEach(function (input) {
+        formatPercentageValue(input);
 
-        input.addEventListener('input', function () {
-            let value = this.value.replace(/\D/g, '');
-
-            if (value === '') {
-                this.value = '';
-                return;
-            }
-
-            // Converter para decimal
-            value = (parseInt(value) / 100).toFixed(2);
-
-            // Formatar como moeda brasileira
-            value = value.replace('.', ',');
-            value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-
-            this.value = 'R$ ' + value;
-        });
-
-        // Remover formato ao focar para facilitar edição
-        input.addEventListener('focus', function () {
+        input.addEventListener('input', function (e) {
             let value = this.value.replace(/[^\d,]/g, '');
-            if (value) {
-                this.value = value.replace(',', '.');
+            const parts = value.split(',');
+            if (parts.length > 2) {
+                value = parts[0] + ',' + parts.slice(1).join('');
             }
-        });
-
-        // Aplicar formato ao sair do campo
-        input.addEventListener('blur', function () {
-            formatCurrencyValue(this);
+            if (parts.length === 2 && parts[1].length > 2) {
+                value = parts[0] + ',' + parts[1].substring(0, 2);
+            }
+            this.value = value ? value + '%' : '';
         });
     });
 }
 
-// Função auxiliar para formatar valores de porcentagem
+function formatToCurrency(value) {
+    if (!value && value !== 0) return '';
+
+    const formatted = value.toFixed(2)
+        .replace('.', ',')
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    return 'R$ ' + formatted;
+}
+
+/**
+ * Converte valor de moeda brasileira para decimal
+ * R$ 89.000,00 -> 89000.00
+ */
+function parseCurrencyToDecimal(value) {
+    if (!value || value.trim() === '') {
+        return '';
+    }
+
+    // Remove R$, espaços e pontos (separador de milhar)
+    let cleanValue = value
+        .replace('R$', '')
+        .replace(/\s/g, '')
+        .replace(/\./g, ''); // Remove pontos de milhar
+
+    // Substitui vírgula decimal por ponto
+    cleanValue = cleanValue.replace(',', '.');
+
+    // Remove qualquer caractere que não seja dígito ou ponto
+    cleanValue = cleanValue.replace(/[^\d.]/g, '');
+
+    // Valida o resultado
+    const numericValue = parseFloat(cleanValue);
+
+    if (isNaN(numericValue)) {
+        return '0';
+    }
+
+    return numericValue.toString();
+}
+
+/**
+ * Converte valor de porcentagem para decimal
+ */
+function parsePercentageToDecimal(value) {
+    if (!value || value.trim() === '') {
+        return '';
+    }
+
+    let cleanValue = value
+        .replace(/%/g, '')
+        .replace(/\s/g, '')
+        .replace(',', '.');
+
+    const numericValue = parseFloat(cleanValue);
+
+    if (isNaN(numericValue)) {
+        return '0';
+    }
+
+    return numericValue.toString();
+}
+
 function formatPercentageValue(input) {
     if (!input.value || input.value.trim() === '' || input.value === '%') {
         input.value = '';
         return;
     }
 
-    // Se já está formatado corretamente, não fazer nada
     if (input.value.endsWith('%') && !input.value.includes('%%')) {
         return;
     }
 
-    // Remover % e espaços
     let value = input.value.replace(/[^\d,]/g, '');
 
     if (value === '') {
@@ -198,38 +220,13 @@ function formatPercentageValue(input) {
         return;
     }
 
-    // Garantir formato correto com vírgula
     if (!value.includes(',') && value.includes('.')) {
         value = value.replace('.', ',');
     }
 
-    // Adicionar %
     input.value = value + '%';
 }
 
-// Função auxiliar para formatar valores currency
-function formatCurrencyValue(input) {
-    if (!input.value || input.value.trim() === '') {
-        return;
-    }
-
-    // Se já está formatado, não fazer nada
-    if (input.value.startsWith('R$')) {
-        return;
-    }
-
-    // Tentar parsear o valor
-    let value = input.value.replace(/[^\d,.]/g, '').replace(',', '.');
-    let numericValue = parseFloat(value);
-
-    if (!isNaN(numericValue)) {
-        // Formatar como moeda brasileira
-        let formatted = numericValue.toFixed(2);
-        formatted = formatted.replace('.', ',');
-        formatted = formatted.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-        input.value = 'R$ ' + formatted;
-    }
-}
 
 // ================================================================================================
 // CAMPOS CONDICIONAIS
@@ -315,17 +312,36 @@ async function submitFormAjax(form) {
     const originalText = submitBtn?.innerHTML;
 
     try {
-        // Mostrar loading
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
         }
 
-        // Limpar erros anteriores
         clearAllErrors(form);
 
-        // Enviar formulário
         const formData = new FormData(form);
+
+        // Processar campos currency
+        const currencyInputs = form.querySelectorAll('.currency-mask');
+        currencyInputs.forEach(input => {
+            const rawValue = parseCurrencyToDecimal(input.value);
+            formData.set(input.name, rawValue);
+        });
+
+        // Processar campos percentage
+        const percentageInputs = form.querySelectorAll('.percentage-mask');
+        percentageInputs.forEach(input => {
+            const rawValue = parsePercentageToDecimal(input.value);
+            formData.set(input.name, rawValue);
+        });
+
+        // Processar campos com máscara
+        const maskedInputs = form.querySelectorAll('.cpf-mask, .cnpj-mask, .phone-mask, .cep-mask');
+        maskedInputs.forEach(input => {
+            const rawValue = input.value.replace(/\D/g, '');
+            formData.set(input.name, rawValue);
+        });
+
         const response = await fetch(form.action, {
             method: 'POST',
             body: formData,
@@ -334,49 +350,98 @@ async function submitFormAjax(form) {
             }
         });
 
-        if (response.ok) {
-            const result = await response.json();
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Resposta inválida do servidor");
+        }
 
-            if (result.success) {
-                showToast(result.message || 'Formulário enviado com sucesso!', 'success');
+        const result = await response.json();
 
-                if (result.redirectUrl) {
-                    setTimeout(() => {
-                        window.location.href = result.redirectUrl;
-                    }, 1500);
-                }
+        if (result.success) {
+            showToast(result.message || 'Salvo com sucesso!', 'success');
+
+            if (result.redirectUrl) {
+                setTimeout(() => {
+                    window.location.href = result.redirectUrl;
+                }, 1000);
             } else {
-                showToast('Erro ao processar solicitação', 'error');
-            }
-        } else if (response.status === 400) {
-            // Erros de validação
-            const html = await response.text();
-            const formContent = form.closest('.dashboard-container');
-
-            if (formContent) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
-                const newFormContent = tempDiv.querySelector('form');
-
-                if (newFormContent) {
-                    form.parentNode.replaceChild(newFormContent, form);
-                    initializeStandardForm(); // Reinicializar
-                }
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             }
         } else {
-            showToast('Erro interno do servidor', 'error');
+            if (result.errors) {
+                displayValidationErrors(form, result.errors);
+            }
+            showToast(result.message || 'Erro ao processar formulário.', 'error');
         }
 
     } catch (error) {
-        console.error('Erro ao enviar formulário:', error);
+        console.error('Erro:', error);
         showToast('Erro ao enviar formulário', 'error');
     } finally {
-        // Restaurar botão
-        if (submitBtn && originalText) {
+        if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
     }
+}
+
+function displayValidationErrors(form, errors) {
+    for (const [fieldName, messages] of Object.entries(errors)) {
+        const field = form.querySelector(`[name="${fieldName}"]`);
+
+        if (field) {
+            field.classList.add('is-invalid');
+
+            const existingFeedback = field.parentElement.querySelector('.invalid-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+
+            const feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.style.display = 'block';
+            feedback.textContent = Array.isArray(messages) ? messages.join(', ') : messages;
+            field.parentElement.appendChild(feedback);
+        }
+    }
+}
+
+function clearAllErrors(form) {
+    form.querySelectorAll('.is-invalid').forEach(el => {
+        el.classList.remove('is-invalid');
+    });
+
+    form.querySelectorAll('.invalid-feedback').forEach(el => {
+        el.remove();
+    });
+
+    const alertDanger = form.querySelector('.alert-danger');
+    if (alertDanger) {
+        alertDanger.style.display = 'none';
+    }
+}
+
+function showToast(message, type = 'info') {
+    if (window.showNotification) {
+        window.showNotification(message, type);
+        return;
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        ${message}
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
 
 // ================================================================================================

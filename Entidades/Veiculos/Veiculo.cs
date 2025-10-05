@@ -6,17 +6,17 @@ namespace AutoGestao.Entidades.Veiculos
 {
     [FormConfig(Title = "Veículo", Subtitle = "Gerencie todas as informações do veículo", Icon = "fas fa-car", EnableAjaxSubmit = true)]
     [FormTabs(EnableTabs = true, DefaultTab = "principal")]
-    [FormTab("arquivos", "Arquivos", TabIcon = "fas fa-folder", Order = 1, Controller = "VeiculoDocumentos")]
-    [FormTab("nfe", "NFE", TabIcon = "fas fa-file-invoice", Order = 2, Controller = "VeiculoNFE")]
+    //[FormTab("arquivos", "Arquivos", TabIcon = "fas fa-folder", Order = 1, Controller = "VeiculoDocumentos")]
+    //[FormTab("nfe", "NFE", TabIcon = "fas fa-file-invoice", Order = 2, Controller = "VeiculoNFE")]
     [FormTab("midias", "Mídias", TabIcon = "fas fa-images", Order = 3, Controller = "VeiculoFotos")]
-    [FormTab("lancamentos", "Lançamentos", TabIcon = "fas fa-list", Order = 4, Controller = "VeiculoLancamentos")]
-    [FormTab("despachante", "Despachante", TabIcon = "fas fa-user-tie", Order = 5, Controller = "VeiculoDespachante")]
-    [FormTab("resumo", "Resumo", TabIcon = "fas fa-chart-line", Order = 6, Controller = "VeiculoResumo")]
-    [FormTab("vistoria", "Vistoria", TabIcon = "fas fa-search", Order = 7, Controller = "VeiculoVistoria")]
-    [FormTab("web", "Web", TabIcon = "fas fa-globe", Order = 8, Controller = "VeiculoWeb")]
-    [FormTab("entrada", "Entrada", TabIcon = "fas fa-sign-in-alt", Order = 9, Controller = "VeiculoEntrada")]
+    //[FormTab("lancamentos", "Lançamentos", TabIcon = "fas fa-list", Order = 4, Controller = "VeiculoLancamentos")]
+    //[FormTab("despachante", "Despachante", TabIcon = "fas fa-user-tie", Order = 5, Controller = "VeiculoDespachante")]
+    //[FormTab("resumo", "Resumo", TabIcon = "fas fa-chart-line", Order = 6, Controller = "VeiculoResumo")]
+    //[FormTab("vistoria", "Vistoria", TabIcon = "fas fa-search", Order = 7, Controller = "VeiculoVistoria")]
+    //[FormTab("web", "Web", TabIcon = "fas fa-globe", Order = 8, Controller = "VeiculoWeb")]
+    //[FormTab("entrada", "Entrada", TabIcon = "fas fa-sign-in-alt", Order = 9, Controller = "VeiculoEntrada")]
     [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 10, Controller = "Despesas", RequiredRoles = new[] { "Admin", "Financeiro" })]
-    public class Veiculo : BaseEntidadeEmpresa
+    public class Veiculo : BaseEntidade
     {
         [GridId()]
         [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Text, ReadOnly = true, Required = false, GridColumns = 2)]
@@ -54,13 +54,6 @@ namespace AutoGestao.Entidades.Veiculos
         [GridField("Situação", Order = 50, Width = "100px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Order = 30, Name = "Situação", Section = "Status", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true)]
         public EnumSituacaoVeiculo Situacao { get; set; } = EnumSituacaoVeiculo.Estoque;
-
-        // ============================================================
-        // PREÇO DE VENDA - Formatado como moeda
-        // ============================================================
-        [GridField("Preço", Order = 60, Width = "140px", Format = "C")]
-        [FormField(Order = 20, Name = "Preço de Venda", Section = "Financeiro", Icon = "fas fa-dollar-sign", Type = EnumFieldType.Currency)]
-        public decimal? PrecoVenda { get; set; }
 
         [FormField(Order = 1, Name = "Chassi", Section = "Identificação", Type = EnumFieldType.Text)]
         public string? Chassi { get; set; }
@@ -117,23 +110,30 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 10, Name = "Origem", Section = "Especificações", Type = EnumFieldType.Select)]
         public EnumOrigemVeiculo OrigemVeiculo { get; set; } = EnumOrigemVeiculo.Nacional;
 
+        [FormField(Order = 20, Name = "Preço de Compra", Section = "Financeiro", Icon = "fas fa-money-bill", Type = EnumFieldType.Currency)]
+        public decimal? PrecoCompra { get; set; }
+
         [FormField(Order = 20, Name = "Proprietário", Section = "Financeiro", Icon = "fas fa-user", Type = EnumFieldType.Reference, Reference = typeof(Cliente), GridColumns = 2)]
         public long IdCliente { get; set; }
 
-        [FormField(Order = 21, Name = "Preço de Compra", Section = "Financeiro", Icon = "fas fa-money-bill", Type = EnumFieldType.Currency)]
-        public decimal? PrecoCompra { get; set; }
-
-        [FormField(Order = 22, Name = "Data entrada", Section = "Financeiro", Type = EnumFieldType.Date)]
+        [FormField(Order = 20, Name = "Data entrada", Section = "Financeiro", Type = EnumFieldType.Date)]
         public DateTime? DataEntrada { get; set; } = DateTime.Now;
 
-        [FormField(Order = 23, Name = "Km entrada", Section = "Financeiro", Type = EnumFieldType.Decimal)]
+        [FormField(Order = 20, Name = "Km entrada", Section = "Financeiro", Type = EnumFieldType.Decimal)]
         public decimal? KmEntrada { get; set; }
 
-        [FormField(Order = 24, Name = "Data saída", Section = "Financeiro", Type = EnumFieldType.Date)]
+        [FormField(Order = 20, Name = "Data saída", Section = "Financeiro", Type = EnumFieldType.Date)]
         public DateTime? DataSaida { get; set; }
 
-        [FormField(Order = 25, Name = "Km saida", Section = "Financeiro", Type = EnumFieldType.Decimal)]
+        [FormField(Order = 20, Name = "Km saida", Section = "Financeiro", Type = EnumFieldType.Decimal)]
         public decimal? KmSaida { get; set; }
+
+        // ============================================================
+        // PREÇO DE VENDA - Formatado como moeda
+        // ============================================================
+        [GridField("Preço", Order = 60, Width = "140px", Format = "C")]
+        [FormField(Order = 20, Name = "Preço de Venda", Section = "Financeiro", Icon = "fas fa-dollar-sign", Type = EnumFieldType.Currency)]
+        public decimal? PrecoVenda { get; set; }
 
         [FormField(Order = 30, Name = "Status", Section = "Status", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true, GridColumns = 2)]
         public EnumStatusVeiculo Status { get; set; } = EnumStatusVeiculo.Usado;

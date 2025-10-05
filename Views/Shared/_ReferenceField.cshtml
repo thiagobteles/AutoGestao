@@ -1,8 +1,11 @@
+@* Views/Shared/_ReferenceField.cshtml *@
 @model AutoGestao.Models.FormFieldViewModel
 
 @{
     var fieldId = Model.PropertyName;
     var fieldValue = Model.Value?.ToString() ?? "0";
+    var displayText = Model.DisplayText ?? "";
+    var hasValue = !string.IsNullOrEmpty(displayText) && fieldValue != "0";
     var referenceType = Model.Reference?.Name ?? "";
     var isReadOnly = Model.ReadOnly;
     var isRequired = Model.Required || Model.IsConditionallyRequired;
@@ -14,15 +17,16 @@
 
     <div class="input-group">
         <input type="text"
-            class="form-control reference-search-input"
-            id="@(fieldId)_search"
-            placeholder="@(isReadOnly ? "" : string.IsNullOrEmpty(Model.Placeholder) ? "Digite para pesquisar..." : Model.Placeholder)"
-            autocomplete="off"
-            data-reference-type="@referenceType"
-            data-target-field="@fieldId"
-            data-reference-filters='@Html.Raw(filterConfig)'
-            readonly="@isReadOnly"
-            @(isRequired ? "required" : "") />
+               class="form-control reference-search-input @(hasValue ? "selected" : "")"
+               id="@(fieldId)_search"
+               value="@displayText"
+               placeholder="@(isReadOnly ? "" : string.IsNullOrEmpty(Model.Placeholder) ? "Digite para pesquisar..." : Model.Placeholder)"
+               autocomplete="off"
+               data-reference-type="@referenceType"
+               data-target-field="@fieldId"
+               data-reference-filters='@Html.Raw(filterConfig)'
+               readonly="@isReadOnly"
+               @(isRequired ? "required" : "") />
 
         @if (!isReadOnly)
         {

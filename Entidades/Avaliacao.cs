@@ -6,7 +6,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Avaliação", Subtitle = "Gerencie as avaliações de veículos", Icon = "fas fa-clipboard-check", EnableAjaxSubmit = true)]
-    public class Avaliacao : BaseEntidadeEmpresa
+    public class Avaliacao : BaseEntidade
     {
         [GridField("Ano", Order = 20, Width = "80px")]
         [FormField(Order = 1, Name = "Ano do Veículo", Section = "Dados do Veículo", Icon = "fas fa-calendar", Type = EnumFieldType.Number, Required = true, GridColumns = 3)]

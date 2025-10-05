@@ -5,7 +5,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades.Veiculos
 {
     [FormConfig(Title = "Documento do Veículo", Subtitle = "Gerencie os documentos dos veículos", Icon = "fas fa-file-alt", EnableAjaxSubmit = true)]
-    public class VeiculoDocumento : BaseEntidadeEmpresa
+    public class VeiculoDocumento : BaseEntidade
     {
         [GridField("Tipo", Order = 15, Width = "150px")]
         [FormField(Order = 1, Name = "Tipo de Documento", Section = "Identificação", Icon = "fas fa-tags", Type = EnumFieldType.Select, Required = true, GridColumns = 2)]
