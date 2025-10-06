@@ -95,6 +95,16 @@ namespace AutoGestao.Enumerador.Gerais
         /// <summary>
         /// Campo de referência com busca automática
         /// </summary>
-        Reference
+        Reference,
+
+        /// <summary>
+        /// Campo de imagem com upload/download e preview minimalista
+        /// </summary>
+        Image,
+
+        /// <summary>
+        /// Campo de arquivo com upload/download
+        /// </summary>
+        File
     }
 }

@@ -5,6 +5,7 @@ using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Models.Auth;
+using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,8 @@ using Microsoft.EntityFrameworkCore;
 namespace AutoGestao.Controllers
 {
     [Authorize(Roles = "Admin,Gerente")]
-    public class AuditController(ApplicationDbContext context, IAuditService auditService) : StandardGridController<AuditLog>(context)
+    public class AuditController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService) 
+        : StandardGridController<AuditLog>(context, fileStorageService)
     {
         private readonly IAuditService _auditService = auditService;
 

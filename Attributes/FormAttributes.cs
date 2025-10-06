@@ -99,5 +99,22 @@ namespace AutoGestao.Attributes
         /// Configurações específicas para campo de referência
         /// </summary>
         public string ReferenceConfig { get; set; } = "";
+
+        /// <summary>
+        /// Tamanho da imagem em pixels (para Type = Image)
+        /// Formato: "largura x altura" (ex: "150x150")
+        /// Se não informado, usa 100x100
+        /// </summary>
+        public string ImageSize { get; set; } = "100x100";
+
+        /// <summary>
+        /// Extensões permitidas separadas por vírgula
+        /// </summary>
+        public string AllowedExtensions { get; set; } = "";
+
+        /// <summary>
+        /// Tamanho máximo do arquivo em MB
+        /// </summary>
+        public int MaxSizeMB { get; set; } = 10;
     }
 }

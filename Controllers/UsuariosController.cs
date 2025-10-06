@@ -4,6 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
 using AutoGestao.Models.Auth;
+using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,8 @@ using System.Security.Claims;
 namespace AutoGestao.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class UsuariosController(ApplicationDbContext context, IUsuarioService usuarioService) : StandardGridController<Usuario>(context)
+    public class UsuariosController(ApplicationDbContext context, IUsuarioService usuarioService, IFileStorageService fileStorageService, ILogger<StandardGridController<Usuario>> logger) 
+        : StandardGridController<Usuario>(context, fileStorageService, logger)
     {
         private readonly IUsuarioService _usuarioService = usuarioService;
 

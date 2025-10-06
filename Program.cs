@@ -2,10 +2,12 @@ using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Models;
 using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Minio;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +38,20 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
 
+// Add fluxo do Minio storage
+builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("MinioSettings"));
+
+var minioSettings = builder.Configuration.GetSection("MinioSettings").Get<MinioSettings>()!;
+
+builder.Services.AddSingleton<IMinioClient>(sp =>
+{
+    return new MinioClient()
+        .WithEndpoint(minioSettings.Endpoint)
+        .WithCredentials(minioSettings.AccessKey, minioSettings.SecretKey)
+        .WithSSL(minioSettings.UseSSL)
+        .Build();
+});
+
 builder.Services.AddAuthorization();
 
 // Registrar serviços
@@ -44,6 +60,7 @@ builder.Services.AddScoped<IEmpresaService, EmpresaService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
+builder.Services.AddScoped<IFileStorageService, MinioFileStorageService>();
 builder.Services.AddScoped<GenericReferenceService>();
 builder.Services.AddHttpContextAccessor();
 

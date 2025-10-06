@@ -1,6 +1,7 @@
 using AutoGestao.Data;
 using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Models;
+using AutoGestao.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

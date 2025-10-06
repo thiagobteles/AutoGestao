@@ -1,17 +1,15 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
-using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Enumerador.Veiculo;
-using AutoGestao.Extensions;
 using AutoGestao.Models;
+using AutoGestao.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace AutoGestao.Controllers
 {
-    public class VendedoresController(ApplicationDbContext context) : StandardGridController<Vendedor>(context)
+    public class VendedoresController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Vendedor>> logger)
+        : StandardGridController<Vendedor>(context, fileStorageService, logger)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
@@ -119,41 +117,6 @@ namespace AutoGestao.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Export()
-        {
-            try
-            {
-                var vendedores = await _context.Vendedores
-                    .OrderBy(c => c.Nome)
-                    .ToListAsync();
-
-                var csv = new System.Text.StringBuilder();
-                csv.AppendLine("ID,Nome,CPF,Email,Telefone,Celular,Status,Data Cadastro");
-
-                foreach (var vendedor in vendedores)
-                {
-                    csv.AppendLine($"{vendedor.Id}," +
-                                  $"\"{vendedor.Nome}\"," +
-                                  $"{vendedor.Cpf}," +
-                                  $"{vendedor.Email}," +
-                                  $"{vendedor.Telefone}," +
-                                  $"{vendedor.Celular}," +
-                                  $"{(vendedor.Ativo ? "Ativo" : "Inativo")}," +
-                                  $"{vendedor.DataCadastro:dd/MM/yyyy}");
-                }
-
-                var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
-                var fileName = $"vendedores_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
-                return File(bytes, "text/csv", fileName);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
-                return RedirectToAction(nameof(Index));
-            }
         }
 
         #endregion

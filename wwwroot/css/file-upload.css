@@ -1,0 +1,136 @@
+.file-upload-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+    .file-upload-wrapper input[type="file"] {
+        position: absolute;
+        left: -9999px;
+        opacity: 0;
+    }
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+    .file-upload-label:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+
+    .file-upload-label.has-file {
+        border-color: #198754;
+        background-color: #d1e7dd;
+    }
+
+    .file-upload-label.readonly {
+        cursor: not-allowed;
+        background-color: #e9ecef;
+        opacity: 0.6;
+    }
+
+.file-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.file-upload-label:hover .file-upload-btn {
+    background-color: #0b5ed7;
+}
+
+.file-upload-label.readonly .file-upload-btn {
+    background-color: #6c757d;
+}
+
+.file-upload-text {
+    flex: 1;
+    color: #6c757d;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-upload-label.has-file .file-upload-text {
+    color: #212529;
+    font-weight: 500;
+}
+
+.file-upload-clear {
+    flex-shrink: 0;
+    padding: 4px 8px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s;
+}
+
+    .file-upload-clear:hover {
+        background-color: #bb2d3b;
+    }
+
+.file-upload-icon {
+    font-size: 16px;
+}
+
+/* Estilos para preview de imagem */
+.image-preview-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+    .image-preview-wrapper .d-flex {
+        margin-left: auto;
+    }
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+    .file-info .d-flex {
+        margin-left: auto;
+    }
+
+.file-name {
+    flex: 1;
+    font-size: 14px;
+    color: #212529;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

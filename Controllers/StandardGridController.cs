@@ -6,6 +6,7 @@ using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Models.Grid;
+using AutoGestao.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +17,19 @@ using System.Reflection;
 
 namespace AutoGestao.Controllers
 {
-    public abstract class StandardGridController<T>(ApplicationDbContext context) : Controller() where T : BaseEntidade, new()
+    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null)
+        : Controller where T : BaseEntidade, new()
     {
         protected readonly ApplicationDbContext _context = context;
+        protected readonly IFileStorageService _fileStorageService = fileStorageService;
+        protected readonly ILogger<StandardGridController<T>>? _logger = logger;
+
+        // CONSTRUTOR SEM LOGGER (COMPATIBILIDADE)
+        protected StandardGridController(ApplicationDbContext context, IFileStorageService fileStorageService) : this(context, fileStorageService, null)
+        {
+        }
+
+        #region Métodos protected virtual (podem ser sobrescritos)
 
         protected virtual StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
@@ -107,7 +118,6 @@ namespace AutoGestao.Controllers
 
         protected virtual List<SelectListItem> GetSelectOptions(string propertyName)
         {
-            // Primeiro ajusta automaticamente se for Enum
             var autoOptions = StandardGridController<T>.GetAutoEnumOptions(propertyName);
             if (autoOptions.Count != 0)
             {
@@ -123,11 +133,6 @@ namespace AutoGestao.Controllers
             return [];
         }
 
-        #region Métodos Virtuais para Formulários (podem ser sobrescritos)
-
-        /// <summary>
-        /// Customizar campos do formulário baseado na action
-        /// </summary>
         protected virtual void ConfigureFormFields(List<FormFieldViewModel> fields, T entity, string action)
         {
         }
@@ -179,9 +184,37 @@ namespace AutoGestao.Controllers
             return Task.CompletedTask;
         }
 
+        protected virtual long GetCurrentEmpresaId()
+        {
+            var empresaIdClaim = User.FindFirst("EmpresaId")?.Value;
+            return long.TryParse(empresaIdClaim, out var empresaId) 
+                ? empresaId
+                : 1;
+        }
+
+        protected void PopulateEnumsInViewBag()
+        {
+            var enumProperties = typeof(T).GetProperties()
+                .Where(p => {
+                    var type = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
+                    return type.IsEnum;
+                });
+
+            foreach (var property in enumProperties)
+            {
+                var options = StandardGridController<T>.GetAutoEnumOptions(property.Name);
+                if (options.Count != 0)
+                {
+                    ViewBag.GetType().GetProperty(property.Name)?.SetValue(ViewBag, options);
+                    // Alternativamente, use ViewData:
+                    ViewData[property.Name] = options;
+                }
+            }
+        }
+
         #endregion
 
-        #region Actions para Formulários Dinâmicos
+        #region Actions/EndPoints para Formulários Dinâmicos
 
         /// <summary>
         /// GET: Index - Exibir tela inicial com grid
@@ -310,37 +343,33 @@ namespace AutoGestao.Controllers
         /// GET: Create - Exibir formulário de criação
         /// </summary>
         [HttpGet]
-        public virtual IActionResult Create()
+        public virtual async Task<IActionResult> Create()
         {
-            var entity = new T();
-            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
-
-            if (!CanCreate(entity))
+            if (!CanCreate(new T()))
             {
                 TempData["Error"] = "Você não tem permissão para cadastrar um novo registro.";
                 return Forbid();
             }
 
+            var entity = new T();
             PopulateEnumsInViewBag();
 
-            var viewModel = BuildFormViewModel(entity, "Create");
+            var viewModel = await BuildFormViewModelAsync(entity, "Create"); // USAR VERSÃO ASYNC
 
             if (IsAjaxRequest())
             {
-                // Tenta encontrar view parcial específica primeiro
                 var partialViewName = $"_Create{typeof(T).Name}Form";
                 if (ViewExists(partialViewName))
                 {
                     return PartialView(partialViewName, viewModel);
                 }
-
-                // Fallback para view parcial genérica
                 return PartialView("_CreateForm", viewModel);
             }
 
+            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
             if (formTabs?.EnableTabs == true)
             {
-                viewModel = BuildTabbedFormViewModel(entity, "Create");
+                viewModel = await BuildTabbedFormViewModelAsync(entity, "Create");
                 return View("_TabbedForm", viewModel);
             }
             else
@@ -390,7 +419,7 @@ namespace AutoGestao.Controllers
                 }
             }
 
-            var viewModel = BuildFormViewModel(entity, "Create");
+            var viewModel = await BuildFormViewModelAsync(entity, "Create");
             AddModelStateToViewModel(viewModel);
 
             return Request.IsAjaxRequest() 
@@ -404,10 +433,8 @@ namespace AutoGestao.Controllers
         [HttpGet]
         public virtual async Task<IActionResult> Edit(long id)
         {
-            // Carregar entidade COM TODAS as referências
             var query = GetBaseQuery();
 
-            // Include automático de todas as navigation properties
             var entityType = typeof(T);
             var navigationProperties = entityType.GetProperties()
                 .Where(p => p.PropertyType.IsClass &&
@@ -423,7 +450,6 @@ namespace AutoGestao.Controllers
                 if (property != null)
                 {
                     query = query.Include(propertyName);
-                    Console.WriteLine($"Include adicionado: {propertyName}");
                 }
             }
 
@@ -437,20 +463,20 @@ namespace AutoGestao.Controllers
             if (!CanEdit(entity))
             {
                 TempData["Error"] = "Você não tem permissão para editar este registro.";
-                return RedirectToAction(nameof(Index));
+                return Forbid();
             }
 
             PopulateEnumsInViewBag();
+            var viewModel = await BuildFormViewModelAsync(entity, "Edit"); // USAR VERSÃO ASYNC
 
             var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
             if (formTabs?.EnableTabs == true)
             {
-                var viewModel = BuildTabbedFormViewModel(entity, "Edit");
+                viewModel = await BuildTabbedFormViewModelAsync(entity, "Edit");
                 return View("_TabbedForm", viewModel);
             }
             else
             {
-                var viewModel = BuildFormViewModel(entity, "Edit");
                 return View("_StandardForm", viewModel);
             }
         }
@@ -574,7 +600,7 @@ namespace AutoGestao.Controllers
                 });
             }
 
-            var viewModel = BuildFormViewModel(entity, "Edit");
+            var viewModel = await BuildFormViewModelAsync(entity, "Edit");
             AddModelStateToViewModel(viewModel);
 
             return View("_StandardForm", viewModel);
@@ -586,23 +612,45 @@ namespace AutoGestao.Controllers
         [HttpGet]
         public virtual async Task<IActionResult> Details(long id)
         {
-            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
+            var query = GetBaseQuery();
+
+            var entityType = typeof(T);
+            var navigationProperties = entityType.GetProperties()
+                .Where(p => p.PropertyType.IsClass &&
+                            p.PropertyType != typeof(string) &&
+                            !p.PropertyType.IsArray &&
+                            p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
+
+            foreach (var navProp in navigationProperties)
+            {
+                var propertyName = navProp.Name.StartsWith("Id") ? navProp.Name.Substring(2) : navProp.Name;
+                var property = entityType.GetProperty(propertyName);
+
+                if (property != null)
+                {
+                    query = query.Include(propertyName);
+                }
+            }
+
+            var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
+
             if (entity == null)
             {
                 return NotFound();
             }
 
-            PopulateEnumsInViewBag();
+            await this.AddAuditHistoryToViewBag(_context, entity);
+
+            var viewModel = await BuildFormViewModelAsync(entity, "Details"); // USAR VERSÃO ASYNC
 
             var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
             if (formTabs?.EnableTabs == true)
             {
-                var viewModel = BuildTabbedFormViewModel(entity, "Details");
+                viewModel = await BuildTabbedFormViewModelAsync(entity, "Details");
                 return View("_TabbedForm", viewModel);
             }
             else
             {
-                var viewModel = BuildFormViewModel(entity, "Details");
                 return View("_StandardForm", viewModel);
             }
         }
@@ -651,6 +699,7 @@ namespace AutoGestao.Controllers
                 {
                     return Json(new { success = false, message = $"Erro ao excluir registro: {ex.Message}" });
                 }
+
                 TempData["Error"] = $"Erro ao excluir registro: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
@@ -699,6 +748,166 @@ namespace AutoGestao.Controllers
             {
                 TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
                 return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> UploadFile(string propertyName, IFormFile file, string? customBucket = null)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return Json(new { success = false, message = "Nenhum arquivo selecionado" });
+                }
+
+                var property = typeof(T).GetProperties()
+                    .FirstOrDefault(p => p.Name == propertyName &&
+                        (p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.File ||
+                         p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Image));
+
+                if (property == null)
+                {
+                    return Json(new { success = false, message = "Campo não encontrado" });
+                }
+
+                var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
+
+                // Validar extensão
+                if (!string.IsNullOrEmpty(formFieldAttr.AllowedExtensions))
+                {
+                    var allowedExts = formFieldAttr.AllowedExtensions
+                        .Split(',')
+                        .Select(e => e.Trim().ToLower())
+                        .ToList();
+
+                    var fileExt = Path.GetExtension(file.FileName).ToLower().TrimStart('.');
+
+                    if (!allowedExts.Contains(fileExt))
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = $"Extensão não permitida. Use: {formFieldAttr.AllowedExtensions}"
+                        });
+                    }
+                }
+
+                // Validar tamanho
+                var maxSize = formFieldAttr.MaxSizeMB * 1024 * 1024;
+                if (file.Length > maxSize)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"Arquivo muito grande. Máximo: {formFieldAttr.MaxSizeMB}MB"
+                    });
+                }
+
+                // Upload para MinIO
+                var entityName = typeof(T).Name;
+                var idEmpresa = GetCurrentEmpresaId();
+                var filePath = await _fileStorageService.UploadFileAsync(file, entityName, propertyName, idEmpresa, customBucket);
+
+                // Gerar URL de download
+                var fileUrl = await _fileStorageService.GetDownloadUrlAsync(filePath, entityName, idEmpresa, customBucket);
+                return Json(new
+                {
+                    success = true,
+                    fileName = Path.GetFileName(file.FileName),
+                    filePath = filePath,
+                    fileUrl = fileUrl,
+                    message = "Arquivo enviado com sucesso!"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao fazer upload do arquivo");
+                return Json(new { success = false, message = $"Erro ao enviar arquivo: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public virtual async Task<IActionResult> DownloadFile(string propertyName, string filePath, string? customBucket = null)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    _logger?.LogWarning("Tentativa de download com filePath vazio. PropertyName: {PropertyName}", propertyName);
+                    return NotFound("Arquivo não encontrado");
+                }
+
+                var entityName = typeof(T).Name;
+                var idEmpresa = GetCurrentEmpresaId();
+
+                var stream = await _fileStorageService.DownloadFileAsync(
+                    filePath,
+                    entityName,
+                    idEmpresa,
+                    customBucket);
+
+                var contentType = GetContentType(filePath);
+                var downloadName = Path.GetFileName(filePath);
+
+                return File(stream, contentType, downloadName);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao fazer download do arquivo. PropertyName: {PropertyName}, FilePath: {FilePath}", propertyName, filePath);
+                return NotFound("Arquivo não encontrado");
+            }
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> DeleteFile([FromBody] DeleteFileRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.FilePath))
+                {
+                    _logger?.LogWarning("Tentativa de exclusão com filePath vazio. PropertyName: {PropertyName}", request.PropertyName);
+                    return Json(new { success = false, message = "Caminho do arquivo não informado" });
+                }
+
+                var entityName = typeof(T).Name;
+                var idEmpresa = GetCurrentEmpresaId();
+
+                var deleted = await _fileStorageService.DeleteFileAsync(
+                    request.FilePath,
+                    entityName,
+                    idEmpresa,
+                    request.CustomBucket);
+
+                if (deleted)
+                {
+                    return Json(new { success = true, message = "Arquivo excluído com sucesso!" });
+                }
+
+                return Json(new { success = false, message = "Erro ao excluir arquivo" });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao excluir arquivo. PropertyName: {PropertyName}, FilePath: {FilePath}",
+                    request.PropertyName, request.FilePath);
+                return Json(new { success = false, message = $"Erro ao excluir arquivo: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public virtual async Task<IActionResult> GetFileUrl(string propertyName, string fileName, string? customBucket = null)
+        {
+            try
+            {
+                var entityName = typeof(T).Name;
+                var idEmpresa = GetCurrentEmpresaId();
+                var url = await _fileStorageService.GetDownloadUrlAsync(fileName, entityName, idEmpresa, customBucket);
+                return Json(new { success = true, url });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao obter URL do arquivo");
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -787,7 +996,7 @@ namespace AutoGestao.Controllers
             if (tabId == "principal")
             {
                 // Renderizar formulário principal
-                var viewModel = BuildFormViewModel(entity, "Details");
+                var viewModel = await BuildFormViewModelAsync(entity, "Details");
                 return PartialView("_StandardFormContent", viewModel);
             }
 
@@ -795,38 +1004,12 @@ namespace AutoGestao.Controllers
             return await RenderCustomTab(entity, tab);
         }
 
-        /// <summary>
-        /// Renderizar aba personalizada (override em controllers específicos)
-        /// </summary>
         protected virtual Task<IActionResult> RenderCustomTab(T entity, FormTabViewModel tab)
         {
             return Task.FromResult<IActionResult>(PartialView($"_Tab{tab.TabId}", entity));
         }
 
-        #endregion
-
-        #region Métodos Privados
-
-        private static StandardGridViewModel ConfigureGrid(string controllerName)
-        {
-            var standardGridViewModel = new StandardGridViewModel
-            {
-                Title = controllerName,
-                SubTitle = $"Gerencie todos os {controllerName}",
-                EntityName = typeof(T).Name,
-                ControllerName = controllerName,
-                Columns = GridColumnBuilder.BuildColumns<T>(),
-                HeaderActions = ObterHeaderActionsPadrao(controllerName),
-                RowActions = ObterRowActionsPadrao(controllerName)
-            };
-
-            return standardGridViewModel;
-        }
-
-        /// <summary>
-        /// Constrói o ViewModel do formulário baseado nos atributos da entidade
-        /// </summary>
-        public StandardFormViewModel BuildFormViewModel(T entity, string action)
+        protected virtual async Task<StandardFormViewModel> BuildFormViewModelAsync(T entity, string action)
         {
             var formConfig = typeof(T).GetCustomAttribute<FormConfigAttribute>() ?? new FormConfigAttribute();
             var properties = GetFormProperties();
@@ -846,11 +1029,14 @@ namespace AutoGestao.Controllers
                 IsDetailsMode = action == "Details"
             };
 
+            // CRIAR TASKS PARA PROCESSAR PROPRIEDADES DE FORMA ASSÍNCRONA
+            var fieldTasks = properties.Select(p => CreateFieldFromPropertyAsync(p, entity, action));
+            var fields = await Task.WhenAll(fieldTasks);
+
             // Agrupar campos por seção
-            var fieldsBySection = properties
-                .Select(p => CreateFieldFromProperty(p, entity, action))
+            var fieldsBySection = fields
                 .Where(f => f != null)
-                .GroupBy(f => f.Section ?? "Não Informado")
+                .GroupBy(f => f!.Section ?? "Não Informado")
                 .ToList();
 
             foreach (var sectionGroup in fieldsBySection)
@@ -859,44 +1045,154 @@ namespace AutoGestao.Controllers
                 {
                     Name = sectionGroup.Key,
                     Icon = GetSectionIcon(sectionGroup.Key),
-                    Fields = [.. sectionGroup.OrderBy(f => f.Order)]
+                    Fields = sectionGroup.OrderBy(f => f!.Order).ToList()!
                 };
 
-                // Determinar quantas colunas a seção deve ter
                 section.GridColumns = section.Fields.Count != 0 ? section.Fields.Max(f => f.GridColumns) : 1;
-
                 viewModel.Sections.Add(section);
             }
 
-            // Permitir customizações específicas do controller
             var allFields = viewModel.Sections.SelectMany(s => s.Fields).ToList();
             ConfigureFormFields(allFields, entity, action);
 
             return viewModel;
         }
 
-        /// <summary>
-        /// Obtém as propriedades que devem aparecer no formulário
-        /// </summary>
-        //private static List<PropertyInfo> GetFormProperties()
-        //{
-        //    return [.. typeof(T).GetProperties()
-        //        .Where(p => p.CanRead && p.CanWrite)
-        //        .Where(p => !IsIgnoredProperty(p))
-        //        .OrderBy(p => GetPropertyOrder(p))];
-        //}
+        #endregion
 
-        private List<PropertyInfo> GetFormProperties()
+        #region Métodos Privados
+
+        private Dictionary<string, object> ExtractFiltersFromRequest()
         {
-            return typeof(T).GetProperties()
-                .Where(p => p.GetCustomAttribute<FormFieldAttribute>() != null)
-                .OrderBy(p => p.GetCustomAttribute<FormFieldAttribute>()?.Order ?? 0)
-                .ToList();
+            var filters = new Dictionary<string, object>();
+
+            foreach (var key in Request.Query.Keys)
+            {
+                var value = Request.Query[key].ToString();
+
+                if (!string.IsNullOrEmpty(value) &&
+                    !new[] { "page", "pageSize", "orderBy", "orderDirection" }.Contains(key))
+                {
+                    // Tratamento especial para filtros de data range
+                    if (key.EndsWith("_inicio") || key.EndsWith("_fim"))
+                    {
+                        filters[key] = value;
+                    }
+                    else
+                    {
+                        filters[key] = value;
+                    }
+                }
+            }
+
+            return filters;
         }
 
-        /// <summary>
-        /// Determina se uma propriedade deve ser auto-gerada no formulário
-        /// </summary>
+        private void UpdateFilterValues(List<GridFilter> filters, Dictionary<string, object> values)
+        {
+            foreach (var filter in filters)
+            {
+                if (values.TryGetValue(filter.Name, out var value))
+                {
+                    filter.Value = value;
+                }
+
+                // Para filtros de data range, verificar campos específicos
+                if (filter.Type == EnumGridFilterType.DateRange)
+                {
+                    var inicioKey = $"{filter.Name}_inicio";
+                    var fimKey = $"{filter.Name}_fim";
+
+                    if (values.TryGetValue(inicioKey, out var valueInico))
+                    {
+                        ViewBag.GetType().GetProperty(inicioKey)?.SetValue(ViewBag, valueInico);
+                    }
+
+                    if (values.TryGetValue(fimKey, out var valueFim))
+                    {
+                        ViewBag.GetType().GetProperty(fimKey)?.SetValue(ViewBag, valueFim);
+                    }
+                }
+            }
+        }
+
+        private void AddModelStateToViewModel(StandardFormViewModel viewModel)
+        {
+            viewModel.ModelState.Clear();
+            foreach (var error in ModelState)
+            {
+                if (error.Value.Errors.Any())
+                {
+                    viewModel.ModelState[error.Key] = string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage));
+                }
+            }
+        }
+
+        private async Task<TabbedFormViewModel> BuildTabbedFormViewModelAsync(T entity, string action)
+        {
+            var formConfig = typeof(T).GetCustomAttribute<FormConfigAttribute>() ?? new FormConfigAttribute();
+            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>() ?? new FormTabsAttribute();
+
+            var viewModel = new TabbedFormViewModel
+            {
+                Title = formConfig.Title ?? StandardGridController<T>.GetDefaultTitle(action),
+                Subtitle = formConfig.Subtitle ?? GetDefaultSubtitle(action),
+                Icon = formConfig.Icon ?? "fas fa-edit",
+                BackAction = formConfig.BackAction ?? "Index",
+                BackText = formConfig.BackText ?? "Voltar à Lista",
+                ActionName = action,
+                ControllerName = ControllerContext.ActionDescriptor.ControllerName,
+                Model = entity,
+                EnableAjaxSubmit = formConfig.EnableAjaxSubmit,
+                IsEditMode = action == "Edit",
+                IsDetailsMode = action == "Details",
+                EnableTabs = formTabs.EnableTabs,
+                EntityId = entity.Id,
+                ActiveTab = formTabs.DefaultTab ?? "principal",
+                // Configurar abas
+                Tabs = ConfigureTabs(entity)
+            };
+
+            // Construir formulário principal para a primeira aba
+            var mainFormViewModel = await BuildFormViewModelAsync(entity, action);
+            viewModel.Sections = mainFormViewModel.Sections;
+            viewModel.ModelState = mainFormViewModel.ModelState;
+
+            return viewModel;
+        }
+
+        private bool IsAjaxRequest()
+        {
+            return Request.Headers.ContainsKey("X-Requested-With") ||
+                   Request.Query.ContainsKey("ajax") ||
+                   Request.ContentType?.Contains("application/json") == true;
+        }
+
+        private bool ViewExists(string viewName)
+        {
+            var viewEngine = HttpContext.RequestServices.GetService(typeof(Microsoft.AspNetCore.Mvc.ViewEngines.ICompositeViewEngine))
+                as Microsoft.AspNetCore.Mvc.ViewEngines.ICompositeViewEngine;
+
+            var viewResult = viewEngine?.FindView(ControllerContext, viewName, false);
+            return viewResult?.Success ?? false;
+        }
+
+        private static StandardGridViewModel ConfigureGrid(string controllerName)
+        {
+            var standardGridViewModel = new StandardGridViewModel
+            {
+                Title = controllerName,
+                SubTitle = $"Gerencie todos os {controllerName}",
+                EntityName = typeof(T).Name,
+                ControllerName = controllerName,
+                Columns = GridColumnBuilder.BuildColumns<T>(),
+                HeaderActions = ObterHeaderActionsPadrao(controllerName),
+                RowActions = ObterRowActionsPadrao(controllerName)
+            };
+
+            return standardGridViewModel;
+        }
+
         private static bool ShouldAutoGenerateField(PropertyInfo property)
         {
             // Não incluir propriedades de navegação
@@ -968,58 +1264,31 @@ namespace AutoGestao.Controllers
                 ];
         }
 
-        private Dictionary<string, object> ExtractFiltersFromRequest()
+        private static List<PropertyInfo> GetFormProperties()
         {
-            var filters = new Dictionary<string, object>();
-
-            foreach (var key in Request.Query.Keys)
-            {
-                var value = Request.Query[key].ToString();
-
-                if (!string.IsNullOrEmpty(value) &&
-                    !new[] { "page", "pageSize", "orderBy", "orderDirection" }.Contains(key))
-                {
-                    // Tratamento especial para filtros de data range
-                    if (key.EndsWith("_inicio") || key.EndsWith("_fim"))
-                    {
-                        filters[key] = value;
-                    }
-                    else
-                    {
-                        filters[key] = value;
-                    }
-                }
-            }
-
-            return filters;
+            return typeof(T).GetProperties()
+                .Where(p => p.GetCustomAttribute<FormFieldAttribute>() != null)
+                .OrderBy(p => p.GetCustomAttribute<FormFieldAttribute>()?.Order ?? 0)
+                .ToList();
         }
 
-        private void UpdateFilterValues(List<GridFilter> filters, Dictionary<string, object> values)
+        private static string GetContentType(string fileName)
         {
-            foreach (var filter in filters)
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return extension switch
             {
-                if (values.TryGetValue(filter.Name, out var value))
-                {
-                    filter.Value = value;
-                }
-
-                // Para filtros de data range, verificar campos específicos
-                if (filter.Type == EnumGridFilterType.DateRange)
-                {
-                    var inicioKey = $"{filter.Name}_inicio";
-                    var fimKey = $"{filter.Name}_fim";
-
-                    if (values.TryGetValue(inicioKey, out var valueInico))
-                    {
-                        ViewBag.GetType().GetProperty(inicioKey)?.SetValue(ViewBag, valueInico);
-                    }
-
-                    if (values.TryGetValue(fimKey, out var valueFim))
-                    {
-                        ViewBag.GetType().GetProperty(fimKey)?.SetValue(ViewBag, valueFim);
-                    }
-                }
-            }
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".xls" => "application/vnd.ms-excel",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".png" => "image/png",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".gif" => "image/gif",
+                ".txt" => "text/plain",
+                ".zip" => "application/zip",
+                _ => "application/octet-stream"
+            };
         }
 
         private static bool TryConvertToNumeric<TProperty>(string value, out TProperty result)
@@ -1181,68 +1450,6 @@ namespace AutoGestao.Controllers
             };
         }
 
-        private void AddModelStateToViewModel(StandardFormViewModel viewModel)
-        {
-            viewModel.ModelState.Clear();
-            foreach (var error in ModelState)
-            {
-                if (error.Value.Errors.Any())
-                {
-                    viewModel.ModelState[error.Key] = string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage));
-                }
-            }
-        }
-
-        private TabbedFormViewModel BuildTabbedFormViewModel(T entity, string action)
-        {
-            var formConfig = typeof(T).GetCustomAttribute<FormConfigAttribute>() ?? new FormConfigAttribute();
-            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>() ?? new FormTabsAttribute();
-
-            var viewModel = new TabbedFormViewModel
-            {
-                Title = formConfig.Title ?? StandardGridController<T>.GetDefaultTitle(action),
-                Subtitle = formConfig.Subtitle ?? GetDefaultSubtitle(action),
-                Icon = formConfig.Icon ?? "fas fa-edit",
-                BackAction = formConfig.BackAction ?? "Index",
-                BackText = formConfig.BackText ?? "Voltar à Lista",
-                ActionName = action,
-                ControllerName = ControllerContext.ActionDescriptor.ControllerName,
-                Model = entity,
-                EnableAjaxSubmit = formConfig.EnableAjaxSubmit,
-                IsEditMode = action == "Edit",
-                IsDetailsMode = action == "Details",
-                EnableTabs = formTabs.EnableTabs,
-                EntityId = entity.Id,
-                ActiveTab = formTabs.DefaultTab ?? "principal"
-            };
-
-            // Configurar abas
-            viewModel.Tabs = ConfigureTabs(entity);
-
-            // Construir formulário principal para a primeira aba
-            var mainFormViewModel = BuildFormViewModel(entity, action);
-            viewModel.Sections = mainFormViewModel.Sections;
-            viewModel.ModelState = mainFormViewModel.ModelState;
-
-            return viewModel;
-        }
-
-        private bool IsAjaxRequest()
-        {
-            return Request.Headers.ContainsKey("X-Requested-With") ||
-                   Request.Query.ContainsKey("ajax") ||
-                   Request.ContentType?.Contains("application/json") == true;
-        }
-
-        private bool ViewExists(string viewName)
-        {
-            var viewEngine = HttpContext.RequestServices.GetService(typeof(Microsoft.AspNetCore.Mvc.ViewEngines.ICompositeViewEngine))
-                as Microsoft.AspNetCore.Mvc.ViewEngines.ICompositeViewEngine;
-
-            var viewResult = viewEngine?.FindView(ControllerContext, viewName, false);
-            return viewResult?.Success ?? false;
-        }
-
         private static string FormatValueForExport(T item, GridColumn column)
         {
             try
@@ -1349,9 +1556,6 @@ namespace AutoGestao.Controllers
 
         #region Automated Enum Detection and Population
 
-        /// <summary>
-        /// Determina automaticamente o tipo de campo baseado na propriedade (MODIFICADO)
-        /// </summary>
         private static EnumFieldType DetermineFieldType(PropertyInfo property)
         {
             var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
@@ -1371,9 +1575,6 @@ namespace AutoGestao.Controllers
             };
         }
 
-        /// <summary>
-        /// Obtém automaticamente opções para propriedades Enum
-        /// </summary>
         private static List<SelectListItem> GetAutoEnumOptions(string propertyName)
         {
             try
@@ -1408,9 +1609,7 @@ namespace AutoGestao.Controllers
             }
         }
 
-        // Controllers/StandardGridController.cs
-
-        private FormFieldViewModel? CreateFieldFromProperty(PropertyInfo property, T entity, string action)
+        private async Task<FormFieldViewModel?> CreateFieldFromPropertyAsync(PropertyInfo property, T entity, string action)
         {
             var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
 
@@ -1446,9 +1645,7 @@ namespace AutoGestao.Controllers
 
                 var isRequired = formFieldAttr.Required || isConditionallyRequired;
 
-                // ============================================================
-                // PROCESSAMENTO DE FILTROS DE REFERÊNCIA
-                // ============================================================
+                // Processamento de filtros de referência
                 string? referenceFilters = null;
                 if (formFieldAttr.Type == EnumFieldType.Reference && ReferenceFilterHelper.HasFilters(property))
                 {
@@ -1456,19 +1653,43 @@ namespace AutoGestao.Controllers
                     referenceFilters = ReferenceFilterHelper.SerializeFilterConfig(filterConfig);
                 }
 
-                // ============================================================
-                // OBTER E FORMATAR O VALOR DO CAMPO
-                // ============================================================
                 var rawValue = property.GetValue(entity);
                 var formattedValue = FormatFieldValue(rawValue, formFieldAttr.Type, property);
 
-                // ============================================================
-                // OBTER DISPLAY TEXT PARA CAMPOS REFERENCE
-                // ============================================================
                 string? displayText = null;
                 if (formFieldAttr.Type == EnumFieldType.Reference && rawValue != null)
                 {
                     displayText = GetReferenceDisplayText(entity, property, formFieldAttr.Reference);
+                }
+
+                // CORRIGIR: Obter URL e nome do arquivo para campos File e Image usando MinIO
+                string? fileUrl = null;
+                string? fileName = null;
+                string? filePath = null;
+
+                if ((formFieldAttr.Type == EnumFieldType.File || formFieldAttr.Type == EnumFieldType.Image) && rawValue != null)
+                {
+                    var fileValue = rawValue.ToString();
+                    if (!string.IsNullOrEmpty(fileValue))
+                    {
+                        filePath = fileValue; // IMPORTANTE: Armazenar o filePath completo
+                        fileName = Path.GetFileName(fileValue);
+                        var entityName = typeof(T).Name;
+                        var idEmpresa = GetCurrentEmpresaId();
+
+                        try
+                        {
+                            // Gerar URL pré-assinada do MinIO
+                            fileUrl = await _fileStorageService.GetDownloadUrlAsync(
+                                fileValue,
+                                entityName,
+                                idEmpresa);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.LogWarning(ex, "Erro ao gerar URL do arquivo: {FileName}", fileValue);
+                        }
+                    }
                 }
 
                 return new FormFieldViewModel
@@ -1480,38 +1701,36 @@ namespace AutoGestao.Controllers
                     Type = formFieldAttr.Type,
                     Required = isRequired,
                     ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
-                    Value = formattedValue,
+                    Value = formattedValue, // IMPORTANTE: Este é o valor que vai para o input hidden
                     DisplayText = displayText,
                     Reference = formFieldAttr.Reference ?? null,
                     ValidationRegex = formFieldAttr.ValidationRegex ?? "",
                     ValidationMessage = formFieldAttr.ValidationMessage ?? "",
+                    GridColumns = formFieldAttr.GridColumns,
+                    CssClass = formFieldAttr.CssClass ?? "",
+                    DataList = formFieldAttr.DataList ?? "",
+                    Order = formFieldAttr.Order,
+                    Section = formFieldAttr.Section ?? "Gerais",
                     ConditionalDisplayRule = displayRule,
                     ConditionalRequiredRule = requiredRule,
                     ConditionalRequiredMessage = requiredMessage,
                     ShouldDisplay = shouldDisplay,
                     IsConditionallyRequired = isConditionallyRequired,
-
-                    GridColumns = formFieldAttr.GridColumns,
-                    CssClass = formFieldAttr.CssClass ?? "",
-                    DataList = formFieldAttr.DataList ?? "",
-                    Order = formFieldAttr.Order,
-                    Section = formFieldAttr.Section ?? "Não Informado",
-
-                    Options = formFieldAttr.Type == EnumFieldType.Select
-                        ? GetSelectOptions(property.Name)
-                        : [],
-
-                    ReferenceFilters = referenceFilters
+                    ReferenceFilters = referenceFilters,
+                    Options = GetSelectOptions(property.Name),
+                    ImageSize = formFieldAttr.ImageSize,
+                    AllowedExtensions = formFieldAttr.AllowedExtensions,
+                    MaxSizeMB = formFieldAttr.MaxSizeMB,
+                    FileUrl = fileUrl,
+                    FileName = fileName,
+                    FilePath = filePath
                 };
             }
 
             return null;
         }
 
-        /// <summary>
-        /// Obtém o texto de exibição de uma entidade referenciada
-        /// </summary>
-        private string? GetReferenceDisplayText(T entity, PropertyInfo property, Type? referenceType)
+        private static string? GetReferenceDisplayText(T entity, PropertyInfo property, Type? referenceType)
         {
             if (referenceType == null)
             {
@@ -1576,9 +1795,6 @@ namespace AutoGestao.Controllers
             }
         }
 
-        /// <summary>
-        /// Formata o valor do campo de acordo com o tipo
-        /// </summary>
         private static object? FormatFieldValue(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
         {
             if (rawValue == null)
@@ -1628,29 +1844,6 @@ namespace AutoGestao.Controllers
 
             // Para outros tipos, retornar o valor original
             return rawValue;
-        }
-
-        // <summary>
-        // Popula automaticamente a ViewBag com todos os Enums da entidade
-        // </summary>
-        protected void PopulateEnumsInViewBag()
-        {
-            var enumProperties = typeof(T).GetProperties()
-                .Where(p => {
-                    var type = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
-                    return type.IsEnum;
-                });
-
-            foreach (var property in enumProperties)
-            {
-                var options = StandardGridController<T>.GetAutoEnumOptions(property.Name);
-                if (options.Count != 0)
-                {
-                    ViewBag.GetType().GetProperty(property.Name)?.SetValue(ViewBag, options);
-                    // Alternativamente, use ViewData:
-                    ViewData[property.Name] = options;
-                }
-            }
         }
 
         #endregion
@@ -1798,6 +1991,8 @@ namespace AutoGestao.Controllers
 
         #endregion Helpers para aplicar filtros
 
+        #region Criação via modal para campo referência
+
         /// <summary>
         /// Manipula criação via modal para campos de referência
         /// </summary>
@@ -1805,7 +2000,7 @@ namespace AutoGestao.Controllers
         /// <param name="controller">Controller</param>
         /// <param name="entity">Entidade a ser criada</param>
         /// <returns>ActionResult apropriado (JSON para AJAX, View para navegação normal)</returns>
-        public static async Task<IActionResult> HandleModalCreate<T>(StandardGridController<T> controller, T entity) where T : BaseEntidade, new()
+        public static async Task<IActionResult> HandleModalCreate(StandardGridController<T> controller, T entity)
         {
             // Verifica se é requisição AJAX (modal)
             if (controller.Request.Headers.TryGetValue("X-Requested-With", out var value) && value == "XMLHttpRequest")
@@ -1871,7 +2066,7 @@ namespace AutoGestao.Controllers
         /// <param name="controller">Controller</param>
         /// <param name="entity">Entidade</param>
         /// <returns>ActionResult</returns>
-        private static async Task<IActionResult> DefaultCreate<T>(StandardGridController<T> controller, T entity) where T : BaseEntidade, new()
+        private static async Task<IActionResult> DefaultCreate(StandardGridController<T> controller, T entity)
         {
             try
             {
@@ -1893,7 +2088,7 @@ namespace AutoGestao.Controllers
             }
 
             // Se chegou até aqui, há erros - mostrar form novamente
-            var viewModel = controller.BuildFormViewModel(entity, "Create");
+            var viewModel = await controller.BuildFormViewModelAsync(entity, "Create");
             return controller.View(viewModel);
         }
 
@@ -1903,7 +2098,7 @@ namespace AutoGestao.Controllers
         /// <typeparam name="T">Tipo da entidade</typeparam>
         /// <param name="entity">Instância da entidade</param>
         /// <returns>Texto para exibição</returns>
-        private static string GetDisplayText<T>(T entity) where T : BaseEntidade
+        private static string GetDisplayText(T entity)
         {
             var type = typeof(T);
 
@@ -1927,5 +2122,14 @@ namespace AutoGestao.Controllers
             var typeName = type.Name;
             return $"{typeName} #{entity.Id}";
         }
+
+        #endregion
+    }
+
+    public class DeleteFileRequest
+    {
+        public string PropertyName { get; set; } = "";
+        public string FilePath { get; set; } = "";
+        public string? CustomBucket { get; set; }
     }
 }

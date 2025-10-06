@@ -7,13 +7,14 @@ using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
+using AutoGestao.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
-    public class VeiculosController(ApplicationDbContext context) : StandardGridController<Veiculo>(context)
+    public class VeiculosController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Veiculo>> logger) : StandardGridController<Veiculo>(context, fileStorageService, logger)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {

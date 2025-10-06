@@ -30,5 +30,11 @@ namespace AutoGestao.Models
         public List<SelectListItem> Options { get; set; } = [];
         public Type? Reference { get; set; }
         public ReferenceFieldConfig ReferenceConfig { get; set; } = new();
+        public string ImageSize { get; set; } = "100x100";
+        public string AllowedExtensions { get; set; } = "";
+        public int MaxSizeMB { get; set; } = 10;
+        public string? FileUrl { get; set; }
+        public string? FileName { get; set; }
+        public string? FilePath { get; set; }
     }
 }
