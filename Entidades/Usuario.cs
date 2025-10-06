@@ -1,5 +1,5 @@
 using AutoGestao.Atributes;
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 

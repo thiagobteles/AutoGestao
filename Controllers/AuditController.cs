@@ -5,7 +5,6 @@ using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Models.Auth;
-using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

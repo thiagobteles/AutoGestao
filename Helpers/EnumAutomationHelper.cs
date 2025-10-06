@@ -1,3 +1,4 @@
+using AutoGestao.Atributes;
 using AutoGestao.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Reflection;
@@ -228,27 +229,108 @@ namespace AutoGestao.Helpers
 
             return string.Join("\n\n", jsCode);
         }
-    }
 
-    /// <summary>
-    /// Informações sobre um Enum
-    /// </summary>
-    public class EnumInfo
-    {
-        public string Name { get; set; } = "";
-        public bool IsEnum { get; set; }
-        public List<EnumValueInfo> Values { get; set; } = [];
-    }
+        /// <summary>
+        /// Obtém informações de um valor específico de enum
+        /// </summary>
+        /// <param name="enumValue">Valor do enum</param>
+        /// <returns>Informações do valor do enum</returns>
+        public static EnumValueInfo GetEnumValueInfo(object enumValue)
+        {
+            if (enumValue == null)
+            {
+                return new EnumValueInfo
+                {
+                    Name = "",
+                    Description = "",
+                    Icon = "",
+                    Value = 0
+                };
+            }
 
-    /// <summary>
-    /// Informações sobre um valor de Enum
-    /// </summary>
-    public class EnumValueInfo
-    {
-        public string Name { get; set; } = "";
-        public int Value { get; set; }
-        public string Description { get; set; } = "";
-        public string Category { get; set; } = "";
-        public string Icon { get; set; } = "";
+            var enumType = enumValue.GetType();
+            if (!enumType.IsEnum)
+            {
+                return new EnumValueInfo
+                {
+                    Name = enumValue.ToString() ?? "",
+                    Description = enumValue.ToString() ?? "",
+                    Icon = "",
+                    Value = 0
+                };
+            }
+
+            var enumAsEnum = (Enum)enumValue;
+
+            return new EnumValueInfo
+            {
+                Name = enumValue.ToString() ?? "",
+                Value = Convert.ToInt32(enumValue),
+                Description = enumAsEnum.GetDescription(),
+                Category = enumAsEnum.GetCategory(),
+                Icon = enumAsEnum.GetIcone() ?? "fas fa-circle"
+            };
+        }
+
+        /// <summary>
+        /// Obtém a cor de um valor de enum (baseado em atributos ou padrão)
+        /// </summary>
+        /// <param name="enumValue">Valor do enum</param>
+        /// <returns>Cor em formato CSS</returns>
+        public static string GetEnumColor(object enumValue)
+        {
+            if (enumValue == null)
+            {
+                return "#6c757d";
+            }
+
+            var enumType = enumValue.GetType();
+            if (!enumType.IsEnum)
+            {
+                return "#6c757d";
+            }
+
+            var fieldInfo = enumType.GetField(enumValue.ToString()!);
+            if (fieldInfo == null)
+            {
+                return "#6c757d";
+            }
+
+            // Buscar atributo de cor se existir
+            var corAttr = fieldInfo.GetCustomAttributes(typeof(CorAttribute), false)
+                .FirstOrDefault() as CorAttribute;
+
+            if (corAttr != null)
+            {
+                return corAttr.Cor;
+            }
+
+            // Cores padrão baseadas no nome do enum
+            var enumName = enumValue.ToString()?.ToLower() ?? "";
+
+            if (enumName.Contains("ativo") || enumName.Contains("aprovado") ||
+                enumName.Contains("pago") || enumName.Contains("concluido"))
+            {
+                return "#198754"; // Verde
+            }
+
+            if (enumName.Contains("inativo") || enumName.Contains("cancelado") ||
+                enumName.Contains("reprovado"))
+            {
+                return "#dc3545"; // Vermelho
+            }
+
+            if (enumName.Contains("pendente") || enumName.Contains("aguardando"))
+            {
+                return "#ffc107"; // Amarelo
+            }
+
+            if (enumName.Contains("andamento") || enumName.Contains("processo"))
+            {
+                return "#0dcaf0"; // Azul claro
+            }
+
+            return "#6c757d"; // Cinza padrão
+        }
     }
 }

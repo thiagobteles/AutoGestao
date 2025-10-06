@@ -1,3 +1,4 @@
+using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
@@ -41,8 +42,8 @@ namespace AutoGestao.Extensions
         {
             // Buscar propriedade com [ReferenceText] ou [GridMain]
             var property = referenceType.GetProperties()
-                .FirstOrDefault(p => p.GetCustomAttributes(typeof(Attributes.ReferenceTextAttribute), false).Any() ||
-                                   p.GetCustomAttributes(typeof(Attributes.GridMainAttribute), false).Any());
+                .FirstOrDefault(p => p.GetCustomAttributes(typeof(ReferenceTextAttribute), false).Any() ||
+                                   p.GetCustomAttributes(typeof(GridMainAttribute), false).Any());
 
             return property?.Name ?? "Id";
         }
@@ -54,7 +55,7 @@ namespace AutoGestao.Extensions
         {
             // Buscar propriedades com [ReferenceSearchable]
             return referenceType.GetProperties()
-                .Where(p => p.GetCustomAttributes(typeof(Attributes.ReferenceSearchableAttribute), false).Any())
+                .Where(p => p.GetCustomAttributes(typeof(ReferenceSearchableAttribute), false).Any())
                 .Select(p => p.Name)
                 .ToList();
         }
@@ -66,7 +67,7 @@ namespace AutoGestao.Extensions
         {
             // Buscar propriedades com [ReferenceSubtitle]
             return referenceType.GetProperties()
-                .Where(p => p.GetCustomAttributes(typeof(Attributes.ReferenceSubtitleAttribute), false).Any())
+                .Where(p => p.GetCustomAttributes(typeof(ReferenceSubtitleAttribute), false).Any())
                 .Select(p => p.Name)
                 .ToList();
         }

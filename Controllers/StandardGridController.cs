@@ -1,4 +1,4 @@
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
@@ -6,7 +6,7 @@ using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Models.Grid;
-using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -1763,8 +1763,8 @@ namespace AutoGestao.Controllers
                 // Buscar propriedade com [ReferenceText] ou [GridMain]
                 var displayProperty = referenceType.GetProperties()
                     .FirstOrDefault(p =>
-                        p.GetCustomAttributes(typeof(Attributes.ReferenceTextAttribute), false).Any() ||
-                        p.GetCustomAttributes(typeof(Attributes.GridMainAttribute), false).Any());
+                        p.GetCustomAttributes(typeof(ReferenceTextAttribute), false).Any() ||
+                        p.GetCustomAttributes(typeof(GridMainAttribute), false).Any());
 
                 if (displayProperty == null)
                 {

@@ -1,4 +1,4 @@
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using System.Reflection;
 
 namespace AutoGestao.Helpers

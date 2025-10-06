@@ -1,4 +1,4 @@
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Enumerador.Veiculo;
 
@@ -13,8 +13,8 @@ namespace AutoGestao.Entidades.Veiculos
     [FormTab("despachante", "Despachante", TabIcon = "fas fa-user-tie", Order = 5, Controller = "VeiculoDespachante")]
     [FormTab("resumo", "Resumo", TabIcon = "fas fa-chart-line", Order = 6, Controller = "VeiculoResumo")]
     [FormTab("vistoria", "Vistoria", TabIcon = "fas fa-search", Order = 7, Controller = "VeiculoVistoria")]
-    //[FormTab("web", "Web", TabIcon = "fas fa-globe", Order = 8, Controller = "VeiculoWeb")]
-    //[FormTab("entrada", "Entrada", TabIcon = "fas fa-sign-in-alt", Order = 9, Controller = "VeiculoEntrada")]
+    [FormTab("web", "Web", TabIcon = "fas fa-globe", Order = 8, Controller = "VeiculoWeb")]
+    [FormTab("entrada", "Entrada", TabIcon = "fas fa-sign-in-alt", Order = 9, Controller = "VeiculoEntrada")]
     [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 10, Controller = "Despesas", RequiredRoles = new[] { "Admin", "Financeiro" })]
     public class Veiculo : BaseEntidade
     {

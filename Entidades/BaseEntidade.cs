@@ -1,4 +1,4 @@
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using AutoGestao.Interfaces;
 
 namespace AutoGestao.Entidades

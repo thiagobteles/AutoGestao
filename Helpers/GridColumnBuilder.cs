@@ -1,4 +1,4 @@
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Models.Grid;
 using System.ComponentModel;
@@ -256,8 +256,20 @@ namespace AutoGestao.Helpers
                 Format = attr.Format
             };
 
+            // Verificar se é campo de Imagem ou Arquivo via FormField
+            var formFieldAttr = prop.GetCustomAttribute<FormFieldAttribute>();
+
+            // NOVO: Detectar campos de imagem e arquivo
+            if (formFieldAttr?.Type == EnumFieldType.Image || formFieldAttr?.Type == EnumFieldType.File)
+            {
+                column.Type = EnumGridColumnType.Text; // Será renderizado na view _GridCell.cshtml
+                column.Sortable = false;
+                column.Width = formFieldAttr.Type == EnumFieldType.Image
+                    ? (attr.Width ?? "80px")
+                    : (attr.Width ?? "150px");
+            }
             // Determinar o tipo da coluna
-            if (prop.PropertyType.IsEnum || Nullable.GetUnderlyingType(prop.PropertyType)?.IsEnum == true)
+            else if (prop.PropertyType.IsEnum || Nullable.GetUnderlyingType(prop.PropertyType)?.IsEnum == true)
             {
                 column.Type = EnumGridColumnType.Enumerador;
                 column.EnumRender = attr.EnumRender;
@@ -268,7 +280,6 @@ namespace AutoGestao.Helpers
             }
             else if (IsNumericType(prop.PropertyType))
             {
-                // CORREÇÃO: Verificar se tem formato "C" para Currency
                 if (!string.IsNullOrEmpty(attr.Format) && attr.Format.ToUpper() == "C")
                 {
                     column.Type = EnumGridColumnType.Currency;

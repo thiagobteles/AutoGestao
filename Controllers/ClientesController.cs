@@ -4,7 +4,7 @@ using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
-using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

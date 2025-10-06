@@ -7,7 +7,7 @@ using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
-using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using AutoGestao.Models;
 using System.Security.Claims;
 using Minio.ApiEndpoints;
+using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Services
 {

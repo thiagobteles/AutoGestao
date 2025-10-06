@@ -1,7 +1,7 @@
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
-using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 using System.Reflection;
 
 namespace AutoGestao.Helpers
@@ -126,12 +126,13 @@ namespace AutoGestao.Helpers
             try
             {
                 var enumValue = Enum.Parse(property.PropertyType, value);
-                var enumInfo = EnumHelper.GetEnumInfo(enumValue);
+                var enumInfo = EnumAutomationHelper.GetEnumValueInfo(enumValue);
+                var enumColor = EnumAutomationHelper.GetEnumColor(enumValue);
 
                 return renderType switch
                 {
-                    EnumRenderType.Icon => $"<i class='{enumInfo.Icon}' style='color:{enumInfo.Color}'></i>",
-                    EnumRenderType.IconDescription => $"<i class='{enumInfo.Icon}' style='color:{enumInfo.Color}'></i> {enumInfo.Description}",
+                    EnumRenderType.Icon => $"<i class='{enumInfo.Icon}' style='color:{enumColor}'></i>",
+                    EnumRenderType.IconDescription => $"<i class='{enumInfo.Icon}' style='color:{enumColor}'></i> {enumInfo.Description}",
                     EnumRenderType.Description => enumInfo.Description,
                     _ => enumInfo.Description
                 };

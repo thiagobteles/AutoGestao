@@ -1,8 +1,3 @@
-/**
- * Sistema de Grid Unificado - Versão Completa
- * Suporte a todos os tipos de filtros e funcionalidades avançadas
- */
-
 class StandardGrid {
     constructor(options = {}) {
         this.options = {

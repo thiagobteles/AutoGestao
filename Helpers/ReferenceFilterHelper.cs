@@ -1,5 +1,5 @@
 using System.Reflection;
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using AutoGestao.Models;
 
 namespace AutoGestao.Helpers

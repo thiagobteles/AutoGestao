@@ -3,11 +3,15 @@
 @using AutoGestao.Extensions
 @using AutoGestao.Models
 @using AutoGestao.Models.Grid
+@using AutoGestao.Services.Interface
+
+@inject AutoGestao.Services.Interface.IFileStorageService FileStorageService
 
 @{
     var itemType = Model.Item.GetType();
     var propertyInfo = itemType.GetProperty(Model.Column.Name);
     var value = propertyInfo?.GetValue(Model.Item);
+    var formFieldAttr = propertyInfo?.GetCustomAttribute<FormFieldAttribute>();
 }
 
 @switch (Model.Column.Type)
@@ -227,6 +231,73 @@
         }
         break;
 
+    case EnumGridColumnType.Text:
+        @* RENDERIZAR IMAGEM NA GRID *@
+        @if (formFieldAttr?.Type == EnumFieldType.Image && value != null && !string.IsNullOrEmpty(value.ToString()))
+        {
+            try
+            {
+                var filePath = value.ToString();
+                var entityName = itemType.Name;
+                var idEmpresa = GetCurrentEmpresaId();
+
+                var imageUrl = FileStorageService.GetDownloadUrlAsync(filePath, entityName, idEmpresa).GetAwaiter().GetResult();
+                var size = formFieldAttr.ImageSize.Split('x');
+                var width = size.Length > 0 ? size[0] : "50";
+                var height = size.Length > 1 ? size[1] : "50";
+
+                <img src="@imageUrl"
+                     alt="Imagem"
+                     class="img-thumbnail"
+                     style="max-width:@(width)px; max-height:@(height)px; object-fit: cover; border-radius: 4px; cursor: pointer;"
+                     loading="lazy"
+                     onclick="window.open('@imageUrl', '_blank')"
+                     title="Clique para ampliar" />
+            }
+            catch
+            {
+                <i class="fas fa-image text-muted" title="Erro ao carregar imagem"></i>
+            }
+        }
+        @* RENDERIZAR ARQUIVO NA GRID *@
+        else if (formFieldAttr?.Type == EnumFieldType.File && value != null && !string.IsNullOrEmpty(value.ToString()))
+        {
+            var fileName = System.IO.Path.GetFileName(value.ToString());
+            var extension = System.IO.Path.GetExtension(fileName).ToLower();
+
+            var icon = extension switch
+            {
+                ".pdf" => "fa-file-pdf text-danger",
+                ".doc" or ".docx" => "fa-file-word text-primary",
+                ".xls" or ".xlsx" => "fa-file-excel text-success",
+                ".jpg" or ".jpeg" or ".png" or ".gif" => "fa-file-image text-info",
+                ".zip" or ".rar" => "fa-file-archive text-warning",
+                _ => "fa-file text-secondary"
+            };
+
+            <span title="@fileName">
+                <i class="fas @icon me-1"></i>
+                <small>@fileName</small>
+            </span>
+        }
+        else
+        {
+            @* TEXTO NORMAL COM LINK SE NECESSÁRIO *@
+            if (!string.IsNullOrEmpty(Model.Column.UrlAction))
+            {
+                var itemId = itemType.GetProperty("Id")?.GetValue(Model.Item)?.ToString();
+                var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+                <a href="/@controller/@Model.Column.UrlAction/@itemId" class="text-decoration-none text-primary">
+                    @value
+                </a>
+            }
+            else
+            {
+                <text>@value</text>
+            }
+        }
+        break;
+
     default:
         @if (!string.IsNullOrEmpty(Model.Column.UrlAction))
         {
@@ -240,4 +311,15 @@
             <span class="text-truncate" title="@value">@(value ?? "-")</span>
         }
         break;
+}
+
+@functions {
+    private long GetCurrentEmpresaId()
+    {
+        var empresaIdClaim = User.FindFirst("EmpresaId")?.Value;
+        if (long.TryParse(empresaIdClaim, out var empresaId))
+            return empresaId;
+
+        return 1;
+    }
 }

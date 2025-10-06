@@ -1,4 +1,4 @@
-using AutoGestao.Attributes;
+using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Entidades.Veiculos

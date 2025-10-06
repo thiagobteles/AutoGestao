@@ -1,7 +1,7 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Entidades.Veiculos;
-using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Controllers
 {

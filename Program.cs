@@ -15,6 +15,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddControllersWithViews()
+    .AddRazorOptions(options =>
+    {
+        // Permitir await em views
+        options.ViewLocationFormats.Add("/Views/{1}/{0}.cshtml");
+        options.ViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
+    });
+
 // Configurar cultura padrão para português do Brasil
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("pt-BR");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");

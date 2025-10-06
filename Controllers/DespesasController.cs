@@ -1,6 +1,6 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
-using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers

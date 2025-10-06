@@ -2,7 +2,7 @@ using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Models;
-using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

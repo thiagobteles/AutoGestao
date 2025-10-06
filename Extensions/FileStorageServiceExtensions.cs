@@ -1,4 +1,4 @@
-using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Extensions
 {
