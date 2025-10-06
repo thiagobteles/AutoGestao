@@ -118,7 +118,7 @@ namespace AutoGestao.Controllers
             return Ok(_entityTypeCache.Keys.OrderBy(k => k).ToList());
         }
 
-        #region Helper Methods
+        #region Métodos private
 
         /// <summary>
         /// Obtém o tipo da entidade de forma dinâmica

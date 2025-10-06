@@ -107,10 +107,8 @@
     }
     else
     {
-        <!-- Formulário sem abas (fallback) -->
         @await Html.PartialAsync("_StandardFormContent", Model)
     }
 </div>
 
-<!-- JavaScript para gerenciamento das abas -->
 <script src="~/js/tabbed-form.js"></script>
