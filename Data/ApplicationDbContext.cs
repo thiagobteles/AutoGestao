@@ -124,6 +124,8 @@ namespace AutoGestao.Data
                 entity.Property(e => e.Bairro).HasMaxLength(100);
                 entity.Property(e => e.Ativo).IsRequired();
                 entity.Property(e => e.Observacoes).HasMaxLength(2000);
+                entity.Property(e => e.FotoCliente).HasMaxLength(10000);
+                entity.Property(e => e.DocumentoRG).HasMaxLength(10000);
                 entity.Property(e => e.DataCadastro).IsRequired();
                 entity.Property(e => e.DataAlteracao).IsRequired();
             });

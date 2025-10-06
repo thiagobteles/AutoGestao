@@ -321,49 +321,42 @@ async function submitFormAjax(form) {
 
         const formData = new FormData(form);
 
-        // IMPORTANTE: Atualizar valores dos campos de referência
-        // Os campos hidden podem não estar sincronizados com o FormData
+        // ===================================================================
+        // CRITICAL: Garantir que campos de arquivo hidden sejam enviados
+        // ===================================================================
+        const filePathInputs = form.querySelectorAll('.file-path-input');
+        filePathInputs.forEach(hiddenInput => {
+            const fieldName = hiddenInput.name;
+            const fieldValue = hiddenInput.value || '';
+
+            console.log(`[FILE] ${fieldName} = ${fieldValue}`);
+
+            // Garantir que o campo está no FormData
+            if (formData.has(fieldName)) {
+                formData.set(fieldName, fieldValue);
+            } else {
+                formData.append(fieldName, fieldValue);
+            }
+        });
+
+        // Atualizar valores dos campos de referência
         const referenceHiddenInputs = form.querySelectorAll('input[type="hidden"][id$="_value"]');
         referenceHiddenInputs.forEach(hiddenInput => {
             const fieldName = hiddenInput.name;
             const fieldValue = hiddenInput.value || '0';
 
-            console.log(`Campo referência: ${fieldName} = ${fieldValue}`);
+            console.log(`[REF] ${fieldName} = ${fieldValue}`);
 
-            // Forçar atualização no FormData
-            formData.set(fieldName, fieldValue);
+            if (formData.has(fieldName)) {
+                formData.set(fieldName, fieldValue);
+            } else {
+                formData.append(fieldName, fieldValue);
+            }
         });
 
-        // Processar campos currency
-        const currencyInputs = form.querySelectorAll('.currency-mask');
-        currencyInputs.forEach(input => {
-            const rawValue = parseCurrencyToDecimal(input.value);
-            console.log(`Currency: ${input.name} = ${input.value} -> ${rawValue}`);
-            formData.set(input.name, rawValue);
-        });
+        const actionUrl = form.action;
 
-        // Processar campos percentage
-        const percentageInputs = form.querySelectorAll('.percentage-mask');
-        percentageInputs.forEach(input => {
-            const rawValue = parsePercentageToDecimal(input.value);
-            formData.set(input.name, rawValue);
-        });
-
-        // Processar campos com máscara
-        const maskedInputs = form.querySelectorAll('.cpf-mask, .cnpj-mask, .phone-mask, .cep-mask');
-        maskedInputs.forEach(input => {
-            const rawValue = input.value.replace(/\D/g, '');
-            formData.set(input.name, rawValue);
-        });
-
-        // DEBUG: Mostrar todos os valores sendo enviados
-        console.log('=== Dados sendo enviados ===');
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-        }
-        console.log('===========================');
-
-        const response = await fetch(form.action, {
+        const response = await fetch(actionUrl, {
             method: 'POST',
             body: formData,
             headers: {
@@ -371,36 +364,35 @@ async function submitFormAjax(form) {
             }
         });
 
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new Error("Resposta inválida do servidor");
-        }
-
         const result = await response.json();
 
         if (result.success) {
             showToast(result.message || 'Salvo com sucesso!', 'success');
 
-            if (result.redirectUrl) {
-                setTimeout(() => {
+            setTimeout(() => {
+                if (result.redirectUrl) {
                     window.location.href = result.redirectUrl;
-                }, 1000);
-            } else {
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            }
+                } else {
+                    window.location.href = form.dataset.backUrl || '/';
+                }
+            }, 1000);
         } else {
             if (result.errors) {
-                displayValidationErrors(form, result.errors);
+                displayValidationErrors(result.errors);
+            } else {
+                showToast(result.message || 'Erro ao salvar', 'error');
             }
-            showToast(result.message || 'Erro ao processar formulário.', 'error');
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
         }
 
     } catch (error) {
-        console.error('Erro:', error);
-        showToast('Erro ao enviar formulário', 'error');
-    } finally {
+        console.error('Erro no submit:', error);
+        showToast('Erro ao processar requisição', 'error');
+
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;

@@ -152,9 +152,55 @@ namespace AutoGestao.Controllers
             return true;
         }
 
+        protected virtual void ProcessFileFieldsFromRequest(T entity)
+        {
+            var fileProperties = typeof(T).GetProperties()
+                .Where(p => p.GetCustomAttribute<FormFieldAttribute>() != null &&
+                           (p.GetCustomAttribute<FormFieldAttribute>().Type == EnumFieldType.File ||
+                            p.GetCustomAttribute<FormFieldAttribute>().Type == EnumFieldType.Image))
+                .ToList();
+
+            foreach (var property in fileProperties)
+            {
+                var propertyName = property.Name;
+
+                // Obter valor do Request.Form (campo hidden)
+                if (Request.Form.TryGetValue(propertyName, out var formValue))
+                {
+                    var value = formValue.ToString();
+
+                    _logger?.LogInformation("Processando campo arquivo {Property}: '{Value}'", propertyName, value);
+
+                    // Se tiver valor, atribuir à propriedade
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        property.SetValue(entity, value);
+                    }
+                    else
+                    {
+                        // Se valor vazio, manter null
+                        property.SetValue(entity, null);
+                    }
+                }
+            }
+        }
+
         protected virtual Task BeforeCreate(T entity)
         {
+            ProcessFileFieldsFromRequest(entity); // ADICIONE ESTA LINHA
             entity.DataCadastro = DateTime.UtcNow;
+            return Task.CompletedTask;
+        }
+
+        protected virtual Task BeforeUpdate(T entity)
+        {
+            ProcessFileFieldsFromRequest(entity); // ADICIONE ESTA LINHA
+            entity.DataAlteracao = DateTime.UtcNow;
+            return Task.CompletedTask;
+        }
+
+        protected virtual Task BeforeDelete(T entity)
+        {
             return Task.CompletedTask;
         }
 
@@ -163,18 +209,7 @@ namespace AutoGestao.Controllers
             return Task.CompletedTask;
         }
 
-        protected virtual Task BeforeUpdate(T entity)
-        {
-            entity.DataAlteracao = DateTime.UtcNow;
-            return Task.CompletedTask;
-        }
-
         protected virtual Task AfterUpdate(T entity)
-        {
-            return Task.CompletedTask;
-        }
-
-        protected virtual Task BeforeDelete(T entity)
         {
             return Task.CompletedTask;
         }
