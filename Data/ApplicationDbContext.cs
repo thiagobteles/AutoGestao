@@ -262,6 +262,7 @@ namespace AutoGestao.Data
                 entity.Property(e => e.Principal).IsRequired();
                 entity.Property(e => e.DataCadastro).IsRequired();
                 entity.Property(e => e.DataAlteracao).IsRequired();
+                entity.Property(e => e.Foto).HasMaxLength(10000).IsRequired();
             });
 
             // ===========================================

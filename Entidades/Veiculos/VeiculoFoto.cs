@@ -13,6 +13,9 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 1, Name = "Caminho do Arquivo", Section = "Arquivo", Icon = "fas fa-folder", Type = EnumFieldType.Text, Required = true, ReadOnly = true)]
         public string CaminhoArquivo { get; set; } = string.Empty;
 
+        [FormField(Order = 50, Name = "Foto do veículo", Section = "Teste", Icon = "fas fa-image", Type = EnumFieldType.Image, ImageSize = "75X75", AllowedExtensions = "jpg,jpeg,png", MaxSizeMB = 5)]
+        public string? Foto { get; set; }
+
         [GridField("Descrição", Order = 20)]
         [FormField(Order = 10, Name = "Descrição", Section = "Informações", Icon = "fas fa-align-left", Type = EnumFieldType.Text, GridColumns = 2, Placeholder = "Descrição da foto...")]
         public string? Descricao { get; set; }

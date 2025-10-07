@@ -35,11 +35,10 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Observações", Order = 40, Section = "Status", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea, Placeholder = "Informações adicionais sobre o cliente...", GridColumns = 1)]
         public string? Observacoes { get; set; }
 
-        [GridField("Foto", Order = 50, Width = "150px", ShowInGrid = true)]
-        [FormField(Order = 50, Name = "Foto do Cliente", Section = "Teste", Icon = "fas fa-image", Type = EnumFieldType.Image, ImageSize = "150x150", AllowedExtensions = "jpg,jpeg,png", MaxSizeMB = 5)]
+        //[GridField("Foto", Order = 50, Width = "50px", ShowInGrid = true)]
+        [FormField(Order = 50, Name = "Foto do Cliente", Section = "Teste", Icon = "fas fa-image", Type = EnumFieldType.Image, ImageSize = "75X75", AllowedExtensions = "jpg,jpeg,png", MaxSizeMB = 5)]
         public string? FotoCliente { get; set; }
 
-        [GridField("RG", Order = 50, ShowInGrid = false)]
         [FormField(Order = 50, Name = "Documento RG (PDF)", Section = "Teste", Icon = "fas fa-file-pdf", Type = EnumFieldType.File, AllowedExtensions = "pdf", MaxSizeMB = 5)]
         public string? DocumentoRG { get; set; }
 
