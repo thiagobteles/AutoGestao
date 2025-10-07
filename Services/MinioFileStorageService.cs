@@ -62,33 +62,6 @@ namespace AutoGestao.Services
             }
         }
 
-        public async Task<string> GetDownloadUrlAsync(
-            string filePath,
-            string entityName,
-            long idEmpresa,
-            string? customBucket = null,
-            int? expirySeconds = null)
-        {
-            try
-            {
-                var bucketName = customBucket ?? GetBucketName(entityName, idEmpresa);
-                var expiry = expirySeconds ?? _settings.DefaultExpirySeconds;
-
-                var presignedGetObjectArgs = new PresignedGetObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(filePath)
-                    .WithExpiry(expiry);
-
-                var url = await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs);
-                return url;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao gerar URL de download");
-                throw;
-            }
-        }
-
         public async Task<Stream> DownloadFileAsync(string filePath, string entityName, long idEmpresa, string? customBucket = null)
         {
             try
@@ -142,6 +115,41 @@ namespace AutoGestao.Services
             }
         }
 
+        public async Task<string> GetDownloadUrlAsync(string filePath, string entityName, long idEmpresa, string? customBucket = null, int? expirySeconds = null)
+        {
+            try
+            {
+                var bucketName = customBucket ?? GetBucketName(entityName, idEmpresa);
+                var expiry = expirySeconds ?? _settings.DefaultExpirySeconds;
+
+                _logger.LogInformation($"[MINIO] Gerando URL para: Bucket={bucketName}, File={filePath}, Expiry={expiry}s");
+
+                // Verificar se o arquivo existe
+                var exists = await FileExistsAsync(filePath, entityName, idEmpresa, customBucket);
+                if (!exists)
+                {
+                    _logger.LogWarning($"[MINIO] Arquivo não encontrado: {bucketName}/{filePath}");
+                    throw new FileNotFoundException($"Arquivo não encontrado: {filePath}");
+                }
+
+                var presignedGetObjectArgs = new PresignedGetObjectArgs()
+                    .WithBucket(bucketName)
+                    .WithObject(filePath)
+                    .WithExpiry(expiry);
+
+                var url = await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs);
+
+                _logger.LogInformation($"[MINIO] URL gerada com sucesso: {url}");
+
+                return url;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[MINIO] Erro ao gerar URL de download");
+                throw;
+            }
+        }
+
         public async Task<bool> FileExistsAsync(string filePath, string entityName, long idEmpresa, string? customBucket = null)
         {
             try
@@ -155,13 +163,8 @@ namespace AutoGestao.Services
                 await _minioClient.StatObjectAsync(statObjectArgs);
                 return true;
             }
-            catch (ObjectNotFoundException)
+            catch (Exception)
             {
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao verificar existência do arquivo");
                 return false;
             }
         }

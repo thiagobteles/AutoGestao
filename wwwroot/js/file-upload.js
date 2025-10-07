@@ -198,7 +198,6 @@
 
 
         replaceUploadWithPreview(container, result, formGroup, propertyName) {
-            // Remover o campo de upload
             const uploadWrapper = container.querySelector('.file-upload-wrapper');
             if (uploadWrapper) {
                 uploadWrapper.remove();
@@ -207,30 +206,59 @@
             const isImage = container.classList.contains('image-upload-container');
 
             if (isImage) {
-                // Criar preview de imagem
+                const fileInput = document.getElementById(`file_${propertyName}`);
+                const imageSize = fileInput?.dataset.imageSize || '150x150';
+                const [width, height] = imageSize.split('x');
+
+                console.log('[PREVIEW] Criando preview de imagem:', {
+                    url: result.fileUrl,
+                    size: `${width}x${height}`
+                });
+
                 const previewHtml = `
-            <div class="image-preview-wrapper">
+            <div class="image-preview-wrapper position-relative">
                 <img src="${result.fileUrl}" 
                      alt="Imagem" 
                      class="image-preview" 
-                     style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 8px;">
+                     style="width: ${width}px; height: ${height}px; object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6;"
+                     onload="console.log('[PREVIEW] Imagem carregada com sucesso')"
+                     onerror="console.error('[PREVIEW] Erro ao carregar imagem:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                
+                <div class="image-error-placeholder d-none align-items-center justify-content-center" 
+                     style="width: ${width}px; height: ${height}px; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 8px;">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-image fs-1"></i>
+                        <div class="small mt-2">Erro ao carregar imagem</div>
+                    </div>
+                </div>
+                
                 <button type="button" 
-                        class="btn btn-sm btn-danger btn-delete-file" 
+                        class="btn btn-sm btn-danger btn-delete-file position-absolute" 
                         data-property="${propertyName}" 
                         data-filepath="${result.filePath}"
-                        title="Excluir arquivo">
+                        style="top: 5px; right: 5px; z-index: 10;"
+                        title="Excluir imagem">
                     <i class="fas fa-trash"></i>
                 </button>
+            </div>
+            <div class="form-text mt-2">
+                <small class="text-muted">
+                    <i class="fas fa-check-circle text-success me-1"></i>
+                    Upload realizado com sucesso
+                </small>
             </div>
         `;
                 container.insertAdjacentHTML('afterbegin', previewHtml);
             } else {
-                // Criar preview de arquivo
+                // Criar preview de arquivo com melhor visual
                 const previewHtml = `
-            <div class="file-info">
-                <i class="fas fa-file me-2"></i>
-                <span class="file-name">${result.fileName}</span>
-                <a href="${result.fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary ms-2" title="Visualizar">
+            <div class="file-info d-flex align-items-center gap-2 p-3 border rounded">
+                <i class="fas fa-file-pdf text-danger fs-3"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">${result.fileName}</div>
+                    <small class="text-muted">PDF</small>
+                </div>
+                <a href="${result.fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar">
                     <i class="fas fa-eye"></i>
                 </a>
                 <button type="button" 
@@ -248,6 +276,7 @@
             // Reattach listeners para o botão de deletar
             this.attachDeleteFileListeners();
         }
+
 
         resetLabel(input) {
             const label = input.nextElementSibling;
@@ -335,8 +364,10 @@
             const fileInfo = container.querySelector('.file-info');
             if (fileInfo) fileInfo.remove();
 
-            // Determinar tipo
+            // Determinar tipo e obter configurações
             const isImage = container.classList.contains('image-upload-container');
+            const hiddenInput = document.getElementById(`hidden_${propertyName}`);
+            const imageSize = hiddenInput?.dataset.imageSize || '150x150';
             const accept = isImage ? 'image/*' : '';
 
             // Criar novo campo de upload
@@ -346,11 +377,12 @@
                    class="form-control file-input" 
                    id="file_${propertyName}" 
                    data-property="${propertyName}"
+                   data-image-size="${imageSize}"
                    ${accept ? `accept="${accept}"` : ''} />
             
             <label for="file_${propertyName}" class="file-upload-label">
                 <span class="file-upload-btn">
-                    <i class="fas fa-upload file-upload-icon"></i> Escolher Arquivo
+                    <i class="fas fa-upload file-upload-icon"></i> Escolher ${isImage ? 'Imagem' : 'Arquivo'}
                 </span>
                 <span class="file-upload-text">Nenhum arquivo selecionado</span>
             </label>
