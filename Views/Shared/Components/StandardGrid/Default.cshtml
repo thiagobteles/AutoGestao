@@ -1,0 +1,81 @@
+@model AutoGestao.Models.StandardGridViewModel
+
+<div class="container-fluid px-0">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">
+                        <i class="@Model.Icon me-2"></i>@Model.Title
+                    </h5>
+                </div>
+                @if (Model.ShowCreateButton)
+                {
+                    <a href="/@Model.ControllerName/Create" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Novo
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table base-grid-table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            @foreach (var column in Model.Columns)
+                            {
+                                <th style="width: @column.Width" class="@(column.Sortable ? "sortable" : "")">
+                                    @column.Name
+                                    @if (column.Sortable)
+                                    {
+                                        <i class="fas fa-sort ms-1 sort-icon"></i>
+                                    }
+                                </th>
+                            }
+                            <th style="width: 100px" class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                                @foreach (var column in Model.Columns)
+                                {
+                                    <td>
+                                        @if (row.ContainsKey(column.Property))
+                                        {
+                                            @row[column.Property]
+                                        }
+                                    </td>
+                                }
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        @if (Model.ShowDetailsButton)
+                                        {
+                                            <a href="/@Model.ControllerName/Details/@row["Id"]" class="btn btn-outline-info" title="Detalhes">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        }
+                                        @if (Model.ShowEditButton)
+                                        {
+                                            <a href="/@Model.ControllerName/Edit/@row["Id"]" class="btn btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        }
+                                        @if (Model.ShowDeleteButton)
+                                        {
+                                            <button onclick="confirmarExclusao(@row["Id"])" class="btn btn-outline-danger" title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

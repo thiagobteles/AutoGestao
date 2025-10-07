@@ -426,6 +426,16 @@ namespace AutoGestao.Controllers
                 return Forbid();
             }
 
+            // LOG: Verificar TODOS os campos recebidos
+            var allProperties = typeof(T).GetProperties();
+            Console.WriteLine("========== VALORES RECEBIDOS NO CREATE ==========");
+            foreach (var prop in allProperties)
+            {
+                var value = prop.GetValue(entity);
+                Console.WriteLine($"{prop.Name}: {value ?? "NULL"}");
+            }
+            Console.WriteLine("=================================================");
+
             if (IsAjaxRequest())
             {
                 return await HandleModalCreate(this, entity);
@@ -450,14 +460,27 @@ namespace AutoGestao.Controllers
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"ERRO CREATE: {ex.Message}");
                     ModelState.AddModelError("", $"Erro ao criar registro: {ex.Message}");
                 }
+            }
+            else
+            {
+                Console.WriteLine("========== ERROS DE VALIDAÇÃO ==========");
+                foreach (var error in ModelState)
+                {
+                    if (error.Value.Errors.Any())
+                    {
+                        Console.WriteLine($"{error.Key}: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+                    }
+                }
+                Console.WriteLine("========================================");
             }
 
             var viewModel = await BuildFormViewModelAsync(entity, "Create");
             AddModelStateToViewModel(viewModel);
 
-            return Request.IsAjaxRequest() 
+            return Request.IsAjaxRequest()
                 ? PartialView("_StandardFormContent", viewModel)
                 : View("_StandardForm", viewModel);
         }
@@ -523,15 +546,28 @@ namespace AutoGestao.Controllers
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Edit(long id, T entity)
         {
-            // LOG: Verificar valores recebidos
-            var properties = typeof(T).GetProperties()
-                .Where(p => p.Name.StartsWith("Id") && p.PropertyType == typeof(long) || p.PropertyType == typeof(long?));
-
-            foreach (var prop in properties)
+            // LOG: Verificar TODOS os campos recebidos
+            var allProperties = typeof(T).GetProperties();
+            Console.WriteLine("========== VALORES RECEBIDOS NO EDIT ==========");
+            foreach (var prop in allProperties)
             {
                 var value = prop.GetValue(entity);
-                Console.WriteLine($"Campo recebido: {prop.Name} = {value}");
+                Console.WriteLine($"{prop.Name}: {value ?? "NULL"}");
             }
+            Console.WriteLine("===============================================");
+
+            // Verificar especificamente campos de arquivo
+            var fileProperties = typeof(T).GetProperties()
+                .Where(p => p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.File ||
+                            p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Image);
+
+            Console.WriteLine("========== CAMPOS DE ARQUIVO ==========");
+            foreach (var prop in fileProperties)
+            {
+                var value = prop.GetValue(entity);
+                Console.WriteLine($"{prop.Name}: '{value}' (IsNull: {value == null})");
+            }
+            Console.WriteLine("========================================");
 
             if (id != entity.Id)
             {
@@ -566,20 +602,29 @@ namespace AutoGestao.Controllers
             {
                 try
                 {
-                    // Preservar valores que não devem ser alterados
+                    // Preservar valores
                     entity.IdEmpresa = existingEntity.IdEmpresa;
                     entity.DataCadastro = existingEntity.DataCadastro;
                     entity.CriadoPorUsuarioId = existingEntity.CriadoPorUsuarioId;
 
-                    // LOG: Verificar valores antes de atualizar
-                    foreach (var prop in properties)
+                    // CRITICAL: Preservar campos de arquivo que não foram alterados
+                    foreach (var prop in fileProperties)
                     {
-                        var oldValue = prop.GetValue(existingEntity);
                         var newValue = prop.GetValue(entity);
-                        Console.WriteLine($"Atualizando {prop.Name}: {oldValue} -> {newValue}");
+                        var oldValue = prop.GetValue(existingEntity);
+
+                        // Se o novo valor está vazio mas havia um arquivo antes, manter o antigo
+                        if (string.IsNullOrEmpty(newValue?.ToString()) && !string.IsNullOrEmpty(oldValue?.ToString()))
+                        {
+                            Console.WriteLine($"[PRESERVANDO] {prop.Name}: mantendo valor '{oldValue}'");
+                            prop.SetValue(entity, oldValue);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[ATUALIZANDO] {prop.Name}: '{oldValue}' -> '{newValue}'");
+                        }
                     }
 
-                    // Atualizar propriedades
                     _context.Entry(existingEntity).CurrentValues.SetValues(entity);
 
                     await BeforeUpdate(existingEntity);
@@ -608,7 +653,6 @@ namespace AutoGestao.Controllers
             }
             else
             {
-                // LOG: Mostrar erros de validação
                 foreach (var error in ModelState)
                 {
                     if (error.Value.Errors.Any())

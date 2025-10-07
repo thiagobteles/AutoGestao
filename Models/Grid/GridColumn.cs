@@ -5,6 +5,7 @@ namespace AutoGestao.Models.Grid
     public class GridColumn
     {
         public string Name { get; set; } = "";
+        public string Property { get; set; } = "";
         public string DisplayName { get; set; } = "";
         public string? Width { get; set; }
         public bool Sortable { get; set; } = true;

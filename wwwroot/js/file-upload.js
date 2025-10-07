@@ -130,8 +130,20 @@
 
             const propertyName = input.dataset.property;
             const customBucket = input.dataset.customBucket;
-            const container = input.closest('.file-upload-container');
-            const hiddenInput = container.querySelector('.file-path-input');
+            const container = input.closest('.image-upload-container, .file-upload-container');
+            const hiddenInput = document.getElementById(`hidden_${propertyName}`);
+
+            console.log('[UPLOAD] Iniciando upload...', {
+                propertyName,
+                fileName: file.name,
+                hiddenInput: hiddenInput?.id,
+                hiddenInputValue: hiddenInput?.value
+            });
+
+            if (!hiddenInput) {
+                console.error('[UPLOAD] Hidden input não encontrado!');
+                return;
+            }
 
             const formData = new FormData();
             formData.append('file', file);
@@ -152,12 +164,23 @@
                 const result = await response.json();
 
                 if (result.success) {
+                    console.log('[UPLOAD] Sucesso!', {
+                        filePath: result.filePath,
+                        fileUrl: result.fileUrl
+                    });
+
+                    // ATUALIZAR O HIDDEN INPUT COM O FILEPATH
                     hiddenInput.value = result.filePath;
+                    console.log('[UPLOAD] Hidden input atualizado:', {
+                        id: hiddenInput.id,
+                        name: hiddenInput.name,
+                        value: hiddenInput.value
+                    });
+
                     this.showSuccess(container, result.message);
 
-                    // RECONSTRUIR O PREVIEW E ESCONDER O CAMPO DE UPLOAD
-                    this.replaceUploadWithPreview(container, result, input.closest('.form-group-modern'));
-
+                    // Substituir campo de upload por preview
+                    this.replaceUploadWithPreview(container, result, input.closest('.form-group-modern'), propertyName);
                 } else {
                     this.showError(container, result.message);
                     input.value = '';
@@ -165,7 +188,7 @@
                 }
             } catch (error) {
                 this.showError(container, 'Erro ao enviar arquivo');
-                console.error('Upload error:', error);
+                console.error('[UPLOAD] Erro:', error);
                 input.value = '';
                 this.resetLabel(input);
             } finally {
@@ -173,70 +196,56 @@
             }
         }
 
-        replaceUploadWithPreview(container, result, formGroup) {
+
+        replaceUploadWithPreview(container, result, formGroup, propertyName) {
             // Remover o campo de upload
             const uploadWrapper = container.querySelector('.file-upload-wrapper');
-            if (uploadWrapper) uploadWrapper.remove();
+            if (uploadWrapper) {
+                uploadWrapper.remove();
+            }
 
-            // Remover mensagem de ajuda
-            const helpText = container.querySelector('.form-text');
-            if (helpText) helpText.remove();
+            const isImage = container.classList.contains('image-upload-container');
 
-            const controllerName = this.getControllerName();
-
-            if (container.classList.contains('image-upload')) {
+            if (isImage) {
                 // Criar preview de imagem
-                const preview = document.createElement('div');
-                preview.className = 'image-preview-wrapper';
-                preview.innerHTML = `
-            <img src="${result.fileUrl}" 
-                 alt="${result.fileName}" 
-                 class="image-preview"
-                 style="max-width: 100px; max-height: 100px; border-radius: 4px;">
-            <div class="d-flex gap-2">
-                <a href="/${controllerName}/DownloadFile?propertyName=${result.filePath.split('/')[0]}&filePath=${result.filePath}" 
-                   class="btn btn-sm btn-primary" 
-                   download
-                   title="Baixar imagem">
-                    <i class="fas fa-download"></i>
-                </a>
+                const previewHtml = `
+            <div class="image-preview-wrapper">
+                <img src="${result.fileUrl}" 
+                     alt="Imagem" 
+                     class="image-preview" 
+                     style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 8px;">
                 <button type="button" 
                         class="btn btn-sm btn-danger btn-delete-file" 
-                        data-property="${result.filePath.split('/')[0]}" 
-                        data-filepath="${result.filePath}"
-                        title="Excluir imagem">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-                container.insertBefore(preview, container.querySelector('.file-path-input'));
-            } else if (container.classList.contains('file-upload')) {
-                // Criar info de arquivo
-                const fileInfo = document.createElement('div');
-                fileInfo.className = 'file-info';
-                fileInfo.innerHTML = `
-            <i class="fas fa-file file-upload-icon text-primary"></i>
-            <span class="file-name" title="${result.fileName}">${result.fileName}</span>
-            <div class="d-flex gap-2">
-                <a href="/${controllerName}/DownloadFile?propertyName=${result.filePath.split('/')[0]}&filePath=${result.filePath}" 
-                   class="btn btn-sm btn-primary" 
-                   download
-                   title="Baixar arquivo">
-                    <i class="fas fa-download"></i>
-                </a>
-                <button type="button" 
-                        class="btn btn-sm btn-danger btn-delete-file" 
-                        data-property="${result.filePath.split('/')[0]}" 
+                        data-property="${propertyName}" 
                         data-filepath="${result.filePath}"
                         title="Excluir arquivo">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
         `;
-                container.insertBefore(fileInfo, container.querySelector('.file-path-input'));
+                container.insertAdjacentHTML('afterbegin', previewHtml);
+            } else {
+                // Criar preview de arquivo
+                const previewHtml = `
+            <div class="file-info">
+                <i class="fas fa-file me-2"></i>
+                <span class="file-name">${result.fileName}</span>
+                <a href="${result.fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary ms-2" title="Visualizar">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <button type="button" 
+                        class="btn btn-sm btn-danger btn-delete-file" 
+                        data-property="${propertyName}" 
+                        data-filepath="${result.filePath}"
+                        title="Excluir arquivo">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+                container.insertAdjacentHTML('afterbegin', previewHtml);
             }
 
-            // Reattach listeners
+            // Reattach listeners para o botão de deletar
             this.attachDeleteFileListeners();
         }
 
@@ -253,19 +262,28 @@
 
         async handleFileDelete(event) {
             event.preventDefault();
-            const btn = event.currentTarget;
-            const propertyName = btn.dataset.property;
-            const filePath = btn.dataset.filepath;
-            const container = btn.closest('.file-upload-container');
-            const hiddenInput = container.querySelector('.file-path-input');
+            event.stopPropagation();
 
-            if (!filePath) {
-                console.error('FilePath não encontrado no botão de exclusão');
-                this.showError(container, 'Erro: Caminho do arquivo não encontrado');
+            if (!confirm('Deseja realmente excluir este arquivo?')) {
                 return;
             }
 
-            if (!confirm('Deseja realmente excluir este arquivo?')) return;
+            const btn = event.currentTarget;
+            const propertyName = btn.dataset.property;
+            const filePath = btn.dataset.filepath;
+            const container = btn.closest('.image-upload-container, .file-upload-container');
+            const hiddenInput = document.getElementById(`hidden_${propertyName}`);
+
+            console.log('[DELETE] Iniciando exclusão...', {
+                propertyName,
+                filePath,
+                hiddenInput: hiddenInput?.id
+            });
+
+            if (!hiddenInput) {
+                console.error('[DELETE] Hidden input não encontrado!');
+                return;
+            }
 
             try {
                 this.showLoading(container);
@@ -285,18 +303,25 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    if (hiddenInput) hiddenInput.value = '';
+                    console.log('[DELETE] Sucesso!');
 
-                    // RECRIAR O CAMPO DE UPLOAD
+                    // LIMPAR O HIDDEN INPUT
+                    hiddenInput.value = '';
+                    console.log('[DELETE] Hidden input limpo:', {
+                        id: hiddenInput.id,
+                        name: hiddenInput.name,
+                        value: hiddenInput.value
+                    });
+
+                    // Remover preview e recriar campo de upload
                     this.recreateUploadField(container, propertyName);
-
                     this.showSuccess(container, result.message);
                 } else {
                     this.showError(container, result.message);
                 }
             } catch (error) {
                 this.showError(container, 'Erro ao excluir arquivo');
-                console.error('Delete error:', error);
+                console.error('[DELETE] Erro:', error);
             } finally {
                 this.hideLoading(container);
             }
@@ -310,35 +335,33 @@
             const fileInfo = container.querySelector('.file-info');
             if (fileInfo) fileInfo.remove();
 
-            // Determinar tipo de campo
-            const isImage = container.classList.contains('image-upload');
+            // Determinar tipo
+            const isImage = container.classList.contains('image-upload-container');
             const accept = isImage ? 'image/*' : '';
 
             // Criar novo campo de upload
-            const uploadWrapper = document.createElement('div');
-            uploadWrapper.className = 'file-upload-wrapper';
-            uploadWrapper.innerHTML = `
-        <input type="file" 
-               class="form-control file-input"
-               id="${propertyName}"
-               data-property="${propertyName}"
-               ${accept ? `accept="${accept}"` : ''} />
-        
-        <label for="${propertyName}" class="file-upload-label">
-            <span class="file-upload-btn">
-                <i class="fas fa-upload file-upload-icon"></i>
-                Escolher Arquivo
-            </span>
-            <span class="file-upload-text">
-                Nenhum arquivo selecionado
-            </span>
-        </label>
+            const uploadHtml = `
+        <div class="file-upload-wrapper">
+            <input type="file" 
+                   class="form-control file-input" 
+                   id="file_${propertyName}" 
+                   data-property="${propertyName}"
+                   ${accept ? `accept="${accept}"` : ''} />
+            
+            <label for="file_${propertyName}" class="file-upload-label">
+                <span class="file-upload-btn">
+                    <i class="fas fa-upload file-upload-icon"></i> Escolher Arquivo
+                </span>
+                <span class="file-upload-text">Nenhum arquivo selecionado</span>
+            </label>
+        </div>
     `;
 
-            container.insertBefore(uploadWrapper, container.querySelector('.file-path-input'));
+            container.insertAdjacentHTML('afterbegin', uploadHtml);
 
             // Reattach listeners
             this.attachFileInputListeners();
+            this.attachLabelClickListeners();
         }
 
         updatePreview(container, result, formGroup) {

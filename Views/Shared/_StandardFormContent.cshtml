@@ -300,172 +300,117 @@
                                     break;
 
                                 case EnumFieldType.Image:
-                                    <div class="file-upload-container image-upload" data-property="@field.PropertyName">
-                                        @if (!string.IsNullOrEmpty(field.FileUrl))
-                                        {
-                                            var size = field.ImageSize.Split('x');
-                                            var width = size.Length > 0 ? size[0] : "100";
-                                            var height = size.Length > 1 ? size[1] : "100";
+                                case EnumFieldType.File:
+                                    <div class="form-group-modern col-md-@field.GridColumns">
+                                        <label class="form-label">
+                                            <i class="@field.Icon me-2"></i>@field.DisplayName
+                                            @if (field.Required)
+                                            {
+                                                <span class="text-danger">*</span>
+                                            }
+                                        </label>
 
-                                            @* Mostrar preview da imagem *@
-                                            <div class="image-preview-wrapper">
-                                                <img src="@field.FileUrl"
-                                                     alt="@field.FileName"
-                                                     class="image-preview"
-                                                     style="max-width: @(width)px; max-height: @(height)px; border-radius: 4px;">
-
-                                                @if (!field.ReadOnly)
+                                        <div class="@(field.Type == EnumFieldType.Image ? "image-upload-container" : "file-upload-container")">
+                                            @if (!string.IsNullOrEmpty(field.FileUrl))
+                                            {
+                                                @* ===== PREVIEW DO ARQUIVO JÁ EXISTENTE ===== *@
+                                                @if (field.Type == EnumFieldType.Image)
                                                 {
-                                                    <div class="d-flex gap-2">
-                                                        <a href="@Url.Action("DownloadFile", new { propertyName = field.PropertyName, filePath = field.FilePath })"
-                                                           class="btn btn-sm btn-primary"
-                                                           download
-                                                           title="Baixar imagem">
-                                                            <i class="fas fa-download"></i>
-                                                        </a>
-                                                        <button type="button"
-                                                                class="btn btn-sm btn-danger btn-delete-file"
-                                                                data-property="@field.PropertyName"
-                                                                data-filepath="@field.FilePath"
-                                                                title="Excluir imagem">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
+                                                    <div class="image-preview-wrapper">
+                                                        <img src="@field.FileUrl"
+                                                             alt="Imagem"
+                                                             class="image-preview"
+                                                             style="max-width: @field.ImageSize.Split('x')[0]px; max-height: @field.ImageSize.Split('x')[1]px; object-fit: cover; border-radius: 8px;">
+                                                        @if (!field.ReadOnly)
+                                                        {
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-danger btn-delete-file"
+                                                                    data-property="@field.PropertyName"
+                                                                    data-filepath="@field.FilePath"
+                                                                    title="Excluir arquivo">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        }
                                                     </div>
                                                 }
                                                 else
                                                 {
-                                                    <a href="@Url.Action("DownloadFile", new { propertyName = field.PropertyName, filePath = field.FilePath })"
-                                                       class="btn btn-sm btn-primary"
-                                                       download
-                                                       title="Baixar imagem">
-                                                        <i class="fas fa-download"></i>
-                                                    </a>
+                                                    <div class="file-info">
+                                                        <i class="fas fa-file me-2"></i>
+                                                        <span class="file-name">@field.FileName</span>
+                                                        <a href="@field.FileUrl" target="_blank" class="btn btn-sm btn-outline-primary ms-2" title="Visualizar">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        @if (!field.ReadOnly)
+                                                        {
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-danger btn-delete-file"
+                                                                    data-property="@field.PropertyName"
+                                                                    data-filepath="@field.FilePath"
+                                                                    title="Excluir arquivo">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        }
+                                                    </div>
                                                 }
-                                            </div>
+                                            }
+                                            else if (!field.ReadOnly)
+                                            {
+                                                @* ===== CAMPO DE UPLOAD (SEM ARQUIVO) ===== *@
+                                                <div class="file-upload-wrapper">
+                                                    @* IMPORTANTE: Input file SEM atributo name! *@
+                                                    <input type="file"
+                                                           class="form-control file-input"
+                                                           id="file_@field.PropertyName"
+                                                           data-property="@field.PropertyName"
+                                                           @if (field.Type == EnumFieldType.Image)
+                                                           {
+                                                               @:accept="image/*"
+                                                           }
+                                                           else if (!string.IsNullOrEmpty(field.AllowedExtensions))
+                                                           {
+                                                               var accepts = string.Join(",", field.AllowedExtensions.Split(',').Select(e => $".{e.Trim()}"));
+                                                               @:accept="@accepts"
+                                                           }
+                                                    />
 
-                                            @* Input hidden para manter o valor do arquivo *@
-                                            <input type="hidden" name="@field.PropertyName" value="@field.FilePath" class="file-path-input" />
-                                        }
-                                        else if (!field.ReadOnly)
-                                        {
-                                            @* Mostrar campo de upload APENAS quando NÃO houver arquivo *@
-                                            <div class="file-upload-wrapper">
-                                                <input type="file"
-                                                       class="form-control file-input @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                                       id="@field.PropertyName"
-                                                       data-property="@field.PropertyName"
-                                                       accept="image/*"
-                                                       @(field.Required && string.IsNullOrEmpty(field.FileUrl) ? "required" : "") />
-
-                                                <label for="@field.PropertyName"
-                                                       class="file-upload-label"
-                                                       data-filepath="@field.FilePath">
-                                                    <span class="file-upload-btn">
-                                                        <i class="fas fa-upload file-upload-icon"></i>
-                                                        Escolher Arquivo
-                                                    </span>
-                                                    <span class="file-upload-text">
-                                                        Nenhum arquivo selecionado
-                                                    </span>
-                                                </label>
-
-                                                <input type="hidden" name="@field.PropertyName" value="@field.FilePath" class="file-path-input" />
-                                            </div>
-                                            <div class="form-text">
-                                                @if (!string.IsNullOrEmpty(field.AllowedExtensions))
-                                                {
-                                                    <span><i class="fas fa-info-circle me-1"></i>Formatos: @field.AllowedExtensions</span>
-                                                    <span class="mx-2">|</span>
-                                                }
-                                                <span>Tamanho máximo: @field.MaxSizeMB MB</span>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            @* Modo somente leitura sem arquivo *@
-                                            <p class="text-muted mb-0">
-                                                <i class="fas fa-image me-2"></i>Nenhuma imagem cadastrada
-                                            </p>
-                                        }
-                                    </div>
-                                    break;
-
-                                case EnumFieldType.File:
-                                    <div class="file-upload-container file-upload" data-property="@field.PropertyName">
-                                        @if (!string.IsNullOrEmpty(field.FileUrl))
-                                        {
-                                            <div class="file-info">
-                                                <i class="fas fa-file file-upload-icon text-primary"></i>
-                                                <span class="file-name" title="@field.FileName">@field.FileName</span>
-
-                                                <div class="d-flex gap-2">
-                                                    <a href="@Url.Action("DownloadFile", new { propertyName = field.PropertyName, filePath = field.FilePath })"
-                                                       class="btn btn-sm btn-primary"
-                                                       download
-                                                       title="Baixar arquivo">
-                                                        <i class="fas fa-download"></i>
-                                                    </a>
-                                                    @if (!field.ReadOnly)
-                                                    {
-                                                        <button type="button"
-                                                                class="btn btn-sm btn-danger btn-delete-file"
-                                                                data-property="@field.PropertyName"
-                                                                data-filepath="@field.FilePath"
-                                                                title="Excluir arquivo">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    }
+                                                    <label for="file_@field.PropertyName" class="file-upload-label">
+                                                        <span class="file-upload-btn">
+                                                            <i class="fas fa-upload file-upload-icon"></i> Escolher Arquivo
+                                                        </span>
+                                                        <span class="file-upload-text">Nenhum arquivo selecionado</span>
+                                                    </label>
                                                 </div>
-                                            </div>
 
-                                            @* Input hidden para manter o valor do arquivo *@
-                                            <input type="hidden" name="@field.PropertyName" value="@field.FilePath" class="file-path-input" />
-                                        }
-                                        else if (!field.ReadOnly)
-                                        {
-                                            @* Mostrar campo de upload APENAS quando NÃO houver arquivo *@
-                                            <div class="file-upload-wrapper">
-                                                <input type="file"
-                                                       class="form-control file-input @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                                       id="@field.PropertyName"
-                                                       data-property="@field.PropertyName"
-                                                       @if (!string.IsNullOrEmpty(field.AllowedExtensions))
-                                                       {
-                                                           var accepts = string.Join(",", field.AllowedExtensions.Split(',').Select(e => $".{e.Trim()}"));
-                                                           @:accept="@accepts"
-                                                       }
-                                                       @(field.Required && string.IsNullOrEmpty(field.FileUrl) ? "required" : "") />
-
-                                                <label for="@field.PropertyName"
-                                                       class="file-upload-label"
-                                                       data-filepath="@field.FilePath">
-                                                    <span class="file-upload-btn">
-                                                        <i class="fas fa-upload file-upload-icon"></i>
-                                                        Escolher Arquivo
-                                                    </span>
-                                                    <span class="file-upload-text">
-                                                        Nenhum arquivo selecionado
-                                                    </span>
-                                                </label>
-
-                                                <input type="hidden" name="@field.PropertyName" value="@field.FilePath" class="file-path-input" />
-                                            </div>
-                                            <div class="form-text">
                                                 @if (!string.IsNullOrEmpty(field.AllowedExtensions))
                                                 {
-                                                    <span><i class="fas fa-info-circle me-1"></i>Formatos: @field.AllowedExtensions</span>
-                                                    <span class="mx-2">|</span>
+                                                    <div class="form-text">
+                                                        <i class="fas fa-info-circle me-1"></i>Formatos: @field.AllowedExtensions
+                                                    </div>
                                                 }
-                                                <span>Tamanho máximo: @field.MaxSizeMB MB</span>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            @* Modo somente leitura sem arquivo *@
-                                            <p class="text-muted mb-0">
-                                                <i class="fas fa-file me-2"></i>Nenhum arquivo cadastrado
-                                            </p>
-                                        }
+                                                @if (field.MaxSizeMB > 0)
+                                                {
+                                                    <div class="form-text">
+                                                        <i class="fas fa-info-circle me-1"></i>Tamanho máximo: @field.MaxSizeMB MB
+                                                    </div>
+                                                }
+                                            }
+
+                                            @* ===== INPUT HIDDEN - ÚNICO COM ATRIBUTO NAME ===== *@
+                                            <input type="hidden"
+                                                   name="@field.PropertyName"
+                                                   id="hidden_@field.PropertyName"
+                                                   value="@(field.FilePath ?? "")"
+                                                   class="file-path-input"
+                                                   data-property="@field.PropertyName" />
+
+                                            @if (HasValidationError(field.PropertyName))
+                                            {
+                                                <div class="invalid-feedback d-block">
+                                                    @GetValidationError(field.PropertyName)
+                                                </div>
+                                            }
+                                        </div>
                                     </div>
                                     break;
 

@@ -321,38 +321,12 @@ async function submitFormAjax(form) {
 
         const formData = new FormData(form);
 
-        // ===================================================================
-        // CRITICAL: Garantir que campos de arquivo hidden sejam enviados
-        // ===================================================================
-        const filePathInputs = form.querySelectorAll('.file-path-input');
-        filePathInputs.forEach(hiddenInput => {
-            const fieldName = hiddenInput.name;
-            const fieldValue = hiddenInput.value || '';
-
-            console.log(`[FILE] ${fieldName} = ${fieldValue}`);
-
-            // Garantir que o campo está no FormData
-            if (formData.has(fieldName)) {
-                formData.set(fieldName, fieldValue);
-            } else {
-                formData.append(fieldName, fieldValue);
-            }
-        });
-
-        // Atualizar valores dos campos de referência
-        const referenceHiddenInputs = form.querySelectorAll('input[type="hidden"][id$="_value"]');
-        referenceHiddenInputs.forEach(hiddenInput => {
-            const fieldName = hiddenInput.name;
-            const fieldValue = hiddenInput.value || '0';
-
-            console.log(`[REF] ${fieldName} = ${fieldValue}`);
-
-            if (formData.has(fieldName)) {
-                formData.set(fieldName, fieldValue);
-            } else {
-                formData.append(fieldName, fieldValue);
-            }
-        });
+        // LOG: Ver tudo que está sendo enviado
+        console.log('========== FORM DATA SENDO ENVIADO ==========');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        console.log('=============================================');
 
         const actionUrl = form.action;
 
@@ -368,31 +342,20 @@ async function submitFormAjax(form) {
 
         if (result.success) {
             showToast(result.message || 'Salvo com sucesso!', 'success');
-
             setTimeout(() => {
-                if (result.redirectUrl) {
-                    window.location.href = result.redirectUrl;
-                } else {
-                    window.location.href = form.dataset.backUrl || '/';
-                }
+                window.location.href = result.redirectUrl || window.location.pathname.replace(/\/(Create|Edit).*/, '');
             }, 1000);
         } else {
             if (result.errors) {
-                displayValidationErrors(result.errors);
-            } else {
-                showToast(result.message || 'Erro ao salvar', 'error');
+                displayErrors(result.errors, form);
             }
-
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            }
+            showToast(result.message || 'Erro ao salvar', 'error');
         }
 
     } catch (error) {
-        console.error('Erro no submit:', error);
+        console.error('[FORM] Erro:', error);
         showToast('Erro ao processar requisição', 'error');
-
+    } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
