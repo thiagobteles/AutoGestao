@@ -1052,42 +1052,6 @@ namespace AutoGestao.Controllers
             return requiredRoles == null || requiredRoles.Length == 0 ? true : requiredRoles.Any(role => User.IsInRole(role));
         }
 
-        /// <summary>
-        /// Renderizar conteúdo de uma aba específica
-        /// </summary>
-        [HttpGet]
-        public virtual async Task<IActionResult> RenderTab(long id, string tabId)
-        {
-            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-
-            var tabs = ConfigureTabs(entity);
-            var tab = tabs.FirstOrDefault(t => t.TabId == tabId);
-
-            if (tab == null || !tab.HasAccess)
-            {
-                return Forbid();
-            }
-
-            if (tabId == "principal")
-            {
-                // Renderizar formulário principal
-                var viewModel = await BuildFormViewModelAsync(entity, "Details");
-                return PartialView("_StandardFormContent", viewModel);
-            }
-
-            // Renderizar aba personalizada
-            return await RenderCustomTab(entity, tab);
-        }
-
-        protected virtual Task<IActionResult> RenderCustomTab(T entity, FormTabViewModel tab)
-        {
-            return Task.FromResult<IActionResult>(PartialView($"_Tab{tab.TabId}", entity));
-        }
-
         protected virtual async Task<StandardFormViewModel> BuildFormViewModelAsync(T entity, string action)
         {
             var formConfig = typeof(T).GetCustomAttribute<FormConfigAttribute>() ?? new FormConfigAttribute();
@@ -2203,86 +2167,6 @@ namespace AutoGestao.Controllers
         }
 
         #endregion
-
-        //private async Task<FormFieldViewModel> BuildFormFieldAsync(PropertyInfo property, object entity, string action, bool isRequired)
-        //{
-        //    var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
-        //    if (formFieldAttr == null) return null;
-
-        //    var rawValue = property.GetValue(entity);
-        //    var formattedValue = FormatPropertyValue(rawValue, property);
-
-        //    string? displayText = null;
-        //    if (formFieldAttr.Type == EnumFieldType.Reference && rawValue != null)
-        //    {
-        //        displayText = GetReferenceDisplayText(entity, property, formFieldAttr.Reference);
-        //    }
-
-        //    // CORRIGIR: Obter URL e nome do arquivo para campos File e Image usando MinIO
-        //    string? fileUrl = null;
-        //    string? fileName = null;
-        //    string? filePath = null;
-
-        //    if ((formFieldAttr.Type == EnumFieldType.File || formFieldAttr.Type == EnumFieldType.Image) && rawValue != null)
-        //    {
-        //        var fileValue = rawValue.ToString();
-        //        if (!string.IsNullOrEmpty(fileValue))
-        //        {
-        //            filePath = fileValue;
-        //            fileName = Path.GetFileName(fileValue);
-        //            var entityName = typeof(T).Name;
-        //            var idEmpresa = GetCurrentEmpresaId();
-
-        //            try
-        //            {
-        //                Console.WriteLine($"[FILE] Gerando URL para: {fileValue}");
-        //                Console.WriteLine($"[FILE] Entity: {entityName}, IdEmpresa: {idEmpresa}");
-
-        //                // Gerar URL pré-assinada do MinIO com tempo maior
-        //                fileUrl = await _fileStorageService.GetDownloadUrlAsync(
-        //                    fileValue,
-        //                    entityName,
-        //                    idEmpresa,
-        //                    customBucket: null,
-        //                    expirySeconds: 3600); // 1 hora
-
-        //                Console.WriteLine($"[FILE] URL gerada: {fileUrl}");
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                _logger?.LogWarning(ex, "Erro ao gerar URL do arquivo: {FileName}", fileValue);
-        //                Console.WriteLine($"[FILE] ERRO: {ex.Message}");
-        //            }
-        //        }
-        //    }
-
-        //    return new FormFieldViewModel
-        //    {
-        //        PropertyName = property.Name,
-        //        DisplayName = formFieldAttr.Name ?? GetDisplayName(property),
-        //        Icon = formFieldAttr.Icon ?? GetDefaultIcon(property),
-        //        Placeholder = formFieldAttr.Placeholder ?? GetDefaultPlaceholder(property),
-        //        Type = formFieldAttr.Type,
-        //        Required = isRequired,
-        //        ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
-        //        Value = formattedValue,
-        //        DisplayText = displayText,
-        //        Reference = formFieldAttr.Reference ?? null,
-        //        ValidationRegex = formFieldAttr.ValidationRegex ?? "",
-        //        ValidationMessage = formFieldAttr.ValidationMessage ?? "",
-        //        GridColumns = formFieldAttr.GridColumns,
-        //        CssClass = formFieldAttr.CssClass ?? "",
-        //        DataList = formFieldAttr.DataList ?? "",
-        //        Order = formFieldAttr.Order,
-        //        Section = formFieldAttr.Section ?? "Gerais",
-        //        AllowedExtensions = formFieldAttr.AllowedExtensions ?? "",
-        //        MaxSizeMB = formFieldAttr.MaxSizeMB,
-        //        ImageSize = formFieldAttr.ImageSize ?? "100x100",
-        //        FileUrl = fileUrl,
-        //        FileName = fileName,
-        //        FilePath = filePath
-        //    };
-        //}
     }
 
     public class DeleteFileRequest

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -814,7 +814,7 @@ namespace AutoGestao.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_audit_logs_entidade_nome_entidade_id",
                 table: "audit_logs",
-                columns: new[] { "entidade_nome", "entidade_id" });
+                columns: ["entidade_nome", "entidade_id"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_logs_id_empresa",

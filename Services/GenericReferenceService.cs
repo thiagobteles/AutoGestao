@@ -257,7 +257,7 @@ namespace AutoGestao.Services
 
                 // String operations
                 var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
-                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
 
                 if (toLowerMethod != null && containsMethod != null)
                 {

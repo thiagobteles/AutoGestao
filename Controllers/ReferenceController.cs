@@ -234,7 +234,7 @@ namespace AutoGestao.Controllers
                 return null;
             }
 
-            var task = (Task?)method.Invoke(_referenceService, new object[] { id });
+            var task = (Task?)method.Invoke(_referenceService, [id]);
             if (task == null)
             {
                 return null;
@@ -260,7 +260,7 @@ namespace AutoGestao.Controllers
                 return [];
             }
 
-            var task = (Task?)method.Invoke(_referenceService, new object?[] { searchTerm, pageSize, filters });
+            var task = (Task?)method.Invoke(_referenceService, [searchTerm, pageSize, filters]);
             if (task == null)
             {
                 return [];
