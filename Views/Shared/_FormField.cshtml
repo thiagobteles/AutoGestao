@@ -3,17 +3,17 @@
 <!-- ============================================================================ -->
 @model FormFieldViewModel
 
-@if (!Model.ShouldDisplay)
+@* @if (!Model.ShouldDisplay)
 {
     return;
-}
+} *@
 
 <div class="form-group"
      data-field="@Model.PropertyName"
      data-conditional-display="@Model.ConditionalDisplayRule"
      data-conditional-required="@Model.ConditionalRequiredRule">
 
-    @if (Model.Type != EnumFieldType.Hidden && Model.Type != EnumFieldType.Checkbox)
+    @if (Model.Type != EnumFieldType.Hidden)
     {
         <label for="@Model.PropertyName" class="form-label">
             @if (!string.IsNullOrEmpty(Model.Icon))
@@ -21,7 +21,7 @@
                 <i class="@Model.Icon me-1"></i>
             }
             @Model.DisplayName
-            @if (Model.Required)
+            @if (Model.Required || Model.IsConditionallyRequired)
             {
                 <span class="text-danger">*</span>
             }
@@ -33,31 +33,43 @@
         case EnumFieldType.Text:
         case EnumFieldType.Email:
             <input type="@Model.Type.ToString().ToLower()"
+                   class="form-control @(Model.CssClass)"
                    id="@Model.PropertyName"
                    name="@Model.PropertyName"
-                   class="form-control @(Model.CssClass)"
                    value="@Model.DisplayText"
                    placeholder="@Model.Placeholder"
-                   maxlength="@(Model.ValidationRegex != null && Model.ValidationRegex.Length > 0 ? Model.ValidationRegex.Length : 0)"
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
                    @(Model.ReadOnly ? "readonly" : "")
-                   @(Model.Required ? "required" : "")
+                   @* maxlength="@(Model.ValidationRegex != null && Model.ValidationRegex.Length > 0 ? Model.ValidationRegex.Length : 0)"
                    data-val="true"
                    data-val-regex="@Model.ValidationMessage"
-                   data-val-regex-pattern="@Model.ValidationRegex" />
+                   data-val-regex-pattern="@Model.ValidationRegex" *@
+                   />
             break;
 
         case EnumFieldType.Number:
         case EnumFieldType.Decimal:
-        case EnumFieldType.Currency:
             <input type="number"
+                   class="form-control @(Model.CssClass)"
                    id="@Model.PropertyName"
                    name="@Model.PropertyName"
-                   class="form-control @(Model.CssClass) @(Model.Type == EnumFieldType.Currency ? "currency-input" : "")"
                    value="@Model.Value"
                    placeholder="@Model.Placeholder"
-                   step="@(Model.Type == EnumFieldType.Decimal || Model.Type == EnumFieldType.Currency ? "0.01" : "1")"
-                   @(Model.ReadOnly ? "readonly" : "")
-                   @(Model.Required ? "required" : "") />
+                   step="@(Model.Type == EnumFieldType.Decimal ? "0.01" : "1")"
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
+                   @(Model.ReadOnly ? "readonly" : "") />
+            break;
+
+        case EnumFieldType.Currency:
+            <input type="text"
+                   class="form-control money-mask"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   value="@Model.Value"
+                   placeholder="@Model.Placeholder"
+                   step="0.01"
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
+                   @(Model.ReadOnly ? "readonly" : "") />
             break;
 
         case EnumFieldType.Date:
@@ -67,7 +79,7 @@
                    class="form-control @(Model.CssClass)"
                    value="@(Model.Value != null ? Convert.ToDateTime(Model.Value).ToString("yyyy-MM-dd") : "")"
                    @(Model.ReadOnly ? "readonly" : "")
-                   @(Model.Required ? "required" : "") />
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "") />
             break;
 
         case EnumFieldType.DateTime:
@@ -77,7 +89,7 @@
                    class="form-control @(Model.CssClass)"
                    value="@(Model.Value != null ? Convert.ToDateTime(Model.Value).ToString("yyyy-MM-ddTHH:mm") : "")"
                    @(Model.ReadOnly ? "readonly" : "")
-                   @(Model.Required ? "required" : "") />
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "") />
             break;
 
         case EnumFieldType.Time:
@@ -87,7 +99,7 @@
                    class="form-control @(Model.CssClass)"
                    value="@Model.DisplayText"
                    @(Model.ReadOnly ? "readonly" : "")
-                   @(Model.Required ? "required" : "") />
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "") />
             break;
 
         case EnumFieldType.TextArea:
@@ -97,7 +109,9 @@
               placeholder="@Model.Placeholder"
               rows="3"
               @(Model.ReadOnly ? "readonly" : "")
-              @(Model.Required ? "required" : "")>@Model.DisplayText</textarea>
+              @(Model.Required || Model.IsConditionallyRequired ? "required" : "") >
+              @Model.DisplayText
+            </textarea>
             break;
 
         case EnumFieldType.Select:
@@ -105,7 +119,7 @@
                     name="@Model.PropertyName"
                     class="form-select @(Model.CssClass)"
                     @(Model.ReadOnly ? "disabled" : "")
-                    @(Model.Required ? "required" : "")
+                    @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
                     data-val="true">
                 <option value="">@Model.Placeholder</option>
                 @if (Model.Options != null)
@@ -124,48 +138,46 @@
         case EnumFieldType.Checkbox:
             <div class="form-check">
                 <input type="checkbox"
+                       class="form-check-input @(Model.CssClass)"
                        id="@Model.PropertyName"
                        name="@Model.PropertyName"
-                       class="form-check-input @(Model.CssClass)"
                        value="true"
-                       checked="@(Model.Value?.ToString() == "True")"
+                       @(Model.Value?.ToString().ToLower() == "true" ? "checked" : "")
                        @(Model.ReadOnly ? "disabled" : "") />
                 <label class="form-check-label" for="@Model.PropertyName">
-                    @if (!string.IsNullOrEmpty(Model.Icon))
+                    @* @if (!string.IsNullOrEmpty(Model.Icon))
                     {
                         <i class="@Model.Icon me-1"></i>
-                    }
+                    } *@
                     @Model.DisplayName
-                    @if (Model.Required)
+                    @* @if (Model.Required)
                     {
                         <span class="text-danger">*</span>
-                    }
+                    } *@
                 </label>
             </div>
             break;
 
         case EnumFieldType.Cpf:
-            @if (Model.Options != null)
-            {
-                <div class="radio-group">
-                    @foreach (var option in Model.Options)
-                    {
-                        <div class="form-check">
-                            <input type="radio"
-                                   id="@(Model.PropertyName)_@option.Value"
-                                   name="@Model.PropertyName"
-                                   class="form-check-input @(Model.CssClass)"
-                                   value="@option.Value"
-                                   checked="@(option.Value?.ToString() == Model.Value?.ToString())"
-                                   @(Model.ReadOnly ? "disabled" : "")
-                                   @(Model.Required ? "required" : "") />
-                            <label class="form-check-label" for="@(Model.PropertyName)_@option.Value">
-                                @option.Text
-                            </label>
-                        </div>
-                    }
-                </div>
-            }
+            <input type="text"
+                   class="form-control cpf-mask"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   value="@Model.Value"
+                   placeholder="@Model.Placeholder"
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
+                   @(Model.ReadOnly ? "readonly" : "") />
+            break;
+
+        case EnumFieldType.Cnpj:
+            <input type="text"
+                   class="form-control cnpj-mask"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   value="@Model.Value"
+                   placeholder="@Model.Placeholder"
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
+                   @(Model.ReadOnly ? "readonly" : "") />
             break;
 
         case EnumFieldType.File:
@@ -174,7 +186,7 @@
                    name="@Model.PropertyName"
                    class="form-control @(Model.CssClass)"
                    @(Model.ReadOnly ? "disabled" : "")
-                   @(Model.Required ? "required" : "")
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
                    accept="@Model.DataList" />
             @if (!string.IsNullOrEmpty(Model.DisplayText))
             {
@@ -182,6 +194,28 @@
                     Arquivo atual: @Model.DisplayText
                 </small>
             }
+            break;
+
+        case EnumFieldType.Phone:
+            <input type="text"
+                   class="form-control telefone-mask"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   value="@Model.Value"
+                   placeholder="@Model.Placeholder"
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
+                   @(Model.ReadOnly ? "readonly" : "") />
+            break;
+
+        case EnumFieldType.Cep:
+            <input type="text"
+                   class="form-control cep-mask"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   value="@Model.Value"
+                   placeholder="@Model.Placeholder"
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "")
+                   @(Model.ReadOnly ? "readonly" : "") />
             break;
 
         case EnumFieldType.Hidden:
@@ -192,25 +226,7 @@
             break;
 
         case EnumFieldType.Reference:
-            <select id="@Model.PropertyName"
-                    name="@Model.PropertyName"
-                    class="form-select reference-select @(Model.CssClass)"
-                    @(Model.ReadOnly ? "disabled" : "")
-                    @(Model.Required ? "required" : "")
-                    data-reference="@Model.ReferenceFilters"
-                    data-val="true">
-                <option value="">@Model.Placeholder</option>
-                @if (Model.Options != null)
-                {
-                    foreach (var option in Model.Options)
-                    {
-                        <option value="@option.Value"
-                                selected="@(option.Value?.ToString() == Model.Value?.ToString())">
-                            @option.Text
-                        </option>
-                    }
-                }
-            </select>
+            @await Html.PartialAsync("_ReferenceField", Model)
             break;
 
         default:
@@ -221,7 +237,7 @@
                    value="@Model.DisplayText"
                    placeholder="@Model.Placeholder"
                    @(Model.ReadOnly ? "readonly" : "")
-                   @(Model.Required ? "required" : "") />
+                   @(Model.Required || Model.IsConditionallyRequired ? "required" : "") />
             break;
     }
 

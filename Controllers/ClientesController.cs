@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
-    public class ClientesController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Cliente>> logger,  IReportService reportService) 
+    public class ClientesController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Cliente>> logger, IReportService reportService) 
         : StandardGridController<Cliente>(context, fileStorageService, logger, reportService)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)

@@ -495,7 +495,27 @@ namespace AutoGestao.Controllers.Base
                 return NotFound();
             }
 
-            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
+            var query = GetBaseQuery();
+            var entityType = typeof(T);
+
+            var navigationProperties = entityType.GetProperties()
+                .Where(p => p.PropertyType.IsClass &&
+                            p.PropertyType != typeof(string) &&
+                            !p.PropertyType.IsArray &&
+                            p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
+
+            foreach (var navProp in navigationProperties)
+            {
+                var propertyName = navProp.Name.StartsWith("Id") ? navProp.Name.Substring(2) : navProp.Name;
+                var property = entityType.GetProperty(propertyName);
+
+                if (property != null)
+                {
+                    query = query.Include(propertyName);
+                }
+            }
+
+            var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
             if (entity == null)
             {
                 return NotFound();
@@ -503,24 +523,17 @@ namespace AutoGestao.Controllers.Base
 
             await BeforeUpdate(entity);
 
-            // DETECTAR SE É MODAL
-            var isModal = Request.Query.ContainsKey("modal") &&
-                          Request.Query["modal"] == "true";
+            var isModal = Request.Query.ContainsKey("modal") && Request.Query["modal"] == "true";
 
             _logger?.LogInformation("Edit chamado - Id: {Id}, IsModal: {IsModal}", id, isModal);
 
             if (isModal)
             {
-                // Retornar apenas o formulário sem layout para o modal
                 var formViewModel = await BuildFormViewModelAsync(entity, "Edit");
-
                 _logger?.LogInformation("Retornando _ModalForm para modal");
-
-                // IMPORTANTE: Usar PartialView para não carregar layout
                 return PartialView("_ModalForm", formViewModel);
             }
 
-            // Comportamento normal com tabs
             if (ShouldUseTabbedForm())
             {
                 var viewModel = await BuildTabbedFormViewModelAsync(entity, "Edit");

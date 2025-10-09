@@ -1,14 +1,15 @@
+@model StandardFormViewModel
 @{
     Layout = null;
 }
-@model StandardFormViewModel
 
-<form method="post" 
-      action="/@Model.ControllerName/@Model.ActionName@(Model.ActionName == "Edit" && Model.Model != null ? $"/{((dynamic)Model.Model).Id}" : "")" 
+<form method="post"
+      action="/@Model.ControllerName/@Model.ActionName@(Model.ActionName == "Edit" && Model.Model != null ? $"/{((dynamic)Model.Model).Id}" : "")"
       class="modal-form-container"
       enctype="multipart/form-data"
-      novalidate>
-    
+      novalidate
+      id="modalForm">
+
     @if (Model.Model != null)
     {
         var idProperty = Model.Model.GetType().GetProperty("Id");
@@ -78,26 +79,27 @@
     .modal-form-content {
         max-height: calc(80vh - 200px);
         overflow-y: auto;
+        padding: 1.5rem;
         padding-right: 10px;
     }
 
-    .modal-form-content::-webkit-scrollbar {
-        width: 8px;
-    }
+        .modal-form-content::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    .modal-form-content::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
+        .modal-form-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
 
-    .modal-form-content::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 10px;
-    }
+        .modal-form-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
 
-    .modal-form-content::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
+            .modal-form-content::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
 
     .modal-form-container .form-section {
         background: white;
@@ -125,60 +127,32 @@
         gap: 1rem;
     }
 
-    /* Grid responsivo baseado no GridColumns da seção */
-    .modal-form-container .form-grid.grid-cols-1 {
-        grid-template-columns: repeat(1, 1fr);
-    }
+        .modal-form-container .form-grid.grid-cols-1 {
+            grid-template-columns: repeat(1, 1fr);
+        }
 
-    .modal-form-container .form-grid.grid-cols-2 {
-        grid-template-columns: repeat(2, 1fr);
-    }
+        .modal-form-container .form-grid.grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
 
-    .modal-form-container .form-grid.grid-cols-3 {
-        grid-template-columns: repeat(3, 1fr);
-    }
+        .modal-form-container .form-grid.grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
 
-    .modal-form-container .form-grid.grid-cols-4 {
-        grid-template-columns: repeat(4, 1fr);
-    }
+        .modal-form-container .form-grid.grid-cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
 
-    .modal-form-container .form-grid.grid-cols-5 {
-        grid-template-columns: repeat(5, 1fr);
-    }
+        .modal-form-container .form-grid.grid-cols-5 {
+            grid-template-columns: repeat(5, 1fr);
+        }
 
-    .modal-form-container .form-grid.grid-cols-6 {
-        grid-template-columns: repeat(6, 1fr);
-    }
-
-    .modal-form-container .form-grid.grid-cols-12 {
-        grid-template-columns: repeat(12, 1fr);
-    }
+        .modal-form-container .form-grid.grid-cols-6 {
+            grid-template-columns: repeat(6, 1fr);
+        }
 
     .modal-form-container .form-field-wrapper {
         min-width: 0;
-    }
-
-    @@media (max-width: 992px) {
-        .modal-form-container .form-grid.grid-cols-4,
-        .modal-form-container .form-grid.grid-cols-5,
-        .modal-form-container .form-grid.grid-cols-6,
-        .modal-form-container .form-grid.grid-cols-12 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .modal-form-container .form-grid {
-            grid-template-columns: 1fr !important;
-        }
-        
-        .modal-form-container .form-field-wrapper {
-            grid-column: span 1 !important;
-        }
-        
-        .modal-form-content {
-            max-height: calc(100vh - 200px);
-        }
     }
 
     .modal-form-container .form-label {
@@ -190,8 +164,7 @@
     }
 
     .modal-form-container .form-control,
-    .modal-form-container .form-select,
-    .modal-form-container .form-control-file {
+    .modal-form-container .form-select {
         border-radius: 6px;
         border: 1px solid #ced4da;
         padding: 0.625rem 0.875rem;
@@ -199,12 +172,12 @@
         width: 100%;
     }
 
-    .modal-form-container .form-control:focus,
-    .modal-form-container .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        outline: none;
-    }
+        .modal-form-container .form-control:focus,
+        .modal-form-container .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            outline: none;
+        }
 
     .modal-form-container .invalid-feedback {
         display: block;
@@ -217,84 +190,24 @@
         border-color: #dc3545;
     }
 
-    .modal-form-container .form-text {
-        font-size: 0.8125rem;
-        color: #6c757d;
-        margin-top: 0.25rem;
-        display: block;
+    @@media (max-width: 992px) {
+        .modal-form-container .form-grid.grid-cols-4, .modal-form-container .form-grid.grid-cols-5, .modal-form-container .form-grid.grid-cols-6
+        {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
-    .modal-form-container .form-check {
-        padding-left: 1.5rem;
-    }
+    @@media (max-width: 768px) {
+        .modal-form-container .form-grid {
+            grid-template-columns: 1fr !important;
+        }
 
-    .modal-form-container .form-check-input {
-        margin-left: -1.5rem;
-    }
+        .modal-form-container .form-field-wrapper {
+            grid-column: span 1 !important;
+        }
 
-    .modal-form-container textarea.form-control {
-        min-height: 100px;
-        resize: vertical;
-    }
-
-    .modal-form-container .input-group {
-        width: 100%;
-    }
-
-    .modal-form-container .input-group-text {
-        background-color: #f8f9fa;
-        border: 1px solid #ced4da;
-        border-radius: 6px 0 0 6px;
-    }
-
-    .modal-form-container .input-group .form-control {
-        border-radius: 0 6px 6px 0;
-    }
-
-    .modal-form-container input[type="date"],
-    .modal-form-container input[type="datetime-local"],
-    .modal-form-container input[type="time"] {
-        appearance: none;
-        -webkit-appearance: none;
-    }
-
-    .modal-form-container input[type="number"] {
-        text-align: right;
-    }
-
-    .modal-form-container input[type="file"] {
-        padding: 0.5rem;
-    }
-
-    .modal-form-container input[type="file"]::file-selector-button {
-        padding: 0.375rem 0.75rem;
-        margin-right: 0.75rem;
-        background-color: #667eea;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 0.875rem;
-    }
-
-    .modal-form-container input[type="file"]::file-selector-button:hover {
-        background-color: #5568d3;
-    }
-
-    /* Estilos para campos com ícones */
-    .modal-form-container .field-with-icon {
-        position: relative;
-    }
-
-    .modal-form-container .field-with-icon .form-control {
-        padding-left: 2.5rem;
-    }
-
-    .modal-form-container .field-icon {
-        position: absolute;
-        left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
+        .modal-form-content {
+            max-height: calc(100vh - 200px);
+        }
     }
 </style>

@@ -592,105 +592,99 @@ class ReferenceFieldManager {
 
     setupModalForm(modal, controller) {
         const form = modal.querySelector('form');
-        const saveBtn = modal.querySelector('.btn-save-modal');
+        if (!form) return;
 
-        if (!form || !saveBtn) return;
+        const saveBtn = modal.querySelector('#modalSaveBtn') ||
+            modal.closest('.modal').querySelector('.modal-footer .btn-primary');
 
-        saveBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
+        if (saveBtn) {
+            saveBtn.onclick = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
 
-            // Validar formulário
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const formData = new FormData(form);
-            const originalBtnContent = saveBtn.innerHTML;
-            const spinner = saveBtn.querySelector('.spinner-border');
-
-            try {
-                saveBtn.disabled = true;
-                if (spinner) {
-                    spinner.classList.remove('d-none');
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    this.showToast('Por favor, preencha todos os campos obrigatórios', 'warning');
+                    return;
                 }
 
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
+                const originalBtnContent = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+                saveBtn.disabled = true;
 
-                if (response.ok) {
-                    const contentType = response.headers.get('content-type');
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    });
 
-                    if (contentType && contentType.includes('application/json')) {
-                        const result = await response.json();
+                    if (response.ok) {
+                        const contentType = response.headers.get('content-type');
 
-                        if (result.success) {
-                            // Sucesso - fechar modal e preencher campo
-                            this.showToast(result.message || 'Registro criado com sucesso!', 'success');
+                        if (contentType && contentType.includes('application/json')) {
+                            const result = await response.json();
 
-                            const targetField = modal.dataset.targetField;
-                            const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
-                            const searchInput = document.querySelector(`input.reference-search-input[data-target-field="${targetField}"]`);
+                            if (result.success) {
+                                this.showToast(result.message || 'Registro criado com sucesso!', 'success');
 
-                            if (hiddenInput && searchInput) {
-                                // Preencher valores
-                                hiddenInput.value = result.id;
-                                searchInput.value = result.text || result.name;
-                                searchInput.classList.add('selected');
+                                const targetField = modal.dataset.targetField;
+                                const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+                                const searchInput = document.querySelector(`input.reference-search-input[data-target-field="${targetField}"]`);
 
-                                // Disparar eventos
-                                hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-                                searchInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                if (hiddenInput && searchInput) {
+                                    hiddenInput.value = result.id;
+                                    searchInput.value = result.text || result.name;
+                                    searchInput.classList.add('selected');
 
-                                // Limpar cache para forçar nova busca se necessário
-                                const referenceType = searchInput.dataset.referenceType;
-                                if (referenceType && this.cache) {
-                                    // Limpar apenas o cache deste tipo de referência
-                                    for (const [key] of this.cache) {
-                                        if (key.startsWith(`${referenceType}:`)) {
-                                            this.cache.delete(key);
+                                    hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                    searchInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+                                    const referenceType = searchInput.dataset.referenceType;
+                                    if (referenceType && this.cache) {
+                                        for (const [key] of this.cache) {
+                                            if (key.startsWith(`${referenceType}:`)) {
+                                                this.cache.delete(key);
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            // Fechar modal
-                            const bsModal = bootstrap.Modal.getInstance(modal);
-                            if (bsModal) {
-                                bsModal.hide();
-                            }
+                                const bsModal = bootstrap.Modal.getInstance(modal);
+                                if (bsModal) {
+                                    bsModal.hide();
+                                }
 
+                            } else {
+                                this.showValidationErrors(form, result.errors || {});
+                            }
                         } else {
-                            // Erros de validação
-                            this.showValidationErrors(form, result.errors || {});
+                            const html = await response.text();
+                            const modalBody = modal.querySelector('.modal-body');
+                            modalBody.innerHTML = html;
+                            this.setupModalForm(modal, controller);
+                            this.initializeFormElements(modalBody);
                         }
                     } else {
-                        // Resposta HTML - recarregar formulário com erros
-                        const html = await response.text();
-                        const modalBody = modal.querySelector('.modal-body');
-                        modalBody.innerHTML = html;
-                        this.setupModalForm(modal, controller);
-                        this.initializeFormElements(modalBody);
+                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
                     }
-                } else {
-                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
-                }
 
-            } catch (error) {
-                console.error('Erro ao criar registro:', error);
-                this.showToast(`Erro ao criar registro: ${error.message}`, 'error');
-            } finally {
-                if (saveBtn) {
-                    saveBtn.innerHTML = originalBtnContent;
-                    saveBtn.disabled = false;
+                } catch (error) {
+                    console.error('Erro ao criar registro:', error);
+                    this.showToast(`Erro ao criar registro: ${error.message}`, 'error');
+                } finally {
+                    if (saveBtn) {
+                        saveBtn.innerHTML = originalBtnContent;
+                        saveBtn.disabled = false;
+                    }
                 }
-            }
-        });
+            };
+        }
+
+        this.initializeFormElements(modal);
     }
 
     initializeFormElements(container) {
