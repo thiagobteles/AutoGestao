@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Base
 {
     [Route("api/[controller]")]
     [ApiController]

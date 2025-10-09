@@ -1,0 +1,474 @@
+@{
+    ViewData["Title"] = "Criar Relatório";
+    var entityType = ViewBag.EntityType as string ?? "Cliente";
+    var entityId = ViewBag.EntityId as long? ?? 0;
+}
+
+<div class="dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title">
+                <i class="fas fa-file-pdf"></i>
+                Gerador de Relatórios
+            </h2>
+            <p class="page-subtitle">Configure e gere relatórios personalizados</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Configuração do Relatório -->
+        <div class="col-lg-8">
+            <div class="card-modern mb-4">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-cog me-2"></i>Configuração do Relatório</h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Entidade</label>
+                            <select id="entityType" class="form-select form-select-modern">
+                                <option value="Cliente">Cliente</option>
+                                <option value="Veiculo">Veículo</option>
+                                <option value="Venda">Venda</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ID do Registro</label>
+                            <input type="number" id="entityId" class="form-control form-control-modern" placeholder="ID" value="@entityId">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn-modern btn-outline-modern" onclick="loadDefaultTemplate()">
+                            <i class="fas fa-download me-2"></i>
+                            Carregar Template Padrão
+                        </button>
+                    </div>
+
+                    <hr>
+
+                    <!-- Seções do Relatório -->
+                    <div id="sectionsContainer">
+                        <h6 class="mb-3">Seções do Relatório</h6>
+                        <div id="sectionsList"></div>
+
+                        <div class="mt-3">
+                            <button type="button" class="btn-modern btn-outline-modern btn-sm" onclick="addGridSection()">
+                                <i class="fas fa-plus me-2"></i>
+                                Adicionar Seção Grid
+                            </button>
+                            <button type="button" class="btn-modern btn-outline-modern btn-sm" onclick="addTableSection()">
+                                <i class="fas fa-plus me-2"></i>
+                                Adicionar Seção Tabela
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="col-lg-4">
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-rocket me-2"></i>Ações</h5>
+                </div>
+                <div class="card-body-modern">
+                    <button type="button" class="btn-modern btn-primary-modern w-100 mb-2" onclick="generateReport()">
+                        <i class="fas fa-file-pdf me-2"></i>
+                        Gerar Relatório PDF
+                    </button>
+
+                    <button type="button" class="btn-modern btn-outline-modern w-100 mb-2" onclick="previewReport()">
+                        <i class="fas fa-eye me-2"></i>
+                        Visualizar
+                    </button>
+
+                    <hr>
+
+                    <h6 class="mb-2">Templates Rápidos</h6>
+                    <div class="list-group list-group-flush">
+                        <button type="button" class="list-group-item list-group-item-action" onclick="loadQuickTemplate('Cliente')">
+                            <i class="fas fa-user me-2"></i>
+                            Cliente Completo
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" onclick="loadQuickTemplate('Veiculo')">
+                            <i class="fas fa-car me-2"></i>
+                            Veículo Detalhado
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" onclick="loadQuickTemplate('Venda')">
+                            <i class="fas fa-handshake me-2"></i>
+                            Venda com Parcelas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template para Seção Grid -->
+<template id="gridSectionTemplate">
+    <div class="section-card border rounded p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">Seção Grid</h6>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeSection(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <label class="form-label form-label-sm">Título</label>
+                <input type="text" class="form-control form-control-sm section-title" placeholder="Dados do Cliente">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label form-label-sm">Colunas</label>
+                <select class="form-select form-select-sm section-columns">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label form-label-sm">Ordem</label>
+                <input type="number" class="form-control form-control-sm section-order" value="0">
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-12">
+                <label class="form-label form-label-sm">Subtítulo (opcional)</label>
+                <input type="text" class="form-control form-control-sm section-subtitle" placeholder="Informações Cadastrais">
+            </div>
+        </div>
+
+        <div class="fields-container">
+            <label class="form-label form-label-sm">Campos</label>
+            <div class="fields-list"></div>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addField(this)">
+                <i class="fas fa-plus me-1"></i>
+                Adicionar Campo
+            </button>
+        </div>
+    </div>
+</template>
+
+<!-- Template para Seção Tabela -->
+<template id="tableSectionTemplate">
+    <div class="section-card border rounded p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">Seção Tabela</h6>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeSection(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-8">
+                <label class="form-label form-label-sm">Título</label>
+                <input type="text" class="form-control form-control-sm section-title" placeholder="Parcelas">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label form-label-sm">Ordem</label>
+                <input type="number" class="form-control form-control-sm section-order" value="1">
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <label class="form-label form-label-sm">Propriedade de Dados</label>
+                <input type="text" class="form-control form-control-sm section-data-property" placeholder="Parcelas">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label form-label-sm">Campo Total</label>
+                <input type="text" class="form-control form-control-sm section-total-field" placeholder="Valor">
+            </div>
+            <div class="col-md-3">
+                <div class="form-check mt-4">
+                    <input class="form-check-input section-show-total" type="checkbox" checked>
+                    <label class="form-check-label">Mostrar Total</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns-container">
+            <label class="form-label form-label-sm">Colunas</label>
+            <div class="columns-list"></div>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addColumn(this)">
+                <i class="fas fa-plus me-1"></i>
+                Adicionar Coluna
+            </button>
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    <script>
+        let currentTemplate = {
+            Name: 'Relatório Personalizado',
+            Sections: []
+        };
+
+        function loadDefaultTemplate() {
+            const entityType = document.getElementById('entityType').value;
+
+            fetch(`/Report/GetDefaultTemplate?entityType=${entityType}`)
+                .then(response => response.json())
+                .then(template => {
+                    currentTemplate = template;
+                    renderTemplate();
+                    showSuccess('Template carregado com sucesso!');
+                })
+                .catch(error => {
+                    showError('Erro ao carregar template: ' + error.message);
+                });
+        }
+
+        function loadQuickTemplate(type) {
+            document.getElementById('entityType').value = type;
+            loadDefaultTemplate();
+        }
+
+        function renderTemplate() {
+            const container = document.getElementById('sectionsList');
+            container.innerHTML = '';
+
+            currentTemplate.Sections.forEach((section, index) => {
+                if (section.Type === 'grid') {
+                    renderGridSection(section, container);
+                } else if (section.Type === 'table') {
+                    renderTableSection(section, container);
+                }
+            });
+        }
+
+        function renderGridSection(section, container) {
+            const template = document.getElementById('gridSectionTemplate');
+            const clone = template.content.cloneNode(true);
+
+            clone.querySelector('.section-title').value = section.Title || '';
+            clone.querySelector('.section-subtitle').value = section.Subtitle || '';
+            clone.querySelector('.section-columns').value = section.Columns || 3;
+            clone.querySelector('.section-order').value = section.Order || 0;
+
+            const fieldsList = clone.querySelector('.fields-list');
+            section.Fields.forEach(field => {
+                addFieldToList(fieldsList, field);
+            });
+
+            container.appendChild(clone);
+        }
+
+        function renderTableSection(section, container) {
+            const template = document.getElementById('tableSectionTemplate');
+            const clone = template.content.cloneNode(true);
+
+            clone.querySelector('.section-title').value = section.Title || '';
+            clone.querySelector('.section-order').value = section.Order || 0;
+            clone.querySelector('.section-data-property').value = section.DataProperty || '';
+            clone.querySelector('.section-total-field').value = section.TotalField || '';
+            clone.querySelector('.section-show-total').checked = section.ShowTotal || false;
+
+            const columnsList = clone.querySelector('.columns-list');
+            section.Columns.forEach(column => {
+                addColumnToList(columnsList, column);
+            });
+
+            container.appendChild(clone);
+        }
+
+        function addGridSection() {
+            const template = document.getElementById('gridSectionTemplate');
+            const clone = template.content.cloneNode(true);
+            document.getElementById('sectionsList').appendChild(clone);
+        }
+
+        function addTableSection() {
+            const template = document.getElementById('tableSectionTemplate');
+            const clone = template.content.cloneNode(true);
+            document.getElementById('sectionsList').appendChild(clone);
+        }
+
+        function addField(button) {
+            const fieldsList = button.parentElement.querySelector('.fields-list');
+            addFieldToList(fieldsList);
+        }
+
+        function addFieldToList(fieldsList, field = {}) {
+            const fieldHtml = `
+                <div class="input-group input-group-sm mb-2">
+                    <input type="text" class="form-control field-label" placeholder="Label" value="${field.Label || ''}">
+                    <input type="text" class="form-control field-property" placeholder="Propriedade" value="${field.PropertyName || ''}">
+                    <input type="text" class="form-control field-format" placeholder="Formato (opcional)" value="${field.Format || ''}" style="max-width: 120px;">
+                    <button class="btn btn-sm btn-danger" type="button" onclick="removeField(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            fieldsList.insertAdjacentHTML('beforeend', fieldHtml);
+        }
+
+        function addColumn(button) {
+            const columnsList = button.parentElement.querySelector('.columns-list');
+            addColumnToList(columnsList);
+        }
+
+        function addColumnToList(columnsList, column = {}) {
+            const columnHtml = `
+                <div class="input-group input-group-sm mb-2">
+                    <input type="text" class="form-control column-label" placeholder="Label" value="${column.Label || ''}">
+                    <input type="text" class="form-control column-property" placeholder="Propriedade" value="${column.PropertyName || ''}">
+                    <select class="form-select column-align" style="max-width: 100px;">
+                        <option value="left" ${column.Align === 'left' ? 'selected' : ''}>Esquerda</option>
+                        <option value="right" ${column.Align === 'right' ? 'selected' : ''}>Direita</option>
+                    </select>
+                    <button class="btn btn-sm btn-danger" type="button" onclick="removeColumn(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            columnsList.insertAdjacentHTML('beforeend', columnHtml);
+        }
+
+        function removeSection(button) {
+            button.closest('.section-card').remove();
+        }
+
+        function removeField(button) {
+            button.closest('.input-group').remove();
+        }
+
+        function removeColumn(button) {
+            button.closest('.input-group').remove();
+        }
+
+        function buildTemplateFromUI() {
+            const sections = [];
+
+            document.querySelectorAll('.section-card').forEach((card, index) => {
+                const isGrid = card.querySelector('.fields-container') !== null;
+
+                if (isGrid) {
+                    const fields = [];
+                    card.querySelectorAll('.fields-list .input-group').forEach(fieldGroup => {
+                        fields.push({
+                            Label: fieldGroup.querySelector('.field-label').value,
+                            PropertyName: fieldGroup.querySelector('.field-property').value,
+                            Format: fieldGroup.querySelector('.field-format').value || null,
+                            Order: fields.length
+                        });
+                    });
+
+                    sections.push({
+                        Title: card.querySelector('.section-title').value,
+                        Subtitle: card.querySelector('.section-subtitle')?.value || null,
+                        Type: 'grid',
+                        Columns: parseInt(card.querySelector('.section-columns').value),
+                        Order: parseInt(card.querySelector('.section-order').value),
+                        Fields: fields
+                    });
+                } else {
+                    const columns = [];
+                    card.querySelectorAll('.columns-list .input-group').forEach(columnGroup => {
+                        columns.push({
+                            Label: columnGroup.querySelector('.column-label').value,
+                            PropertyName: columnGroup.querySelector('.column-property').value,
+                            Align: columnGroup.querySelector('.column-align').value
+                        });
+                    });
+
+                    sections.push({
+                        Title: card.querySelector('.section-title').value,
+                        Type: 'table',
+                        Order: parseInt(card.querySelector('.section-order').value),
+                        DataProperty: card.querySelector('.section-data-property').value,
+                        ShowTotal: card.querySelector('.section-show-total').checked,
+                        TotalField: card.querySelector('.section-total-field').value || null,
+                        Columns: columns
+                    });
+                }
+            });
+
+            return {
+                Name: 'Relatório Personalizado',
+                Sections: sections
+            };
+        }
+
+        function generateReport() {
+            const entityType = document.getElementById('entityType').value;
+            const entityId = parseInt(document.getElementById('entityId').value);
+
+            if (!entityId || entityId <= 0) {
+                showError('Por favor, informe um ID válido');
+                return;
+            }
+
+            const template = buildTemplateFromUI();
+
+            fetch('/Report/Generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    entityType: entityType,
+                    entityId: entityId.toString(),
+                    templateJson: JSON.stringify(template)
+                })
+            })
+            .then(response => response.text())
+            .then(html => {
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(html);
+                newWindow.document.close();
+                showSuccess('Relatório gerado com sucesso!');
+            })
+            .catch(error => {
+                showError('Erro ao gerar relatório: ' + error.message);
+            });
+        }
+
+        function previewReport() {
+            generateReport();
+        }
+
+        function showSuccess(message) {
+            // Implementar notificação de sucesso
+            alert(message);
+        }
+
+        function showError(message) {
+            // Implementar notificação de erro
+            alert(message);
+        }
+
+        // Carregar template padrão ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDefaultTemplate();
+        });
+    </script>
+}
+
+<style>
+    .section-card {
+        background-color: #f8f9fa;
+    }
+
+    .form-label-sm {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .list-group-item-action {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .list-group-item-action:hover {
+            background-color: #f8f9fa;
+        }
+</style>

@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Base
 {
     [Authorize(Roles = "Admin,Gerente")]
     public class AuditController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService) 

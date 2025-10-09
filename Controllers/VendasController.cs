@@ -1,3 +1,4 @@
+using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Entidades.Veiculos;
@@ -5,8 +6,8 @@ using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Controllers
 {
-    public class VendasController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Venda>> logger) 
-        : StandardGridController<Venda>(context, fileStorageService, logger)
+    public class VendasController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Venda>> logger,  IReportService reportService) 
+        : StandardGridController<Venda>(context, fileStorageService, logger, reportService)
     {
     }
 }

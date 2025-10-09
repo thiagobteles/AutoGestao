@@ -1,0 +1,462 @@
+@{
+    ViewData["Title"] = "Gerador de Relatórios - Avançado";
+    var entityType = ViewBag.EntityType as string ?? "Cliente";
+    var entityId = ViewBag.EntityId as long? ?? 0;
+}
+
+<!-- Incluir helper JavaScript -->
+<script src="~/js/report-helper.js"></script>
+
+<div class="dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title">
+                <i class="fas fa-file-pdf"></i>
+                Gerador de Relatórios Avançado
+            </h2>
+            <p class="page-subtitle">Configure, salve e gere relatórios personalizados</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Painel Esquerdo: Configuração -->
+        <div class="col-lg-8">
+            <!-- Card de Configuração Básica -->
+            <div class="card-modern mb-4">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-cog me-2"></i>Configuração Básica</h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo de Entidade</label>
+                            <select id="entityType" class="form-select form-select-modern">
+                                <option value="Cliente">Cliente</option>
+                                <option value="Veiculo">Veículo</option>
+                                <option value="Venda">Venda</option>
+                                <option value="Fornecedor">Fornecedor</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">ID do Registro</label>
+                            <input type="number" id="entityId" class="form-control form-control-modern"
+                                   placeholder="ID" value="@entityId" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Templates Salvos</label>
+                            <select id="savedTemplates" class="form-select form-select-modern">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Nome do Template (para salvar)</label>
+                            <input type="text" id="templateName" class="form-control form-control-modern"
+                                   placeholder="Ex: Relatório Completo de Cliente">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="isDefault">
+                                <label class="form-check-label" for="isDefault">
+                                    Definir como padrão
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn-modern btn-outline-modern" onclick="loadDefaultTemplate()">
+                            <i class="fas fa-download me-2"></i>
+                            Carregar Padrão
+                        </button>
+                        <button type="button" class="btn-modern btn-outline-modern" onclick="loadFromSaved()">
+                            <i class="fas fa-folder-open me-2"></i>
+                            Carregar Salvo
+                        </button>
+                        <button type="button" class="btn-modern btn-outline-modern" onclick="clearAll()">
+                            <i class="fas fa-eraser me-2"></i>
+                            Limpar Tudo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Seções -->
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-layer-group me-2"></i>Seções do Relatório</h5>
+                </div>
+                <div class="card-body-modern">
+                    <div id="sectionsContainer">
+                        <div id="sectionsList"></div>
+
+                        <div class="mt-3 d-flex gap-2">
+                            <button type="button" class="btn-modern btn-outline-modern btn-sm" onclick="addGridSection()">
+                                <i class="fas fa-th me-2"></i>
+                                Adicionar Grid
+                            </button>
+                            <button type="button" class="btn-modern btn-outline-modern btn-sm" onclick="addTableSection()">
+                                <i class="fas fa-table me-2"></i>
+                                Adicionar Tabela
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel Direito: Ações -->
+        <div class="col-lg-4">
+            <!-- Ações Principais -->
+            <div class="card-modern mb-4">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-play me-2"></i>Ações</h5>
+                </div>
+                <div class="card-body-modern">
+                    <button type="button" class="btn-modern btn-primary-modern w-100 mb-2" onclick="generateReport()">
+                        <i class="fas fa-file-pdf me-2"></i>
+                        Gerar Relatório
+                    </button>
+
+                    <button type="button" class="btn-modern btn-success-modern w-100 mb-2" onclick="saveTemplate()">
+                        <i class="fas fa-save me-2"></i>
+                        Salvar Template
+                    </button>
+
+                    <button type="button" class="btn-modern btn-outline-modern w-100 mb-2" onclick="previewReport()">
+                        <i class="fas fa-eye me-2"></i>
+                        Visualizar Preview
+                    </button>
+
+                    <hr>
+
+                    <button type="button" class="btn-modern btn-outline-modern w-100" onclick="exportTemplate()">
+                        <i class="fas fa-download me-2"></i>
+                        Exportar JSON
+                    </button>
+
+                    <button type="button" class="btn-modern btn-outline-modern w-100 mt-2" onclick="importTemplate()">
+                        <i class="fas fa-upload me-2"></i>
+                        Importar JSON
+                    </button>
+                </div>
+            </div>
+
+            <!-- Templates Rápidos -->
+            <div class="card-modern mb-4">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-bolt me-2"></i>Templates Rápidos</h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="list-group list-group-flush">
+                        <button type="button" class="list-group-item list-group-item-action" onclick="loadQuickTemplate('Cliente')">
+                            <i class="fas fa-user me-2"></i>
+                            Cliente Completo
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" onclick="loadQuickTemplate('Veiculo')">
+                            <i class="fas fa-car me-2"></i>
+                            Veículo Detalhado
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" onclick="loadQuickTemplate('Venda')">
+                            <i class="fas fa-handshake me-2"></i>
+                            Venda com Parcelas
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Informações</h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Seções:</span>
+                        <strong id="sectionCount">0</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Campos:</span>
+                        <strong id="fieldCount">0</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Tabelas:</span>
+                        <strong id="tableCount">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Templates HTML (mesmos do Builder.cshtml) -->
+<template id="gridSectionTemplate">
+    <!-- Mesmo conteúdo do Builder.cshtml -->
+</template>
+
+<template id="tableSectionTemplate">
+    <!-- Mesmo conteúdo do Builder.cshtml -->
+</template>
+
+<!-- Input oculto para importar arquivo -->
+<input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
+
+@section Scripts {
+    <script>
+        let currentTemplate = {
+            Name: 'Relatório Personalizado',
+            Sections: []
+        };
+
+        // Mesmas funções do Builder.cshtml + novas funções abaixo:
+
+        // ==================================================
+        // NOVAS FUNCIONALIDADES
+        // ==================================================
+
+        async function saveTemplate() {
+            const templateName = document.getElementById('templateName').value.trim();
+            const entityType = document.getElementById('entityType').value;
+            const isDefault = document.getElementById('isDefault').checked;
+
+            if (!templateName) {
+                ReportNotifications.error('Por favor, informe um nome para o template');
+                return;
+            }
+
+            const template = buildTemplateFromUI();
+            template.Name = templateName;
+
+            try {
+                ReportLoading.show('Salvando template...');
+
+                const response = await fetch('/ReportTemplate/Create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        Nome: templateName,
+                        TipoEntidade: entityType,
+                        TemplateJson: JSON.stringify(template),
+                        IsPadrao: isDefault,
+                        Ativo: true
+                    })
+                });
+
+                if (!response.ok) throw new Error('Erro ao salvar');
+
+                ReportNotifications.success('Template salvo com sucesso!');
+                await loadSavedTemplatesList();
+
+            } catch (error) {
+                ReportNotifications.error('Erro ao salvar template: ' + error.message);
+            } finally {
+                ReportLoading.hide();
+            }
+        }
+
+        async function loadSavedTemplatesList() {
+            const entityType = document.getElementById('entityType').value;
+            const select = document.getElementById('savedTemplates');
+
+            try {
+                const templates = await ReportHelper.getTemplates(entityType);
+
+                select.innerHTML = '<option value="">Selecione...</option>';
+                templates.forEach(t => {
+                    const option = document.createElement('option');
+                    option.value = t.Id;
+                    option.textContent = t.Nome + (t.IsPadrao ? ' (Padrão)' : '');
+                    select.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar templates:', error);
+            }
+        }
+
+        async function loadFromSaved() {
+            const templateId = document.getElementById('savedTemplates').value;
+
+            if (!templateId) {
+                ReportNotifications.error('Selecione um template salvo');
+                return;
+            }
+
+            try {
+                ReportLoading.show('Carregando template...');
+
+                const response = await fetch(`/ReportTemplate/Details/${templateId}`);
+                if (!response.ok) throw new Error('Template não encontrado');
+
+                const templateEntity = await response.json();
+                currentTemplate = JSON.parse(templateEntity.TemplateJson);
+
+                document.getElementById('templateName').value = templateEntity.Nome;
+                renderTemplate();
+
+                ReportNotifications.success('Template carregado!');
+
+            } catch (error) {
+                ReportNotifications.error('Erro ao carregar: ' + error.message);
+            } finally {
+                ReportLoading.hide();
+            }
+        }
+
+        function exportTemplate() {
+            const template = buildTemplateFromUI();
+            const json = JSON.stringify(template, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `template-${Date.now()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            ReportNotifications.success('Template exportado!');
+        }
+
+        function importTemplate() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const template = JSON.parse(e.target.result);
+                    currentTemplate = template;
+                    renderTemplate();
+
+                    if (template.Name) {
+                        document.getElementById('templateName').value = template.Name;
+                    }
+
+                    ReportNotifications.success('Template importado!');
+                } catch (error) {
+                    ReportNotifications.error('Arquivo JSON inválido');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAll() {
+            if (!confirm('Tem certeza que deseja limpar tudo?')) return;
+
+            currentTemplate = { Name: 'Relatório Personalizado', Sections: [] };
+            document.getElementById('sectionsList').innerHTML = '';
+            document.getElementById('templateName').value = '';
+            document.getElementById('isDefault').checked = false;
+            updateStats();
+
+            ReportNotifications.info('Template limpo!');
+        }
+
+        function previewReport() {
+            const entityType = document.getElementById('entityType').value;
+            const entityId = parseInt(document.getElementById('entityId').value);
+
+            if (!entityId || entityId <= 0) {
+                ReportNotifications.error('Por favor, informe um ID válido');
+                return;
+            }
+
+            ReportPreview.show(entityType, entityId);
+        }
+
+        function updateStats() {
+            const sections = document.querySelectorAll('.section-card').length;
+            const fields = document.querySelectorAll('.field-property').length;
+            const tables = document.querySelectorAll('.section-data-property').length;
+
+            document.getElementById('sectionCount').textContent = sections;
+            document.getElementById('fieldCount').textContent = fields;
+            document.getElementById('tableCount').textContent = tables;
+        }
+
+        // Atualizar stats quando seções mudarem
+        const observer = new MutationObserver(updateStats);
+        observer.observe(document.getElementById('sectionsList'), {
+            childList: true,
+            subtree: true
+        });
+
+        // Carregar templates salvos ao mudar tipo de entidade
+        document.getElementById('entityType').addEventListener('change', function() {
+            loadSavedTemplatesList();
+        });
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDefaultTemplate();
+            loadSavedTemplatesList();
+            updateStats();
+        });
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + S = Salvar template
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveTemplate();
+            }
+
+            // Ctrl + G = Gerar relatório
+            if (e.ctrlKey && e.key === 'g') {
+                e.preventDefault();
+                generateReport();
+            }
+
+            // Ctrl + P = Preview
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                previewReport();
+            }
+        });
+    </script>
+}
+
+<style>
+    .section-card {
+        background-color: #f8f9fa;
+        transition: all 0.2s;
+    }
+
+        .section-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+    .form-label-sm {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .list-group-item-action {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .list-group-item-action:hover {
+            background-color: #f8f9fa;
+            transform: translateX(4px);
+        }
+
+    .btn-modern {
+        transition: all 0.2s;
+    }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+</style>

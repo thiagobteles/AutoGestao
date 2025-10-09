@@ -1,4 +1,5 @@
 using AutoGestao.Entidades;
+using AutoGestao.Entidades.Relatorio;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ namespace AutoGestao.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Empresa> Empresas { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<ReportTemplateEntity> ReportTemplates { get; set; }
 
         #endregion
 
@@ -272,8 +274,7 @@ namespace AutoGestao.Data
             modelBuilder.Entity<VeiculoDocumento>(entity =>
             {
                 entity.Property(e => e.TipoDocumento).IsRequired();
-                entity.Property(e => e.NomeArquivo).HasMaxLength(255).IsRequired();
-                entity.Property(e => e.CaminhoArquivo).HasMaxLength(500).IsRequired();
+                entity.Property(e => e.Documento).HasMaxLength(500).IsRequired();
                 entity.Property(e => e.Observacoes).HasMaxLength(500).IsRequired();
                 entity.Property(e => e.DataUpload).IsRequired();
                 entity.Property(e => e.DataCadastro).IsRequired();
@@ -433,6 +434,25 @@ namespace AutoGestao.Data
                 entity.Property(e => e.DataHora).IsRequired();
                 entity.Property(e => e.DataCadastro).IsRequired();
                 entity.Property(e => e.DataAlteracao).IsRequired();
+            });
+
+
+            // ===========================================
+            // CONFIGURAÇÕES DA ENTIDADE ReportTemplateEntity
+            // ===========================================
+            modelBuilder.Entity<ReportTemplateEntity>().ToTable("report_templates");
+            modelBuilder.Entity<ReportTemplateEntity>(entity =>
+            {
+                entity.Property(e => e.Nome).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.TipoEntidade).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Descricao).HasMaxLength(500);
+                entity.Property(e => e.TemplateJson).IsRequired();
+                entity.Property(e => e.IsPadrao).HasDefaultValue(false);
+                entity.Property(e => e.Ativo).HasDefaultValue(true);
+
+                // Índices
+                entity.HasIndex(e => e.TipoEntidade);
+                entity.HasIndex(e => new { e.TipoEntidade, e.IsPadrao });
             });
 
             #endregion CONFIGURAÇÕES DAS ENTIDADES

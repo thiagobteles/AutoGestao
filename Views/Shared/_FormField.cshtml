@@ -1,0 +1,321 @@
+<!-- ============================================================================ -->
+<!-- Views/Shared/_FormField.cshtml - RENDERIZAR CAMPOS DO FORMULÁRIO -->
+<!-- ============================================================================ -->
+@model FormFieldViewModel
+
+@if (!Model.ShouldDisplay)
+{
+    return;
+}
+
+<div class="form-group"
+     data-field="@Model.PropertyName"
+     data-conditional-display="@Model.ConditionalDisplayRule"
+     data-conditional-required="@Model.ConditionalRequiredRule">
+
+    @if (Model.Type != EnumFieldType.Hidden && Model.Type != EnumFieldType.Checkbox)
+    {
+        <label for="@Model.PropertyName" class="form-label">
+            @if (!string.IsNullOrEmpty(Model.Icon))
+            {
+                <i class="@Model.Icon me-1"></i>
+            }
+            @Model.DisplayName
+            @if (Model.Required)
+            {
+                <span class="text-danger">*</span>
+            }
+        </label>
+    }
+
+    @switch (Model.Type)
+    {
+        case EnumFieldType.Text:
+        case EnumFieldType.Email:
+            <input type="@Model.Type.ToString().ToLower()"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   class="form-control @(Model.CssClass)"
+                   value="@Model.DisplayText"
+                   placeholder="@Model.Placeholder"
+                   maxlength="@(Model.ValidationRegex != null && Model.ValidationRegex.Length > 0 ? Model.ValidationRegex.Length : 0)"
+                   @(Model.ReadOnly ? "readonly" : "")
+                   @(Model.Required ? "required" : "")
+                   data-val="true"
+                   data-val-regex="@Model.ValidationMessage"
+                   data-val-regex-pattern="@Model.ValidationRegex" />
+            break;
+
+        case EnumFieldType.Number:
+        case EnumFieldType.Decimal:
+        case EnumFieldType.Currency:
+            <input type="number"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   class="form-control @(Model.CssClass) @(Model.Type == EnumFieldType.Currency ? "currency-input" : "")"
+                   value="@Model.Value"
+                   placeholder="@Model.Placeholder"
+                   step="@(Model.Type == EnumFieldType.Decimal || Model.Type == EnumFieldType.Currency ? "0.01" : "1")"
+                   @(Model.ReadOnly ? "readonly" : "")
+                   @(Model.Required ? "required" : "") />
+            break;
+
+        case EnumFieldType.Date:
+            <input type="date"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   class="form-control @(Model.CssClass)"
+                   value="@(Model.Value != null ? Convert.ToDateTime(Model.Value).ToString("yyyy-MM-dd") : "")"
+                   @(Model.ReadOnly ? "readonly" : "")
+                   @(Model.Required ? "required" : "") />
+            break;
+
+        case EnumFieldType.DateTime:
+            <input type="datetime-local"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   class="form-control @(Model.CssClass)"
+                   value="@(Model.Value != null ? Convert.ToDateTime(Model.Value).ToString("yyyy-MM-ddTHH:mm") : "")"
+                   @(Model.ReadOnly ? "readonly" : "")
+                   @(Model.Required ? "required" : "") />
+            break;
+
+        case EnumFieldType.Time:
+            <input type="time"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   class="form-control @(Model.CssClass)"
+                   value="@Model.DisplayText"
+                   @(Model.ReadOnly ? "readonly" : "")
+                   @(Model.Required ? "required" : "") />
+            break;
+
+        case EnumFieldType.TextArea:
+            <textarea id="@Model.PropertyName"
+              name="@Model.PropertyName"
+              class="form-control @(Model.CssClass)"
+              placeholder="@Model.Placeholder"
+              rows="3"
+              @(Model.ReadOnly ? "readonly" : "")
+              @(Model.Required ? "required" : "")>@Model.DisplayText</textarea>
+            break;
+
+        case EnumFieldType.Select:
+            <select id="@Model.PropertyName"
+                    name="@Model.PropertyName"
+                    class="form-select @(Model.CssClass)"
+                    @(Model.ReadOnly ? "disabled" : "")
+                    @(Model.Required ? "required" : "")
+                    data-val="true">
+                <option value="">@Model.Placeholder</option>
+                @if (Model.Options != null)
+                {
+                    foreach (var option in Model.Options)
+                    {
+                        <option value="@option.Value"
+                                selected="@(option.Value?.ToString() == Model.Value?.ToString())">
+                            @option.Text
+                        </option>
+                    }
+                }
+            </select>
+            break;
+
+        case EnumFieldType.Checkbox:
+            <div class="form-check">
+                <input type="checkbox"
+                       id="@Model.PropertyName"
+                       name="@Model.PropertyName"
+                       class="form-check-input @(Model.CssClass)"
+                       value="true"
+                       checked="@(Model.Value?.ToString() == "True")"
+                       @(Model.ReadOnly ? "disabled" : "") />
+                <label class="form-check-label" for="@Model.PropertyName">
+                    @if (!string.IsNullOrEmpty(Model.Icon))
+                    {
+                        <i class="@Model.Icon me-1"></i>
+                    }
+                    @Model.DisplayName
+                    @if (Model.Required)
+                    {
+                        <span class="text-danger">*</span>
+                    }
+                </label>
+            </div>
+            break;
+
+        case EnumFieldType.Cpf:
+            @if (Model.Options != null)
+            {
+                <div class="radio-group">
+                    @foreach (var option in Model.Options)
+                    {
+                        <div class="form-check">
+                            <input type="radio"
+                                   id="@(Model.PropertyName)_@option.Value"
+                                   name="@Model.PropertyName"
+                                   class="form-check-input @(Model.CssClass)"
+                                   value="@option.Value"
+                                   checked="@(option.Value?.ToString() == Model.Value?.ToString())"
+                                   @(Model.ReadOnly ? "disabled" : "")
+                                   @(Model.Required ? "required" : "") />
+                            <label class="form-check-label" for="@(Model.PropertyName)_@option.Value">
+                                @option.Text
+                            </label>
+                        </div>
+                    }
+                </div>
+            }
+            break;
+
+        case EnumFieldType.File:
+            <input type="file"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   class="form-control @(Model.CssClass)"
+                   @(Model.ReadOnly ? "disabled" : "")
+                   @(Model.Required ? "required" : "")
+                   accept="@Model.DataList" />
+            @if (!string.IsNullOrEmpty(Model.DisplayText))
+            {
+                <small class="form-text text-muted">
+                    Arquivo atual: @Model.DisplayText
+                </small>
+            }
+            break;
+
+        case EnumFieldType.Hidden:
+            <input type="hidden"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   value="@Model.Value" />
+            break;
+
+        case EnumFieldType.Reference:
+            <select id="@Model.PropertyName"
+                    name="@Model.PropertyName"
+                    class="form-select reference-select @(Model.CssClass)"
+                    @(Model.ReadOnly ? "disabled" : "")
+                    @(Model.Required ? "required" : "")
+                    data-reference="@Model.ReferenceFilters"
+                    data-val="true">
+                <option value="">@Model.Placeholder</option>
+                @if (Model.Options != null)
+                {
+                    foreach (var option in Model.Options)
+                    {
+                        <option value="@option.Value"
+                                selected="@(option.Value?.ToString() == Model.Value?.ToString())">
+                            @option.Text
+                        </option>
+                    }
+                }
+            </select>
+            break;
+
+        default:
+            <input type="text"
+                   id="@Model.PropertyName"
+                   name="@Model.PropertyName"
+                   class="form-control @(Model.CssClass)"
+                   value="@Model.DisplayText"
+                   placeholder="@Model.Placeholder"
+                   @(Model.ReadOnly ? "readonly" : "")
+                   @(Model.Required ? "required" : "") />
+            break;
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ValidationMessage) && Model.Required)
+    {
+        <span class="invalid-feedback"
+              data-valmsg-for="@Model.PropertyName"
+              data-valmsg-replace="true">
+            @Model.ValidationMessage
+        </span>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Placeholder) && Model.Type != EnumFieldType.Checkbox)
+    {
+        <small class="form-text text-muted">@Model.Placeholder</small>
+    }
+</div>
+
+<style>
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 0.625rem 0.875rem;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+    .currency-input {
+        text-align: right;
+    }
+
+    .invalid-feedback {
+        display: none;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+    }
+
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+
+    .form-check {
+        padding-left: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-check-input {
+        margin-left: -1.5rem;
+    }
+
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-control-color {
+        height: 40px;
+        padding: 0.25rem;
+    }
+
+    .form-range {
+        width: 100%;
+    }
+</style>
+
+<script>
+    // Atualizar valor do range ao mudar
+    document.addEventListener('DOMContentLoaded', function() {
+        const rangeInputs = document.querySelectorAll('input[type="range"]');
+        rangeInputs.forEach(input => {
+            const valueDisplay = document.getElementById(input.id + '_value');
+            if (valueDisplay) {
+                input.addEventListener('input', function() {
+                    valueDisplay.textContent = this.value;
+                });
+            }
+        });
+    });
+</script>

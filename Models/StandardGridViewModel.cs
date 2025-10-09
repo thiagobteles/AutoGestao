@@ -22,7 +22,7 @@ namespace AutoGestao.Models
         public List<GridAction> HeaderActions { get; set; } = [];
         public List<GridAction> RowActions { get; set; } = [];
         public string Icon { get; set; } = "fas fa-table";
-        public List<Dictionary<string, object>> Rows { get; set; } = new();
+        public List<Dictionary<string, object>> Rows { get; set; } = [];
         public bool ShowCreateButton { get; set; } = true;
         public bool ShowEditButton { get; set; } = true;
         public bool ShowDeleteButton { get; set; } = true;

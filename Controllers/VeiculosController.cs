@@ -1,3 +1,4 @@
+using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Entidades.Veiculos;
@@ -7,14 +8,17 @@ using AutoGestao.Enumerador.Veiculo;
 using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
+using AutoGestao.Models.Report;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace AutoGestao.Controllers
 {
-    public class VeiculosController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Veiculo>> logger) : StandardGridController<Veiculo>(context, fileStorageService, logger)
+    public class VeiculosController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Veiculo>> logger, IReportService reportService) 
+        : StandardGridController<Veiculo>(context, fileStorageService, logger, reportService)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
@@ -176,6 +180,59 @@ namespace AutoGestao.Controllers
 
         #region Endpoints Específicos
 
+        //[HttpGet]
+        //protected override async Task<IActionResult> GerarRelatorio(long id)
+        //{
+        //    var item = await _context.Veiculos
+        //        .Include(v => v.Cliente)
+        //        .Include(v => v.VeiculoMarca)
+        //        .Include(v => v.VeiculoMarcaModelo)
+        //        .Include(v => v.VeiculoCor)
+        //        .FirstOrDefaultAsync(v => v.Id == id);
+
+        //    if (item == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    // Preparar dados para o relatório
+        //    var lancamento = new LancamentoVeiculo
+        //    {
+        //        Modelo = item.VeiculoMarcaModelo.Descricao,
+        //        Placa = item.Placa,
+        //        Ano = item.AnoComposto?.ToString(),
+        //        Chassi = item.Chassi,
+        //        Km = item.KmEntrada?.ToString(),
+        //        Cor = item.VeiculoCor.Descricao,
+        //        Combustivel = item.Combustivel.GetDescription(),
+        //        Cambio = item.Cambio.GetDescription(),
+        //        Receitas = [],
+        //        Lancamentos =
+        //        [
+        //            new()
+        //            {
+        //                DataCriacao = "25/08/2025",
+        //                Descricao = $"LAUDO CAUTELAR - {item.VeiculoMarcaModelo.Descricao}",
+        //                Status = "Pago pela loja",
+        //                Valor = 160.00m
+        //            },
+        //            new()
+        //            {
+        //                DataCriacao = "25/08/2025",
+        //                Descricao = $"Lavagem detalhada",
+        //                Status = "Pago pela loja",
+        //                Valor = 300.00m
+        //            }
+        //        ]
+        //    };
+
+        //    // Obter template padrão e gerar HTML
+        //    var template = _reportService.GetDefaultTemplate<LancamentoVeiculo>();
+        //    var html = _reportService.GenerateReportHtml(lancamento, template);
+
+        //    return Content(html, "text/html");
+        //}
+
         [HttpPost]
         public async Task<IActionResult> AdicionarDocumento(long id, IFormFile arquivo, string descricao)
         {
@@ -188,7 +245,7 @@ namespace AutoGestao.Controllers
             var documento = new VeiculoDocumento
             {
                 IdVeiculo = id,
-                NomeArquivo = arquivo.FileName,
+                Documento = arquivo.FileName,
                 Observacoes = descricao,
                 DataUpload = DateTime.UtcNow
             };

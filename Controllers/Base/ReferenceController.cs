@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Base
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -269,7 +269,7 @@ namespace AutoGestao.Controllers
             await task.ConfigureAwait(false);
 
             var resultProperty = task.GetType().GetProperty("Result");
-            return (resultProperty?.GetValue(task) as List<ReferenceItem>) ?? [];
+            return resultProperty?.GetValue(task) as List<ReferenceItem> ?? [];
         }
 
         #endregion

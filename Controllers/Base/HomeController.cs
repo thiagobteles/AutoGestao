@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Base
 {
     [Authorize]
     public class HomeController(ApplicationDbContext context) : Controller

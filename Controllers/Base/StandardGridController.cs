@@ -6,6 +6,8 @@ using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Models.Grid;
+using AutoGestao.Models.Report;
+using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -15,14 +17,16 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Base
 {
-    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null)
+    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null, IReportService reportService = null)
         : Controller where T : BaseEntidade, new()
     {
         protected readonly ApplicationDbContext _context = context;
         protected readonly IFileStorageService _fileStorageService = fileStorageService;
         protected readonly ILogger<StandardGridController<T>>? _logger = logger;
+        protected readonly IReportService _reportService = reportService;
+
 
         // CONSTRUTOR SEM LOGGER (COMPATIBILIDADE)
         protected StandardGridController(ApplicationDbContext context, IFileStorageService fileStorageService) : this(context, fileStorageService, null)
@@ -380,44 +384,32 @@ namespace AutoGestao.Controllers
         [HttpGet]
         public virtual async Task<IActionResult> Create()
         {
-            if (!CanCreate(new T()))
-            {
-                TempData["Error"] = "Você não tem permissão para cadastrar um novo registro.";
-                return Forbid();
-            }
-
             var entity = new T();
-            PopulateEnumsInViewBag();
-
-            var viewModel = await BuildFormViewModelAsync(entity, "Create"); // USAR VERSÃO ASYNC
-
-            if (IsAjaxRequest())
-            {
-                var partialViewName = $"_Create{typeof(T).Name}Form";
-                if (ViewExists(partialViewName))
-                {
-                    return PartialView(partialViewName, viewModel);
-                }
-                return PartialView("_CreateForm", viewModel);
-            }
+            await BeforeCreate(entity);
 
             // DETECTAR SE É MODAL
-            if (Request.Query.ContainsKey("modal") && Request.Query["modal"] == "true")
+            var isModal = Request.Query.ContainsKey("modal") && Request.Query["modal"] == "true";
+            _logger?.LogInformation("Create chamado - IsModal: {IsModal}", isModal);
+            if (isModal)
             {
-                // Retornar apenas o formulário sem layout
-                return PartialView("_ModalForm", viewModel);
+                // Retornar apenas o formulário sem layout para o modal
+                var formViewModel = await BuildFormViewModelAsync(entity, "Create");
+
+                _logger?.LogInformation("Retornando _ModalForm para modal");
+
+                // IMPORTANTE: Usar PartialView para não carregar layout
+                return PartialView("_ModalForm", formViewModel);
             }
 
-            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
-            if (formTabs?.EnableTabs == true)
+            // Comportamento normal com tabs
+            if (ShouldUseTabbedForm())
             {
-                viewModel = await BuildTabbedFormViewModelAsync(entity, "Create");
+                var viewModel = await BuildTabbedFormViewModelAsync(entity, "Create");
                 return View("_TabbedForm", viewModel);
             }
-            else
-            {
-                return View("_StandardForm", viewModel);
-            }
+
+            var standardViewModel = await BuildFormViewModelAsync(entity, "Create");
+            return View("_StandardForm", standardViewModel);
         }
 
         /// <summary>
@@ -496,54 +488,53 @@ namespace AutoGestao.Controllers
         /// GET: Edit - Exibir formulário de edição
         /// </summary>
         [HttpGet]
-        public virtual async Task<IActionResult> Edit(long id)
+        public virtual async Task<IActionResult> Edit(long? id)
         {
-            var query = GetBaseQuery();
-
-            var entityType = typeof(T);
-            var navigationProperties = entityType.GetProperties()
-                .Where(p => p.PropertyType.IsClass &&
-                            p.PropertyType != typeof(string) &&
-                            !p.PropertyType.IsArray &&
-                            p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
-
-            foreach (var navProp in navigationProperties)
+            if (id == null)
             {
-                var propertyName = navProp.Name.StartsWith("Id") ? navProp.Name.Substring(2) : navProp.Name;
-                var property = entityType.GetProperty(propertyName);
-
-                if (property != null)
-                {
-                    query = query.Include(propertyName);
-                }
+                return NotFound();
             }
 
-            var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
-
+            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (entity == null)
             {
                 return NotFound();
             }
 
-            if (!CanEdit(entity))
+            await BeforeUpdate(entity);
+
+            // DETECTAR SE É MODAL
+            var isModal = Request.Query.ContainsKey("modal") &&
+                          Request.Query["modal"] == "true";
+
+            _logger?.LogInformation("Edit chamado - Id: {Id}, IsModal: {IsModal}", id, isModal);
+
+            if (isModal)
             {
-                TempData["Error"] = "Você não tem permissão para editar este registro.";
-                return Forbid();
+                // Retornar apenas o formulário sem layout para o modal
+                var formViewModel = await BuildFormViewModelAsync(entity, "Edit");
+
+                _logger?.LogInformation("Retornando _ModalForm para modal");
+
+                // IMPORTANTE: Usar PartialView para não carregar layout
+                return PartialView("_ModalForm", formViewModel);
             }
 
-            PopulateEnumsInViewBag();
-            var viewModel = await BuildFormViewModelAsync(entity, "Edit"); // USAR VERSÃO ASYNC
-
-            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
-            if (formTabs?.EnableTabs == true)
+            // Comportamento normal com tabs
+            if (ShouldUseTabbedForm())
             {
-                viewModel = await BuildTabbedFormViewModelAsync(entity, "Edit");
+                var viewModel = await BuildTabbedFormViewModelAsync(entity, "Edit");
                 return View("_TabbedForm", viewModel);
             }
-            else
-            {
-                return View("_StandardForm", viewModel);
-            }
+
+            var standardViewModel = await BuildFormViewModelAsync(entity, "Edit");
+            return View("_StandardForm", standardViewModel);
+        }
+
+        private static bool ShouldUseTabbedForm()
+        {
+            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
+            return formTabs?.EnableTabs ?? false;
         }
 
         /// <summary>
@@ -574,15 +565,14 @@ namespace AutoGestao.Controllers
                 var value = prop.GetValue(entity);
                 Console.WriteLine($"{prop.Name}: '{value}' (IsNull: {value == null})");
             }
+
             Console.WriteLine("========================================");
 
             if (id != entity.Id)
             {
-                if (Request.IsAjaxRequest())
-                {
-                    return Json(new { success = false, message = "ID inconsistente." });
-                }
-                return NotFound();
+                return Request.IsAjaxRequest() 
+                    ? Json(new { success = false, message = "ID inconsistente." })
+                    : NotFound();
             }
 
             var existingEntity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
@@ -682,7 +672,7 @@ namespace AutoGestao.Controllers
                 {
                     success = false,
                     message = "Erro de validação.",
-                    errors = errors
+                    errors
                 });
             }
 
@@ -739,6 +729,22 @@ namespace AutoGestao.Controllers
             {
                 return View("_StandardForm", viewModel);
             }
+        }
+
+        [HttpGet]
+        public virtual async Task<IActionResult> GerarRelatorio(long id)
+        {
+            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            // Obter template padrão e gerar HTML
+            var template = _reportService.GetDefaultTemplate<T>();
+            var html = _reportService.GenerateReportHtml(entity, template);
+
+            return Content(html, "text/html");
         }
 
         /// <summary>
@@ -901,8 +907,8 @@ namespace AutoGestao.Controllers
                 {
                     success = true,
                     fileName = Path.GetFileName(file.FileName),
-                    filePath = filePath,
-                    fileUrl = fileUrl,
+                    filePath,
+                    fileUrl,
                     message = "Arquivo enviado com sucesso!"
                 });
             }
@@ -1306,6 +1312,14 @@ namespace AutoGestao.Controllers
                     },
                     new()
                     {
+                        Name = "QuickReport",
+                        DisplayName = "PDF",
+                        Icon = "fas fa-file-pdf",
+                        CssClass = "btn btn-sm btn-outline-success",
+                        Url = "/" + controllerNome + "/GerarRelatorio/{id}",
+                    },
+                    new()
+                    {
                         Name = "Delete",
                         DisplayName = "Excluir",
                         Icon = "fas fa-trash",
@@ -1343,7 +1357,7 @@ namespace AutoGestao.Controllers
 
         private static bool TryConvertToNumeric<TProperty>(string value, out TProperty result)
         {
-            result = default(TProperty);
+            result = default;
 
             try
             {
@@ -2003,7 +2017,7 @@ namespace AutoGestao.Controllers
         /// </summary>
         protected IQueryable<T> ApplyEnumFilter<TEnum>(IQueryable<T> query, Dictionary<string, object> filters, string filterName, Expression<Func<T, TEnum>> propertyExpression) where TEnum : struct, Enum
         {
-            if (filters.TryGetValue(filterName, out var value) && Enum.TryParse<TEnum>(value.ToString(), out TEnum enumValue))
+            if (filters.TryGetValue(filterName, out var value) && Enum.TryParse<TEnum>(value.ToString(), out var enumValue))
             {
                 var parameter = Expression.Parameter(typeof(T), "x");
                 var property = Expression.Property(parameter, ((MemberExpression)propertyExpression.Body).Member.Name);

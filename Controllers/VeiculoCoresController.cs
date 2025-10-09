@@ -1,11 +1,12 @@
+using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Controllers
 {
-    public class VeiculoCoresController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<VeiculoCor>> logger) 
-        : StandardGridController<VeiculoCor>(context, fileStorageService, logger)
+    public class VeiculoCoresController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<VeiculoCor>> logger,  IReportService reportService) 
+        : StandardGridController<VeiculoCor>(context, fileStorageService, logger, reportService)
     {
     }
 }

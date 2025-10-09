@@ -1,4 +1,4 @@
-using AutoGestao.Controllers;
+using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Helpers;

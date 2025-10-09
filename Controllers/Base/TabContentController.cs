@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Base
 {
     public class TabContentController(ApplicationDbContext context, ILogger<TabContentController> logger) : Controller
     {
@@ -65,15 +65,21 @@ namespace AutoGestao.Controllers
         {
             // Remover sufixo "Controller" se existir
             if (controllerName.EndsWith("Controller"))
+            {
                 controllerName = controllerName[..^10];
+            }
 
             // Casos especiais para Veículo
             if (controllerName.StartsWith("Veiculo"))
+            {
                 return controllerName;
+            }
 
             // Remover 's' do plural se necessário
             if (controllerName.EndsWith("s") && controllerName.Length > 1)
+            {
                 return controllerName[..^1];
+            }
 
             return controllerName;
         }
@@ -82,7 +88,9 @@ namespace AutoGestao.Controllers
         {
             // Remover sufixo "Controller" se existir
             if (parentController.EndsWith("Controller"))
+            {
                 parentController = parentController[..^10];
+            }
 
             // Remover 's' do plural
             var parentEntityName = parentController.EndsWith("s") && parentController.Length > 1
@@ -179,7 +187,7 @@ namespace AutoGestao.Controllers
                 Mode = mode,
                 ParentId = parentId,
                 Items = items.Cast<object>().ToList(),
-                Columns = gridColumns.Where(c => c.Type != AutoGestao.Enumerador.Gerais.EnumGridColumnType.Actions).ToList(),
+                Columns = gridColumns.Where(c => c.Type != Enumerador.Gerais.EnumGridColumnType.Actions).ToList(),
                 Title = formConfig.Title ?? entityType.Name,
                 Icon = formConfig.Icon ?? "fas fa-list",
                 ForeignKeyProperty = foreignKeyProperty?.Name,

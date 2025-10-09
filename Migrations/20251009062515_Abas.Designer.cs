@@ -3,6 +3,7 @@ using System;
 using AutoGestao.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoGestao.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251009062515_Abas")]
+    partial class Abas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -870,7 +873,7 @@ namespace AutoGestao.Migrations
                     b.ToTable("parcelas", (string)null);
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Relatorio.ReportTemplateEntity", b =>
+            modelBuilder.Entity("AutoGestao.Entidades.ReportTemplateEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -947,6 +950,84 @@ namespace AutoGestao.Migrations
                     b.HasIndex("TipoEntidade", "IsPadrao");
 
                     b.ToTable("report_templates", (string)null);
+                });
+
+            modelBuilder.Entity("AutoGestao.Entidades.ReportTemplateUsage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("AlteradoPorUsuarioId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("alterado_por_usuario_id");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<long?>("CriadoPorUsuarioId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("criado_por_usuario_id");
+
+                    b.Property<DateTime>("DataAlteracao")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("data_alteracao");
+
+                    b.Property<DateTime>("DataCadastro")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("data_cadastro");
+
+                    b.Property<DateTime>("DataGeracao")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("data_geracao");
+
+                    b.Property<long?>("EmpresaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<long>("EntidadeId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entidade_id");
+
+                    b.Property<long>("IdEmpresa")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id_empresa");
+
+                    b.Property<long>("IdReportTemplate")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id_report_template");
+
+                    b.Property<long?>("IdUsuario")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<string>("TipoEntidade")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("tipo_entidade");
+
+                    b.Property<string>("UsuarioNome")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("usuario_nome");
+
+                    b.HasKey("Id")
+                        .HasName("pk_report_template_usages");
+
+                    b.HasIndex("DataGeracao");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.HasIndex("IdReportTemplate");
+
+                    b.HasIndex("TipoEntidade", "EntidadeId");
+
+                    b.ToTable("report_template_usages", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Tarefa", b =>
@@ -2090,13 +2171,30 @@ namespace AutoGestao.Migrations
                     b.Navigation("Venda");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Relatorio.ReportTemplateEntity", b =>
+            modelBuilder.Entity("AutoGestao.Entidades.ReportTemplateEntity", b =>
                 {
                     b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId");
 
                     b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("AutoGestao.Entidades.ReportTemplateUsage", b =>
+                {
+                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId");
+
+                    b.HasOne("AutoGestao.Entidades.ReportTemplateEntity", "ReportTemplate")
+                        .WithMany()
+                        .HasForeignKey("IdReportTemplate")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("ReportTemplate");
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Tarefa", b =>

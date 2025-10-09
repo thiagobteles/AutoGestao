@@ -1,38 +1,42 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Enumerador.Veiculo;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 
 namespace AutoGestao.Entidades.Veiculos
 {
+    // Anotação para geração de Relatório
+    [ReportConfig("Detalhes do veículo", Icon = "fas fa-car", ShowLogo = true, ShowDate = true)]
+
+    // Anotação para geração da GRID
     [FormConfig(Title = "Veículo", Subtitle = "Gerencie todas as informações do veículo", Icon = "fas fa-car", EnableAjaxSubmit = true)]
+    
+    // Anotações para geração de TABS
     [FormTabs(EnableTabs = true, DefaultTab = "principal")]
-    [FormTab("arquivos", "Arquivos", TabIcon = "fas fa-folder", Order = 1, Controller = "VeiculoDocumento")]
-    //[FormTab("nfe", "NFE", TabIcon = "fas fa-file-invoice", Order = 2, Controller = "VeiculoNFE")]
-    [FormTab("midias", "Mídias", TabIcon = "fas fa-images", Order = 3, Controller = "VeiculoFoto")]
-    //[FormTab("lancamentos", "Lançamentos", TabIcon = "fas fa-list", Order = 4, Controller = "VeiculoLancamentos")]
-    //[FormTab("despachante", "Despachante", TabIcon = "fas fa-user-tie", Order = 5, Controller = "VeiculoDespachante")]
-    //[FormTab("resumo", "Resumo", TabIcon = "fas fa-chart-line", Order = 6, Controller = "VeiculoResumo")]
-    //[FormTab("vistoria", "Vistoria", TabIcon = "fas fa-search", Order = 7, Controller = "VeiculoVistoria")]
-    //[FormTab("web", "Web", TabIcon = "fas fa-globe", Order = 8, Controller = "VeiculoWeb")]
-    //[FormTab("entrada", "Entrada", TabIcon = "fas fa-sign-in-alt", Order = 9, Controller = "VeiculoEntrada")]
-    [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 10, Controller = "Despesa", RequiredRoles = new[] { "Admin", "Financeiro" })]
+    [FormTab("arquivos", "Arquivos", TabIcon = "fas fa-folder", Order = 1, Controller = "VeiculoDocumento", LazyLoad = true)]
+    [FormTab("nfe", "NFE", TabIcon = "fas fa-file-invoice", Order = 2, Controller = "VeiculoDocumento", LazyLoad = true)]
+    [FormTab("midias", "Mídias", TabIcon = "fas fa-images", Order = 3, Controller = "VeiculoFoto", LazyLoad = true)]
+    [FormTab("lancamentos", "Lançamentos", TabIcon = "fas fa-list", Order = 4, Controller = "Despesa", LazyLoad = true)]
+    //[FormTab("web", "Web", TabIcon = "fas fa-globe", Order = 5, Controller = "VeiculoWeb")]
+    [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 6, Controller = "Despesa", RequiredRoles = new[] { "Admin", "Financeiro" })]
     public class Veiculo : BaseEntidade
     {
+        // Cammpo aparece no RPT
+        [ReportField("Codigo", Section = "AUTOMÓVEL", Order = 1)]
+        
+        // Campo aparece na GRID
         [GridId()]
+
+        // Campo aparece no CADASTRO/EDIÇÃO
         [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Text, ReadOnly = true, Required = false, GridColumns = 2)]
         public string Codigo { get; set; } = string.Empty;
 
         // ============================================================
         // MARCA + MODELO - Campo COMPOSTO para grid
-        // Este é um campo virtual (não existe no banco)
         // Combina VeiculoMarca.Descricao + VeiculoMarcaModelo.Descricao
         // ============================================================
-        [GridComposite("Veículo", Order = 20, Width = "200px",
-            NavigationPaths = new[] { "VeiculoMarca.Descricao", "VeiculoMarcaModelo.Descricao" },
-            Template = @"<div class=""vehicle-info"">
-                    <div class=""fw-semibold"">{0}</div>
-                    <div class=""text-muted small"">{1}</div>
-                </div>")]
+        [GridComposite("Veículo", Order = 20, Width = "200px", NavigationPaths = new[] { "VeiculoMarca.Descricao", "VeiculoMarcaModelo.Descricao" },
+            Template = @"<div class=""vehicle-info""><div class=""fw-semibold"">{0}</div><div class=""text-muted small"">{1}</div></div>")]
         public string MarcaModelo => $"{VeiculoMarca?.Descricao ?? "N/A"} - {VeiculoMarcaModelo?.Descricao ?? "N/A"}";
 
         // ============================================================
@@ -41,9 +45,8 @@ namespace AutoGestao.Entidades.Veiculos
         [GridField("Ano", Order = 30, Width = "100px")]
         public string AnoComposto => $"{AnoFabricacao}/{AnoModelo}";
 
-        // ============================================================
-        // PLACA - Aparece na grid
-        // ============================================================
+        [ReferenceSearchable]
+        [ReferenceText]
         [GridField("Placa", Order = 40, Width = "120px")]
         [FormField(Order = 1, Name = "Placa", Section = "Identificação", Icon = "fas fa-id-card", Type = EnumFieldType.Text, Required = true, Placeholder = "XXX-0000 ou XXX0X00")]
         public string Placa { get; set; } = string.Empty;
@@ -65,9 +68,8 @@ namespace AutoGestao.Entidades.Veiculos
         public long IdVeiculoMarca { get; set; }
 
         // ============================================================
-        // MODELO (FK) - NÃO aparece na grid
-        // A grid usa o campo composto MarcaModelo
-        // Habilitado condicionalmente apenas se Marca estiver selecionada
+        // (Anotação: ConditionalRule) => Habilitado condicionalmente apenas se Marca estiver selecionada
+        // (Anotação: ReferenceFilter) => Quando habilitado é utilizado o campo IdVeiculoMarca dessa classe para filtrar o IdVeiculoMarca dentro da referencia VeiculoMarcaModelo 
         // ============================================================
         [ConditionalRule(EnumConditionalRuleType.Enabled, "IdVeiculoMarca != 0")]
         [ReferenceFilter("IdVeiculoMarca", "IdVeiculoMarca", Operator = EnumFilterOperator.Equals)]
@@ -128,9 +130,6 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 20, Name = "Km saida", Section = "Financeiro", Type = EnumFieldType.Decimal)]
         public decimal? KmSaida { get; set; }
 
-        // ============================================================
-        // PREÇO DE VENDA - Formatado como moeda
-        // ============================================================
         [GridField("Preço", Order = 60, Width = "140px", Format = "C")]
         [FormField(Order = 20, Name = "Preço de Venda", Section = "Financeiro", Icon = "fas fa-dollar-sign", Type = EnumFieldType.Currency)]
         public decimal? PrecoVenda { get; set; }
@@ -160,6 +159,8 @@ namespace AutoGestao.Entidades.Veiculos
         public virtual ICollection<Venda> Vendas { get; set; } = [];
         public virtual ICollection<VeiculoFoto> Fotos { get; set; } = [];
         public virtual ICollection<VeiculoDocumento> Documentos { get; set; } = [];
+
+        [ReportTable("Resumo das Receitas", ShowTotal = true, TotalField = "Valor", Order = 1)]
         public virtual ICollection<Despesa> Despesas { get; set; } = [];
     }
 }

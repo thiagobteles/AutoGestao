@@ -67,6 +67,7 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
 builder.Services.AddScoped<IFileStorageService, MinioFileStorageService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<GenericReferenceService>();
 builder.Services.AddHttpContextAccessor();
 
@@ -142,6 +143,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
     var empresaService = scope.ServiceProvider.GetRequiredService<IEmpresaService>();
+    ReportTemplateSeeder.SeedDefaultTemplates(context);
 
     await InicializarDadosPadrao(context, usuarioService, empresaService);
 }

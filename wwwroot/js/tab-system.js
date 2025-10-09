@@ -4,7 +4,7 @@ class TabSystem {
         this.currentParentController = '';
         this.currentMode = '';
         this.loadedTabs = new Set();
-        this.loadingTabs = new Set(); // NOVO: Controlar tabs em carregamento
+        this.loadingTabs = new Set();
         this.init();
     }
 
@@ -114,6 +114,16 @@ class TabSystem {
     setupTabEventListeners() {
         document.querySelectorAll('[data-bs-toggle="tab"]').forEach(button => {
             button.addEventListener('shown.bs.tab', (e) => this.handleTabShown(e));
+
+            // NOVO: Adicionar evento de clique para forçar reload
+            button.addEventListener('click', (e) => {
+                const tabId = e.currentTarget.dataset.tabId;
+                if (tabId !== 'principal' && this.loadedTabs.has(tabId)) {
+                    console.log('🔄 Forçando reload da tab:', tabId);
+                    // Não fazer nada aqui, deixar o shown.bs.tab lidar
+                    // Mas podemos limpar o cache se quiser forçar reload
+                }
+            });
         });
     }
 
@@ -125,32 +135,32 @@ class TabSystem {
 
         console.log('👁️ Tab shown:', { tabId, controller, lazyLoad, parentId: this.currentParentId, mode: this.currentMode });
 
-        // Verificar se ID é válido
         if (this.currentParentId === 0) {
             console.warn('⚠️ ID inválido - tab não pode carregar');
             return;
         }
 
-        // Aba principal não precisa carregar
         if (tabId === 'principal') {
             console.log('ℹ️ Aba principal - não precisa carregar');
             return;
         }
 
-        // Se não tem lazy load, não precisa carregar
         if (!lazyLoad) {
             console.log('ℹ️ Tab sem lazy load');
             return;
         }
 
-        // NOVO: Verificar se já está carregando ou carregada
+        // MODIFICADO: Verificar apenas se está carregando
         if (this.loadingTabs.has(tabId)) {
             console.log('⏳ Tab já está sendo carregada:', tabId);
             return;
         }
 
+        // REMOVIDO: A verificação de loadedTabs para permitir reload
+        // Se quiser mostrar conteúdo em cache enquanto recarrega:
         if (this.loadedTabs.has(tabId)) {
-            console.log('✅ Tab já foi carregada:', tabId);
+            console.log('♻️ Tab já carregada, mostrando cache:', tabId);
+            // O conteúdo já está lá, apenas retornar
             return;
         }
 
@@ -306,7 +316,7 @@ class TabSystem {
 
 // Funções globais continuam iguais...
 window.openTabCreateModal = async function (entityType, parentId, foreignKeyProperty, controllerName) {
-    console.log('openTabCreateModal:', { entityType, parentId, foreignKeyProperty, controllerName });
+    console.log('🆕 openTabCreateModal:', { entityType, parentId, foreignKeyProperty, controllerName });
 
     const modalElement = document.getElementById('tabItemModal');
     const modal = new bootstrap.Modal(modalElement, {
@@ -330,17 +340,24 @@ window.openTabCreateModal = async function (entityType, parentId, foreignKeyProp
     try {
         const url = `/${controllerName}/Create?modal=true&${foreignKeyProperty}=${parentId}`;
 
-        console.log('Carregando modal create:', url);
+        console.log('📤 Requisição modal create:', url);
 
         const response = await fetch(url);
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Erro ao carregar modal:', response.status, errorText);
+            console.error('❌ Erro ao carregar modal:', response.status, errorText);
             throw new Error(`Erro ${response.status}: ${response.statusText}`);
         }
 
+        const contentType = response.headers.get('content-type');
+        console.log('📥 Response content-type:', contentType);
+
         const html = await response.text();
+
+        console.log('✅ HTML recebido, tamanho:', html.length);
+        console.log('📄 Primeiros 200 chars:', html.substring(0, 200));
+
         modalBody.innerHTML = html;
 
         if (window.initializeStandardForm) {
@@ -349,6 +366,8 @@ window.openTabCreateModal = async function (entityType, parentId, foreignKeyProp
 
         const form = modalBody.querySelector('form');
         if (form) {
+            console.log('✅ Formulário encontrado no modal');
+
             const formButtons = form.querySelectorAll('button[type="submit"], .form-actions');
             formButtons.forEach(btn => btn.style.display = 'none');
 
@@ -361,10 +380,12 @@ window.openTabCreateModal = async function (entityType, parentId, foreignKeyProp
                 e.preventDefault();
                 await handleTabFormSubmit(form, modal);
             });
+        } else {
+            console.error('❌ Formulário não encontrado no modal');
         }
 
     } catch (error) {
-        console.error('Erro ao abrir modal:', error);
+        console.error('❌ Erro ao abrir modal:', error);
         modalBody.innerHTML = tabSystem.getErrorHtml(error.message);
     }
 };

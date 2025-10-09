@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Base
 {
     [AllowAnonymous]
     public class LoginController(IAuthService authService) : Controller

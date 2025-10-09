@@ -1,3 +1,4 @@
+using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
@@ -10,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
-    public class ClientesController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Cliente>> logger) 
-        : StandardGridController<Cliente>(context, fileStorageService, logger)
+    public class ClientesController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Cliente>> logger,  IReportService reportService) 
+        : StandardGridController<Cliente>(context, fileStorageService, logger, reportService)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {

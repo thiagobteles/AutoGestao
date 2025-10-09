@@ -1,186 +1,300 @@
-@model TabContentViewModel
+@{
+    Layout = null;
+}
+@model StandardFormViewModel
 
-<div class="tab-content-container">
-    <div class="tab-header mb-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5>
-                <i class="@Model.Icon me-2"></i>
-                @Model.Title
-            </h5>
-            @if (Model.CanCreate)
-            {
-                <button type="button"
-                        class="btn btn-primary btn-sm"
-                        onclick="openTabCreateModal('@Model.EntityType', @Model.ParentId, '@Model.ForeignKeyProperty', '@Model.ControllerName')">
-                    <i class="fas fa-plus me-1"></i>
-                    Adicionar
-                </button>
-            }
-        </div>
-    </div>
-
-    <div class="tab-grid-container">
-        @if (Model.Items.Any())
+<form method="post" 
+      action="/@Model.ControllerName/@Model.ActionName@(Model.ActionName == "Edit" && Model.Model != null ? $"/{((dynamic)Model.Model).Id}" : "")" 
+      class="modal-form-container"
+      enctype="multipart/form-data"
+      novalidate>
+    
+    @if (Model.Model != null)
+    {
+        var idProperty = Model.Model.GetType().GetProperty("Id");
+        if (idProperty != null)
         {
-            <div class="table-responsive">
-                <table class="table table-hover table-sm">
-                    <thead>
-                        <tr>
-                            @foreach (var column in Model.Columns)
-                            {
-                                <th>@column.DisplayName</th>
-                            }
-                            @if (Model.CanEdit || Model.CanDelete)
-                            {
-                                <th width="120px" class="text-center">Ações</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.Items)
+            <input type="hidden" name="Id" value="@idProperty.GetValue(Model.Model)" />
+        }
+    }
+
+    @Html.AntiForgeryToken()
+
+    @if (Model.ModelState != null && Model.ModelState.Count > 0)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <div class="d-flex align-items-start">
+                <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                <div>
+                    <strong>Erro de validação!</strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach (var error in Model.ModelState)
                         {
-                            var itemType = item.GetType();
-                            var itemId = itemType.GetProperty("Id")?.GetValue(item);
-
-                            <tr>
-                                @foreach (var column in Model.Columns)
-                                {
-                                    <td>
-                                        @await Html.PartialAsync("_GridCell", new GridCellViewModel
-                                        {
-                                            Item = item,
-                                                        Column = column
-                                                        })
-                        </td>
-                                                }
-                                @if (Model.CanEdit || Model.CanDelete)
-                                {
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm">
-                                            @if (Model.CanEdit)
-                                            {
-                                                <button type="button"
-                                                        class="btn btn-outline-primary"
-                                                        onclick="openTabEditModal('@Model.EntityType', @itemId, '@Model.ControllerName')"
-                                                        title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            }
-                                            @if (Model.CanDelete)
-                                            {
-                                                <button type="button"
-                                                        class="btn btn-outline-danger"
-                                                        onclick="deleteTabItem('@Model.EntityType', @itemId, '@Model.ControllerName')"
-                                                        title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            }
-                                        </div>
-                                    </td>
-                                }
-                            </tr>
+                            <li>@error.Value</li>
                         }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="empty-state text-center py-5">
-                <i class="@Model.Icon fa-3x text-muted mb-3"></i>
-                <h6 class="text-muted">Nenhum registro encontrado</h6>
-                @if (Model.CanCreate)
-                {
-                    <p class="text-muted small">Clique em "Adicionar" para criar um novo registro</p>
-                }
-            </div>
-        }
-    </div>
-</div>
-
-<!-- Modal para Create/Edit - FULLSCREEN -->
-<div class="modal fade" id="tabItemModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="tabItemModalLabel">
-                    <i class="fas fa-edit me-2"></i>
-                    <span id="modalTitleText">Item</span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body p-4" id="tabItemModalBody" style="min-height: 60vh; max-height: 80vh; overflow-y: auto;">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="text-muted mt-3">Carregando formulário...</p>
+                    </ul>
                 </div>
             </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>
-                    Cancelar
-                </button>
-                <button type="button" class="btn btn-primary" id="modalSubmitBtn" style="display: none;">
-                    <i class="fas fa-save me-1"></i>
-                    Salvar
-                </button>
-            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    }
+
+    <div class="modal-form-content">
+        @foreach (var sectionItem in Model.Sections)
+        {
+            <div class="form-section mb-3">
+                @if (!string.IsNullOrEmpty(sectionItem.Name))
+                {
+                    <div class="section-header mb-3">
+                        <h6 class="section-title mb-0">
+                            @if (!string.IsNullOrEmpty(sectionItem.Icon))
+                            {
+                                <i class="@sectionItem.Icon me-2"></i>
+                            }
+                            @sectionItem.Name
+                        </h6>
+                    </div>
+                }
+
+                <div class="form-grid grid-cols-@sectionItem.GridColumns">
+                    @foreach (var field in sectionItem.Fields.Where(f => f.ShouldDisplay).OrderBy(f => f.Order))
+                    {
+                        <div class="form-field-wrapper" style="grid-column: span @field.GridColumns;">
+                            @await Html.PartialAsync("_FormField", field)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
-</div>
+</form>
 
 <style>
-    /* Garantir que o modal ocupe bem o espaço */
-    #tabItemModal .modal-dialog {
-        margin: 1rem;
-        max-width: calc(100% - 2rem);
+    .modal-form-container {
+        width: 100%;
+        height: 100%;
     }
 
-    @@media (min-width: 992px) {
-        #tabItemModal .modal-dialog {
-            max-width: 90vw;
-            width: 90vw;
-        }
-
-        #tabItemModal .modal-body {
-            min-height: 70vh;
-        }
+    .modal-form-content {
+        max-height: calc(80vh - 200px);
+        overflow-y: auto;
+        padding-right: 10px;
     }
 
-    @@media (min-width: 1200px) {
-        #tabItemModal .modal-dialog {
-            max-width: 85vw;
-            width: 85vw;
-        }
+    .modal-form-content::-webkit-scrollbar {
+        width: 8px;
     }
 
-    /* Estilos para o conteúdo do modal */
-    #tabItemModal .modal-body {
-        background-color: #f8f9fa;
+    .modal-form-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
     }
 
-    #tabItemModal .form-section {
+    .modal-form-content::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .modal-form-content::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    .modal-form-container .form-section {
         background: white;
         border-radius: 8px;
         padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
     }
 
-    #tabItemModal .section-header {
+    .modal-form-container .section-header {
         border-bottom: 2px solid #e9ecef;
         padding-bottom: 0.75rem;
         margin-bottom: 1rem;
     }
 
-    #tabItemModal .modal-header {
-        padding: 1rem 1.5rem;
+    .modal-form-container .section-title {
+        color: #495057;
+        font-weight: 600;
+        font-size: 1rem;
+        margin: 0;
     }
 
-    #tabItemModal .modal-footer {
-        padding: 1rem 1.5rem;
-        border-top: 2px solid #dee2e6;
+    .modal-form-container .form-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    /* Grid responsivo baseado no GridColumns da seção */
+    .modal-form-container .form-grid.grid-cols-1 {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .modal-form-container .form-grid.grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .modal-form-container .form-grid.grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .modal-form-container .form-grid.grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .modal-form-container .form-grid.grid-cols-5 {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .modal-form-container .form-grid.grid-cols-6 {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .modal-form-container .form-grid.grid-cols-12 {
+        grid-template-columns: repeat(12, 1fr);
+    }
+
+    .modal-form-container .form-field-wrapper {
+        min-width: 0;
+    }
+
+    @@media (max-width: 992px) {
+        .modal-form-container .form-grid.grid-cols-4,
+        .modal-form-container .form-grid.grid-cols-5,
+        .modal-form-container .form-grid.grid-cols-6,
+        .modal-form-container .form-grid.grid-cols-12 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .modal-form-container .form-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .modal-form-container .form-field-wrapper {
+            grid-column: span 1 !important;
+        }
+        
+        .modal-form-content {
+            max-height: calc(100vh - 200px);
+        }
+    }
+
+    .modal-form-container .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.875rem;
+    }
+
+    .modal-form-container .form-control,
+    .modal-form-container .form-select,
+    .modal-form-container .form-control-file {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+        width: 100%;
+    }
+
+    .modal-form-container .form-control:focus,
+    .modal-form-container .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+
+    .modal-form-container .invalid-feedback {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.8125rem;
+        color: #dc3545;
+    }
+
+    .modal-form-container .is-invalid {
+        border-color: #dc3545;
+    }
+
+    .modal-form-container .form-text {
+        font-size: 0.8125rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .modal-form-container .form-check {
+        padding-left: 1.5rem;
+    }
+
+    .modal-form-container .form-check-input {
+        margin-left: -1.5rem;
+    }
+
+    .modal-form-container textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .modal-form-container .input-group {
+        width: 100%;
+    }
+
+    .modal-form-container .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 6px 0 0 6px;
+    }
+
+    .modal-form-container .input-group .form-control {
+        border-radius: 0 6px 6px 0;
+    }
+
+    .modal-form-container input[type="date"],
+    .modal-form-container input[type="datetime-local"],
+    .modal-form-container input[type="time"] {
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+    .modal-form-container input[type="number"] {
+        text-align: right;
+    }
+
+    .modal-form-container input[type="file"] {
+        padding: 0.5rem;
+    }
+
+    .modal-form-container input[type="file"]::file-selector-button {
+        padding: 0.375rem 0.75rem;
+        margin-right: 0.75rem;
+        background-color: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .modal-form-container input[type="file"]::file-selector-button:hover {
+        background-color: #5568d3;
+    }
+
+    /* Estilos para campos com ícones */
+    .modal-form-container .field-with-icon {
+        position: relative;
+    }
+
+    .modal-form-container .field-with-icon .form-control {
+        padding-left: 2.5rem;
+    }
+
+    .modal-form-container .field-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
     }
 </style>
