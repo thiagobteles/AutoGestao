@@ -1,3 +1,4 @@
+@* Views/Shared/_StandardFormContent.cshtml - VERSÃO CORRIGIDA MANTENDO FUNCIONALIDADES *@
 @using AutoGestao.Enumerador.Gerais
 @model StandardFormViewModel
 
@@ -40,6 +41,46 @@
         }
 
         return string.Empty;
+    }
+
+    // NOVA FUNÇÃO: Formatar valor de data de forma segura
+    string FormatDateValue(object value)
+    {
+        if (value == null) return "";
+
+        // Se já é string, retornar diretamente
+        if (value is string strValue)
+        {
+            return strValue;
+        }
+
+        // Se é DateTime, formatar
+        if (value is DateTime dateValue)
+        {
+            return dateValue.ToString("yyyy-MM-dd");
+        }
+
+        return "";
+    }
+
+    // NOVA FUNÇÃO: Formatar valor de datetime de forma segura
+    string FormatDateTimeValue(object value)
+    {
+        if (value == null) return "";
+
+        // Se já é string, retornar diretamente
+        if (value is string strValue)
+        {
+            return strValue;
+        }
+
+        // Se é DateTime, formatar
+        if (value is DateTime dateTimeValue)
+        {
+            return dateTimeValue.ToString("yyyy-MM-ddTHH:mm");
+        }
+
+        return "";
     }
 }
 
@@ -106,77 +147,79 @@
                             {
                                 case EnumFieldType.Text:
                                     <input type="text"
-                                        class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : "") />
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : "") />
                                     break;
 
                                 case EnumFieldType.Number:
                                     <input type="number"
-                                        class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
                                     break;
 
                                 case EnumFieldType.Email:
                                     <input type="email"
-                                        class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
                                     break;
 
                                 case EnumFieldType.Date:
+                                    @* CORREÇÃO: Usar função segura para formatar data *@
                                     <input type="date"
-                                        class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@(field.Value != null ? ((DateTime)field.Value).ToString("yyyy-MM-dd") : "")"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "") />
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@FormatDateValue(field.Value)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
                                 case EnumFieldType.DateTime:
+                                    @* CORREÇÃO: Usar função segura para formatar datetime *@
                                     <input type="datetime-local"
-                                        class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@(field.Value != null ? ((DateTime)field.Value).ToString("yyyy-MM-ddTHH:mm") : "")"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "") />
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@FormatDateTimeValue(field.Value)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "") />
                                     break;
 
                                 case EnumFieldType.TextArea:
                                     <textarea id="@field.PropertyName"
-                                        class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        name="@field.PropertyName"
-                                        rows="3"
-                                        placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty)
-                                        @(field.ReadOnly ? "readonly" : string.Empty)>@field.Value</textarea>
+                              class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                              name="@field.PropertyName"
+                              rows="3"
+                              placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
+                              @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                              @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty)
+                              @(field.ReadOnly ? "readonly" : string.Empty)>@field.Value</textarea>
                                     break;
 
                                 case EnumFieldType.Select:
                                     <select id="@field.PropertyName"
-                                        class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        name="@field.PropertyName"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "disabled" : string.Empty)>
+                                            class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                            name="@field.PropertyName"
+                                            @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                            @(field.ReadOnly ? "disabled" : string.Empty)>
                                         <option value="">Selecione...</option>
                                         @{
                                             var selectedValue = field.Value?.ToString() ?? "";
@@ -185,7 +228,7 @@
                                         @foreach (var option in field.Options)
                                         {
                                             <option value="@option.Value"
-                                                selected="@(selectedValue == option.Value)">
+                                                    selected="@(selectedValue == option.Value)">
                                                 @option.Text
                                             </option>
                                         }
@@ -195,12 +238,12 @@
                                 case EnumFieldType.Checkbox:
                                     <div class="form-check">
                                         <input type="checkbox"
-                                            class="form-check-input @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                            id="@field.PropertyName"
-                                            name="@field.PropertyName"
-                                            value="true"
-                                            @(field.Value != null && (bool)field.Value ? "checked" : "")
-                                            @(field.ReadOnly ? "disabled" : "") />
+                                               class="form-check-input @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                               id="@field.PropertyName"
+                                               name="@field.PropertyName"
+                                               value="true"
+                                               @(field.Value != null && (field.Value.ToString().ToLower() == "true" || (field.Value is bool && (bool)field.Value)) ? "checked" : "")
+                                               @(field.ReadOnly ? "disabled" : "") />
                                         <label class="form-check-label" for="@field.PropertyName">
                                             @if (!string.IsNullOrEmpty(field.Icon))
                                             {
@@ -213,7 +256,7 @@
 
                                 case EnumFieldType.Currency:
                                     <input type="text"
-                                           class="form-control currency-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           class="form-control money-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                            id="@field.PropertyName"
                                            name="@field.PropertyName"
                                            value="@field.Value"
@@ -236,50 +279,50 @@
 
                                 case EnumFieldType.Cpf:
                                     <input type="text"
-                                        class="form-control cpf-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "000.000.000-00" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
+                                           class="form-control cpf-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "000.000.000-00" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
                                     break;
 
                                 case EnumFieldType.Cnpj:
                                     <input type="text"
-                                        class="form-control cnpj-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "00.000.000/0000-00" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
+                                           class="form-control cnpj-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "00.000.000/0000-00" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
                                     break;
 
-                                case EnumFieldType.Phone:
+                                case EnumFieldType.Telefone:
                                     <input type="text"
-                                        class="form-control phone-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "(00) 00000-0000" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
+                                           class="form-control telefone-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "(00) 00000-0000" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
                                     break;
 
                                 case EnumFieldType.Cep:
                                     <input type="text"
-                                        class="form-control cep-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                                        id="@field.PropertyName"
-                                        name="@field.PropertyName"
-                                        value="@field.Value"
-                                        placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "00000-000" : field.Placeholder)"
-                                        @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                                        @(field.ReadOnly ? "readonly" : "")
-                                        @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
+                                           class="form-control cep-mask @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@(field.ReadOnly ? "" : string.IsNullOrEmpty(field.Placeholder) ? "00000-000" : field.Placeholder)"
+                                           @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                           @(field.ReadOnly ? "readonly" : "")
+                                           @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty) />
                                     break;
 
                                 case EnumFieldType.Percentage:
@@ -458,7 +501,7 @@
                 <i class="fas fa-arrow-left"></i>
                 Cancelar
             </button>
-            
+
             <div class="d-flex gap-2">
                 <button type="button" class="btn-modern btn-outline-modern" onclick="limparFormulario()">
                     <i class="fas fa-eraser"></i>
@@ -478,7 +521,7 @@
                 <i class="fas fa-arrow-left"></i>
                 Voltar à Lista
             </a>
-            
+
             @if (Model.Model != null)
             {
                 <div class="d-flex gap-2">

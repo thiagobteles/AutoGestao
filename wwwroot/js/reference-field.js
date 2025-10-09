@@ -1,51 +1,118 @@
 class ReferenceFieldManager {
     constructor() {
-        this.debounceTimer = null;
         this.cache = new Map();
-        this.loadingRequests = new Set();
-        this.init();
+        this.debounceTimers = new Map();
+        this.activeRequests = new Map();
     }
 
     init() {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                this.setupAll();
-            });
-        } else {
-            this.setupAll();
+        this.setupEventListeners();
+        console.log('ReferenceFieldManager inicializado');
+    }
+
+    setupEventListeners() {
+        document.addEventListener('DOMContentLoaded', () => {
+            this.initializeAllFields();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.reference-field-container')) {
+                this.hideAllDropdowns();
+            }
+        });
+    }
+
+    initializeAllFields() {
+        const fields = document.querySelectorAll('.reference-search-input');
+        fields.forEach(input => {
+            if (!input.dataset.initialized) {
+                this.initializeField(input);
+                input.dataset.initialized = 'true';
+            }
+        });
+
+        const clearBtns = document.querySelectorAll('.reference-clear-btn');
+        clearBtns.forEach(btn => {
+            if (!btn.dataset.initialized) {
+                btn.addEventListener('click', (e) => this.clearSelection(e));
+                btn.dataset.initialized = 'true';
+            }
+        });
+
+        const createBtns = document.querySelectorAll('.reference-create-btn');
+        createBtns.forEach(btn => {
+            if (!btn.dataset.initialized) {
+                btn.addEventListener('click', (e) => this.openCreateModal(e));
+                btn.dataset.initialized = 'true';
+            }
+        });
+    }
+
+    initializeField(input) {
+        input.addEventListener('input', (e) => this.handleSearch(e));
+        input.addEventListener('focus', (e) => this.handleFocus(e));
+        input.addEventListener('blur', (e) => this.handleBlur(e));
+        input.addEventListener('keydown', (e) => this.handleKeyDown(e));
+
+        try {
+            const filterConfig = input.dataset.referenceFilters;
+            if (!filterConfig || filterConfig === '{}') {
+                return;
+            }
+
+            const config = JSON.parse(filterConfig);
+
+            for (const [, filterInfo] of Object.entries(config)) {
+                if (filterInfo.isProperty) {
+                    const sourceFieldName = filterInfo.value;
+                    const sourceHiddenInput = document.querySelector(`input[name="${sourceFieldName}"]`);
+
+                    if (sourceHiddenInput && !sourceHiddenInput.dataset.listenerAttached) {
+                        const sourceFieldDisplayName = this.getFieldDisplayName(sourceFieldName);
+
+                        sourceHiddenInput.addEventListener('change', () => {
+                            const targetField = input.dataset.targetField;
+                            const targetHiddenInput = document.querySelector(`input[name="${targetField}"]`);
+
+                            if (targetHiddenInput && targetHiddenInput.value && targetHiddenInput.value !== '0') {
+                                input.value = '';
+                                targetHiddenInput.value = '';
+                                input.classList.remove('selected');
+                                this.hideDropdown(input);
+                            }
+
+                            if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
+                                input.disabled = true;
+                                input.placeholder = `Selecione ${sourceFieldDisplayName} primeiro`;
+                            } else {
+                                input.disabled = false;
+                                input.placeholder = input.dataset.originalPlaceholder || 'Digite para pesquisar...';
+                            }
+                        });
+
+                        sourceHiddenInput.dataset.listenerAttached = 'true';
+
+                        if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
+                            input.disabled = true;
+                            input.placeholder = `Selecione ${sourceFieldDisplayName} primeiro`;
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao configurar filtros:', error);
         }
     }
 
-    setupAll() {
-        this.attachSearchHandlers();
-        this.attachClearHandlers();
-        this.attachCreateHandlers();
-        this.setupDependencyWatchers();
-        this.loadInitialDisplayTexts();
-    }
-
-    attachSearchHandlers() {
-        const searchInputs = document.querySelectorAll('.reference-search-input');
-        searchInputs.forEach(input => {
-            input.addEventListener('input', (e) => this.handleSearch(e));
-            input.addEventListener('focus', (e) => this.handleFocus(e));
-            input.addEventListener('blur', (e) => this.handleBlur(e));
-            input.addEventListener('keydown', (e) => this.handleKeyDown(e));
-        });
-    }
-
-    attachClearHandlers() {
-        const clearBtns = document.querySelectorAll('.reference-clear-btn');
-        clearBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => this.clearSelection(e));
-        });
-    }
-
-    attachCreateHandlers() {
-        const createBtns = document.querySelectorAll('.reference-create-btn');
-        createBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => this.openCreateModal(e));
-        });
+    getFieldDisplayName(fieldName) {
+        const field = document.querySelector(`input[name="${fieldName}"]`);
+        if (field) {
+            const label = document.querySelector(`label[for="${fieldName}"]`);
+            if (label) {
+                return label.textContent.replace('*', '').trim();
+            }
+        }
+        return fieldName;
     }
 
     async handleSearch(event) {
@@ -54,380 +121,237 @@ class ReferenceFieldManager {
         const referenceType = input.dataset.referenceType;
         const targetField = input.dataset.targetField;
 
-        clearTimeout(this.debounceTimer);
-
         if (searchTerm.length < 2) {
             this.hideDropdown(input);
             return;
         }
 
-        const cacheKey = `${referenceType}:${searchTerm.toLowerCase()}`;
-        if (this.cache.has(cacheKey)) {
-            this.showDropdown(input, this.cache.get(cacheKey));
-            return;
+        if (this.debounceTimers.has(targetField)) {
+            clearTimeout(this.debounceTimers.get(targetField));
         }
 
-        this.debounceTimer = setTimeout(() => {
-            this.performSearch(input, referenceType, searchTerm);
-        }, 300);
+        this.debounceTimers.set(targetField, setTimeout(async () => {
+            await this.performSearch(input, searchTerm, referenceType, targetField);
+        }, 300));
     }
 
-    async performSearch(input, referenceType, searchTerm) {
-        const targetField = input.dataset.targetField;
-        const requestKey = `${targetField}:${searchTerm}`;
-
-        if (this.loadingRequests.has(requestKey)) {
-            return;
-        }
-
-        this.loadingRequests.add(requestKey);
-        this.showLoading(input);
-
+    async performSearch(input, searchTerm, referenceType, targetField) {
         try {
-            const filters = this.buildFilters(input);
+            const filters = this.getFiltersForField(input);
+            const cacheKey = `${referenceType}:${searchTerm}:${JSON.stringify(filters)}`;
 
-            const response = await fetch('/api/Reference/Search', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    entityType: referenceType,
-                    searchTerm: searchTerm,
-                    pageSize: 10,
-                    filters: filters
-                })
-            });
-
-            if (response.ok) {
-                const results = await response.json();
-
-                const cacheKey = `${referenceType}:${searchTerm.toLowerCase()}`;
-                this.cache.set(cacheKey, results);
-
-                this.showDropdown(input, results);
+            let results;
+            if (this.cache.has(cacheKey)) {
+                results = this.cache.get(cacheKey);
             } else {
-                console.error('Erro na busca:', response.status, response.statusText);
-                this.showError(input, `Erro ao buscar dados (${response.status})`);
-            }
-        } catch (error) {
-            console.error('Erro ao buscar referências:', error);
-            this.showError(input, 'Erro de conexão. Tente novamente.');
-        } finally {
-            this.loadingRequests.delete(requestKey);
-        }
-    }
+                if (this.activeRequests.has(targetField)) {
+                    this.activeRequests.get(targetField).abort();
+                }
 
-    showDropdown(input, results) {
-        let dropdown = input.parentElement.parentElement.querySelector('.reference-dropdown');
+                const controller = new AbortController();
+                this.activeRequests.set(targetField, controller);
 
-        if (!dropdown) {
-            dropdown = document.createElement('div');
-            dropdown.className = 'reference-dropdown';
-            input.parentElement.parentElement.appendChild(dropdown);
-        }
+                const controllerName = this.getControllerName(referenceType);
+                let url = `/${controllerName}/Search?term=${encodeURIComponent(searchTerm)}`;
 
-        if (results.length === 0) {
-            dropdown.innerHTML = '<div class="reference-dropdown-item disabled">Nenhum resultado encontrado</div>';
-        } else {
-            dropdown.innerHTML = results.map((item, index) => `
-                <div class="reference-dropdown-item ${index === 0 ? 'active' : ''}" data-id="${item.value}" data-text="${item.text}">
-                    ${item.text}
-                    ${item.subtitle ? `<small class="text-muted d-block">${item.subtitle}</small>` : ''}
-                </div>
-            `).join('');
+                if (filters && Object.keys(filters).length > 0) {
+                    for (const [key, value] of Object.entries(filters)) {
+                        url += `&${key}=${encodeURIComponent(value)}`;
+                    }
+                }
 
-            dropdown.querySelectorAll('.reference-dropdown-item:not(.disabled)').forEach(item => {
-                item.addEventListener('click', (e) => this.selectItem(e, input));
-                item.addEventListener('mouseenter', () => {
-                    dropdown.querySelectorAll('.reference-dropdown-item').forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
-            });
-        }
 
-        dropdown.style.display = 'block';
+                if (!response.ok) {
+                    throw new Error(`Erro na busca: ${response.status}`);
+                }
+
+                results = await response.json();
+                this.cache.set(cacheKey, results);
+                this.activeRequests.delete(targetField);
+            }
+
+            this.displayResults(input, results);
+
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Erro na busca:', error);
+                this.showDropdownError(input, 'Erro ao buscar dados');
+            }
+        }
     }
 
-    showLoading(input) {
-        let dropdown = input.parentElement.parentElement.querySelector('.reference-dropdown');
+    getFiltersForField(input) {
+        try {
+            const filterConfig = input.dataset.referenceFilters;
+            if (!filterConfig || filterConfig === '{}') {
+                return {};
+            }
 
-        if (!dropdown) {
-            dropdown = document.createElement('div');
-            dropdown.className = 'reference-dropdown';
-            input.parentElement.parentElement.appendChild(dropdown);
+            const config = JSON.parse(filterConfig);
+            const filters = {};
+
+            for (const [filterField, filterInfo] of Object.entries(config)) {
+                if (filterInfo.isProperty) {
+                    const sourceFieldName = filterInfo.value;
+                    const sourceInput = document.querySelector(`input[name="${sourceFieldName}"]`);
+
+                    if (sourceInput && sourceInput.value && sourceInput.value !== '0') {
+                        filters[filterField] = sourceInput.value;
+                    }
+                } else {
+                    filters[filterField] = filterInfo.value;
+                }
+            }
+
+            return filters;
+        } catch (error) {
+            console.error('Erro ao obter filtros:', error);
+            return {};
+        }
+    }
+
+    displayResults(input, results) {
+        const dropdown = this.getDropdown(input);
+
+        if (!results || results.length === 0) {
+            dropdown.innerHTML = '<div class="reference-dropdown-item disabled">Nenhum resultado encontrado</div>';
+            dropdown.style.display = 'block';
+            return;
         }
 
-        dropdown.innerHTML = `
-            <div class="reference-dropdown-item disabled">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="spinner-border spinner-border-sm" role="status"></span>
-                    <span>Buscando...</span>
-                </div>
+        dropdown.innerHTML = results.map((item, index) => `
+            <div class="reference-dropdown-item" data-id="${item.id}" data-text="${item.text}" data-index="${index}">
+                <div><strong>${item.text}</strong></div>
+                ${item.subtitle ? `<small class="text-muted">${item.subtitle}</small>` : ''}
             </div>
-        `;
+        `).join('');
+
+        dropdown.querySelectorAll('.reference-dropdown-item:not(.disabled)').forEach(item => {
+            item.addEventListener('click', () => this.selectItem(input, item));
+        });
+
         dropdown.style.display = 'block';
     }
 
-    showError(input, message) {
-        let dropdown = input.parentElement.parentElement.querySelector('.reference-dropdown');
-
-        if (!dropdown) {
-            dropdown = document.createElement('div');
-            dropdown.className = 'reference-dropdown';
-            input.parentElement.parentElement.appendChild(dropdown);
-        }
-
+    showDropdownError(input, message) {
+        const dropdown = this.getDropdown(input);
         dropdown.innerHTML = `<div class="reference-dropdown-item disabled text-danger">${message}</div>`;
         dropdown.style.display = 'block';
     }
 
-    hideDropdown(input) {
-        const dropdown = input.parentElement.parentElement.querySelector('.reference-dropdown');
-        if (dropdown) {
+    getDropdown(input) {
+        const container = input.closest('.reference-field-container');
+        let dropdown = container.querySelector('.reference-dropdown');
+
+        if (!dropdown) {
+            dropdown = document.createElement('div');
+            dropdown.className = 'reference-dropdown';
             dropdown.style.display = 'none';
+            container.appendChild(dropdown);
         }
+
+        return dropdown;
+    }
+
+    selectItem(input, item) {
+        const id = item.dataset.id;
+        const text = item.dataset.text;
+        const targetField = input.dataset.targetField;
+
+        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+
+        if (hiddenInput) {
+            hiddenInput.value = id;
+            input.value = text;
+            input.classList.add('selected');
+
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+
+            input.dispatchEvent(new CustomEvent('reference:selected', {
+                detail: { id, text, targetField },
+                bubbles: true
+            }));
+        }
+
+        this.hideDropdown(input);
     }
 
     handleFocus(event) {
         const input = event.target;
-        if (input.value.length >= 2) {
-            const referenceType = input.dataset.referenceType;
-            const searchTerm = input.value.trim();
-            const cacheKey = `${referenceType}:${searchTerm.toLowerCase()}`;
-
-            if (this.cache.has(cacheKey)) {
-                this.showDropdown(input, this.cache.get(cacheKey));
-            }
+        if (input.classList.contains('selected')) {
+            input.select();
         }
     }
 
     handleBlur(event) {
-        const input = event.target;
         setTimeout(() => {
-            this.hideDropdown(input);
+            this.hideDropdown(event.target);
         }, 200);
     }
 
     handleKeyDown(event) {
         const input = event.target;
-        const dropdown = input.parentElement.parentElement.querySelector('.reference-dropdown');
+        const dropdown = this.getDropdown(input);
 
-        if (!dropdown || dropdown.style.display === 'none') {
-            return;
-        }
+        if (dropdown.style.display === 'none') return;
 
-        const items = Array.from(dropdown.querySelectorAll('.reference-dropdown-item:not(.disabled)'));
-        if (items.length === 0) {
-            return;
-        }
-
-        const currentActive = dropdown.querySelector('.reference-dropdown-item.active');
-        let currentIndex = currentActive ? items.indexOf(currentActive) : -1;
+        const items = dropdown.querySelectorAll('.reference-dropdown-item:not(.disabled)');
+        const activeItem = dropdown.querySelector('.reference-dropdown-item.active');
+        let currentIndex = activeItem ? Array.from(items).indexOf(activeItem) : -1;
 
         switch (event.key) {
             case 'ArrowDown':
                 event.preventDefault();
-                currentIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
-                this.highlightItem(items, currentIndex);
+                currentIndex = Math.min(currentIndex + 1, items.length - 1);
+                this.setActiveItem(items, currentIndex);
                 break;
 
             case 'ArrowUp':
                 event.preventDefault();
-                currentIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
-                this.highlightItem(items, currentIndex);
+                currentIndex = Math.max(currentIndex - 1, 0);
+                this.setActiveItem(items, currentIndex);
                 break;
 
             case 'Enter':
                 event.preventDefault();
-                if (currentActive) {
-                    currentActive.click();
+                if (activeItem) {
+                    this.selectItem(input, activeItem);
                 }
                 break;
 
             case 'Escape':
-                event.preventDefault();
                 this.hideDropdown(input);
                 break;
         }
     }
 
-    highlightItem(items, index) {
+    setActiveItem(items, index) {
         items.forEach((item, i) => {
             if (i === index) {
                 item.classList.add('active');
-                item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                item.scrollIntoView({ block: 'nearest' });
             } else {
                 item.classList.remove('active');
             }
         });
     }
 
-    selectItem(event, input) {
-        const item = event.target;
-        const id = item.dataset.id;
-        const text = item.dataset.text;
-        const targetField = input.dataset.targetField;
-
-        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
-        if (hiddenInput) {
-            hiddenInput.value = id;
-        }
-
-        input.value = text;
-        input.classList.add('selected');
-
-        this.hideDropdown(input);
-
-        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-
-        input.dispatchEvent(new CustomEvent('reference:selected', {
-            detail: { id, text, targetField },
-            bubbles: true
-        }));
+    hideDropdown(input) {
+        const dropdown = this.getDropdown(input);
+        dropdown.style.display = 'none';
     }
 
-    buildFilters(input) {
-        const filters = {};
-
-        try {
-            const filterConfig = input.dataset.referenceFilters;
-            if (!filterConfig || filterConfig === '{}') {
-                return filters;
-            }
-
-            const config = JSON.parse(filterConfig);
-
-            for (const [filterField, filterInfo] of Object.entries(config)) {
-                if (filterInfo.isProperty) {
-                    const sourceFieldName = filterInfo.value;
-                    const sourceHiddenInput = document.querySelector(`input[name="${sourceFieldName}"]`);
-
-                    if (sourceHiddenInput && sourceHiddenInput.value && sourceHiddenInput.value !== '0') {
-                        filters[filterField] = sourceHiddenInput.value;
-                    }
-                } else {
-                    filters[filterField] = filterInfo.value;
-                }
-            }
-        } catch (error) {
-            console.error('Erro ao processar filtros de referência:', error);
-        }
-
-        return filters;
-    }
-
-    loadInitialDisplayTexts() {
-        const referenceInputs = document.querySelectorAll('.reference-search-input');
-
-        referenceInputs.forEach(input => {
-            const hiddenInput = document.querySelector(`input[name="${input.dataset.targetField}"]`);
-
-            if (hiddenInput && hiddenInput.value && hiddenInput.value !== '0') {
-                // Se o campo já tem um valor e um texto, marcar como selecionado
-                if (input.value && input.value.trim() !== '') {
-                    input.classList.add('selected');
-                }
-            }
+    hideAllDropdowns() {
+        document.querySelectorAll('.reference-dropdown').forEach(dropdown => {
+            dropdown.style.display = 'none';
         });
-    }
-
-    setupDependencyWatchers() {
-        const referenceInputs = document.querySelectorAll('.reference-search-input');
-
-        referenceInputs.forEach(input => {
-            try {
-                const filterConfig = input.dataset.referenceFilters;
-                if (!filterConfig || filterConfig === '{}') {
-                    return;
-                }
-
-                const config = JSON.parse(filterConfig);
-
-                for (const [, filterInfo] of Object.entries(config)) {
-                    if (filterInfo.isProperty) {
-                        const sourceFieldName = filterInfo.value;
-                        const sourceHiddenInput = document.querySelector(`input[name="${sourceFieldName}"]`);
-
-                        if (sourceHiddenInput) {
-                            // Buscar o DisplayName do campo de origem
-                            const sourceFieldDisplayName = this.getFieldDisplayName(sourceFieldName);
-
-                            sourceHiddenInput.addEventListener('change', () => {
-                                const targetField = input.dataset.targetField;
-                                const targetHiddenInput = document.querySelector(`input[name="${targetField}"]`);
-
-                                if (targetHiddenInput && targetHiddenInput.value && targetHiddenInput.value !== '0') {
-                                    input.value = '';
-                                    targetHiddenInput.value = '';
-                                    input.classList.remove('selected');
-                                    this.hideDropdown(input);
-                                }
-
-                                if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
-                                    input.disabled = true;
-                                    input.placeholder = `Selecione o campo ${sourceFieldDisplayName} primeiro`;
-                                } else {
-                                    input.disabled = false;
-                                    input.placeholder = input.dataset.originalPlaceholder || 'Digite para pesquisar...';
-                                }
-                            });
-
-                            if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
-                                input.disabled = true;
-                                input.dataset.originalPlaceholder = input.placeholder;
-                                input.placeholder = `Selecione o campo ${sourceFieldDisplayName} primeiro`;
-                            }
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Erro ao configurar observadores de dependência:', error);
-            }
-        });
-    }
-
-    getFieldDisplayName(fieldName) {
-        // Buscar o label do campo no DOM
-        const fieldContainer = document.querySelector(`[data-field-name="${fieldName}"]`);
-        if (fieldContainer) {
-            const label = fieldContainer.querySelector('.form-label, .form-label-modern, label');
-            if (label) {
-                // Remover asterisco de obrigatório e ícones
-                let displayName = label.textContent.trim();
-                displayName = displayName.replace(/\s*\*\s*$/, ''); // Remove asterisco no final
-                displayName = displayName.replace(/^\s*\S+\s+/, ''); // Remove ícone no início (ex: " Marca")
-                return displayName.trim();
-            }
-        }
-
-        // Fallback: tentar encontrar pelo ID do input
-        const input = document.querySelector(`#${fieldName}_search, input[name="${fieldName}"]`);
-        if (input) {
-            const container = input.closest('.form-group, .form-group-modern');
-            if (container) {
-                const label = container.querySelector('.form-label, .form-label-modern, label');
-                if (label) {
-                    let displayName = label.textContent.trim();
-                    displayName = displayName.replace(/\s*\*\s*$/, '');
-                    displayName = displayName.replace(/^\s*\S+\s+/, '');
-                    return displayName.trim();
-                }
-            }
-        }
-
-        // Fallback final: usar o nome do campo formatado
-        return this.formatFieldName(fieldName);
-    }
-
-    formatFieldName(fieldName) {
-        // Converte "IdVeiculoMarca" para "Veiculo Marca"
-        return fieldName
-            .replace(/^Id/, '') // Remove "Id" do início
-            .replace(/([A-Z])/g, ' $1') // Adiciona espaço antes de maiúsculas
-            .trim();
     }
 
     clearSelection(event) {
@@ -437,9 +361,10 @@ class ReferenceFieldManager {
         const btn = event.target.closest('.reference-clear-btn');
         const container = btn.closest('.reference-field-container');
         const searchInput = container.querySelector('.reference-search-input');
-        const hiddenInput = container.querySelector('input[type="hidden"]');
+        const targetField = searchInput.dataset.targetField;
+        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
 
-        if (confirm('Deseja limpar a seleção?')) {
+        if (hiddenInput && searchInput) {
             searchInput.value = '';
             hiddenInput.value = '';
             searchInput.classList.remove('selected');
@@ -450,7 +375,7 @@ class ReferenceFieldManager {
             searchInput.dispatchEvent(new Event('change', { bubbles: true }));
 
             searchInput.dispatchEvent(new CustomEvent('reference:cleared', {
-                detail: { targetField: searchInput.dataset.targetField },
+                detail: { targetField },
                 bubbles: true
             }));
 
@@ -490,8 +415,6 @@ class ReferenceFieldManager {
     }
 
     getControllerName(referenceType) {
-        // Convenção: Nome da entidade + "s" = nome do controller
-        // Exemplos: Cliente -> Clientes, Veiculo -> Veiculos, VeiculoMarca -> VeiculoMarcas
         return referenceType + 's';
     }
 
@@ -529,12 +452,9 @@ class ReferenceFieldManager {
                             <i class="fas fa-times me-2"></i>
                             Cancelar
                         </button>
-                        <button type="button" class="btn btn-success btn-save-modal" disabled>
+                        <button type="button" class="btn btn-primary" id="modalSaveBtn" style="display: none;">
                             <i class="fas fa-save me-2"></i>
                             Salvar
-                            <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
-                                <span class="visually-hidden">Salvando...</span>
-                            </span>
                         </button>
                     </div>
                 </div>
@@ -546,45 +466,35 @@ class ReferenceFieldManager {
 
     async loadCreateContent(modal, controller) {
         try {
-            const response = await fetch(`/${controller}/Create?ajax=true`, {
+            const response = await fetch(`/${controller}/Create?modal=true`, {
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'text/html, application/xhtml+xml, text/plain, */*'
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
-            if (response.ok) {
-                const html = await response.text();
-                const modalBody = modal.querySelector('.modal-body');
-
-                // Manter a estrutura flex do modal-body
-                modalBody.style.overflow = 'auto';
-                modalBody.innerHTML = html;
-
-                this.setupModalForm(modal, controller);
-                this.initializeFormElements(modalBody);
-
-                const saveBtn = modal.querySelector('.btn-save-modal');
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                }
-
-            } else {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            if (!response.ok) {
+                throw new Error(`Erro ao carregar formulário: ${response.status}`);
             }
+
+            const html = await response.text();
+            const modalBody = modal.querySelector('.modal-body');
+            modalBody.innerHTML = html;
+
+            const saveBtn = modal.querySelector('#modalSaveBtn');
+            if (saveBtn) {
+                saveBtn.style.display = 'inline-flex';
+            }
+
+            this.setupModalForm(modal, controller);
+            this.initializeFormElements(modalBody);
+
         } catch (error) {
+            console.error('Erro ao carregar conteúdo:', error);
             const modalBody = modal.querySelector('.modal-body');
             modalBody.innerHTML = `
-                <div class="container-fluid p-4">
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Erro ao carregar formulário:</strong><br>
-                        ${error.message}
-                        <hr>
-                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="location.reload()">
-                            <i class="fas fa-refresh me-1"></i> Recarregar Página
-                        </button>
-                    </div>
+                <div class="alert alert-danger m-4">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erro ao carregar formulário. Por favor, tente novamente.
                 </div>
             `;
         }
@@ -594,8 +504,7 @@ class ReferenceFieldManager {
         const form = modal.querySelector('form');
         if (!form) return;
 
-        const saveBtn = modal.querySelector('#modalSaveBtn') ||
-            modal.closest('.modal').querySelector('.modal-footer .btn-primary');
+        const saveBtn = modal.querySelector('#modalSaveBtn');
 
         if (saveBtn) {
             saveBtn.onclick = async (e) => {
@@ -683,8 +592,6 @@ class ReferenceFieldManager {
                 }
             };
         }
-
-        this.initializeFormElements(modal);
     }
 
     initializeFormElements(container) {
@@ -703,133 +610,68 @@ class ReferenceFieldManager {
 
         const newRefFields = container.querySelectorAll('.reference-search-input');
         newRefFields.forEach(input => {
-            input.addEventListener('input', (e) => this.handleSearch(e));
-            input.addEventListener('focus', (e) => this.handleFocus(e));
-            input.addEventListener('blur', (e) => this.handleBlur(e));
-            input.addEventListener('keydown', (e) => this.handleKeyDown(e));
+            if (!input.dataset.initialized) {
+                this.initializeField(input);
+                input.dataset.initialized = 'true';
+            }
         });
 
         const newClearBtns = container.querySelectorAll('.reference-clear-btn');
         newClearBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => this.clearSelection(e));
+            if (!btn.dataset.initialized) {
+                btn.addEventListener('click', (e) => this.clearSelection(e));
+                btn.dataset.initialized = 'true';
+            }
         });
 
         const newCreateBtns = container.querySelectorAll('.reference-create-btn');
         newCreateBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => this.openCreateModal(e));
-        });
-
-        newRefFields.forEach(input => {
-            try {
-                const filterConfig = input.dataset.referenceFilters;
-                if (!filterConfig || filterConfig === '{}') {
-                    return;
-                }
-
-                const config = JSON.parse(filterConfig);
-
-                for (const [, filterInfo] of Object.entries(config)) {
-                    if (filterInfo.isProperty) {
-                        const sourceFieldName = filterInfo.value;
-                        const sourceHiddenInput = container.querySelector(`input[name="${sourceFieldName}"]`) ||
-                            document.querySelector(`input[name="${sourceFieldName}"]`);
-
-                        if (sourceHiddenInput) {
-                            // Buscar o DisplayName do campo de origem
-                            const sourceFieldDisplayName = this.getFieldDisplayName(sourceFieldName);
-
-                            sourceHiddenInput.addEventListener('change', () => {
-                                const targetField = input.dataset.targetField;
-                                const targetHiddenInput = document.querySelector(`input[name="${targetField}"]`);
-
-                                if (targetHiddenInput && targetHiddenInput.value && targetHiddenInput.value !== '0') {
-                                    input.value = '';
-                                    targetHiddenInput.value = '';
-                                    input.classList.remove('selected');
-                                    this.hideDropdown(input);
-                                }
-
-                                if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
-                                    input.disabled = true;
-                                    input.placeholder = `Selecione o campo ${sourceFieldDisplayName} primeiro`;
-                                } else {
-                                    input.disabled = false;
-                                    input.placeholder = input.dataset.originalPlaceholder || 'Digite para pesquisar...';
-                                }
-                            });
-
-                            if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
-                                input.disabled = true;
-                                input.dataset.originalPlaceholder = input.placeholder;
-                                input.placeholder = `Selecione o campo ${sourceFieldDisplayName} primeiro`;
-                            }
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Erro ao configurar observadores de dependência:', error);
+            if (!btn.dataset.initialized) {
+                btn.addEventListener('click', (e) => this.openCreateModal(e));
+                btn.dataset.initialized = 'true';
             }
         });
     }
 
     showValidationErrors(form, errors) {
-        Object.keys(errors).forEach(key => {
-            const input = form.querySelector(`[name="${key}"]`);
+        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
+        for (const [field, messages] of Object.entries(errors)) {
+            const input = form.querySelector(`[name="${field}"]`);
             if (input) {
                 input.classList.add('is-invalid');
-
-                let feedback = input.parentElement.querySelector('.invalid-feedback');
-                if (!feedback) {
-                    feedback = document.createElement('div');
-                    feedback.className = 'invalid-feedback';
-                    input.parentElement.appendChild(feedback);
-                }
-                feedback.textContent = errors[key];
+                const feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                feedback.textContent = Array.isArray(messages) ? messages[0] : messages;
+                input.parentElement.appendChild(feedback);
             }
-        });
-
-        if (errors.general) {
-            this.showToast(errors.general, 'error');
         }
+
+        this.showToast('Por favor, corrija os erros no formulário', 'error');
     }
 
     showToast(message, type = 'info') {
-        const toastContainer = document.querySelector('.toast-container') || this.createToastContainer();
-
-        const toastId = `toast_${Date.now()}`;
-        const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : 'bg-info';
-
-        const toastHtml = `
-            <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            </div>
-        `;
-
-        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-
-        const toastElement = document.getElementById(toastId);
-        const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
-        toast.show();
-
-        toastElement.addEventListener('hidden.bs.toast', () => {
-            toastElement.remove();
-        });
-    }
-
-    createToastContainer() {
-        const container = document.createElement('div');
-        container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
-        return container;
+        if (typeof Toastify !== 'undefined') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: 'top',
+                position: 'right',
+                backgroundColor: type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8',
+            }).showToast();
+        } else {
+            alert(message);
+        }
     }
 }
 
-// Inicializar o gerenciador
 const referenceFieldManager = new ReferenceFieldManager();
 
-// Exportar para uso global se necessário
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => referenceFieldManager.init());
+} else {
+    referenceFieldManager.init();
+}
+
 window.referenceFieldManager = referenceFieldManager;

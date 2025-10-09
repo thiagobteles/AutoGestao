@@ -1,3 +1,4 @@
+@* Views/Shared/_ModalForm.cshtml - GARANTIR CAMPOS OBRIGATÓRIOS *@
 @model StandardFormViewModel
 @{
     Layout = null;
@@ -10,12 +11,39 @@
       novalidate
       id="modalForm">
 
+    @* CAMPOS HIDDEN OBRIGATÓRIOS *@
     @if (Model.Model != null)
     {
         var idProperty = Model.Model.GetType().GetProperty("Id");
         if (idProperty != null)
         {
-            <input type="hidden" name="Id" value="@idProperty.GetValue(Model.Model)" />
+            var idValue = idProperty.GetValue(Model.Model);
+            <input type="hidden" name="Id" value="@idValue" />
+            @* LOG *@
+            <script>console.log('Campo Id adicionado:', @idValue);</script>
+        }
+
+        var idEmpresaProperty = Model.Model.GetType().GetProperty("IdEmpresa");
+        if (idEmpresaProperty != null)
+        {
+            var idEmpresaValue = idEmpresaProperty.GetValue(Model.Model);
+            <input type="hidden" name="IdEmpresa" value="@idEmpresaValue" />
+            @* LOG *@
+            <script>console.log('Campo IdEmpresa adicionado:', @idEmpresaValue);</script>
+        }
+    }
+    else
+    {
+        @* Em modo CREATE, adicionar IdEmpresa do contexto *@
+        @if (ViewContext.HttpContext.User.Identity.IsAuthenticated)
+        {
+            var idEmpresaClaim = ViewContext.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "IdEmpresa");
+            if (idEmpresaClaim != null)
+            {
+                <input type="hidden" name="IdEmpresa" value="@idEmpresaClaim.Value" />
+                @* LOG *@
+                <script>console.log('Campo IdEmpresa (create) adicionado:', @idEmpresaClaim.Value);</script>
+            }
         }
     }
 

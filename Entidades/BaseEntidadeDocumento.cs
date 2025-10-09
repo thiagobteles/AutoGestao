@@ -62,7 +62,7 @@ namespace AutoGestao.Entidades
         public string? Email { get; set; }
 
         [GridContact("Telefone", ShowInGrid = false)]
-        [FormField(Name = "Telefone", Section = "Contato", Icon = "fas fa-phone", Type = EnumFieldType.Phone, Order = 21)]
+        [FormField(Name = "Telefone", Section = "Contato", Icon = "fas fa-phone", Type = EnumFieldType.Telefone, Order = 21)]
         public string? Telefone { get; set; }
 
         // ============================================================
@@ -70,7 +70,7 @@ namespace AutoGestao.Entidades
         // ============================================================
         [GridField("Celular", IsSubtitle = true, SubtitleOrder = 3, Order = 62)]
         [ConditionalRequired("IsEmpty(Telefone)", "Celular é obrigatório quando não há telefone")]
-        [FormField(Name = "Celular", Section = "Contato", Icon = "fas fa-mobile", Type = EnumFieldType.Phone, Order = 22)]
+        [FormField(Name = "Celular", Section = "Contato", Icon = "fas fa-mobile", Type = EnumFieldType.Telefone, Order = 22)]
         public string? Celular { get; set; }
     }
 }

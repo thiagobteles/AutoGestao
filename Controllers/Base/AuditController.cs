@@ -10,12 +10,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 
 namespace AutoGestao.Controllers.Base
 {
     [Authorize(Roles = "Admin,Gerente")]
-    public class AuditController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService) 
-        : StandardGridController<AuditLog>(context, fileStorageService)
+    public class AuditController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService, IReportService reportService) 
+        : StandardGridController<AuditLog>(context, fileStorageService, reportService)
     {
         private readonly IAuditService _auditService = auditService;
 
@@ -49,23 +50,23 @@ namespace AutoGestao.Controllers.Base
         }
 
         // Sobrescrever para desabilitar criação, edição e exclusão
-        //public override Task<IActionResult> Create()
-        //{
-        //    TempData["ErrorMessage"] = "Logs de auditoria não podem ser criados manualmente.";
-        //    return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
-        //}
+        public override Task<IActionResult> Create()
+        {
+            TempData["ErrorMessage"] = "Logs de auditoria não podem ser criados manualmente.";
+            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        }
 
-        //public override Task<IActionResult> Edit(int id)
-        //{
-        //    TempData["ErrorMessage"] = "Logs de auditoria não podem ser editados.";
-        //    return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
-        //}
+        public override Task<IActionResult> Edit(long? id)
+        {
+            TempData["ErrorMessage"] = "Logs de auditoria não podem ser editados.";
+            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        }
 
-        //public override Task<IActionResult> Delete(int id)
-        //{
-        //    TempData["ErrorMessage"] = "Logs de auditoria não podem ser excluídos.";
-        //    return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
-        //}
+        public override Task<IActionResult> Delete(long id)
+        {
+            TempData["ErrorMessage"] = "Logs de auditoria não podem ser excluídos.";
+            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
+        }
 
         protected override bool CanCreate(AuditLog entity)
         {

@@ -5,8 +5,8 @@ using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Controllers
 {
-    public class AvaliacoesController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Avaliacao>> logger,  IReportService reportService)
-        : StandardGridController<Avaliacao>(context, fileStorageService, logger, reportService)
+    public class AvaliacoesController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Avaliacao>> logger, IReportService reportService)
+        : StandardGridController<Avaliacao>(context, fileStorageService, reportService, logger)
     {
     }
 }

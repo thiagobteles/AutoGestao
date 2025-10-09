@@ -12,6 +12,7 @@ using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
@@ -19,7 +20,7 @@ using System.Reflection;
 
 namespace AutoGestao.Controllers.Base
 {
-    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null, IReportService reportService = null)
+    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, IReportService reportService, ILogger<StandardGridController<T>>? logger = null)
         : Controller where T : BaseEntidade, new()
     {
         protected readonly ApplicationDbContext _context = context;
@@ -29,7 +30,7 @@ namespace AutoGestao.Controllers.Base
 
 
         // CONSTRUTOR SEM LOGGER (COMPATIBILIDADE)
-        protected StandardGridController(ApplicationDbContext context, IFileStorageService fileStorageService) : this(context, fileStorageService, null)
+        protected StandardGridController(ApplicationDbContext context, IFileStorageService fileStorageService, IReportService reportService) : this(context, fileStorageService, reportService, null)
         {
         }
 
@@ -1467,7 +1468,7 @@ namespace AutoGestao.Controllers.Base
             return fieldType switch
             {
                 EnumFieldType.Email => "exemplo@email.com",
-                EnumFieldType.Phone => "(00) 00000-0000",
+                EnumFieldType.Telefone => "(00) 00000-0000",
                 EnumFieldType.Cpf => "000.000.000-00",
                 EnumFieldType.Cnpj => "00.000.000/0000-00",
                 EnumFieldType.Cep => "00000-000",
@@ -1692,10 +1693,6 @@ namespace AutoGestao.Controllers.Base
 
             if (formFieldAttr != null)
             {
-                // ============================================================
-                // PROCESSAMENTO DE REGRAS CONDICIONAIS
-                // ============================================================
-
                 var conditionalDisplayAttr = property.GetCustomAttribute<ConditionalDisplayAttribute>();
                 var conditionalRequiredAttr = property.GetCustomAttribute<ConditionalRequiredAttribute>();
 
@@ -1722,7 +1719,6 @@ namespace AutoGestao.Controllers.Base
 
                 var isRequired = formFieldAttr.Required || isConditionallyRequired;
 
-                // Processamento de filtros de referência
                 string? referenceFilters = null;
                 if (formFieldAttr.Type == EnumFieldType.Reference && ReferenceFilterHelper.HasFilters(property))
                 {
@@ -1731,7 +1727,22 @@ namespace AutoGestao.Controllers.Base
                 }
 
                 var rawValue = property.GetValue(entity);
-                var formattedValue = FormatFieldValue(rawValue, formFieldAttr.Type, property);
+
+                // IMPORTANTE: Converter sempre para string formatada
+                string? formattedValue = null;
+
+                try
+                {
+                    if (rawValue != null)
+                    {
+                        formattedValue = FormatFieldValueToString(rawValue, formFieldAttr.Type, property);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "Erro ao formatar campo {PropertyName} do tipo {Type}", property.Name, formFieldAttr.Type);
+                    formattedValue = rawValue?.ToString();
+                }
 
                 string? displayText = null;
                 if (formFieldAttr.Type == EnumFieldType.Reference && rawValue != null)
@@ -1739,7 +1750,6 @@ namespace AutoGestao.Controllers.Base
                     displayText = GetReferenceDisplayText(entity, property, formFieldAttr.Reference);
                 }
 
-                // CORRIGIR: Obter URL e nome do arquivo para campos File e Image usando MinIO
                 string? fileUrl = null;
                 string? fileName = null;
                 string? filePath = null;
@@ -1749,18 +1759,14 @@ namespace AutoGestao.Controllers.Base
                     var fileValue = rawValue.ToString();
                     if (!string.IsNullOrEmpty(fileValue))
                     {
-                        filePath = fileValue; // IMPORTANTE: Armazenar o filePath completo
+                        filePath = fileValue;
                         fileName = Path.GetFileName(fileValue);
                         var entityName = typeof(T).Name;
                         var idEmpresa = GetCurrentEmpresaId();
 
                         try
                         {
-                            // Gerar URL pré-assinada do MinIO
-                            fileUrl = await _fileStorageService.GetDownloadUrlAsync(
-                                fileValue,
-                                entityName,
-                                idEmpresa);
+                            fileUrl = await _fileStorageService.GetDownloadUrlAsync(fileValue, entityName, idEmpresa);
                         }
                         catch (Exception ex)
                         {
@@ -1778,7 +1784,7 @@ namespace AutoGestao.Controllers.Base
                     Type = formFieldAttr.Type,
                     Required = isRequired,
                     ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
-                    Value = formattedValue, // IMPORTANTE: Este é o valor que vai para o input hidden
+                    Value = formattedValue,
                     DisplayText = displayText,
                     Reference = formFieldAttr.Reference ?? null,
                     ValidationRegex = formFieldAttr.ValidationRegex ?? "",
@@ -1787,24 +1793,106 @@ namespace AutoGestao.Controllers.Base
                     CssClass = formFieldAttr.CssClass ?? "",
                     DataList = formFieldAttr.DataList ?? "",
                     Order = formFieldAttr.Order,
-                    Section = formFieldAttr.Section ?? "Gerais",
+                    Section = formFieldAttr.Section ?? "Geral",
+                    ShouldDisplay = shouldDisplay,
                     ConditionalDisplayRule = displayRule,
+                    IsConditionallyRequired = isConditionallyRequired,
                     ConditionalRequiredRule = requiredRule,
                     ConditionalRequiredMessage = requiredMessage,
-                    ShouldDisplay = shouldDisplay,
-                    IsConditionallyRequired = isConditionallyRequired,
                     ReferenceFilters = referenceFilters,
-                    Options = GetSelectOptions(property.Name),
-                    ImageSize = formFieldAttr.ImageSize,
-                    AllowedExtensions = formFieldAttr.AllowedExtensions,
-                    MaxSizeMB = formFieldAttr.MaxSizeMB,
+                    Options = formFieldAttr.Type == EnumFieldType.Select ? GetSelectOptions(property.Name) : null,
                     FileUrl = fileUrl,
                     FileName = fileName,
-                    FilePath = filePath
+                    FilePath = filePath,
+                    ImageSize = formFieldAttr.Type == EnumFieldType.Image ? (formFieldAttr.ImageSize ?? "150x150") : null
                 };
             }
 
             return null;
+        }
+
+        // NOVO MÉTODO: Converter valor para string formatada
+        private string? FormatFieldValueToString(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
+        {
+            if (rawValue == null)
+            {
+                return null;
+            }
+
+            // Para campos Date, formatar como yyyy-MM-dd (formato HTML5)
+            if (fieldType == EnumFieldType.Date && rawValue is DateTime dateValue)
+            {
+                return dateValue.ToString("yyyy-MM-dd");
+            }
+
+            // Para campos DateTime, formatar como yyyy-MM-ddTHH:mm (formato HTML5)
+            if (fieldType == EnumFieldType.DateTime && rawValue is DateTime dateTimeValue)
+            {
+                return dateTimeValue.ToString("yyyy-MM-ddTHH:mm");
+            }
+
+            // Para campos Time, formatar como HH:mm (formato HTML5)
+            if (fieldType == EnumFieldType.Time)
+            {
+                if (rawValue is DateTime timeValue)
+                {
+                    return timeValue.ToString("HH:mm");
+                }
+                if (rawValue is TimeSpan timeSpanValue)
+                {
+                    return timeSpanValue.ToString(@"hh\:mm");
+                }
+            }
+
+            // Para campos Select (Enums), converter para o valor string do enum
+            if (fieldType == EnumFieldType.Select)
+            {
+                var propertyType = property.PropertyType;
+                var underlyingType = Nullable.GetUnderlyingType(propertyType);
+
+                if (propertyType.IsEnum || (underlyingType?.IsEnum ?? false))
+                {
+                    return Convert.ToInt32(rawValue).ToString();
+                }
+
+                return rawValue.ToString();
+            }
+
+            // Para campos Reference, converter para string (ID da entidade)
+            if (fieldType == EnumFieldType.Reference)
+            {
+                if (rawValue is long longValue)
+                {
+                    return longValue == 0 ? "" : longValue.ToString();
+                }
+                if (rawValue is int intValue)
+                {
+                    return intValue == 0 ? "" : intValue.ToString();
+                }
+
+                return rawValue.ToString();
+            }
+
+            // Para campos Checkbox (bool), retornar "true" ou "false"
+            if (fieldType == EnumFieldType.Checkbox)
+            {
+                return (rawValue is bool boolValue && boolValue).ToString().ToLower();
+            }
+
+            // Para campos Currency, formatar como decimal sem símbolo
+            if (fieldType == EnumFieldType.Currency && rawValue is decimal decimalValue)
+            {
+                return decimalValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            // Para campos Decimal
+            if (fieldType == EnumFieldType.Decimal && rawValue is decimal decValue)
+            {
+                return decValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            // Para outros tipos, retornar string
+            return rawValue.ToString();
         }
 
         private static string? GetReferenceDisplayText(T entity, PropertyInfo property, Type? referenceType)
@@ -1872,11 +1960,34 @@ namespace AutoGestao.Controllers.Base
             }
         }
 
-        private static object? FormatFieldValue(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
+        private object? FormatFieldValue(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
         {
             if (rawValue == null)
             {
                 return null;
+            }
+
+            // Para campos Date, formatar como yyyy-MM-dd (formato HTML5)
+            if (fieldType == EnumFieldType.Date && rawValue is DateTime dateValue)
+            {
+                return dateValue.ToString("yyyy-MM-dd");
+            }
+
+            // Para campos DateTime, formatar como yyyy-MM-ddTHH:mm (formato HTML5)
+            if (fieldType == EnumFieldType.DateTime && rawValue is DateTime dateTimeValue)
+            {
+                return dateTimeValue.ToString("yyyy-MM-ddTHH:mm");
+            }
+
+            // Para campos Time, formatar como HH:mm (formato HTML5)
+            if (fieldType == EnumFieldType.Time && rawValue is DateTime timeValue)
+            {
+                return timeValue.ToString("HH:mm");
+            }
+
+            if (fieldType == EnumFieldType.Time && rawValue is TimeSpan timeSpanValue)
+            {
+                return timeSpanValue.ToString(@"hh\:mm");
             }
 
             // Para campos Select (Enums), converter para o valor string do enum
@@ -1885,22 +1996,17 @@ namespace AutoGestao.Controllers.Base
                 var propertyType = property.PropertyType;
                 var underlyingType = Nullable.GetUnderlyingType(propertyType);
 
-                // Se for um Enum (direto ou Nullable<Enum>)
                 if (propertyType.IsEnum || (underlyingType?.IsEnum ?? false))
                 {
-                    // Converter para o valor numérico do enum como string
-                    // Isso garante compatibilidade com os SelectListItems que usam valores numéricos
                     return Convert.ToInt32(rawValue).ToString();
                 }
 
-                // Para outros tipos de Select (não-enum), retornar como string
                 return rawValue.ToString();
             }
 
             // Para campos Reference, converter para string (ID da entidade)
             if (fieldType == EnumFieldType.Reference)
             {
-                // Se for 0, retornar null para não pré-selecionar nada
                 if (rawValue is long longValue && longValue == 0)
                 {
                     return null;
@@ -1917,6 +2023,12 @@ namespace AutoGestao.Controllers.Base
             if (fieldType == EnumFieldType.Checkbox)
             {
                 return rawValue is bool boolValue && boolValue;
+            }
+
+            // Para campos Currency, formatar como decimal sem símbolo
+            if (fieldType == EnumFieldType.Currency && rawValue is decimal decimalValue)
+            {
+                return decimalValue.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             }
 
             // Para outros tipos, retornar o valor original

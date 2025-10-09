@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AutoGestao.Controllers
 {
     public class ClientesController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Cliente>> logger, IReportService reportService) 
-        : StandardGridController<Cliente>(context, fileStorageService, logger, reportService)
+        : StandardGridController<Cliente>(context, fileStorageService, reportService, logger)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {

@@ -20,11 +20,11 @@ namespace AutoGestao.Entidades
         public string? Cnpj { get; set; }
 
         [GridContact("Telefone")]
-        [FormField(Order = 10, Name = "Telefone", Section = "Contato", Icon = "fas fa-phone", Type = EnumFieldType.Phone, GridColumns = 3)]
+        [FormField(Order = 10, Name = "Telefone", Section = "Contato", Icon = "fas fa-phone", Type = EnumFieldType.Telefone, GridColumns = 3)]
         public string? Telefone { get; set; }
 
         [GridField("Celular", IsSubtitle = true, SubtitleOrder = 2, Order = 65)]
-        [FormField(Order = 10, Name = "Celular", Section = "Contato", Icon = "fas fa-mobile", Type = EnumFieldType.Phone)]
+        [FormField(Order = 10, Name = "Celular", Section = "Contato", Icon = "fas fa-mobile", Type = EnumFieldType.Telefone)]
         public string? Celular { get; set; }
 
         [GridContact("E-mail")]

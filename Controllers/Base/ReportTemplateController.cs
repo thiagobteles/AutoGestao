@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers.Base
 {
-    public class ReportTemplateController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<ReportTemplateEntity>> logger,  IReportService reportService) 
-        : StandardGridController<ReportTemplateEntity>(context, fileStorageService, logger, reportService)
+    public class ReportTemplateController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<ReportTemplateEntity>> logger, IReportService reportService) 
+        : StandardGridController<ReportTemplateEntity>(context, fileStorageService, reportService, logger)
     {
         // Sobrescrever para customizar se necessário
         protected override IQueryable<ReportTemplateEntity> GetBaseQuery()

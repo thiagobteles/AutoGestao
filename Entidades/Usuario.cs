@@ -22,7 +22,7 @@ namespace AutoGestao.Entidades
         public string? Cpf { get; set; }
 
         [GridField("Telefone", IsSubtitle = true, SubtitleOrder = 2, Order = 60)]
-        [FormField(Name = "Telefone", Order = 4, Section = "Dados Básicos", Icon = "fas fa-phone", Type = EnumFieldType.Phone)]
+        [FormField(Name = "Telefone", Order = 4, Section = "Dados Básicos", Icon = "fas fa-phone", Type = EnumFieldType.Telefone)]
         public string? Telefone { get; set; }
 
         [GridField("Perfil", Order = 10, Width = "120px")]

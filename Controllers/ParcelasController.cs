@@ -5,8 +5,8 @@ using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Controllers
 {
-    public class ParcelasController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Parcela>> logger,  IReportService reportService) 
-        : StandardGridController<Parcela>(context, fileStorageService, logger, reportService)
+    public class ParcelasController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Parcela>> logger, IReportService reportService) 
+        : StandardGridController<Parcela>(context, fileStorageService, reportService, logger)
     {
     }
 }

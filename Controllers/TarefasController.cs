@@ -6,8 +6,8 @@ using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Controllers
 {
-    public class TarefasController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Tarefa>> logger,  IReportService reportService) 
-        : StandardGridController<Tarefa>(context, fileStorageService, logger, reportService)
+    public class TarefasController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Tarefa>> logger, IReportService reportService) 
+        : StandardGridController<Tarefa>(context, fileStorageService, reportService, logger)
     {
     }
 }

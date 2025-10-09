@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 namespace AutoGestao.Controllers
 {
     [Authorize]
-    public class DespesasController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Despesa>> logger, IReportService reportService) 
-        : StandardGridController<Despesa>(context, fileStorageService, logger, reportService)
+    public class DespesasController(ApplicationDbContext context, IFileStorageService fileStorageService, IReportService reportService, ILogger<DespesasController> logger) 
+        : StandardGridController<Despesa>(context, fileStorageService, reportService, logger)
     {
         protected override IQueryable<Despesa> GetBaseQuery()
         {
@@ -46,19 +46,26 @@ namespace AutoGestao.Controllers
             return query;
         }
 
+        [HttpGet]
         public override async Task<IActionResult> Create()
         {
             var idVeiculo = Request.Query["IdVeiculo"].ToString();
             var isModal = Request.Query["modal"].ToString() == "true";
 
-            if (isModal && !string.IsNullOrEmpty(idVeiculo) && long.TryParse(idVeiculo, out var veiculoId))
+            var entity = new Despesa
             {
-                var entity = new Despesa
-                {
-                    IdVeiculo = veiculoId,
-                    DataDespesa = DateTime.Now
-                };
+                IdEmpresa = GetCurrentEmpresaId(), // CRÍTICO
+                DataDespesa = DateTime.Now,
+                Status = Enumerador.EnumStatusDespesa.Pendente
+            };
 
+            if (!string.IsNullOrEmpty(idVeiculo) && long.TryParse(idVeiculo, out var veiculoId))
+            {
+                entity.IdVeiculo = veiculoId;
+            }
+
+            if (isModal)
+            {
                 var formViewModel = await BuildFormViewModelAsync(entity, "Create");
                 return PartialView("_ModalForm", formViewModel);
             }
@@ -66,6 +73,7 @@ namespace AutoGestao.Controllers
             return await base.Create();
         }
 
+        [HttpGet]
         public override async Task<IActionResult> Edit(long? id)
         {
             if (id == null)
@@ -75,10 +83,15 @@ namespace AutoGestao.Controllers
 
             var isModal = Request.Query["modal"].ToString() == "true";
             var entity = await GetBaseQuery().FirstOrDefaultAsync(d => d.Id == id);
+
             if (entity == null)
             {
                 return NotFound();
             }
+
+            // LOG
+            _logger?.LogInformation("=== EDIT DESPESA ===");
+            _logger?.LogInformation("Id: {Id}, IdEmpresa: {IdEmpresa}", entity.Id, entity.IdEmpresa);
 
             if (isModal)
             {
