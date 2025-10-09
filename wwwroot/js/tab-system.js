@@ -1,13 +1,10 @@
-// ============================================================================
-// wwwroot/js/tab-system.js - CORRIGIR BLOQUEIO DE ABAS
-// ============================================================================
-
 class TabSystem {
     constructor() {
         this.currentParentId = 0;
         this.currentParentController = '';
         this.currentMode = '';
         this.loadedTabs = new Set();
+        this.loadingTabs = new Set(); // NOVO: Controlar tabs em carregamento
         this.init();
     }
 
@@ -22,8 +19,6 @@ class TabSystem {
         const path = window.location.pathname;
         const pathParts = path.split('/').filter(p => p);
 
-        // URL padrão: /Controller/Action/Id
-        // Ex: /Veiculos/Edit/50 ou /Veiculos/Details/50
         if (pathParts.length >= 3) {
             const possibleId = parseInt(pathParts[2]);
             if (!isNaN(possibleId) && possibleId > 0) {
@@ -74,7 +69,6 @@ class TabSystem {
     }
 
     checkTabsAvailability() {
-        // APENAS bloquear abas se ID = 0 (modo Create antes de salvar)
         if (this.currentParentId === 0) {
             console.log('⚠️ ID = 0: Bloqueando abas até salvar o registro');
 
@@ -102,7 +96,6 @@ class TabSystem {
         } else {
             console.log(`✅ ID = ${this.currentParentId}, Modo = ${this.currentMode}: Abas liberadas para visualização`);
 
-            // Garantir que as abas estão habilitadas
             document.querySelectorAll('[data-bs-toggle="tab"]').forEach(button => {
                 button.classList.remove('disabled');
                 button.removeAttribute('disabled');
@@ -111,7 +104,6 @@ class TabSystem {
                 button.title = '';
             });
 
-            // Remover aviso se existir
             const notice = document.querySelector('.tabs-disabled-notice');
             if (notice) {
                 notice.remove();
@@ -140,8 +132,25 @@ class TabSystem {
         }
 
         // Aba principal não precisa carregar
-        if (tabId === 'principal' || !lazyLoad || this.loadedTabs.has(tabId)) {
-            console.log('ℹ️ Tab não precisa carregar:', tabId);
+        if (tabId === 'principal') {
+            console.log('ℹ️ Aba principal - não precisa carregar');
+            return;
+        }
+
+        // Se não tem lazy load, não precisa carregar
+        if (!lazyLoad) {
+            console.log('ℹ️ Tab sem lazy load');
+            return;
+        }
+
+        // NOVO: Verificar se já está carregando ou carregada
+        if (this.loadingTabs.has(tabId)) {
+            console.log('⏳ Tab já está sendo carregada:', tabId);
+            return;
+        }
+
+        if (this.loadedTabs.has(tabId)) {
+            console.log('✅ Tab já foi carregada:', tabId);
             return;
         }
 
@@ -154,11 +163,15 @@ class TabSystem {
     }
 
     async loadTabContent(tabId, controller) {
+        // NOVO: Marcar como carregando
+        this.loadingTabs.add(tabId);
+
         const contentDiv = document.querySelector(`#${tabId}-content .tab-content-wrapper`);
         const button = document.querySelector(`#${tabId}-tab`);
 
         if (!contentDiv) {
             console.error('❌ Container da tab não encontrado:', tabId);
+            this.loadingTabs.delete(tabId);
             return;
         }
 
@@ -167,8 +180,6 @@ class TabSystem {
             contentDiv.innerHTML = this.getLoadingHtml();
 
             const mode = this.currentMode;
-
-            // Passar o modo correto para o TabContentController
             const url = `/TabContent/LoadTab?parentController=${this.currentParentController}&parentId=${this.currentParentId}&tabController=${controller}&mode=${mode}`;
 
             console.log('🔄 Carregando tab via TabContentController:', {
@@ -200,6 +211,8 @@ class TabSystem {
             contentDiv.innerHTML = this.getErrorHtml(error.message);
         } finally {
             this.setTabLoading(button, false);
+            // NOVO: Remover do estado de carregamento
+            this.loadingTabs.delete(tabId);
         }
     }
 
@@ -243,7 +256,10 @@ class TabSystem {
     async refreshTab(tabId) {
         console.log('🔄 Refreshing tab:', tabId);
 
+        // Remover dos dois conjuntos
         this.loadedTabs.delete(tabId);
+        this.loadingTabs.delete(tabId);
+
         const button = document.querySelector(`#${tabId}-tab`);
         const controller = button?.dataset.controller;
 
@@ -281,10 +297,6 @@ class TabSystem {
                                 <li>Permissões insuficientes</li>
                             </ul>
                         </p>
-                        <button class="btn btn-sm btn-outline-secondary mt-2" onclick="console.log(window.tabSystem)">
-                            <i class="fas fa-bug me-1"></i>
-                            Ver detalhes no console
-                        </button>
                     </div>
                 </div>
             </div>
@@ -531,10 +543,13 @@ function showToast(message, type = 'info') {
 }
 
 let tabSystem;
-document.addEventListener('DOMContentLoaded', () => {
-    tabSystem = new TabSystem();
-    console.log('✅ Sistema de tabs inicializado com sucesso');
-});
+if (!window.tabSystem) {
+    document.addEventListener('DOMContentLoaded', () => {
+        tabSystem = new TabSystem();
+        window.tabSystem = tabSystem;
+        console.log('✅ Sistema de tabs inicializado com sucesso');
+    });
+}
 
 window.TabSystem = TabSystem;
 window.tabSystem = tabSystem;

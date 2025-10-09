@@ -401,6 +401,13 @@ namespace AutoGestao.Controllers
                 return PartialView("_CreateForm", viewModel);
             }
 
+            // DETECTAR SE É MODAL
+            if (Request.Query.ContainsKey("modal") && Request.Query["modal"] == "true")
+            {
+                // Retornar apenas o formulário sem layout
+                return PartialView("_ModalForm", viewModel);
+            }
+
             var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
             if (formTabs?.EnableTabs == true)
             {
