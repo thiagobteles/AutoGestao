@@ -1,15 +1,7 @@
-// Arquivo: Controllers/AuthController.cs
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models;
 using AutoGestao.Models.Auth;
-using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers.Base
 {

@@ -10,12 +10,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 
 namespace AutoGestao.Controllers.Base
 {
     [Authorize(Roles = "Admin,Gerente")]
-    public class AuditController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService, IReportService reportService) 
+    public class AuditLogController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService, IReportService reportService) 
         : StandardGridController<AuditLog>(context, fileStorageService, reportService)
     {
         private readonly IAuditService _auditService = auditService;

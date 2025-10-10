@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
-    public class VendedoresController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Vendedor>> logger, IReportService reportService)
+    public class VendedorController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Vendedor>> logger, IReportService reportService)
         : StandardGridController<Vendedor>(context, fileStorageService, reportService, logger)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)

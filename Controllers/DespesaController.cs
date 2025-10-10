@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AutoGestao.Controllers
 {
     [Authorize]
-    public class DespesasController(ApplicationDbContext context, IFileStorageService fileStorageService, IReportService reportService, ILogger<DespesasController> logger) 
+    public class DespesaController(ApplicationDbContext context, IFileStorageService fileStorageService, IReportService reportService, ILogger<DespesaController> logger) 
         : StandardGridController<Despesa>(context, fileStorageService, reportService, logger)
     {
         protected override IQueryable<Despesa> GetBaseQuery()

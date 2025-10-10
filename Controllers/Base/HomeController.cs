@@ -23,9 +23,9 @@ namespace AutoGestao.Controllers.Base
                 VeiculosVendidos = await _context.Veiculos.CountAsync(v => v.Situacao == EnumSituacaoVeiculo.Vendido),
                 TotalClientes = await _context.Clientes.CountAsync(),
                 VendasMes = await _context.Vendas.CountAsync(v => v.DataVenda.Month == DateTime.UtcNow.Month),
-                ValorVendasMes = await _context.Vendas
-                    .Where(v => v.DataVenda.Month == DateTime.UtcNow.Month)
-                    .SumAsync(v => v.ValorVenda)
+                ValorVendasMes = await _context.Vendas.Where(v => v.DataVenda.Month == DateTime.UtcNow.Month).SumAsync(v => v.ValorVenda),
+                Aniversariantes = await _context.Clientes.Where(x => x.DataNascimento.HasValue && x.DataNascimento.Value.Month == DateTime.UtcNow.Month).Skip(5).ToListAsync(),
+                UltimasVendas = await _context.Vendas.OrderByDescending(x => x.DataVenda).Skip(5).ToListAsync()
             };
 
             return View(dashboard);

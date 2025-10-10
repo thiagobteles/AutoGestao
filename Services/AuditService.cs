@@ -131,7 +131,7 @@ namespace AutoGestao.Services
                     EntidadeDisplayName = "Usuário",
                     EntidadeId = usuarioId.ToString(),
                     TipoOperacao = tipoOperacao,
-                    TabelaNome = "usuarios",
+                    TabelaNome = nameof(Usuario),
                     IpCliente = GetClientIpAddress(),
                     UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString(),
                     UrlRequisicao = _httpContextAccessor.HttpContext?.Request.Path,
@@ -164,15 +164,10 @@ namespace AutoGestao.Services
             try
             {
                 // Verificar se a empresa existe
-                var empresaExiste = await _context.Empresas
-                    .AnyAsync(e => e.Id == idEmpresa.Value);
-
+                var empresaExiste = await _context.Empresas.AnyAsync(e => e.Id == idEmpresa.Value);
                 if (!empresaExiste)
                 {
-                    _logger.LogWarning(
-                        "Empresa não encontrada no banco de dados. IdEmpresa: {IdEmpresa}",
-                        idEmpresa
-                    );
+                    _logger.LogWarning("Empresa não encontrada no banco de dados. IdEmpresa: {IdEmpresa}", idEmpresa);
                     return null;
                 }
 

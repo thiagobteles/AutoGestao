@@ -253,27 +253,27 @@ namespace AutoGestao.Controllers.Base
         {
             return entityType switch
             {
-                "Clientes" => await _context.Clientes
+                "Cliente" => await _context.Clientes
                     .Include(c => c.Vendas)
                     .FirstOrDefaultAsync(c => c.Id == entityId),
 
-                "Veiculos" => await _context.Veiculos
+                "Veiculo" => await _context.Veiculos
                     .Include(v => v.Cliente)
                     .Include(v => v.VeiculoMarca)
                     .Include(v => v.VeiculoMarcaModelo)
                     .Include(v => v.VeiculoCor)
                     .FirstOrDefaultAsync(v => v.Id == entityId),
 
-                "Vendas" => await _context.Vendas
+                "Venda" => await _context.Vendas
                     .Include(v => v.Cliente)
                     .Include(v => v.Veiculo)
                     .Include(v => v.Parcelas)
                     .FirstOrDefaultAsync(v => v.Id == entityId),
 
-                "Fornecedores" => await _context.Fornecedores
+                "Fornecedor" => await _context.Fornecedores
                     .FirstOrDefaultAsync(f => f.Id == entityId),
 
-                "Usuarios" => await _context.Usuarios
+                "Usuario" => await _context.Usuarios
                     .FirstOrDefaultAsync(u => u.Id == entityId),
 
                 _ => null

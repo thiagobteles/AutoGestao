@@ -5,7 +5,7 @@ using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Controllers
 {
-    public class FornecedoresController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Fornecedor>> logger, IReportService reportService) 
+    public class FornecedorController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Fornecedor>> logger, IReportService reportService) 
         : StandardGridController<Fornecedor>(context, fileStorageService, reportService, logger)
     {
     }

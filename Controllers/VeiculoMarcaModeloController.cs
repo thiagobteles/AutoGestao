@@ -5,7 +5,7 @@ using AutoGestao.Services.Interface;
 
 namespace AutoGestao.Controllers
 {
-    public class VeiculoMarcaModelosController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<VeiculoMarcaModelo>> logger, IReportService reportService) 
+    public class VeiculoMarcaModeloController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<VeiculoMarcaModelo>> logger, IReportService reportService) 
         : StandardGridController<VeiculoMarcaModelo>(context, fileStorageService, reportService, logger)
     {
     }

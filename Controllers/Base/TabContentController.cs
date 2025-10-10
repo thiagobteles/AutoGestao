@@ -109,17 +109,14 @@ namespace AutoGestao.Controllers.Base
                 var title = formConfig?.Title ?? controller;
                 var icon = formConfig?.Icon ?? "fas fa-list";
 
-                // CORREÇÃO: Garantir que o nome do controller está no plural
-                var controllerName = EnsurePluralControllerName(controller);
-
-                _logger.LogInformation("Controller name ajustado: {Original} -> {Adjusted}", controller, controllerName);
+                _logger.LogInformation("Controller name ajustado: {Original} -> {Adjusted}", controller, controller);
 
                 var viewModel = new TabContentViewModel
                 {
                     TabId = tab,
                     Title = title,
                     Icon = icon,
-                    ControllerName = controllerName, // <-- Usar nome ajustado
+                    ControllerName = controller,
                     ParentId = parentId,
                     ParentController = parentController,
                     Items = itemsList,
@@ -201,8 +198,7 @@ namespace AutoGestao.Controllers.Base
                 catch (Exception ex)
                 {
                     // Log mas não quebra - apenas não inclui essa navegação
-                    _logger.LogWarning(ex, "Erro ao aplicar Include para propriedade {PropertyName} em {EntityType}",
-                        property.Name, entityType.Name);
+                    _logger.LogWarning(ex, "Erro ao aplicar Include para propriedade {PropertyName} em {EntityType}", property.Name, entityType.Name);
                 }
             }
 
@@ -215,39 +211,6 @@ namespace AutoGestao.Controllers.Base
             return idEmpresaClaim != null && long.TryParse(idEmpresaClaim.Value, out var idEmpresa) 
                 ? idEmpresa
                 : 1;
-        }
-
-        private static string EnsurePluralControllerName(string controller)
-        {
-            // Se já termina com 's', retornar como está
-            if (controller.EndsWith("s", StringComparison.OrdinalIgnoreCase))
-            {
-                return controller;
-            }
-
-            // Regras especiais de pluralização em português
-            var specialPlurals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "Despesa", "Despesas" },
-                { "Veiculo", "Veiculos" },
-                { "Cliente", "Clientes" },
-                { "Fornecedor", "Fornecedores" },
-                { "Vendedor", "Vendedores" },
-                { "Usuario", "Usuarios" },
-                { "Avaliacao", "Avaliacoes" },
-                { "VeiculoDocumento", "VeiculoDocumentos" },
-                { "VeiculoFoto", "VeiculoFotos" },
-                { "VeiculoNFE", "VeiculoNFEs" },
-                { "VeiculoLancamento", "VeiculoLancamentos" }
-            };
-
-            if (specialPlurals.TryGetValue(controller, out var value))
-            {
-                return value;
-            }
-
-            // Regra padrão: adicionar 's'
-            return controller + "s";
         }
 
         private static IQueryable ApplyParentFilter(IQueryable query, Type entityType, string filterField, long parentId)
@@ -302,7 +265,7 @@ namespace AutoGestao.Controllers.Base
         private static Type GetEntityType(string controller)
         {
             var entityName = controller;
-            if (entityName.EndsWith("s"))
+            if (entityName.EndsWith('s'))
             {
                 entityName = entityName.Substring(0, entityName.Length - 1);
             }
@@ -316,10 +279,13 @@ namespace AutoGestao.Controllers.Base
                 { "VeiculoLancamento", "AutoGestao.Entidades.Veiculos.VeiculoLancamento, AutoGestao" },
             };
 
-            if (mapping.ContainsKey(entityName))
+            if (mapping.TryGetValue(entityName, out var value))
             {
-                var type = Type.GetType(mapping[entityName]);
-                if (type != null) return type;
+                var type = Type.GetType(value);
+                if (type != null)
+                {
+                    return type;
+                }
             }
 
             var assembly = Assembly.GetExecutingAssembly();
@@ -337,7 +303,7 @@ namespace AutoGestao.Controllers.Base
             }
 
             var singularParent = parentController;
-            if (singularParent.EndsWith("s"))
+            if (singularParent.EndsWith('s'))
             {
                 singularParent = singularParent.Substring(0, singularParent.Length - 1);
             }

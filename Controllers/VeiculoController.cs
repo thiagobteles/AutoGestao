@@ -17,7 +17,7 @@ using System.Text.Json;
 
 namespace AutoGestao.Controllers
 {
-    public class VeiculosController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Veiculo>> logger, IReportService reportService) 
+    public class VeiculoController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Veiculo>> logger, IReportService reportService) 
         : StandardGridController<Veiculo>(context, fileStorageService, reportService, logger)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)

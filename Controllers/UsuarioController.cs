@@ -15,7 +15,7 @@ using System.Security.Claims;
 namespace AutoGestao.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class UsuariosController(ApplicationDbContext context, IUsuarioService usuarioService, IFileStorageService fileStorageService, ILogger<StandardGridController<Usuario>> logger, IReportService reportService) 
+    public class UsuarioController(ApplicationDbContext context, IUsuarioService usuarioService, IFileStorageService fileStorageService, ILogger<StandardGridController<Usuario>> logger, IReportService reportService) 
         : StandardGridController<Usuario>(context, fileStorageService, reportService, logger)
     {
         private readonly IUsuarioService _usuarioService = usuarioService;
