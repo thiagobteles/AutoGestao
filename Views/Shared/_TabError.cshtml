@@ -1,7 +1,21 @@
-@model dynamic
-
-<div class="alert alert-danger">
-    <i class="fas fa-exclamation-triangle me-2"></i>
-    <strong>Erro ao carregar aba:</strong>
-    <p class="mb-0">@Model.Message</p>
+<div class="alert alert-danger m-4">
+    <div class="d-flex align-items-start">
+        <i class="fas fa-exclamation-triangle fa-3x me-3"></i>
+        <div>
+            <h5 class="alert-heading">Erro ao carregar conteúdo</h5>
+            <p class="mb-2"><strong>Mensagem:</strong> @Model.Message</p>
+            <p class="mb-2"><strong>Controller:</strong> @Model.Controller</p>
+            <p class="mb-0"><strong>Tab:</strong> @Model.Tab</p>
+            <hr class="my-3" />
+            <p class="mb-0 small">
+                <strong>Possíveis causas:</strong>
+            </p>
+            <ul class="small mb-0">
+                <li>Controller não encontrado</li>
+                <li>Entidade não mapeada corretamente</li>
+                <li>Chave estrangeira não configurada</li>
+                <li>Permissões insuficientes</li>
+            </ul>
+        </div>
+    </div>
 </div>

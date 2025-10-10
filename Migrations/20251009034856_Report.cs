@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -95,7 +95,7 @@ namespace AutoGestao.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_report_template_usages_tipo_entidade_entidade_id",
                 table: "report_template_usages",
-                columns: new[] { "tipo_entidade", "entidade_id" });
+                columns: ["tipo_entidade", "entidade_id"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_report_templates_empresa_id",
@@ -110,7 +110,7 @@ namespace AutoGestao.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_report_templates_tipo_entidade_is_padrao",
                 table: "report_templates",
-                columns: new[] { "tipo_entidade", "is_padrao" });
+                columns: ["tipo_entidade", "is_padrao"]);
         }
 
         /// <inheritdoc />

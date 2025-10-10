@@ -1,67 +1,73 @@
 @model TabContentViewModel
 
-<div class="tab-content-container">
-    <div class="tab-header mb-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5>
-                <i class="@Model.Icon me-2"></i>
-                @Model.Title
-            </h5>
-            @if (Model.CanCreate)
-            {
-                <button type="button"
-                        class="btn btn-primary btn-sm"
-                        onclick="openTabCreateModal('@Model.EntityType', @Model.ParentId, '@Model.ForeignKeyProperty', '@Model.ControllerName')">
-                    <i class="fas fa-plus me-1"></i>
-                    Adicionar
-                </button>
-            }
-        </div>
+<div class="tab-content-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">
+            <i class="@Model.Icon me-2"></i>
+            @Model.Title
+        </h5>
+        @if (Model.CanCreate)
+        {
+            <button type="button" 
+                    class="btn btn-primary btn-add-tab-item"
+                    data-tab="@Model.TabId"
+                    data-controller="@Model.ControllerName"
+                    data-parent-id="@Model.ParentId"
+                    data-parent-controller="@Model.ParentController">
+                <i class="fas fa-plus me-2"></i>
+                Adicionar
+            </button>
+        }
     </div>
 
     <div class="tab-grid-container">
-        @if (Model.Items.Any())
+        @if (Model.Items != null && Model.Items.Any())
         {
             <div class="table-responsive">
-                <table class="table table-hover table-sm">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             @foreach (var column in Model.Columns)
                             {
-                                <th>@column.DisplayName</th>
+                                <th style="@(string.IsNullOrEmpty(column.Width) ? "" : $"width: {column.Width};")">
+                                    @column.DisplayName
+                                </th>
                             }
                             @if (Model.CanEdit || Model.CanDelete)
                             {
-                                <th width="120px" class="text-center">Ações</th>
+                                <th class="text-end" style="width: 120px;">Ações</th>
                             }
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model.Items)
                         {
-                            var itemType = item.GetType();
-                            var itemId = itemType.GetProperty("Id")?.GetValue(item);
-
+                            var itemId = ((dynamic)item).Id;
                             <tr>
                                 @foreach (var column in Model.Columns)
                                 {
                                     <td>
-                                        @await Html.PartialAsync("_GridCell", new GridCellViewModel
-                                        {
-                                            Item = item,
-                                                        Column = column
-                                                        })
-                        </td>
-                                                }
+                                        @{
+                                            var value = column.GetValue(item);
+                                            if (value != null)
+                                            {
+                                                @value
+                                            }
+                                        }
+                                    </td>
+                                }
                                 @if (Model.CanEdit || Model.CanDelete)
                                 {
-                                    <td class="text-center">
+                                    <td class="text-end">
                                         <div class="btn-group btn-group-sm">
                                             @if (Model.CanEdit)
                                             {
                                                 <button type="button"
-                                                        class="btn btn-outline-primary"
-                                                        onclick="openTabEditModal('@Model.EntityType', @itemId, '@Model.ControllerName')"
+                                                        class="btn btn-outline-primary btn-edit-tab-item"
+                                                        data-id="@itemId"
+                                                        data-controller="@Model.ControllerName"
+                                                        data-parent-id="@Model.ParentId"
+                                                        data-parent-controller="@Model.ParentController"
                                                         title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
@@ -69,8 +75,9 @@
                                             @if (Model.CanDelete)
                                             {
                                                 <button type="button"
-                                                        class="btn btn-outline-danger"
-                                                        onclick="deleteTabItem('@Model.EntityType', @itemId, '@Model.ControllerName')"
+                                                        class="btn btn-outline-danger btn-delete-tab-item"
+                                                        data-id="@itemId"
+                                                        data-controller="@Model.ControllerName"
                                                         title="Excluir">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
@@ -97,90 +104,3 @@
         }
     </div>
 </div>
-
-<!-- Modal para Create/Edit - FULLSCREEN -->
-<div class="modal fade" id="tabItemModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="tabItemModalLabel">
-                    <i class="fas fa-edit me-2"></i>
-                    <span id="modalTitleText">Item</span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body p-4" id="tabItemModalBody" style="min-height: 60vh; max-height: 80vh; overflow-y: auto;">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="text-muted mt-3">Carregando formulário...</p>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>
-                    Cancelar
-                </button>
-                <button type="button" class="btn btn-primary" id="modalSubmitBtn" style="display: none;">
-                    <i class="fas fa-save me-1"></i>
-                    Salvar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    /* Garantir que o modal ocupe bem o espaço */
-    #tabItemModal .modal-dialog {
-        margin: 1rem;
-        max-width: calc(100% - 2rem);
-    }
-
-    @@media (min-width: 992px) {
-        #tabItemModal .modal-dialog {
-            max-width: 90vw;
-            width: 90vw;
-        }
-
-        #tabItemModal .modal-body {
-            min-height: 70vh;
-        }
-    }
-
-    @@media (min-width: 1200px) {
-        #tabItemModal .modal-dialog {
-            max-width: 85vw;
-            width: 85vw;
-        }
-    }
-
-    /* Estilos para o conteúdo do modal */
-    #tabItemModal .modal-body {
-        background-color: #f8f9fa;
-    }
-
-    #tabItemModal .form-section {
-        background: white;
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    #tabItemModal .section-header {
-        border-bottom: 2px solid #e9ecef;
-        padding-bottom: 0.75rem;
-        margin-bottom: 1rem;
-    }
-
-    #tabItemModal .modal-header {
-        padding: 1rem 1.5rem;
-    }
-
-    #tabItemModal .modal-footer {
-        padding: 1rem 1.5rem;
-        border-top: 2px solid #dee2e6;
-    }
-</style>

@@ -12,7 +12,6 @@ using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
@@ -2313,6 +2312,97 @@ namespace AutoGestao.Controllers.Base
         }
 
         #endregion
+
+        // Controllers/Base/StandardGridController.cs - Método para construir TabContentViewModel
+        protected async Task<TabContentViewModel> BuildTabContentViewModelAsync(
+            string tabId,
+            string title,
+            string icon,
+            long parentId,
+            string parentController,
+            Dictionary<string, object> filters = null)
+        {
+            var query = GetBaseQuery();
+
+            // Aplicar filtros se fornecidos
+            if (filters != null && filters.Any())
+            {
+                query = ApplyFilters(query, filters);
+            }
+
+            var items = await query.ToListAsync();
+
+            // Obter colunas da grid
+            var columns = GetGridColumns();
+
+            return new TabContentViewModel
+            {
+                TabId = tabId,
+                Title = title,
+                Icon = icon,
+                ControllerName = typeof(T).Name.Replace("Controller", "") + "s",
+                ParentId = parentId,
+                ParentController = parentController,
+                Items = items.Cast<object>().ToList(),
+                Columns = columns,
+                CanCreate = CanCreate(null),
+                CanEdit = true,
+                CanDelete = true
+            };
+        }
+
+        protected List<TabColumnDefinition> GetGridColumns()
+        {
+            var columns = new List<TabColumnDefinition>();
+            var properties = typeof(T).GetProperties();
+
+            foreach (var property in properties)
+            {
+                // GridMain
+                var gridMainAttr = property.GetCustomAttribute<GridMainAttribute>();
+                if (gridMainAttr != null)
+                {
+                    columns.Add(new TabColumnDefinition
+                    {
+                        PropertyName = property.Name,
+                        DisplayName = gridMainAttr.DisplayName,
+                        Width = gridMainAttr.Width,
+                        Order = gridMainAttr.Order
+                    });
+                    continue;
+                }
+
+                // GridField
+                var gridFieldAttr = property.GetCustomAttribute<GridFieldAttribute>();
+                if (gridFieldAttr != null)
+                {
+                    columns.Add(new TabColumnDefinition
+                    {
+                        PropertyName = property.Name,
+                        DisplayName = gridFieldAttr.DisplayName,
+                        Width = gridFieldAttr.Width,
+                        Format = gridFieldAttr.Format,
+                        Order = gridFieldAttr.Order
+                    });
+                    continue;
+                }
+
+                // GridId
+                var gridIdAttr = property.GetCustomAttribute<GridIdAttribute>();
+                if (gridIdAttr != null)
+                {
+                    columns.Add(new TabColumnDefinition
+                    {
+                        PropertyName = property.Name,
+                        DisplayName = "Código",
+                        Width = "80px",
+                        Order = 0
+                    });
+                }
+            }
+
+            return columns.OrderBy(c => c.Order).ToList();
+        }
     }
 
     public class DeleteFileRequest

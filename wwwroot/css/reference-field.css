@@ -376,3 +376,27 @@
 .d-none {
     display: none !important;
 }
+
+/* ============================================================================= 
+   MODAL Z-INDEX - GARANTIR QUE FIQUE SOBRE O MENU LATERAL
+   ============================================================================= */
+
+.modal {
+    z-index: 9999 !important;
+}
+
+.modal-backdrop {
+    z-index: 9998 !important;
+}
+
+/* Garantir que o modal sempre fique visível */
+.modal.show {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-dialog {
+    z-index: 10000 !important;
+    position: relative;
+}

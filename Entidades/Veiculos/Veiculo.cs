@@ -1,7 +1,6 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Enumerador.Veiculo;
-using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 
 namespace AutoGestao.Entidades.Veiculos
 {

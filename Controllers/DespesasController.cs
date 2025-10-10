@@ -101,5 +101,30 @@ namespace AutoGestao.Controllers
 
             return await base.Edit(id);
         }
+
+        public async Task<IActionResult> Index(long? IdVeiculo, string tab = null)
+        {
+            if (!string.IsNullOrEmpty(tab) && IdVeiculo.HasValue)
+            {
+                var filters = new Dictionary<string, object>
+                {
+                    { nameof(Despesa.IdVeiculo), IdVeiculo.Value }
+                };
+
+                var viewModel = await BuildTabContentViewModelAsync(
+                    tabId: tab,
+                    title: "Despesas",
+                    icon: "fas fa-file-invoice",
+                    parentId: IdVeiculo.Value,
+                    parentController: "Veiculos",
+                    filters: filters
+                );
+
+                return PartialView("_TabContent", viewModel);
+            }
+
+            // Comportamento normal da grid
+            return await base.Index();
+        }
     }
 }

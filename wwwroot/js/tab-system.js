@@ -1,576 +1,357 @@
+// wwwroot/js/tab-system.js - VERSÃO COMPATÍVEL COM _TabbedForm.cshtml
 class TabSystem {
     constructor() {
-        this.currentParentId = 0;
-        this.currentParentController = '';
-        this.currentMode = '';
         this.loadedTabs = new Set();
-        this.loadingTabs = new Set();
-        this.init();
+        this.currentParentController = null;
+        this.currentParentId = null;
     }
 
     init() {
-        this.detectContext();
-        this.setupTabEventListeners();
-        this.checkTabsAvailability();
+        console.log('TabSystem inicializado');
+        this.detectParentInfo();
+        this.setupEventListeners();
+        this.loadActiveTab();
     }
 
-    detectContext() {
-        // 1. PRIORIDADE: Pegar ID da URL
+    detectParentInfo() {
+        // Detectar controller e ID da URL atual
         const path = window.location.pathname;
-        const pathParts = path.split('/').filter(p => p);
+        const parts = path.split('/').filter(p => p);
 
-        if (pathParts.length >= 3) {
-            const possibleId = parseInt(pathParts[2]);
-            if (!isNaN(possibleId) && possibleId > 0) {
-                this.currentParentId = possibleId;
-                console.log('✅ ID detectado da URL:', this.currentParentId);
-            }
-        }
-
-        // 2. FALLBACK: Tentar pegar do formulário
-        if (this.currentParentId === 0) {
-            const form = document.querySelector('.standard-form');
-            if (form) {
-                const idInput = form.querySelector('input[name="Id"]');
-                const idValue = parseInt(idInput?.value || 0);
-                if (idValue > 0) {
-                    this.currentParentId = idValue;
-                    console.log('✅ ID detectado do formulário:', this.currentParentId);
-                }
-            }
-        }
-
-        // 3. FALLBACK: Tentar pegar do atributo data-entity-id
-        if (this.currentParentId === 0) {
+        if (parts.length >= 3) {
+            this.currentParentController = parts[0];
+            this.currentParentId = parseInt(parts[2]);
+        } else if (parts.length >= 2) {
+            this.currentParentController = parts[0];
+            // Tentar obter ID de um input hidden ou data attribute
             const container = document.querySelector('[data-entity-id]');
             if (container) {
-                const idValue = parseInt(container.dataset.entityId || 0);
-                if (idValue > 0) {
-                    this.currentParentId = idValue;
-                    console.log('✅ ID detectado do data-entity-id:', this.currentParentId);
+                this.currentParentId = parseInt(container.dataset.entityId);
+            } else {
+                const idInput = document.querySelector('input[name="Id"]');
+                if (idInput) {
+                    this.currentParentId = parseInt(idInput.value);
                 }
             }
         }
 
-        // Detectar controller da URL
-        if (pathParts.length >= 1) {
-            this.currentParentController = pathParts[0];
-        }
-
-        // Detectar o modo
-        this.currentMode = this.getMode();
-
-        console.log('📋 Contexto detectado:', {
-            parentId: this.currentParentId,
-            parentController: this.currentParentController,
-            mode: this.currentMode,
-            url: path
+        console.log('Parent info detectado:', {
+            controller: this.currentParentController,
+            id: this.currentParentId
         });
     }
 
-    checkTabsAvailability() {
-        if (this.currentParentId === 0) {
-            console.log('⚠️ ID = 0: Bloqueando abas até salvar o registro');
-
-            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(button => {
-                const tabId = button.dataset.tabId;
-                if (tabId !== 'principal') {
-                    button.classList.add('disabled');
-                    button.setAttribute('disabled', 'disabled');
-                    button.style.opacity = '0.5';
-                    button.style.cursor = 'not-allowed';
-                    button.title = 'Salve o registro antes de acessar esta aba';
-                }
-            });
-
-            const tabNavigation = document.querySelector('.tab-navigation');
-            if (tabNavigation && !document.querySelector('.tabs-disabled-notice')) {
-                const notice = document.createElement('div');
-                notice.className = 'alert alert-info alert-sm mb-3 tabs-disabled-notice';
-                notice.innerHTML = `
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Atenção:</strong> Salve o registro primeiro para acessar as demais abas.
-                `;
-                tabNavigation.insertAdjacentElement('afterend', notice);
+    setupEventListeners() {
+        // Listener para cliques nas tabs
+        document.addEventListener('click', (e) => {
+            const tabButton = e.target.closest('[data-bs-toggle="tab"]');
+            if (tabButton) {
+                this.handleTabClick(tabButton);
             }
-        } else {
-            console.log(`✅ ID = ${this.currentParentId}, Modo = ${this.currentMode}: Abas liberadas para visualização`);
+        });
 
-            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(button => {
-                button.classList.remove('disabled');
-                button.removeAttribute('disabled');
-                button.style.opacity = '1';
-                button.style.cursor = 'pointer';
-                button.title = '';
-            });
-
-            const notice = document.querySelector('.tabs-disabled-notice');
-            if (notice) {
-                notice.remove();
-            }
-        }
-    }
-
-    setupTabEventListeners() {
-        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(button => {
-            button.addEventListener('shown.bs.tab', (e) => this.handleTabShown(e));
-
-            // NOVO: Adicionar evento de clique para forçar reload
-            button.addEventListener('click', (e) => {
-                const tabId = e.currentTarget.dataset.tabId;
-                if (tabId !== 'principal' && this.loadedTabs.has(tabId)) {
-                    console.log('🔄 Forçando reload da tab:', tabId);
-                    // Não fazer nada aqui, deixar o shown.bs.tab lidar
-                    // Mas podemos limpar o cache se quiser forçar reload
-                }
-            });
+        // Listener para quando uma tab é mostrada (evento do Bootstrap)
+        document.addEventListener('shown.bs.tab', (e) => {
+            const tabButton = e.target;
+            this.handleTabShown(tabButton);
         });
     }
 
-    async handleTabShown(event) {
-        const button = event.target;
-        const tabId = button.dataset.tabId;
-        const controller = button.dataset.controller;
-        const lazyLoad = button.dataset.lazyLoad === 'true';
+    handleTabClick(tabButton) {
+        const tabId = this.getCleanTabId(tabButton);
+        console.log('Tab clicada:', tabId);
+    }
 
-        console.log('👁️ Tab shown:', { tabId, controller, lazyLoad, parentId: this.currentParentId, mode: this.currentMode });
+    handleTabShown(tabButton) {
+        const tabId = this.getCleanTabId(tabButton);
+        const controller = tabButton.getAttribute('data-controller');
+        const lazyLoad = tabButton.getAttribute('data-lazy-load') === 'true';
 
-        if (this.currentParentId === 0) {
-            console.warn('⚠️ ID inválido - tab não pode carregar');
-            return;
-        }
+        console.log('Tab mostrada:', { tabId, controller, lazyLoad });
 
+        // Ignorar tab principal
         if (tabId === 'principal') {
-            console.log('ℹ️ Aba principal - não precisa carregar');
+            console.log('Tab principal - não precisa carregar');
             return;
         }
 
-        if (!lazyLoad) {
-            console.log('ℹ️ Tab sem lazy load');
-            return;
+        // Se é lazy load e ainda não foi carregada, carregar agora
+        if (lazyLoad && controller && !this.loadedTabs.has(tabId)) {
+            this.loadTabContent(tabId, controller);
         }
+    }
 
-        // MODIFICADO: Verificar apenas se está carregando
-        if (this.loadingTabs.has(tabId)) {
-            console.log('⏳ Tab já está sendo carregada:', tabId);
-            return;
+    loadActiveTab() {
+        // Carregar a tab ativa inicial se necessário
+        const activeTab = document.querySelector('.nav-link.active[data-bs-toggle="tab"]');
+        if (activeTab) {
+            const tabId = this.getCleanTabId(activeTab);
+            const controller = activeTab.getAttribute('data-controller');
+            const lazyLoad = activeTab.getAttribute('data-lazy-load') === 'true';
+
+            // Ignorar tab principal
+            if (tabId === 'principal') {
+                return;
+            }
+
+            if (lazyLoad && controller && !this.loadedTabs.has(tabId)) {
+                this.loadTabContent(tabId, controller);
+            }
         }
+    }
 
-        // REMOVIDO: A verificação de loadedTabs para permitir reload
-        // Se quiser mostrar conteúdo em cache enquanto recarrega:
-        if (this.loadedTabs.has(tabId)) {
-            console.log('♻️ Tab já carregada, mostrando cache:', tabId);
-            // O conteúdo já está lá, apenas retornar
-            return;
-        }
+    getCleanTabId(tabButton) {
+        // Obtém o ID da tab removendo # e sufixo -content
+        const target = tabButton.getAttribute('data-bs-target');
+        if (!target) return null;
 
-        if (!controller) {
-            console.error('❌ Controller não definido para a tab:', tabId);
-            return;
-        }
+        return target.replace('#', '').replace('-content', '');
+    }
 
-        await this.loadTabContent(tabId, controller);
+    getTabPaneId(tabId) {
+        // Retorna o ID completo da tab-pane (com sufixo -content)
+        return `${tabId}-content`;
     }
 
     async loadTabContent(tabId, controller) {
-        // NOVO: Marcar como carregando
-        this.loadingTabs.add(tabId);
+        const tabPaneId = this.getTabPaneId(tabId);
+        const tabPane = document.getElementById(tabPaneId);
 
-        const contentDiv = document.querySelector(`#${tabId}-content .tab-content-wrapper`);
-        const button = document.querySelector(`#${tabId}-tab`);
+        if (!tabPane) {
+            console.error('Tab pane não encontrado:', tabPaneId);
+            return;
+        }
 
-        if (!contentDiv) {
-            console.error('❌ Container da tab não encontrado:', tabId);
-            this.loadingTabs.delete(tabId);
+        // Verificar se já está carregando
+        if (tabPane.dataset.loading === 'true') {
+            console.log('Tab já está carregando:', tabId);
             return;
         }
 
         try {
-            this.setTabLoading(button, true);
-            contentDiv.innerHTML = this.getLoadingHtml();
+            tabPane.dataset.loading = 'true';
 
-            const mode = this.currentMode;
-            const url = `/TabContent/LoadTab?parentController=${this.currentParentController}&parentId=${this.currentParentId}&tabController=${controller}&mode=${mode}`;
-
-            console.log('🔄 Carregando tab via TabContentController:', {
-                url,
+            console.log('Carregando tab:', {
                 tabId,
                 controller,
                 parentId: this.currentParentId,
-                mode
+                parentController: this.currentParentController
             });
 
-            const response = await fetch(url);
+            // Validações
+            if (!this.currentParentId) {
+                throw new Error('ID do registro pai não encontrado');
+            }
+
+            if (!this.currentParentController) {
+                throw new Error('Controller pai não encontrado');
+            }
+
+            // Construir URL
+            const url = `/TabContent/LoadTab?controller=${encodeURIComponent(controller)}&tab=${encodeURIComponent(tabId)}&parentId=${this.currentParentId}&parentController=${encodeURIComponent(this.currentParentController)}`;
+
+            console.log('URL de carregamento:', url);
+
+            // Mostrar loading
+            this.showLoading(tabPane);
+
+            // Fazer requisição
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html'
+                }
+            });
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('❌ Erro HTTP:', response.status, errorText);
+                console.error('Erro na resposta:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: errorText
+                });
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
             const html = await response.text();
 
-            console.log('✅ Tab carregada com sucesso:', tabId);
+            // Verificar se recebeu HTML válido
+            if (!html || html.trim().length === 0) {
+                throw new Error('Resposta vazia do servidor');
+            }
 
-            contentDiv.innerHTML = html;
+            // Buscar o wrapper da tab
+            const wrapper = tabPane.querySelector('.tab-content-wrapper');
+            if (wrapper) {
+                wrapper.innerHTML = html;
+            } else {
+                tabPane.innerHTML = html;
+            }
+
+            // Marcar como carregada
             this.loadedTabs.add(tabId);
-            this.initializeTabFeatures(tabId);
+
+            console.log('Tab carregada com sucesso:', tabId);
+
+            // Inicializar componentes na tab
+            this.initializeTabComponents(tabPane);
 
         } catch (error) {
-            console.error('❌ Erro ao carregar tab:', error);
-            contentDiv.innerHTML = this.getErrorHtml(error.message);
+            console.error('Erro ao carregar tab:', error);
+            this.showError(tabPane, error.message);
         } finally {
-            this.setTabLoading(button, false);
-            // NOVO: Remover do estado de carregamento
-            this.loadingTabs.delete(tabId);
+            tabPane.dataset.loading = 'false';
+
+            // Remover indicador de loading do botão da tab
+            const tabButton = document.querySelector(`[data-bs-target="#${this.getTabPaneId(tabId)}"]`);
+            if (tabButton) {
+                const loadingSpan = tabButton.querySelector('.tab-loading');
+                if (loadingSpan) {
+                    loadingSpan.classList.add('d-none');
+                }
+            }
         }
     }
 
-    getMode() {
-        const path = window.location.pathname.toLowerCase();
-        if (path.includes('/create')) return 'Create';
-        if (path.includes('/edit')) return 'Edit';
-        if (path.includes('/details')) return 'Details';
-        return 'Index';
-    }
-
-    setTabLoading(button, loading) {
-        const spinner = button?.querySelector('.tab-loading');
-        if (spinner) {
-            spinner.classList.toggle('d-none', !loading);
-        }
-    }
-
-    initializeTabFeatures(tabId) {
-        const tabContent = document.querySelector(`#${tabId}-content`);
-        if (!tabContent) return;
-
-        console.log('🔧 Inicializando features da tab:', tabId);
-
-        if (window.initializeStandardForm) {
-            window.initializeStandardForm();
-        }
-
-        if (window.StandardGrid) {
-            new window.StandardGrid();
-        }
-
-        if (window.bootstrap) {
-            const dropdowns = tabContent.querySelectorAll('[data-bs-toggle="dropdown"]');
-            dropdowns.forEach(dropdown => {
-                new window.bootstrap.Dropdown(dropdown);
-            });
-        }
-    }
-
-    async refreshTab(tabId) {
-        console.log('🔄 Refreshing tab:', tabId);
-
-        // Remover dos dois conjuntos
-        this.loadedTabs.delete(tabId);
-        this.loadingTabs.delete(tabId);
-
-        const button = document.querySelector(`#${tabId}-tab`);
-        const controller = button?.dataset.controller;
-
-        if (controller && button?.classList.contains('active')) {
-            await this.loadTabContent(tabId, controller);
-        }
-    }
-
-    getLoadingHtml() {
-        return `
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary mb-3" role="status">
-                    <span class="visually-hidden">Carregando...</span>
+    showLoading(tabPane) {
+        const wrapper = tabPane.querySelector('.tab-content-wrapper') || tabPane;
+        wrapper.innerHTML = `
+            <div class="d-flex justify-content-center align-items-center py-5" style="min-height: 300px;">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-3 text-muted fw-semibold">Carregando conteúdo...</p>
                 </div>
-                <p class="text-muted">Carregando conteúdo...</p>
             </div>
         `;
     }
 
-    getErrorHtml(message) {
-        return `
-            <div class="alert alert-danger m-4">
+    showError(tabPane, message) {
+        const wrapper = tabPane.querySelector('.tab-content-wrapper') || tabPane;
+        wrapper.innerHTML = `
+            <div class="alert alert-danger m-4" role="alert">
                 <div class="d-flex align-items-start">
-                    <i class="fas fa-exclamation-triangle fa-2x me-3 text-danger"></i>
-                    <div>
+                    <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                    <div class="flex-grow-1">
                         <h5 class="alert-heading">Erro ao carregar conteúdo</h5>
-                        <p class="mb-2"><strong>Mensagem:</strong> ${message}</p>
-                        <hr>
-                        <p class="mb-0 small text-muted">
-                            <strong>Possíveis causas:</strong>
-                            <ul class="mt-2">
-                                <li>Controller não encontrado</li>
-                                <li>Entidade não mapeada corretamente</li>
-                                <li>Chave estrangeira não configurada</li>
-                                <li>Permissões insuficientes</li>
-                            </ul>
-                        </p>
+                        <p class="mb-2">${this.escapeHtml(message)}</p>
+                        <hr class="my-3">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-danger" onclick="location.reload()">
+                                <i class="fas fa-redo me-1"></i>
+                                Recarregar Página
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="window.history.back()">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Voltar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         `;
     }
-}
 
-// Funções globais continuam iguais...
-window.openTabCreateModal = async function (entityType, parentId, foreignKeyProperty, controllerName) {
-    console.log('🆕 openTabCreateModal:', { entityType, parentId, foreignKeyProperty, controllerName });
-
-    const modalElement = document.getElementById('tabItemModal');
-    const modal = new bootstrap.Modal(modalElement, {
-        backdrop: 'static',
-        keyboard: false
-    });
-
-    const modalBody = document.getElementById('tabItemModalBody');
-    const modalTitle = document.getElementById('modalTitleText');
-    const submitBtn = document.getElementById('modalSubmitBtn');
-
-    modalTitle.textContent = `Novo ${entityType}`;
-    modalBody.innerHTML = tabSystem.getLoadingHtml();
-
-    if (submitBtn) {
-        submitBtn.style.display = 'none';
+    escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
     }
 
-    modal.show();
-
-    try {
-        const url = `/${controllerName}/Create?modal=true&${foreignKeyProperty}=${parentId}`;
-
-        console.log('📤 Requisição modal create:', url);
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Erro ao carregar modal:', response.status, errorText);
-            throw new Error(`Erro ${response.status}: ${response.statusText}`);
-        }
-
-        const contentType = response.headers.get('content-type');
-        console.log('📥 Response content-type:', contentType);
-
-        const html = await response.text();
-
-        console.log('✅ HTML recebido, tamanho:', html.length);
-        console.log('📄 Primeiros 200 chars:', html.substring(0, 200));
-
-        modalBody.innerHTML = html;
-
-        if (window.initializeStandardForm) {
-            window.initializeStandardForm();
-        }
-
-        const form = modalBody.querySelector('form');
-        if (form) {
-            console.log('✅ Formulário encontrado no modal');
-
-            const formButtons = form.querySelectorAll('button[type="submit"], .form-actions');
-            formButtons.forEach(btn => btn.style.display = 'none');
-
-            if (submitBtn) {
-                submitBtn.style.display = 'inline-block';
-                submitBtn.onclick = () => form.requestSubmit();
-            }
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await handleTabFormSubmit(form, modal);
-            });
-        } else {
-            console.error('❌ Formulário não encontrado no modal');
-        }
-
-    } catch (error) {
-        console.error('❌ Erro ao abrir modal:', error);
-        modalBody.innerHTML = tabSystem.getErrorHtml(error.message);
-    }
-};
-
-window.openTabEditModal = async function (entityType, itemId, controllerName) {
-    console.log('openTabEditModal:', { entityType, itemId, controllerName });
-
-    const modalElement = document.getElementById('tabItemModal');
-    const modal = new bootstrap.Modal(modalElement, {
-        backdrop: 'static',
-        keyboard: false
-    });
-
-    const modalBody = document.getElementById('tabItemModalBody');
-    const modalTitle = document.getElementById('modalTitleText');
-    const submitBtn = document.getElementById('modalSubmitBtn');
-
-    modalTitle.textContent = `Editar ${entityType}`;
-    modalBody.innerHTML = tabSystem.getLoadingHtml();
-
-    if (submitBtn) {
-        submitBtn.style.display = 'none';
-    }
-
-    modal.show();
-
-    try {
-        const url = `/${controllerName}/Edit/${itemId}?modal=true`;
-
-        console.log('Carregando modal edit:', url);
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Erro ao carregar modal:', response.status, errorText);
-            throw new Error(`Erro ${response.status}: ${response.statusText}`);
-        }
-
-        const html = await response.text();
-        modalBody.innerHTML = html;
-
-        if (window.initializeStandardForm) {
-            window.initializeStandardForm();
-        }
-
-        const form = modalBody.querySelector('form');
-        if (form) {
-            const formButtons = form.querySelectorAll('button[type="submit"], .form-actions');
-            formButtons.forEach(btn => btn.style.display = 'none');
-
-            if (submitBtn) {
-                submitBtn.style.display = 'inline-block';
-                submitBtn.onclick = () => form.requestSubmit();
-            }
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await handleTabFormSubmit(form, modal);
-            });
-        }
-
-    } catch (error) {
-        console.error('Erro ao abrir modal:', error);
-        modalBody.innerHTML = tabSystem.getErrorHtml(error.message);
-    }
-};
-
-window.deleteTabItem = async function (entityType, itemId, controllerName) {
-    console.log('deleteTabItem:', { entityType, itemId, controllerName });
-
-    if (!confirm('Tem certeza que deseja excluir este item?')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`/${controllerName}/Delete/${itemId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+    initializeTabComponents(tabPane) {
+        // Inicializar tooltips
+        const tooltips = tabPane.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(el => {
+            new bootstrap.Tooltip(el);
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-            showToast('Item excluído com sucesso!', 'success');
-
-            const activeTab = document.querySelector('.nav-link.active');
-            const tabId = activeTab?.dataset.tabId;
-            if (tabId && tabSystem) {
-                await tabSystem.refreshTab(tabId);
-            }
-        } else {
-            showToast(result.message || 'Erro ao excluir item', 'error');
-        }
-
-    } catch (error) {
-        console.error('Erro ao excluir:', error);
-        showToast('Erro ao excluir item', 'error');
-    }
-};
-
-async function handleTabFormSubmit(form, modal) {
-    const formData = new FormData(form);
-    const submitBtn = document.getElementById('modalSubmitBtn');
-
-    console.log('Submetendo formulário da tab:', { action: form.action });
-
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Salvando...';
-    }
-
-    try {
-        const response = await fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+        // Inicializar popovers
+        const popovers = tabPane.querySelectorAll('[data-bs-toggle="popover"]');
+        popovers.forEach(el => {
+            new bootstrap.Popover(el);
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-            showToast(result.message || 'Salvo com sucesso!', 'success');
-
-            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('tabItemModal'));
-            if (modalInstance) {
-                modalInstance.hide();
-            }
-
-            const activeTab = document.querySelector('.nav-link.active');
-            const tabId = activeTab?.dataset.tabId;
-            if (tabId && tabSystem) {
-                await tabSystem.refreshTab(tabId);
-            }
-        } else {
-            showToast(result.message || 'Erro ao salvar', 'error');
-
-            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-            form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
-
-            if (result.errors) {
-                Object.keys(result.errors).forEach(key => {
-                    const input = form.querySelector(`[name="${key}"]`);
-                    if (input) {
-                        input.classList.add('is-invalid');
-                        const feedback = document.createElement('div');
-                        feedback.className = 'invalid-feedback d-block';
-                        feedback.textContent = result.errors[key];
-                        input.parentElement.appendChild(feedback);
-                    }
-                });
-            }
+        // Inicializar máscaras se jQuery mask plugin estiver disponível
+        if (typeof $.fn.mask !== 'undefined') {
+            const $tabPane = $(tabPane);
+            $tabPane.find('.cpf-mask').mask('000.000.000-00');
+            $tabPane.find('.cnpj-mask').mask('00.000.000/0000-00');
+            $tabPane.find('.telefone-mask').mask('(00) 0000-00009');
+            $tabPane.find('.cep-mask').mask('00000-000');
+            $tabPane.find('.money-mask').mask('#.##0,00', { reverse: true });
         }
 
-    } catch (error) {
-        console.error('Erro ao submeter formulário:', error);
-        showToast('Erro ao processar solicitação', 'error');
-    } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-save me-1"></i> Salvar';
+        // Disparar evento customizado
+        const event = new CustomEvent('tab:loaded', {
+            detail: { tabPane },
+            bubbles: true
+        });
+        tabPane.dispatchEvent(event);
+    }
+
+    reloadTab(tabId) {
+        // Remover do cache de tabs carregadas
+        this.loadedTabs.delete(tabId);
+
+        // Obter informações da tab
+        const tabPaneId = this.getTabPaneId(tabId);
+        const tabButton = document.querySelector(`[data-bs-target="#${tabPaneId}"]`);
+
+        if (tabButton) {
+            const controller = tabButton.getAttribute('data-controller');
+            if (controller) {
+                this.loadTabContent(tabId, controller);
+            }
+        }
+    }
+
+    reloadActiveTab() {
+        const activeTab = document.querySelector('.nav-link.active[data-bs-toggle="tab"]');
+        if (activeTab) {
+            const tabId = this.getCleanTabId(activeTab);
+            if (tabId && tabId !== 'principal') {
+                this.reloadTab(tabId);
+            }
         }
     }
 }
 
-function showToast(message, type = 'info') {
-    if (window.showToast) {
-        window.showToast(message, type);
-    } else {
-        console.log(`[${type.toUpperCase()}] ${message}`);
-    }
-}
+// Criar instância global
+const tabSystem = new TabSystem();
 
-let tabSystem;
-if (!window.tabSystem) {
+// Inicializar quando o DOM estiver pronto
+if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        tabSystem = new TabSystem();
-        window.tabSystem = tabSystem;
-        console.log('✅ Sistema de tabs inicializado com sucesso');
+        tabSystem.init();
     });
+} else {
+    tabSystem.init();
 }
 
-window.TabSystem = TabSystem;
+// Expor globalmente para uso em outros scripts
 window.tabSystem = tabSystem;
+
+// Funções auxiliares globais para compatibilidade
+window.loadTabContent = function (tabId, controller, parentId) {
+    if (parentId) {
+        tabSystem.currentParentId = parentId;
+    }
+    tabSystem.loadTabContent(tabId, controller);
+};
+
+window.reloadTab = function (tabId) {
+    tabSystem.reloadTab(tabId);
+};
+
+window.reloadActiveTab = function () {
+    tabSystem.reloadActiveTab();
+};
+
+console.log('tab-system.js carregado com sucesso');

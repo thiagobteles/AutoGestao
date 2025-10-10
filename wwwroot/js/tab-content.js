@@ -1,4 +1,3 @@
-// wwwroot/js/tab-content.js - ARQUIVO COMPLETO CORRIGIDO
 class TabContentManager {
     constructor() {
         this.activeTab = null;
@@ -16,43 +15,70 @@ class TabContentManager {
             // Botão adicionar
             if (e.target.closest('.btn-add-tab-item')) {
                 e.preventDefault();
+                e.stopPropagation();
                 const btn = e.target.closest('.btn-add-tab-item');
                 const tabId = btn.dataset.tab;
                 const controller = btn.dataset.controller;
                 const parentId = btn.dataset.parentId;
-                this.openCreateModal(controller, parentId, tabId);
+                const parentController = btn.dataset.parentController;
+
+                console.log('Botão adicionar clicado:', { tabId, controller, parentId, parentController });
+
+                this.openCreateModal(controller, parentId, parentController, tabId);
             }
 
             // Botão editar
             if (e.target.closest('.btn-edit-tab-item')) {
                 e.preventDefault();
+                e.stopPropagation();
                 const btn = e.target.closest('.btn-edit-tab-item');
                 const id = btn.dataset.id;
                 const controller = btn.dataset.controller;
                 const parentId = btn.dataset.parentId;
-                this.openEditModal(controller, id, parentId);
+                const parentController = btn.dataset.parentController;
+
+                console.log('Botão editar clicado:', { id, controller, parentId, parentController });
+
+                // Validar que o ID é um número válido
+                if (!id || isNaN(parseInt(id))) {
+                    console.error('ID inválido:', id);
+                    this.showToast('Erro: ID do registro inválido', 'error');
+                    return;
+                }
+
+                this.openEditModal(controller, parseInt(id), parentId, parentController);
             }
 
             // Botão deletar
             if (e.target.closest('.btn-delete-tab-item')) {
                 e.preventDefault();
+                e.stopPropagation();
                 const btn = e.target.closest('.btn-delete-tab-item');
                 const id = btn.dataset.id;
                 const controller = btn.dataset.controller;
-                this.deleteItem(controller, id);
+
+                console.log('Botão deletar clicado:', { id, controller });
+
+                // Validar que o ID é um número válido
+                if (!id || isNaN(parseInt(id))) {
+                    console.error('ID inválido:', id);
+                    this.showToast('Erro: ID do registro inválido', 'error');
+                    return;
+                }
+
+                this.deleteItem(controller, parseInt(id));
             }
         });
     }
 
-    async openCreateModal(controller, parentId, tabId) {
+    async openCreateModal(controller, parentId, parentController, tabId) {
         try {
-            console.log('Abrindo modal de criação:', { controller, parentId, tabId });
+            console.log('Abrindo modal de criação:', { controller, parentId, parentController, tabId });
 
             const modal = this.createModalElement(controller, 'create');
             document.body.appendChild(modal);
 
-            // Determinar o nome do campo pai baseado no controller
-            const parentField = this.getParentFieldName(controller);
+            const parentField = this.getParentFieldName(controller, parentController);
             let url = `/${controller}/Create?modal=true`;
 
             if (parentId && parentField) {
@@ -72,14 +98,16 @@ class TabContentManager {
             }
 
             const html = await response.text();
-            console.log('HTML recebido, tamanho:', html.length);
-
             const modalBody = modal.querySelector('.modal-body');
             modalBody.innerHTML = html;
 
             const saveBtn = modal.querySelector('#modalSaveBtn');
             if (saveBtn) {
                 saveBtn.style.display = 'inline-flex';
+            }
+
+            if (parentId && parentField) {
+                this.lockParentField(modal, parentField, parentId, parentController);
             }
 
             this.setupModalForm(modal, controller, parentId, parentField);
@@ -90,7 +118,6 @@ class TabContentManager {
             });
 
             bsModal.show();
-            console.log('Modal exibido');
 
             modal.addEventListener('hidden.bs.modal', () => {
                 modal.remove();
@@ -98,17 +125,23 @@ class TabContentManager {
 
         } catch (error) {
             console.error('Erro ao abrir modal de criação:', error);
-            this.showToast('Erro ao abrir modal de criação', 'error');
+            this.showToast('Erro ao abrir modal de criação: ' + error.message, 'error');
         }
     }
 
-    async openEditModal(controller, id, parentId) {
+    async openEditModal(controller, id, parentId, parentController) {
         try {
-            console.log('Abrindo modal de edição:', { controller, id, parentId });
+            console.log('Abrindo modal de edição:', { controller, id, parentId, parentController });
+
+            // Validação extra
+            if (!id || typeof id !== 'number') {
+                throw new Error(`ID inválido: ${id}`);
+            }
 
             const modal = this.createModalElement(controller, 'edit');
             document.body.appendChild(modal);
 
+            // URL correta: /Controller/Edit/ID?modal=true
             const url = `/${controller}/Edit/${id}?modal=true`;
             console.log('URL de edição:', url);
 
@@ -119,7 +152,9 @@ class TabContentManager {
             });
 
             if (!response.ok) {
-                throw new Error(`Erro ao carregar formulário: ${response.status}`);
+                const errorText = await response.text();
+                console.error('Erro na resposta:', errorText);
+                throw new Error(`Erro ${response.status}: ${response.statusText}`);
             }
 
             const html = await response.text();
@@ -131,7 +166,11 @@ class TabContentManager {
                 saveBtn.style.display = 'inline-flex';
             }
 
-            const parentField = this.getParentFieldName(controller);
+            const parentField = this.getParentFieldName(controller, parentController);
+            if (parentId && parentField) {
+                this.lockParentField(modal, parentField, parentId, parentController);
+            }
+
             this.setupModalForm(modal, controller, parentId, parentField);
 
             const bsModal = new bootstrap.Modal(modal, {
@@ -147,22 +186,106 @@ class TabContentManager {
 
         } catch (error) {
             console.error('Erro ao abrir modal de edição:', error);
-            this.showToast('Erro ao abrir modal de edição', 'error');
+            this.showToast('Erro ao abrir modal de edição: ' + error.message, 'error');
         }
     }
 
-    getParentFieldName(controller) {
-        // Mapeamento de controllers para nomes de campos
-        const mapping = {
-            'Despesas': 'IdVeiculo',
-            'VeiculoDocumentos': 'IdVeiculo',
-            'VeiculoFotos': 'IdVeiculo',
-            'VeiculoNFE': 'IdVeiculo',
-            'VeiculoLancamentos': 'IdVeiculo',
-            // Adicione outros mapeamentos conforme necessário
-        };
+    getParentFieldName(controller, parentController) {
+        if (!parentController) {
+            return null;
+        }
 
-        return mapping[controller] || null;
+        let singularParent = parentController;
+        if (singularParent.endsWith('s')) {
+            singularParent = singularParent.slice(0, -1);
+        }
+
+        const fieldName = `Id${singularParent}`;
+
+        console.log(`Campo pai calculado: ${fieldName} (de ${parentController} para ${controller})`);
+
+        return fieldName;
+    }
+
+    async lockParentField(modal, parentField, parentId, parentController) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        console.log('Bloqueando campo pai:', { parentField, parentId });
+
+        const hiddenInput = modal.querySelector(`input[name="${parentField}"]`);
+
+        if (hiddenInput) {
+            console.log('Campo hidden encontrado:', hiddenInput);
+
+            hiddenInput.value = parentId;
+
+            const searchInput = modal.querySelector(`input.reference-search-input[data-target-field="${parentField}"]`);
+
+            if (searchInput) {
+                console.log('Campo de busca encontrado:', searchInput);
+
+                if (!searchInput.value || searchInput.value === '') {
+                    const displayName = await this.fetchParentDisplayName(parentController, parentId);
+                    if (displayName) {
+                        searchInput.value = displayName;
+                        searchInput.classList.add('selected');
+                    }
+                }
+
+                searchInput.setAttribute('readonly', 'readonly');
+                searchInput.setAttribute('disabled', 'disabled');
+                searchInput.style.backgroundColor = '#e9ecef';
+                searchInput.style.cursor = 'not-allowed';
+                searchInput.title = 'Este campo não pode ser alterado pois o registro pertence a este contexto';
+            }
+
+            const container = hiddenInput.closest('.reference-field-container');
+            if (container) {
+                const createBtn = container.querySelector('.reference-create-btn');
+                if (createBtn) {
+                    createBtn.style.display = 'none';
+                }
+
+                const clearBtn = container.querySelector('.reference-clear-btn');
+                if (clearBtn) {
+                    clearBtn.style.display = 'none';
+                }
+            }
+
+            if (searchInput && searchInput.parentElement) {
+                const lockIcon = document.createElement('span');
+                lockIcon.className = 'position-absolute';
+                lockIcon.style.cssText = 'right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #6c757d;';
+                lockIcon.innerHTML = '<i class="fas fa-lock"></i>';
+
+                const parent = searchInput.parentElement;
+                if (parent.style.position !== 'relative' && parent.style.position !== 'absolute') {
+                    parent.style.position = 'relative';
+                }
+                parent.appendChild(lockIcon);
+            }
+        } else {
+            console.warn(`Campo ${parentField} não encontrado no formulário`);
+        }
+    }
+
+    async fetchParentDisplayName(parentController, parentId) {
+        try {
+            const response = await fetch(`/${parentController}/GetDisplayName/${parentId}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                return result.displayName || result.name || result.text;
+            }
+        } catch (error) {
+            console.warn('Não foi possível buscar o nome do registro pai:', error);
+        }
+
+        return null;
     }
 
     createModalElement(controller, mode) {
@@ -220,12 +343,10 @@ class TabContentManager {
 
         console.log('Configurando formulário do modal');
 
-        // Inicializar campos do formulário
         if (typeof window.referenceFieldManager !== 'undefined') {
             window.referenceFieldManager.initializeFormElements(modal);
         }
 
-        // Inicializar máscaras
         if (typeof $.fn.mask !== 'undefined') {
             const $modal = $(modal);
             $modal.find('.cpf-mask').mask('000.000.000-00');
@@ -261,7 +382,6 @@ class TabContentManager {
         try {
             const formData = new FormData(form);
 
-            // CRÍTICO: Adicionar IdEmpresa do usuário logado
             const idEmpresaElement = document.querySelector('input[name="IdEmpresa"]') ||
                 document.querySelector('[data-id-empresa]');
 
@@ -273,13 +393,11 @@ class TabContentManager {
                 }
             }
 
-            // Adicionar campo pai se fornecido
             if (parentId && parentField) {
                 formData.set(parentField, parentId);
-                console.log(`${parentField} adicionado ao FormData:`, parentId);
+                console.log(`${parentField} adicionado/atualizado no FormData:`, parentId);
             }
 
-            // Log de todos os dados do FormData
             console.log('=== DADOS ENVIADOS ===');
             for (let pair of formData.entries()) {
                 console.log(pair[0] + ': ' + pair[1]);
@@ -308,13 +426,14 @@ class TabContentManager {
                             bsModal.hide();
                         }
 
-                        // Recarregar a tab
-                        await this.reloadTab(controller, parentId);
+                        // Recarregar a tab ativa
+                        if (typeof window.tabSystem !== 'undefined') {
+                            window.tabSystem.reloadActiveTab();
+                        }
                     } else {
                         this.showValidationErrors(form, result.errors || {});
                     }
                 } else {
-                    // HTML de resposta - recarregar formulário com erros
                     const html = await response.text();
                     const modalBody = modal.querySelector('.modal-body');
                     modalBody.innerHTML = html;
@@ -332,50 +451,6 @@ class TabContentManager {
                 saveBtn.innerHTML = originalBtnContent;
                 saveBtn.disabled = false;
             }
-        }
-    }
-
-    async reloadTab(controller, parentId) {
-        const tabPane = document.querySelector('.tab-pane.active');
-        if (!tabPane) return;
-
-        const tabId = tabPane.id;
-        await this.loadTabContent(tabId, controller, parentId);
-    }
-
-    async loadTabContent(tabId, controller, parentId) {
-        const tabPane = document.getElementById(tabId);
-        if (!tabPane) return;
-
-        try {
-            const parentField = this.getParentFieldName(controller);
-            let url = `/${controller}?tab=${tabId}`;
-
-            if (parentId && parentField) {
-                url += `&${parentField}=${parentId}`;
-            }
-
-            const response = await fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro ao carregar conteúdo: ${response.status}`);
-            }
-
-            const html = await response.text();
-            tabPane.innerHTML = html;
-
-        } catch (error) {
-            console.error('Erro ao carregar tab:', error);
-            tabPane.innerHTML = `
-                <div class="alert alert-danger m-4">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Erro ao carregar conteúdo. Por favor, recarregue a página.
-                </div>
-            `;
         }
     }
 
@@ -398,7 +473,10 @@ class TabContentManager {
 
                 if (result.success) {
                     this.showToast('Registro excluído com sucesso!', 'success');
-                    await this.reloadTab(controller, null);
+
+                    if (typeof window.tabSystem !== 'undefined') {
+                        window.tabSystem.reloadActiveTab();
+                    }
                 } else {
                     this.showToast(result.message || 'Erro ao excluir registro', 'error');
                 }
@@ -445,7 +523,6 @@ class TabContentManager {
     }
 }
 
-// Inicializar
 const tabContentManager = new TabContentManager();
 
 if (document.readyState === 'loading') {
