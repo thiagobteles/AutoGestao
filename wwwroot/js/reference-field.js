@@ -1,20 +1,20 @@
+// wwwroot/js/reference-field.js - VERSÃO CORRIGIDA E SIMPLIFICADA
 class ReferenceFieldManager {
     constructor() {
         this.cache = new Map();
         this.debounceTimers = new Map();
         this.activeRequests = new Map();
+        console.log('🔧 ReferenceFieldManager construído');
     }
 
     init() {
+        console.log('🚀 Inicializando ReferenceFieldManager...');
         this.setupEventListeners();
-        console.log('ReferenceFieldManager inicializado');
+        this.initializeAllFields();
+        console.log('✅ ReferenceFieldManager inicializado');
     }
 
     setupEventListeners() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.initializeAllFields();
-        });
-
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.reference-field-container')) {
                 this.hideAllDropdowns();
@@ -23,43 +23,82 @@ class ReferenceFieldManager {
     }
 
     initializeAllFields() {
+        console.log('🔍 Procurando campos de referência...');
+
         const fields = document.querySelectorAll('.reference-search-input');
-        fields.forEach(input => {
+        console.log(`📋 Encontrados ${fields.length} campos de referência`);
+
+        fields.forEach((input, index) => {
             if (!input.dataset.initialized) {
+                console.log(`⚙️ Inicializando campo ${index + 1}:`, input.id);
                 this.initializeField(input);
                 input.dataset.initialized = 'true';
             }
         });
 
         const clearBtns = document.querySelectorAll('.reference-clear-btn');
-        clearBtns.forEach(btn => {
+        console.log(`🗑️ Encontrados ${clearBtns.length} botões de limpar`);
+
+        clearBtns.forEach((btn, index) => {
             if (!btn.dataset.initialized) {
-                btn.addEventListener('click', (e) => this.clearSelection(e));
+                console.log(`⚙️ Inicializando botão limpar ${index + 1}:`, btn.id);
+                btn.addEventListener('click', (e) => {
+                    console.log('🗑️ Botão limpar clicado');
+                    this.clearSelection(e);
+                });
                 btn.dataset.initialized = 'true';
             }
         });
 
         const createBtns = document.querySelectorAll('.reference-create-btn');
-        createBtns.forEach(btn => {
+        console.log(`➕ Encontrados ${createBtns.length} botões de criar`);
+
+        createBtns.forEach((btn, index) => {
             if (!btn.dataset.initialized) {
-                btn.addEventListener('click', (e) => this.openCreateModal(e));
+                console.log(`⚙️ Inicializando botão criar ${index + 1}:`, btn.id);
+                btn.addEventListener('click', (e) => {
+                    console.log('➕ Botão criar clicado');
+                    this.openCreateModal(e);
+                });
                 btn.dataset.initialized = 'true';
             }
         });
     }
 
     initializeField(input) {
-        input.addEventListener('input', (e) => this.handleSearch(e));
-        input.addEventListener('focus', (e) => this.handleFocus(e));
-        input.addEventListener('blur', (e) => this.handleBlur(e));
-        input.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        console.log('⚙️ Configurando eventos para:', input.id);
 
+        input.addEventListener('input', (e) => {
+            console.log('⌨️ Input detectado:', e.target.value);
+            this.handleSearch(e);
+        });
+
+        input.addEventListener('focus', (e) => {
+            console.log('👁️ Focus detectado');
+            this.handleFocus(e);
+        });
+
+        input.addEventListener('blur', (e) => {
+            console.log('👁️ Blur detectado');
+            this.handleBlur(e);
+        });
+
+        input.addEventListener('keydown', (e) => {
+            this.handleKeyDown(e);
+        });
+
+        this.setupConditionalFilters(input);
+    }
+
+    setupConditionalFilters(input) {
         try {
             const filterConfig = input.dataset.referenceFilters;
             if (!filterConfig || filterConfig === '{}') {
+                console.log('ℹ️ Sem filtros condicionais para:', input.id);
                 return;
             }
 
+            console.log('🔍 Configurando filtros condicionais:', filterConfig);
             const config = JSON.parse(filterConfig);
 
             for (const [, filterInfo] of Object.entries(config)) {
@@ -68,15 +107,19 @@ class ReferenceFieldManager {
                     const sourceHiddenInput = document.querySelector(`input[name="${sourceFieldName}"]`);
 
                     if (sourceHiddenInput && !sourceHiddenInput.dataset.listenerAttached) {
+                        console.log(`🔗 Vinculando filtro: ${sourceFieldName}`);
+
                         const sourceFieldDisplayName = this.getFieldDisplayName(sourceFieldName);
 
                         sourceHiddenInput.addEventListener('change', () => {
+                            console.log(`🔄 Campo fonte mudou: ${sourceFieldName} = ${sourceHiddenInput.value}`);
+
                             const targetField = input.dataset.targetField;
                             const targetHiddenInput = document.querySelector(`input[name="${targetField}"]`);
 
                             if (targetHiddenInput && targetHiddenInput.value && targetHiddenInput.value !== '0') {
                                 input.value = '';
-                                targetHiddenInput.value = '';
+                                targetHiddenInput.value = '0';
                                 input.classList.remove('selected');
                                 this.hideDropdown(input);
                             }
@@ -84,87 +127,178 @@ class ReferenceFieldManager {
                             if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                                 input.disabled = true;
                                 input.placeholder = `Selecione ${sourceFieldDisplayName} primeiro`;
+                                console.log(`🔒 Campo desabilitado: ${input.id}`);
                             } else {
                                 input.disabled = false;
                                 input.placeholder = input.dataset.originalPlaceholder || 'Digite para pesquisar...';
+                                console.log(`🔓 Campo habilitado: ${input.id}`);
                             }
                         });
 
                         sourceHiddenInput.dataset.listenerAttached = 'true';
 
+                        // Verificar estado inicial
                         if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                             input.disabled = true;
                             input.placeholder = `Selecione ${sourceFieldDisplayName} primeiro`;
+                            console.log(`🔒 Campo inicialmente desabilitado: ${input.id}`);
                         }
                     }
                 }
             }
         } catch (error) {
-            console.error('Erro ao configurar filtros:', error);
+            console.error('❌ Erro ao configurar filtros:', error);
         }
     }
 
     getFieldDisplayName(fieldName) {
         const field = document.querySelector(`input[name="${fieldName}"]`);
         if (field) {
-            const label = document.querySelector(`label[for="${fieldName}"]`);
-            if (label) {
-                return label.textContent.replace('*', '').trim();
+            const container = field.closest('.form-group-modern, .form-group');
+            if (container) {
+                const label = container.querySelector('label');
+                if (label) return label.textContent.trim();
             }
         }
         return fieldName;
     }
 
-    async handleSearch(event) {
+    handleSearch(event) {
         const input = event.target;
         const searchTerm = input.value.trim();
-        const referenceType = input.dataset.referenceType;
         const targetField = input.dataset.targetField;
 
-        if (searchTerm.length < 2) {
-            this.hideDropdown(input);
-            return;
+        console.log(`🔍 Busca iniciada: "${searchTerm}"`);
+
+        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+        if (hiddenInput && hiddenInput.value !== '0') {
+            hiddenInput.value = '0';
+            input.classList.remove('selected');
         }
 
         if (this.debounceTimers.has(targetField)) {
             clearTimeout(this.debounceTimers.get(targetField));
         }
 
-        this.debounceTimers.set(targetField, setTimeout(async () => {
-            await this.performSearch(input, searchTerm, referenceType, targetField);
-        }, 300));
+        if (searchTerm.length < 2) {
+            console.log('⚠️ Termo muito curto, escondendo dropdown');
+            this.hideDropdown(input);
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            console.log('⏰ Debounce concluído, executando busca...');
+            this.performSearch(input, searchTerm);
+        }, 300);
+
+        this.debounceTimers.set(targetField, timer);
     }
 
-    async performSearch(input, searchTerm, referenceType, targetField) {
+    handleFocus(event) {
+        const input = event.target;
+        if (input.value.trim().length >= 2) {
+            console.log('👁️ Campo focado com valor, mostrando resultados');
+            this.performSearch(input, input.value.trim());
+        }
+    }
+
+    handleBlur(event) {
+        setTimeout(() => {
+            if (!document.activeElement?.closest('.reference-dropdown')) {
+                console.log('👁️ Campo perdeu foco, escondendo dropdown');
+                this.hideDropdown(event.target);
+            }
+        }, 200);
+    }
+
+    handleKeyDown(event) {
+        const input = event.target;
+        const dropdown = this.getDropdown(input);
+
+        if (!dropdown || dropdown.style.display === 'none') return;
+
+        const items = dropdown.querySelectorAll('.reference-dropdown-item:not(.disabled)');
+        const currentIndex = parseInt(input.dataset.selectedIndex || '-1');
+
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                this.selectNextItem(input, items, currentIndex);
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                this.selectPreviousItem(input, items, currentIndex);
+                break;
+            case 'Enter':
+                event.preventDefault();
+                if (currentIndex >= 0 && currentIndex < items.length) {
+                    items[currentIndex].click();
+                }
+                break;
+            case 'Escape':
+                event.preventDefault();
+                this.hideDropdown(input);
+                break;
+        }
+    }
+
+    selectNextItem(input, items, currentIndex) {
+        const newIndex = Math.min(currentIndex + 1, items.length - 1);
+        this.highlightItem(input, items, newIndex);
+    }
+
+    selectPreviousItem(input, items, currentIndex) {
+        const newIndex = Math.max(currentIndex - 1, 0);
+        this.highlightItem(input, items, newIndex);
+    }
+
+    highlightItem(input, items, index) {
+        items.forEach((item, i) => {
+            item.classList.toggle('active', i === index);
+        });
+        input.dataset.selectedIndex = index.toString();
+
+        if (items[index]) {
+            items[index].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    async performSearch(input, searchTerm) {
+        const targetField = input.dataset.targetField;
+        const referenceType = input.dataset.referenceType;
+
+        console.log(`🌐 Iniciando busca na API: ${referenceType} - "${searchTerm}"`);
+
+        if (this.activeRequests.has(targetField)) {
+            console.log('⏸️ Abortando requisição anterior');
+            this.activeRequests.get(targetField).abort();
+        }
+
+        const controller = new AbortController();
+        this.activeRequests.set(targetField, controller);
+
         try {
-            const filters = this.getFiltersForField(input);
-            const cacheKey = `${referenceType}:${searchTerm}:${JSON.stringify(filters)}`;
-
+            const cacheKey = `${referenceType}_${searchTerm}`;
+            const cachedResults = this.cache.get(cacheKey);
             let results;
-            if (this.cache.has(cacheKey)) {
-                results = this.cache.get(cacheKey);
+
+            if (cachedResults) {
+                console.log('💾 Resultados encontrados no cache');
+                results = cachedResults;
             } else {
-                if (this.activeRequests.has(targetField)) {
-                    this.activeRequests.get(targetField).abort();
-                }
+                const filters = this.getFiltersForField(input);
+                console.log('📤 Enviando requisição:', { referenceType, searchTerm, filters });
 
-                const controller = new AbortController();
-                this.activeRequests.set(targetField, controller);
-
-                const controllerName = this.getControllerName(referenceType);
-                let url = `/${controllerName}/Search?term=${encodeURIComponent(searchTerm)}`;
-
-                if (filters && Object.keys(filters).length > 0) {
-                    for (const [key, value] of Object.entries(filters)) {
-                        url += `&${key}=${encodeURIComponent(value)}`;
-                    }
-                }
-
-                const response = await fetch(url, {
-                    signal: controller.signal,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                const response = await fetch('/api/Reference/Search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        entityType: referenceType,
+                        searchTerm: searchTerm,
+                        pageSize: 10,
+                        filters: filters
+                    }),
+                    signal: controller.signal
                 });
 
                 if (!response.ok) {
@@ -172,6 +306,8 @@ class ReferenceFieldManager {
                 }
 
                 results = await response.json();
+                console.log(`✅ Busca concluída: ${results.length} resultados`);
+
                 this.cache.set(cacheKey, results);
                 this.activeRequests.delete(targetField);
             }
@@ -180,7 +316,7 @@ class ReferenceFieldManager {
 
         } catch (error) {
             if (error.name !== 'AbortError') {
-                console.error('Erro na busca:', error);
+                console.error('❌ Erro na busca:', error);
                 this.showDropdownError(input, 'Erro ao buscar dados');
             }
         }
@@ -189,9 +325,7 @@ class ReferenceFieldManager {
     getFiltersForField(input) {
         try {
             const filterConfig = input.dataset.referenceFilters;
-            if (!filterConfig || filterConfig === '{}') {
-                return {};
-            }
+            if (!filterConfig || filterConfig === '{}') return {};
 
             const config = JSON.parse(filterConfig);
             const filters = {};
@@ -209,9 +343,10 @@ class ReferenceFieldManager {
                 }
             }
 
+            console.log('🔍 Filtros aplicados:', filters);
             return filters;
         } catch (error) {
-            console.error('Erro ao obter filtros:', error);
+            console.error('❌ Erro ao obter filtros:', error);
             return {};
         }
     }
@@ -220,23 +355,26 @@ class ReferenceFieldManager {
         const dropdown = this.getDropdown(input);
 
         if (!results || results.length === 0) {
+            console.log('ℹ️ Nenhum resultado encontrado');
             dropdown.innerHTML = '<div class="reference-dropdown-item disabled">Nenhum resultado encontrado</div>';
             dropdown.style.display = 'block';
             return;
         }
 
+        console.log(`📋 Exibindo ${results.length} resultados`);
         dropdown.innerHTML = results.map((item, index) => `
-            <div class="reference-dropdown-item" data-id="${item.id}" data-text="${item.text}" data-index="${index}">
+            <div class="reference-dropdown-item" data-id="${item.value}" data-text="${item.text}" data-index="${index}">
                 <div><strong>${item.text}</strong></div>
                 ${item.subtitle ? `<small class="text-muted">${item.subtitle}</small>` : ''}
             </div>
         `).join('');
 
-        dropdown.querySelectorAll('.reference-dropdown-item:not(.disabled)').forEach(item => {
-            item.addEventListener('click', () => this.selectItem(input, item));
-        });
-
         dropdown.style.display = 'block';
+        input.dataset.selectedIndex = '-1';
+
+        dropdown.querySelectorAll('.reference-dropdown-item:not(.disabled)').forEach(item => {
+            item.addEventListener('click', (e) => this.selectItem(e, input));
+        });
     }
 
     showDropdownError(input, message) {
@@ -245,107 +383,56 @@ class ReferenceFieldManager {
         dropdown.style.display = 'block';
     }
 
-    getDropdown(input) {
-        const container = input.closest('.reference-field-container');
-        let dropdown = container.querySelector('.reference-dropdown');
-
-        if (!dropdown) {
-            dropdown = document.createElement('div');
-            dropdown.className = 'reference-dropdown';
-            dropdown.style.display = 'none';
-            container.appendChild(dropdown);
-        }
-
-        return dropdown;
-    }
-
-    selectItem(input, item) {
+    selectItem(event, input) {
+        const item = event.currentTarget;
         const id = item.dataset.id;
         const text = item.dataset.text;
         const targetField = input.dataset.targetField;
 
-        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+        console.log(`✅ Item selecionado: ${text} (${id})`);
 
+        input.value = text;
+        input.classList.add('selected');
+
+        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
         if (hiddenInput) {
             hiddenInput.value = id;
-            input.value = text;
-            input.classList.add('selected');
-
             hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-
-            input.dispatchEvent(new CustomEvent('reference:selected', {
-                detail: { id, text, targetField },
-                bubbles: true
-            }));
+            console.log(`💾 Valor salvo: ${targetField} = ${id}`);
         }
 
         this.hideDropdown(input);
+        input.blur();
     }
 
-    handleFocus(event) {
-        const input = event.target;
-        if (input.classList.contains('selected')) {
-            input.select();
+    clearSelection(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log('🗑️ Limpando seleção...');
+
+        const btn = event.target.closest('.reference-clear-btn');
+        const targetField = btn.id.replace('_clear', '');
+        const searchInput = document.querySelector(`input[id="${targetField}_search"]`);
+        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+
+        if (hiddenInput && searchInput) {
+            searchInput.value = '';
+            hiddenInput.value = '0';
+            searchInput.classList.remove('selected');
+            this.hideDropdown(searchInput);
+
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            searchInput.focus();
+
+            console.log(`✅ Campo limpo: ${targetField}`);
         }
-    }
-
-    handleBlur(event) {
-        setTimeout(() => {
-            this.hideDropdown(event.target);
-        }, 200);
-    }
-
-    handleKeyDown(event) {
-        const input = event.target;
-        const dropdown = this.getDropdown(input);
-
-        if (dropdown.style.display === 'none') return;
-
-        const items = dropdown.querySelectorAll('.reference-dropdown-item:not(.disabled)');
-        const activeItem = dropdown.querySelector('.reference-dropdown-item.active');
-        let currentIndex = activeItem ? Array.from(items).indexOf(activeItem) : -1;
-
-        switch (event.key) {
-            case 'ArrowDown':
-                event.preventDefault();
-                currentIndex = Math.min(currentIndex + 1, items.length - 1);
-                this.setActiveItem(items, currentIndex);
-                break;
-
-            case 'ArrowUp':
-                event.preventDefault();
-                currentIndex = Math.max(currentIndex - 1, 0);
-                this.setActiveItem(items, currentIndex);
-                break;
-
-            case 'Enter':
-                event.preventDefault();
-                if (activeItem) {
-                    this.selectItem(input, activeItem);
-                }
-                break;
-
-            case 'Escape':
-                this.hideDropdown(input);
-                break;
-        }
-    }
-
-    setActiveItem(items, index) {
-        items.forEach((item, i) => {
-            if (i === index) {
-                item.classList.add('active');
-                item.scrollIntoView({ block: 'nearest' });
-            } else {
-                item.classList.remove('active');
-            }
-        });
     }
 
     hideDropdown(input) {
         const dropdown = this.getDropdown(input);
         dropdown.style.display = 'none';
+        input.dataset.selectedIndex = '-1';
     }
 
     hideAllDropdowns() {
@@ -354,38 +441,26 @@ class ReferenceFieldManager {
         });
     }
 
-    clearSelection(event) {
-        event.preventDefault();
-        event.stopPropagation();
+    getDropdown(input) {
+        const targetField = input.dataset.targetField;
+        let dropdown = document.querySelector(`#${targetField}_dropdown`);
 
-        const btn = event.target.closest('.reference-clear-btn');
-        const container = btn.closest('.reference-field-container');
-        const searchInput = container.querySelector('.reference-search-input');
-        const targetField = searchInput.dataset.targetField;
-        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
-
-        if (hiddenInput && searchInput) {
-            searchInput.value = '';
-            hiddenInput.value = '';
-            searchInput.classList.remove('selected');
-
-            this.hideDropdown(searchInput);
-
-            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-            searchInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-            searchInput.dispatchEvent(new CustomEvent('reference:cleared', {
-                detail: { targetField },
-                bubbles: true
-            }));
-
-            searchInput.focus();
+        if (!dropdown) {
+            dropdown = document.createElement('div');
+            dropdown.id = `${targetField}_dropdown`;
+            dropdown.className = 'reference-dropdown';
+            dropdown.style.display = 'none';
+            input.closest('.reference-field-container').appendChild(dropdown);
         }
+
+        return dropdown;
     }
 
     async openCreateModal(event) {
         event.preventDefault();
         event.stopPropagation();
+
+        console.log('➕ Abrindo modal de criação...');
 
         const btn = event.target.closest('.reference-create-btn');
         const referenceType = btn.dataset.referenceType;
@@ -408,8 +483,10 @@ class ReferenceFieldManager {
                 modal.remove();
             });
 
+            console.log('✅ Modal aberto');
+
         } catch (error) {
-            console.error('Erro ao abrir modal:', error);
+            console.error('❌ Erro ao abrir modal:', error);
             this.showToast('Erro ao abrir modal de criação', 'error');
         }
     }
@@ -419,218 +496,113 @@ class ReferenceFieldManager {
     }
 
     createModal(controller, referenceType, targetField) {
-        const modalId = `createModal_${targetField}_${Date.now()}`;
         const modal = document.createElement('div');
         modal.className = 'modal fade';
-        modal.id = modalId;
-        modal.setAttribute('tabindex', '-1');
-        modal.setAttribute('data-target-field', targetField);
-        modal.setAttribute('data-controller', controller);
-
+        modal.id = 'referenceCreateModal';
+        modal.tabIndex = -1;
         modal.innerHTML = `
-            <div class="modal-dialog modal-xl" style="max-width: 90%; width: 1400px;">
-                <div class="modal-content" style="min-height: 85vh; max-height: 95vh; display: flex; flex-direction: column;">
-                    <div class="modal-header bg-primary text-white" style="flex-shrink: 0;">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">
                             <i class="fas fa-plus me-2"></i>
                             Criar ${referenceType}
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body p-0" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
-                        <div class="d-flex justify-content-center align-items-center py-5" style="flex: 1;">
-                            <div class="text-center">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-3 text-muted">Carregando formulário...</p>
+                    <div class="modal-body">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer" style="flex-shrink: 0; background: #f8f9fa; border-top: 1px solid #dee2e6;">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-2"></i>
-                            Cancelar
-                        </button>
-                        <button type="button" class="btn btn-primary" id="modalSaveBtn" style="display: none;">
-                            <i class="fas fa-save me-2"></i>
-                            Salvar
-                        </button>
                     </div>
                 </div>
             </div>
         `;
-
+        modal.dataset.targetField = targetField;
         return modal;
     }
 
     async loadCreateContent(modal, controller) {
         try {
-            const response = await fetch(`/${controller}/Create?modal=true`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+            const response = await fetch(`/${controller}/Create`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
             if (!response.ok) {
-                throw new Error(`Erro ao carregar formulário: ${response.status}`);
+                throw new Error('Erro ao carregar formulário');
             }
 
             const html = await response.text();
             const modalBody = modal.querySelector('.modal-body');
             modalBody.innerHTML = html;
 
-            const saveBtn = modal.querySelector('#modalSaveBtn');
-            if (saveBtn) {
-                saveBtn.style.display = 'inline-flex';
-            }
-
-            this.setupModalForm(modal, controller);
-            this.initializeFormElements(modalBody);
-
+            this.setupModalForm(modal);
         } catch (error) {
-            console.error('Erro ao carregar conteúdo:', error);
-            const modalBody = modal.querySelector('.modal-body');
-            modalBody.innerHTML = `
-                <div class="alert alert-danger m-4">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Erro ao carregar formulário. Por favor, tente novamente.
-                </div>
-            `;
+            console.error('❌ Erro ao carregar conteúdo:', error);
+            throw error;
         }
     }
 
-    setupModalForm(modal, controller) {
-        const form = modal.querySelector('form');
+    setupModalForm(modal) {
+        const form = modal.querySelector('.standard-form, form');
         if (!form) return;
 
-        const saveBtn = modal.querySelector('#modalSaveBtn');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleModalSubmit(modal, form);
+        });
 
-        if (saveBtn) {
-            saveBtn.onclick = async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                if (!form.checkValidity()) {
-                    form.classList.add('was-validated');
-                    this.showToast('Por favor, preencha todos os campos obrigatórios', 'warning');
-                    return;
-                }
-
-                const originalBtnContent = saveBtn.innerHTML;
-                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
-                saveBtn.disabled = true;
-
-                try {
-                    const formData = new FormData(form);
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: formData
-                    });
-
-                    if (response.ok) {
-                        const contentType = response.headers.get('content-type');
-
-                        if (contentType && contentType.includes('application/json')) {
-                            const result = await response.json();
-
-                            if (result.success) {
-                                this.showToast(result.message || 'Registro criado com sucesso!', 'success');
-
-                                const targetField = modal.dataset.targetField;
-                                const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
-                                const searchInput = document.querySelector(`input.reference-search-input[data-target-field="${targetField}"]`);
-
-                                if (hiddenInput && searchInput) {
-                                    hiddenInput.value = result.id;
-                                    searchInput.value = result.text || result.name;
-                                    searchInput.classList.add('selected');
-
-                                    hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-                                    searchInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-                                    const referenceType = searchInput.dataset.referenceType;
-                                    if (referenceType && this.cache) {
-                                        for (const [key] of this.cache) {
-                                            if (key.startsWith(`${referenceType}:`)) {
-                                                this.cache.delete(key);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                const bsModal = bootstrap.Modal.getInstance(modal);
-                                if (bsModal) {
-                                    bsModal.hide();
-                                }
-
-                            } else {
-                                this.showValidationErrors(form, result.errors || {});
-                            }
-                        } else {
-                            const html = await response.text();
-                            const modalBody = modal.querySelector('.modal-body');
-                            modalBody.innerHTML = html;
-                            this.setupModalForm(modal, controller);
-                            this.initializeFormElements(modalBody);
-                        }
-                    } else {
-                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
-                    }
-
-                } catch (error) {
-                    console.error('Erro ao criar registro:', error);
-                    this.showToast(`Erro ao criar registro: ${error.message}`, 'error');
-                } finally {
-                    if (saveBtn) {
-                        saveBtn.innerHTML = originalBtnContent;
-                        saveBtn.disabled = false;
-                    }
-                }
-            };
+        if (typeof window.initializeMasks === 'function') {
+            window.initializeMasks();
         }
+
+        if (typeof window.initializeConditionalFields === 'function') {
+            window.initializeConditionalFields();
+        }
+
+        this.initializeAllFields();
     }
 
-    initializeFormElements(container) {
-        if (typeof $.fn.mask !== 'undefined') {
-            const $container = $(container);
+    async handleModalSubmit(modal, form) {
+        try {
+            const formData = new FormData(form);
+            const action = form.action;
 
-            $container.find('.cpf-mask').mask('000.000.000-00');
-            $container.find('.cnpj-mask').mask('00.000.000/0000-00');
-            $container.find('.telefone-mask').mask('(00) 0000-00009');
-            $container.find('.cep-mask').mask('00000-000');
-            $container.find('.placa-mask').mask('AAA-0A00');
-            $container.find('.renavam-mask').mask('00000000000');
-            $container.find('.chassi-mask').mask('AAAAAAAAAAAAAAAAA');
-            $container.find('.money-mask').mask('#.##0,00', { reverse: true });
+            const response = await fetch(action, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao salvar registro');
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                const targetField = modal.dataset.targetField;
+                const searchInput = document.querySelector(`input[id="${targetField}_search"]`);
+                const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+
+                if (searchInput && hiddenInput) {
+                    searchInput.value = result.text || result.name;
+                    searchInput.classList.add('selected');
+                    hiddenInput.value = result.id;
+                    hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                bootstrap.Modal.getInstance(modal).hide();
+                this.showToast(result.message || 'Registro criado com sucesso!', 'success');
+            } else {
+                this.showValidationErrors(form, result.errors);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao submeter formulário:', error);
+            this.showToast('Erro ao salvar registro', 'error');
         }
-
-        const newRefFields = container.querySelectorAll('.reference-search-input');
-        newRefFields.forEach(input => {
-            if (!input.dataset.initialized) {
-                this.initializeField(input);
-                input.dataset.initialized = 'true';
-            }
-        });
-
-        const newClearBtns = container.querySelectorAll('.reference-clear-btn');
-        newClearBtns.forEach(btn => {
-            if (!btn.dataset.initialized) {
-                btn.addEventListener('click', (e) => this.clearSelection(e));
-                btn.dataset.initialized = 'true';
-            }
-        });
-
-        const newCreateBtns = container.querySelectorAll('.reference-create-btn');
-        newCreateBtns.forEach(btn => {
-            if (!btn.dataset.initialized) {
-                btn.addEventListener('click', (e) => this.openCreateModal(e));
-                btn.dataset.initialized = 'true';
-            }
-        });
     }
 
     showValidationErrors(form, errors) {
@@ -661,17 +633,26 @@ class ReferenceFieldManager {
                 backgroundColor: type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8',
             }).showToast();
         } else {
-            alert(message);
+            console.log(`[${type.toUpperCase()}] ${message}`);
         }
     }
 }
 
+// Inicialização
+console.log('📦 Módulo reference-field.js carregado');
+
 const referenceFieldManager = new ReferenceFieldManager();
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => referenceFieldManager.init());
+    console.log('⏳ Aguardando DOMContentLoaded...');
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('✅ DOM carregado, inicializando...');
+        referenceFieldManager.init();
+    });
 } else {
+    console.log('✅ DOM já carregado, inicializando imediatamente...');
     referenceFieldManager.init();
 }
 
 window.referenceFieldManager = referenceFieldManager;
+console.log('✅ referenceFieldManager disponível globalmente');

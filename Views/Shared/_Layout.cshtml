@@ -23,9 +23,11 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <a href="@Url.Action("Index", "Home")" class="brand-logo">
-                    <i class="fas fa-car"></i>
+                    <i class="fas fa-graduation-cap"></i>
+                    @* <i class="fas fa-car"></i> *@
                     <div class="brand-text-content">
-                        <span>AutoGestão</span>
+                        @* <span>AutoGestão</span> *@
+                        <span>Instituto</span>
                     </div>
                 </a>
                 <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Recolher Menu">
@@ -49,11 +51,18 @@
                 <!-- Cadastros -->
                 <div class="menu-section">
                     <div class="menu-section-title">Cadastros</div>
-                    <div class="menu-item">
+                    @* <div class="menu-item">
                         <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
                             <i class="fas fa-car"></i>
                             <span class="menu-link-text">Veículos</span>
                             <div class="menu-tooltip">Veículos</div>
+                        </a>
+                    </div> *@
+                    <div class="menu-item">
+                        <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
+                            <i class="fas fa-newspaper"></i>
+                            <span class="menu-link-text">Leads</span>
+                            <div class="menu-tooltip">Leads</div>
                         </a>
                     </div>
                     <div class="menu-item">
@@ -221,11 +230,20 @@
     <!-- Esse script da aplicação vem sempre no final -->
     <script src="~/js/reference-field.js" asp-append-version="true"></script>
 
+    <!-- SCIPTS APENAS PARA UTILIZAR REACT -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="~/react-dashboard/static/js/main.js" asp-append-version="true"></script>
 
     <script>
-        // ===================================================================
-        // SISTEMA DE SIDEBAR E LAYOUT
-        // ===================================================================
+        window.loadReactDashboard = function() {
+            const root = ReactDOM.createRoot(document.getElementById('react-root'));
+            root.render(React.createElement(DashboardBI));
+        }
+    </script>
+
+    <!-- SISTEMA DE SIDEBAR E LAYOUT -->
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');

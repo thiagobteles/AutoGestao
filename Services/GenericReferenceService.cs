@@ -3,25 +3,15 @@ using AutoGestao.Helpers;
 using AutoGestao.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace AutoGestao.Services
 {
-    /// <summary>
-    /// Serviço genérico para ReferenceController
-    /// Usa GridColumnBuilder para extrair metadados das anotações
-    /// </summary>
     public class GenericReferenceService(ApplicationDbContext context, ILogger<GenericReferenceService> logger)
     {
         private readonly ApplicationDbContext _context = context;
         private readonly ILogger<GenericReferenceService> _logger = logger;
-
-        // Cache de metadados para performance
         private static readonly Dictionary<Type, ReferenceMetadata> _metadataCache = [];
 
-        /// <summary>
-        /// Busca um item por ID de forma genérica
-        /// </summary>
         public async Task<ReferenceItem?> GetByIdAsync<T>(string id) where T : class
         {
             if (!long.TryParse(id, out var entityId))
@@ -31,11 +21,8 @@ namespace AutoGestao.Services
 
             var metadata = GetMetadata<T>();
             var query = _context.Set<T>().AsQueryable();
-
-            // Aplicar Includes necessários
             query = ApplyIncludes(query, metadata);
 
-            // Buscar pela propriedade Id
             var idProperty = typeof(T).GetProperty("Id");
             if (idProperty == null)
             {
@@ -49,46 +36,33 @@ namespace AutoGestao.Services
             var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
 
             var entity = await query.FirstOrDefaultAsync(lambda);
-            return entity == null 
-                ? null
-                : BuildReferenceItem(entity, metadata);
+            return entity == null ? null : BuildReferenceItem(entity, metadata);
         }
 
-        /// <summary>
-        /// Busca itens usando termo de pesquisa
-        /// </summary>
         public async Task<List<ReferenceItem>> SearchAsync<T>(string searchTerm, int pageSize, Dictionary<string, string>? filters = null) where T : class
         {
             var metadata = GetMetadata<T>();
             var query = _context.Set<T>().AsQueryable();
 
-            // Aplicar Includes
             query = ApplyIncludes(query, metadata);
 
-            // Aplicar filtro de busca
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 query = ApplySearchFilter(query, searchTerm, metadata);
             }
 
-            // Aplicar filtros dinâmicos
             if (filters != null && filters.Any())
             {
                 query = ApplyDynamicFilters(query, filters);
             }
 
-            // Buscar e converter
             var entities = await query.Take(pageSize).ToListAsync();
             return [.. entities.Select(e => BuildReferenceItem(e, metadata))];
         }
 
-        /// <summary>
-        /// Obtém metadados usando GridColumnBuilder (com cache)
-        /// </summary>
         private static ReferenceMetadata GetMetadata<T>() where T : class
         {
             var type = typeof(T);
-
             if (_metadataCache.TryGetValue(type, out var cached))
             {
                 return cached;
@@ -99,14 +73,10 @@ namespace AutoGestao.Services
             return metadata;
         }
 
-        /// <summary>
-        /// Constrói ReferenceItem a partir da entidade
-        /// </summary>
         private static ReferenceItem BuildReferenceItem<T>(T entity, ReferenceMetadata metadata)
         {
             var item = new ReferenceItem();
 
-            // Id
             var idProp = typeof(T).GetProperty("Id");
             if (idProp != null)
             {
@@ -114,14 +84,12 @@ namespace AutoGestao.Services
                 item.Value = idValue?.ToString() ?? "";
             }
 
-            // Text
             if (metadata.TextProperty != null)
             {
                 var textValue = GetPropertyValue(entity, metadata.TextProperty);
                 item.Text = textValue?.ToString() ?? "";
             }
 
-            // Subtitle (concatena múltiplas propriedades)
             var subtitleParts = new List<string>();
             foreach (var subtitleProp in metadata.SubtitleProperties)
             {
@@ -129,30 +97,23 @@ namespace AutoGestao.Services
                 if (value != null && !string.IsNullOrEmpty(value.ToString()))
                 {
                     var formatted = FormatValue(value, subtitleProp.Format);
-                    var part = string.IsNullOrEmpty(subtitleProp.Prefix)
-                        ? formatted
-                        : $"{subtitleProp.Prefix}{formatted}";
+                    var part = string.IsNullOrEmpty(subtitleProp.Prefix) ? formatted : $"{subtitleProp.Prefix}{formatted}";
                     subtitleParts.Add(part);
                 }
             }
 
-            item.Subtitle = subtitleParts.Any() ? string.Join(" • ", subtitleParts) : null;
-
+            item.Subtitle = subtitleParts.Any() ? string.Join(" | ", subtitleParts) : null;
             return item;
         }
 
-        /// <summary>
-        /// Obtém valor de propriedade, navegando por relacionamentos se necessário
-        /// </summary>
-        private static object? GetPropertyValue(object entity, ReferencePropertyInfo propInfo)
+        private static object? GetPropertyValue<T>(T entity, ReferencePropertyInfo propertyInfo)
         {
-            if (string.IsNullOrEmpty(propInfo.NavigationPath))
+            if (string.IsNullOrEmpty(propertyInfo.NavigationPath))
             {
-                return propInfo.Property.GetValue(entity);
+                return propertyInfo.Property.GetValue(entity);
             }
 
-            // Navegar por relacionamentos (ex: VeiculoMarca.Descricao)
-            var parts = propInfo.NavigationPath.Split('.');
+            var parts = propertyInfo.NavigationPath.Split('.');
             object? current = entity;
 
             foreach (var part in parts)
@@ -174,9 +135,6 @@ namespace AutoGestao.Services
             return current;
         }
 
-        /// <summary>
-        /// Formata valor usando máscara se fornecida
-        /// </summary>
         private static string FormatValue(object value, string? format)
         {
             if (string.IsNullOrEmpty(format))
@@ -188,30 +146,18 @@ namespace AutoGestao.Services
 
             return format switch
             {
-                "###.###.###-##" when str.Length == 11
-                    => $"{str[..3]}.{str.Substring(3, 3)}.{str.Substring(6, 3)}-{str.Substring(9, 2)}",
-
-                "##.###.###/####-##" when str.Length == 14
-                    => $"{str[..2]}.{str.Substring(2, 3)}.{str.Substring(5, 3)}/{str.Substring(8, 4)}-{str.Substring(12, 2)}",
-
-                "(##) ####-####" when str.Length == 10
-                    => $"({str[..2]}) {str.Substring(2, 4)}-{str.Substring(6, 4)}",
-
-                "(##) #####-####" when str.Length == 11
-                    => $"({str[..2]}) {str.Substring(2, 5)}-{str.Substring(7, 4)}",
-
+                "###.###.###-##" when str.Length == 11 => $"{str[..3]}.{str.Substring(3, 3)}.{str.Substring(6, 3)}-{str.Substring(9, 2)}",
+                "##.###.###/####-##" when str.Length == 14 => $"{str[..2]}.{str.Substring(2, 3)}.{str.Substring(5, 3)}/{str.Substring(8, 4)}-{str.Substring(12, 2)}",
+                "(##) ####-####" when str.Length == 10 => $"({str[..2]}) {str.Substring(2, 4)}-{str.Substring(6, 4)}",
+                "(##) #####-####" when str.Length == 11 => $"({str[..2]}) {str.Substring(2, 5)}-{str.Substring(7, 4)}",
                 _ => str
             };
         }
 
-        /// <summary>
-        /// Aplica Includes necessários
-        /// </summary>
         private static IQueryable<T> ApplyIncludes<T>(IQueryable<T> query, ReferenceMetadata metadata) where T : class
         {
             var includes = new HashSet<string>();
 
-            // Coletar todos os includes
             void AddIncludeFromPath(string? path)
             {
                 if (!string.IsNullOrEmpty(path))
@@ -222,7 +168,6 @@ namespace AutoGestao.Services
             }
 
             AddIncludeFromPath(metadata.TextProperty?.NavigationPath);
-
             foreach (var subtitle in metadata.SubtitleProperties)
             {
                 AddIncludeFromPath(subtitle.NavigationPath);
@@ -233,7 +178,6 @@ namespace AutoGestao.Services
                 AddIncludeFromPath(searchable.NavigationPath);
             }
 
-            // Aplicar includes
             foreach (var include in includes)
             {
                 query = query.Include(include);
@@ -242,9 +186,6 @@ namespace AutoGestao.Services
             return query;
         }
 
-        /// <summary>
-        /// Aplica filtro de busca em campos searchable
-        /// </summary>
         private static IQueryable<T> ApplySearchFilter<T>(IQueryable<T> query, string searchTerm, ReferenceMetadata metadata) where T : class
         {
             var termLower = searchTerm.ToLower();
@@ -254,8 +195,6 @@ namespace AutoGestao.Services
             foreach (var searchProp in metadata.SearchableProperties)
             {
                 var property = Expression.Property(parameter, searchProp.Property);
-
-                // String operations
                 var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
                 var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
 
@@ -267,9 +206,7 @@ namespace AutoGestao.Services
                     var nullCheck = Expression.NotEqual(property, Expression.Constant(null));
                     var condition = Expression.AndAlso(nullCheck, contains);
 
-                    filterExpression = filterExpression == null
-                        ? condition
-                        : Expression.OrElse(filterExpression, condition);
+                    filterExpression = filterExpression == null ? condition : Expression.OrElse(filterExpression, condition);
                 }
             }
 
@@ -282,10 +219,6 @@ namespace AutoGestao.Services
             return query;
         }
 
-        /// <summary>
-        /// Aplica filtros dinâmicos com suporte a propriedades nullable
-        /// VERSÃO SIMPLIFICADA E ROBUSTA
-        /// </summary>
         private static IQueryable<T> ApplyDynamicFilters<T>(IQueryable<T> query, Dictionary<string, string> filters) where T : class
         {
             foreach (var filter in filters)
@@ -298,21 +231,15 @@ namespace AutoGestao.Services
 
                 var parameter = Expression.Parameter(typeof(T), "e");
                 var propertyAccess = Expression.Property(parameter, property);
-
-                // Obter o tipo da propriedade (pode ser nullable)
                 var propertyType = property.PropertyType;
 
-                // Converter o valor do filtro para o tipo correto
-                object? convertedValue = ConvertFilterValue(filter.Value, propertyType);
+                var convertedValue = ConvertFilterValue(filter.Value, propertyType);
                 if (convertedValue == null)
                 {
                     continue;
                 }
 
-                // Criar constante com o tipo exato da propriedade
                 var constant = Expression.Constant(convertedValue, propertyType);
-
-                // Criar expressão de igualdade
                 var equals = Expression.Equal(propertyAccess, constant);
                 var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
 
@@ -322,75 +249,73 @@ namespace AutoGestao.Services
             return query;
         }
 
-        /// <summary>
-        /// Converte valor string para o tipo apropriado (incluindo nullable)
-        /// </summary>
         private static object? ConvertFilterValue(string value, Type targetType)
         {
             try
             {
-                // Se for nullable, obter o tipo base
                 var underlyingType = Nullable.GetUnderlyingType(targetType);
                 var isNullable = underlyingType != null;
                 var typeToConvert = underlyingType ?? targetType;
 
-                // Converter para o tipo base
-                object convertedValue;
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return isNullable ? null : throw new InvalidOperationException("Cannot convert empty string to non-nullable type");
+                }
+
+                if (typeToConvert == typeof(string))
+                {
+                    return value;
+                }
 
                 if (typeToConvert == typeof(int))
                 {
-                    convertedValue = int.Parse(value);
-                }
-                else if (typeToConvert == typeof(long))
-                {
-                    convertedValue = long.Parse(value);
-                }
-                else if (typeToConvert == typeof(bool))
-                {
-                    convertedValue = bool.Parse(value);
-                }
-                else if (typeToConvert == typeof(DateTime))
-                {
-                    convertedValue = DateTime.Parse(value);
-                }
-                else if (typeToConvert == typeof(TimeSpan))
-                {
-                    convertedValue = TimeSpan.Parse(value);
-                }
-                else if (typeToConvert == typeof(decimal))
-                {
-                    convertedValue = decimal.Parse(value);
-                }
-                else if (typeToConvert == typeof(double))
-                {
-                    convertedValue = double.Parse(value);
-                }
-                else if (typeToConvert == typeof(float))
-                {
-                    convertedValue = float.Parse(value);
-                }
-                else if (typeToConvert == typeof(Guid))
-                {
-                    convertedValue = Guid.Parse(value);
-                }
-                else
-                {
-                    convertedValue = value; // Fallback: retornar string
+                    return int.Parse(value);
                 }
 
-                // Se a propriedade é nullable, converter para Nullable<T>
-                if (isNullable)
+                if (typeToConvert == typeof(long))
                 {
-                    var nullableType = typeof(Nullable<>).MakeGenericType(typeToConvert);
-                    return Activator.CreateInstance(nullableType, convertedValue);
+                    return long.Parse(value);
                 }
 
-                return convertedValue;
+                if (typeToConvert == typeof(decimal))
+                {
+                    return decimal.Parse(value);
+                }
+
+                if (typeToConvert == typeof(double))
+                {
+                    return double.Parse(value);
+                }
+
+                if (typeToConvert == typeof(float))
+                {
+                    return float.Parse(value);
+                }
+
+                if (typeToConvert == typeof(bool))
+                {
+                    return bool.Parse(value);
+                }
+
+                if (typeToConvert == typeof(DateTime))
+                {
+                    return DateTime.Parse(value);
+                }
+
+                if (typeToConvert == typeof(Guid))
+                {
+                    return Guid.Parse(value);
+                }
+
+                if (typeToConvert.IsEnum)
+                {
+                    return Enum.Parse(typeToConvert, value);
+                }
+
+                return Convert.ChangeType(value, typeToConvert);
             }
-            catch (Exception ex)
+            catch
             {
-                // Log para debug (remover em produção se necessário)
-                System.Diagnostics.Debug.WriteLine($"Erro ao converter '{value}' para {targetType.Name}: {ex.Message}");
                 return null;
             }
         }
