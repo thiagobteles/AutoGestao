@@ -8,6 +8,7 @@ using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Minio;
+using System.Configuration;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -145,12 +146,19 @@ using (var scope = app.Services.CreateScope())
     var empresaService = scope.ServiceProvider.GetRequiredService<IEmpresaService>();
     ReportTemplateSeeder.SeedDefaultTemplates(context);
 
-    await InicializarDadosPadrao(context, usuarioService, empresaService);
+    if (builder.Configuration.GetConnectionString("DefaultConnection").Contains("autogestao"))
+    {
+        await InicializarDadosPadraoAutoGestao(context, usuarioService, empresaService);
+    }
+    else
+    {
+        await InicializarDadosPadraoInstituto(context, usuarioService, empresaService);
+    }
 }
 
 app.Run();
 
-static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
+static async Task InicializarDadosPadraoAutoGestao(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
 {
     await context.Database.MigrateAsync();
 
@@ -187,6 +195,47 @@ static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioS
 
         Console.WriteLine("Usuário administrador criado:");
         Console.WriteLine("Email: admin@autogestao.com");
+        Console.WriteLine("Senha: admin123");
+    }
+}
+
+static async Task InicializarDadosPadraoInstituto(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
+{
+    await context.Database.MigrateAsync();
+
+    if (!await context.Usuarios.AnyAsync(u => u.Perfil == EnumPerfilUsuario.Admin))
+    {
+        var empresa = new Empresa
+        {
+            RazaoSocial = "Instituto Fazendo a Diferença",
+            CEP = "74125200",
+            Telefone = "62981483753",
+            Email = "admin@institutofd.com",
+            Estado = EnumEstado.Goias,
+            Cidade = "Goiânia",
+            Endereco = "Rua T46",
+            Numero = "305",
+            Bairro = "Setor Oeste",
+            Complemento = "Apartamento 401",
+            Observacoes = "Empresa e dados teste",
+            Ativo = true
+        };
+
+        await empresaService.CriarEmpresaAsync(empresa);
+
+        var adminUser = new Usuario
+        {
+            Nome = "Thiago",
+            Email = "admin@institutofd.com",
+            Perfil = EnumPerfilUsuario.Admin,
+            IdEmpresa = 1,
+            Ativo = true
+        };
+
+        await usuarioService.CriarUsuarioAsync(adminUser, "admin123");
+
+        Console.WriteLine("Usuário Thiago criado:");
+        Console.WriteLine("Email: admin@institutofd.com");
         Console.WriteLine("Senha: admin123");
     }
 }

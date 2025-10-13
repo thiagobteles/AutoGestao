@@ -59,7 +59,7 @@
                         </a>
                     </div> *@
                     <div class="menu-item">
-                        <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
+                        <a href="@Url.Action("Index", nameof(Lead))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Lead) ? "active" : "")">
                             <i class="fas fa-newspaper"></i>
                             <span class="menu-link-text">Leads</span>
                             <div class="menu-tooltip">Leads</div>
@@ -118,7 +118,7 @@
                 </div>
 
                 <!-- Relatórios -->
-                @if (User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Financeiro"))
+                @* @if (User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Financeiro"))
                 {
                     <div class="menu-section">
                         <div class="menu-section-title">Relatórios</div>
@@ -137,7 +137,7 @@
                             </a>
                         </div>
                     </div>
-                }
+                } *@
 
 
                 <!-- Administração -->

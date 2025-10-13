@@ -2,6 +2,7 @@ using AutoGestao.Entidades;
 using AutoGestao.Entidades.Relatorio;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Extensions;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Data
@@ -31,6 +32,7 @@ namespace AutoGestao.Data
         public DbSet<Empresa> Empresas { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<ReportTemplateEntity> ReportTemplates { get; set; }
+        public DbSet<Lead> Leads { get; set; }
 
         #endregion
 
@@ -387,6 +389,23 @@ namespace AutoGestao.Data
                 entity.Property(e => e.DataCadastro).IsRequired();
                 entity.Property(e => e.DataAlteracao).IsRequired();
             });
+
+            // ===========================================
+            // CONFIGURAÇÕES DA ENTIDADE USUARIO
+            // ===========================================
+            modelBuilder.Entity<Lead>().ToTable("leads");
+            modelBuilder.Entity<Lead>(entity =>
+            {
+                entity.Property(e => e.Contexto).HasMaxLength(-1);
+                entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
+                entity.Property(e => e.Email).HasMaxLength(150).IsRequired();
+                entity.Property(e => e.Cpf).HasMaxLength(14);
+                entity.Property(e => e.Telefone).HasMaxLength(20);
+                entity.Property(e => e.Ativo).IsRequired().HasDefaultValue(true);
+                entity.Property(e => e.DataCadastro).IsRequired();
+                entity.Property(e => e.DataAlteracao).IsRequired();
+            });
+            
 
             // ===========================================
             // CONFIGURAÇÕES DA ENTIDADE EMPRESA
