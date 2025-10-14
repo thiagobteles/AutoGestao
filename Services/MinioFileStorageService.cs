@@ -226,9 +226,7 @@ namespace AutoGestao.Services
 
             // MinIO bucket names devem seguir regras DNS
             // Remover caracteres especiais e limitar tamanho
-            bucketName = new string(bucketName
-                .Where(c => char.IsLetterOrDigit(c) || c == '-')
-                .ToArray());
+            bucketName = new string([.. bucketName.Where(c => char.IsLetterOrDigit(c) || c == '-')]);
 
             if (bucketName.Length > 63)
             {

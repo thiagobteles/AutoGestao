@@ -1,9 +1,9 @@
 using AutoGestao.Entidades;
+using AutoGestao.Entidades.Leads;
 using AutoGestao.Entidades.Relatorio;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
 using AutoGestao.Extensions;
-using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Data
@@ -400,8 +400,8 @@ namespace AutoGestao.Data
                 entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
                 entity.Property(e => e.Email).HasMaxLength(150);
                 entity.Property(e => e.Celular).HasMaxLength(20).IsRequired();
-                entity.Property(e => e.TipoRetornoContato).IsRequired();
                 entity.Property(e => e.Contexto).HasMaxLength(-1);
+                entity.Property(e => e.TipoRetornoContato).IsRequired().HasDefaultValue(EnumTipoRetornoContato.Whatsapp);
                 entity.Property(e => e.Status).IsRequired().HasDefaultValue(EnumStatusLead.Pendente);
                 entity.Property(e => e.Ativo).IsRequired().HasDefaultValue(true);
                 entity.Property(e => e.DataCadastro).IsRequired();

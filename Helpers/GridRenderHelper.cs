@@ -172,7 +172,7 @@ namespace AutoGestao.Helpers
                 return "";
             }
 
-            var cleanValue = new string(value.Where(char.IsDigit).ToArray());
+            var cleanValue = new string([.. value.Where(char.IsDigit)]);
             var result = "";
             var valueIndex = 0;
 

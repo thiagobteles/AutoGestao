@@ -217,7 +217,7 @@ namespace AutoGestao.Controllers.Base
         private static List<string> GetAvailableEntityTypes()
         {
             InitializeEntityCache();
-            return _entityTypeCache.Keys.OrderBy(k => k).Take(10).ToList();
+            return [.. _entityTypeCache.Keys.OrderBy(k => k).Take(10)];
         }
 
         /// <summary>

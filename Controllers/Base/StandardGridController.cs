@@ -27,8 +27,6 @@ namespace AutoGestao.Controllers.Base
         protected readonly ILogger<StandardGridController<T>>? _logger = logger;
         protected readonly IReportService _reportService = reportService;
 
-
-        // CONSTRUTOR SEM LOGGER (COMPATIBILIDADE)
         protected StandardGridController(ApplicationDbContext context, IFileStorageService fileStorageService, IReportService reportService) : this(context, fileStorageService, reportService, null)
         {
         }
@@ -141,7 +139,7 @@ namespace AutoGestao.Controllers.Base
         {
         }
 
-        protected virtual bool CanCreate(T entity)
+        protected virtual bool CanCreate(T? entity)
         {
             return true;
         }
@@ -542,12 +540,6 @@ namespace AutoGestao.Controllers.Base
 
             var standardViewModel = await BuildFormViewModelAsync(entity, "Edit");
             return View("_StandardForm", standardViewModel);
-        }
-
-        private static bool ShouldUseTabbedForm()
-        {
-            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
-            return formTabs?.EnableTabs ?? false;
         }
 
         /// <summary>
@@ -1018,6 +1010,25 @@ namespace AutoGestao.Controllers.Base
 
         #endregion
 
+        public void AddModelStateToViewModel(StandardFormViewModel viewModel)
+        {
+            viewModel.ModelState.Clear();
+            foreach (var error in ModelState)
+            {
+                if (error.Value.Errors.Any())
+                {
+                    viewModel.ModelState[error.Key] = string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage));
+                }
+            }
+        }
+
+        public bool IsAjaxRequest()
+        {
+            return Request.Headers.ContainsKey("X-Requested-With") ||
+                   Request.Query.ContainsKey("ajax") ||
+                   Request.ContentType?.Contains("application/json") == true;
+        }
+
         #region Métodos para Sistema de Abas
 
         /// <summary>
@@ -1131,6 +1142,12 @@ namespace AutoGestao.Controllers.Base
 
         #region Métodos Privados
 
+        private static bool ShouldUseTabbedForm()
+        {
+            var formTabs = typeof(T).GetCustomAttribute<FormTabsAttribute>();
+            return formTabs?.EnableTabs ?? false;
+        }
+
         private Dictionary<string, object> ExtractFiltersFromRequest()
         {
             var filters = new Dictionary<string, object>();
@@ -1185,18 +1202,6 @@ namespace AutoGestao.Controllers.Base
             }
         }
 
-        private void AddModelStateToViewModel(StandardFormViewModel viewModel)
-        {
-            viewModel.ModelState.Clear();
-            foreach (var error in ModelState)
-            {
-                if (error.Value.Errors.Any())
-                {
-                    viewModel.ModelState[error.Key] = string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage));
-                }
-            }
-        }
-
         private async Task<TabbedFormViewModel> BuildTabbedFormViewModelAsync(T entity, string action)
         {
             var formConfig = typeof(T).GetCustomAttribute<FormConfigAttribute>() ?? new FormConfigAttribute();
@@ -1228,13 +1233,6 @@ namespace AutoGestao.Controllers.Base
             viewModel.ModelState = mainFormViewModel.ModelState;
 
             return viewModel;
-        }
-
-        private bool IsAjaxRequest()
-        {
-            return Request.Headers.ContainsKey("X-Requested-With") ||
-                   Request.Query.ContainsKey("ajax") ||
-                   Request.ContentType?.Contains("application/json") == true;
         }
 
         private bool ViewExists(string viewName)
@@ -1343,10 +1341,9 @@ namespace AutoGestao.Controllers.Base
 
         private static List<PropertyInfo> GetFormProperties()
         {
-            return typeof(T).GetProperties()
+            return [.. typeof(T).GetProperties()
                 .Where(p => p.GetCustomAttribute<FormFieldAttribute>() != null)
-                .OrderBy(p => p.GetCustomAttribute<FormFieldAttribute>()?.Order ?? 0)
-                .ToList();
+                .OrderBy(p => p.GetCustomAttribute<FormFieldAttribute>()?.Order ?? 0)];
         }
 
         private static string GetContentType(string fileName)
@@ -2313,19 +2310,18 @@ namespace AutoGestao.Controllers.Base
 
         #endregion
 
-        // Controllers/Base/StandardGridController.cs - Método para construir TabContentViewModel
         protected async Task<TabContentViewModel> BuildTabContentViewModelAsync(
             string tabId,
             string title,
             string icon,
             long parentId,
             string parentController,
-            Dictionary<string, object> filters = null)
+            Dictionary<string, object>? filters = null)
         {
             var query = GetBaseQuery();
 
             // Aplicar filtros se fornecidos
-            if (filters != null && filters.Any())
+            if (filters != null && filters.Count != 0)
             {
                 query = ApplyFilters(query, filters);
             }
@@ -2343,7 +2339,7 @@ namespace AutoGestao.Controllers.Base
                 ControllerName = typeof(T).Name.Replace("Controller", "") + "s",
                 ParentId = parentId,
                 ParentController = parentController,
-                Items = items.Cast<object>().ToList(),
+                Items = [.. items.Cast<object>()],
                 Columns = columns,
                 CanCreate = CanCreate(null),
                 CanEdit = true,
@@ -2401,7 +2397,7 @@ namespace AutoGestao.Controllers.Base
                 }
             }
 
-            return columns.OrderBy(c => c.Order).ToList();
+            return [.. columns.OrderBy(c => c.Order)];
         }
     }
 

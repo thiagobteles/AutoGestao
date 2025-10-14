@@ -135,7 +135,7 @@ namespace AutoGestao.Services
                 });
             }
 
-            return fields.OrderBy(f => f.Order).ToList();
+            return [.. fields.OrderBy(f => f.Order)];
         }
 
         private static string GenerateGridSection<T>(T entity, ReportSection section)

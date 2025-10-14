@@ -2,7 +2,7 @@ using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 
-namespace AutoGestao.Entidades
+namespace AutoGestao.Entidades.Leads
 {
     [ReportConfig("Detalhes do lead", Icon = "fas fa-book", ShowLogo = true, ShowDate = true)]
     [FormConfig(Title = "Lead´s", Subtitle = "Gerencie os leads", Icon = "fas fa-book", EnableAjaxSubmit = true)]
@@ -28,7 +28,7 @@ namespace AutoGestao.Entidades
         [ReportField("Tipo Retorno", Section = "Retorno", Order = 1, GridColumns = 1)]
         [GridField("Tipo Retorno", Order = 3, EnumRender = EnumRenderType.IconDescription)]
         [FormField(Order = 30, Name = "Tipo retorno", Section = "Retorno", Icon = "fas fa-refresh", Type = EnumFieldType.Select, GridColumns = 2)]
-        public EnumTipoRetornoContato TipoRetornoContato { get; set; }
+        public EnumTipoRetornoContato TipoRetornoContato { get; set; } = EnumTipoRetornoContato.Whatsapp;
 
         [ReportField("Status", Section = "Retorno", Order = 1)]
         [GridField("Status", Order = 4, EnumRender = EnumRenderType.IconDescription)]
@@ -41,5 +41,6 @@ namespace AutoGestao.Entidades
 
         [GridStatus(ShowInGrid = false)]
         public new bool Ativo { get; set; } = true;
+
     }
 }

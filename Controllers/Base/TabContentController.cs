@@ -361,7 +361,7 @@ namespace AutoGestao.Controllers.Base
                 }
             }
 
-            return columns.OrderBy(c => c.Order).ToList();
+            return [.. columns.OrderBy(c => c.Order)];
         }
     }
 }

@@ -54,10 +54,9 @@ namespace AutoGestao.Extensions
         private static List<string> GetSearchFields(Type referenceType)
         {
             // Buscar propriedades com [ReferenceSearchable]
-            return referenceType.GetProperties()
+            return [.. referenceType.GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(ReferenceSearchableAttribute), false).Any())
-                .Select(p => p.Name)
-                .ToList();
+                .Select(p => p.Name)];
         }
 
         /// <summary>
@@ -66,10 +65,9 @@ namespace AutoGestao.Extensions
         private static List<string> GetSubtitleFields(Type referenceType)
         {
             // Buscar propriedades com [ReferenceSubtitle]
-            return referenceType.GetProperties()
+            return [.. referenceType.GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(ReferenceSubtitleAttribute), false).Any())
-                .Select(p => p.Name)
-                .ToList();
+                .Select(p => p.Name)];
         }
     }
 }
