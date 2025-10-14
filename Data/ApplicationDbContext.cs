@@ -1,6 +1,7 @@
 using AutoGestao.Entidades;
 using AutoGestao.Entidades.Relatorio;
 using AutoGestao.Entidades.Veiculos;
+using AutoGestao.Enumerador;
 using AutoGestao.Extensions;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
@@ -391,16 +392,17 @@ namespace AutoGestao.Data
             });
 
             // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE USUARIO
+            // CONFIGURAÇÕES DA ENTIDADE LEAD
             // ===========================================
             modelBuilder.Entity<Lead>().ToTable("leads");
             modelBuilder.Entity<Lead>(entity =>
             {
-                entity.Property(e => e.Contexto).HasMaxLength(-1);
                 entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
-                entity.Property(e => e.Email).HasMaxLength(150).IsRequired();
-                entity.Property(e => e.Cpf).HasMaxLength(14);
-                entity.Property(e => e.Telefone).HasMaxLength(20);
+                entity.Property(e => e.Email).HasMaxLength(150);
+                entity.Property(e => e.Celular).HasMaxLength(20).IsRequired();
+                entity.Property(e => e.TipoRetornoContato).IsRequired();
+                entity.Property(e => e.Contexto).HasMaxLength(-1);
+                entity.Property(e => e.Status).IsRequired().HasDefaultValue(EnumStatusLead.Pendente);
                 entity.Property(e => e.Ativo).IsRequired().HasDefaultValue(true);
                 entity.Property(e => e.DataCadastro).IsRequired();
                 entity.Property(e => e.DataAlteracao).IsRequired();

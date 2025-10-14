@@ -3,13 +3,13 @@ using System.ComponentModel;
 
 namespace AutoGestao.Enumerador
 {
-    public enum EnumTipoContato
+    public enum EnumTipoRetornoContato
     {
-        [Icone("")]
+        [Icone("💬")]
         [Description("Whatsapp")]
         Whatsapp = 1,
 
-        [Icone("")]
+        [Icone("📞")]
         [Description("Ligação")]
         Ligacao = 2
     }

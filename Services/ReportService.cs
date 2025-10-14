@@ -95,7 +95,7 @@ namespace AutoGestao.Services
                 {
                     Title = group.Key,
                     Type = "grid",
-                    Columns = 3,
+                    Columns = group.Max(x => x.GetCustomAttribute<ReportFieldAttribute>().GridColumns),
                     Order = index,
                     Fields = [.. group.Select(p =>
                     {
