@@ -82,7 +82,7 @@ namespace AutoGestao.Controllers
         {
             if (!CanCreate(entity))
             {
-                TempData["Error"] = "Você não tem permissão para cadastrar um novo registro.";
+                TempData["NotificationScript"] = "showError('Você não tem permissão para cadastrar um novo registro.')";
                 return Forbid();
             }
 
@@ -106,7 +106,7 @@ namespace AutoGestao.Controllers
                         return Json(new { success = true, message = "Registro criado com sucesso!", redirectUrl = Url.Action("Index") });
                     }
 
-                    TempData["Success"] = "Registro criado com sucesso!";
+                    TempData["NotificationScript"] = "showSuccess('Registro criado com sucesso!')";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)

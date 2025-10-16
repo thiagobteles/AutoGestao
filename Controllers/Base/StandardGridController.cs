@@ -596,10 +596,10 @@ namespace AutoGestao.Controllers.Base
             {
                 if (Request.IsAjaxRequest())
                 {
-                    return Json(new { success = false, message = "Você não tem permissão para editar este registro." });
+                    return Json(new { sucesso = false, mensagem = "Você não tem permissão para editar este registro.", script = "showError('Você não tem permissão para editar este registro.')" });
                 }
 
-                TempData["Error"] = "Você não tem permissão para editar este registro.";
+                TempData["NotificationScript"] = "showError('Você não tem permissão para editar este registro.')";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -878,7 +878,7 @@ namespace AutoGestao.Controllers.Base
             {
                 if (file == null || file.Length == 0)
                 {
-                    return Json(new { success = false, message = "Nenhum arquivo selecionado" });
+                    return Json(new { sucesso = false, mensagem = "Nenhum arquivo selecionado", script = "showError('Nenhum arquivo selecionado')" });
                 }
 
                 var property = typeof(T).GetProperties()
@@ -888,7 +888,7 @@ namespace AutoGestao.Controllers.Base
 
                 if (property == null)
                 {
-                    return Json(new { success = false, message = "Campo não encontrado" });
+                    return Json(new { sucesso = false, mensagem = "Campo não encontrado", script = "showError('Campo não encontrado')" });
                 }
 
                 var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
@@ -987,7 +987,7 @@ namespace AutoGestao.Controllers.Base
                 if (string.IsNullOrEmpty(request.FilePath))
                 {
                     _logger?.LogWarning("Tentativa de exclusão com filePath vazio. PropertyName: {PropertyName}", request.PropertyName);
-                    return Json(new { success = false, message = "Caminho do arquivo não informado" });
+                    return Json(new { sucesso = false, mensagem = "Caminho do arquivo não informado", script = "showError('Caminho do arquivo não informado')" });
                 }
 
                 var entityName = typeof(T).Name;
@@ -1001,10 +1001,10 @@ namespace AutoGestao.Controllers.Base
 
                 if (deleted)
                 {
-                    return Json(new { success = true, message = "Arquivo excluído com sucesso!" });
+                    return Json(new { sucesso = true, mensagem = "Arquivo excluído com sucesso!", script = "showSuccess('Arquivo excluído com sucesso!')" });
                 }
 
-                return Json(new { success = false, message = "Erro ao excluir arquivo" });
+                return Json(new { sucesso = false, mensagem = "Erro ao excluir arquivo", script = "showError('Erro ao excluir arquivo')" });
             }
             catch (Exception ex)
             {

@@ -114,7 +114,7 @@ namespace AutoGestao.Controllers
             }
             else
             {
-                TempData["ErrorMessage"] = "Vendedor não encontrado!";
+                TempData["NotificationScript"] = "showError('Vendedor não encontrado!')";
             }
 
             return RedirectToAction(nameof(Index));

@@ -255,7 +255,7 @@ namespace AutoGestao.Controllers
             _context.VeiculoDocumentos.Add(documento);
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, message = "Documento adicionado com sucesso!" });
+            return Json(new { sucesso = true, mensagem = "Documento adicionado com sucesso!", script = "showSuccess('Documento adicionado com sucesso!')" });
         }
 
         [HttpPost]
@@ -270,7 +270,7 @@ namespace AutoGestao.Controllers
             _context.VeiculoDocumentos.Remove(documento);
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, message = "Documento removido com sucesso!" });
+            return Json(new { sucesso = true, mensagem = "Documento removido com sucesso!", script = "showSuccess('Documento removido com sucesso!')" });
         }
 
         [HttpPost]
@@ -346,11 +346,11 @@ namespace AutoGestao.Controllers
                 veiculo.DataAlteracao = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Veículo reservado com sucesso!";
+                TempData["NotificationScript"] = "showSuccess('Veículo reservado com sucesso!')";
             }
             else
             {
-                TempData["ErrorMessage"] = "Não foi possível reservar o veículo!";
+                TempData["NotificationScript"] = "showError('Não foi possível reservar o veículo!')";
             }
 
             return RedirectToAction(nameof(Index));
@@ -366,11 +366,11 @@ namespace AutoGestao.Controllers
                 veiculo.DataAlteracao = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Reserva do veículo liberada com sucesso!";
+                TempData["NotificationScript"] = "showSuccess('Reserva do veículo liberada com sucesso!')";
             }
             else
             {
-                TempData["ErrorMessage"] = "Não foi possível liberar a reserva do veículo!";
+                TempData["NotificationScript"] = "showError('Não foi possível liberar a reserva do veículo!')";
             }
 
             return RedirectToAction(nameof(Index));

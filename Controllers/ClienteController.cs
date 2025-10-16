@@ -218,7 +218,7 @@ namespace AutoGestao.Controllers
             }
             else
             {
-                TempData["ErrorMessage"] = "Cliente não encontrado!";
+                TempData["NotificationScript"] = "showError('Cliente não encontrado!')";
             }
 
             return RedirectToAction(nameof(Index));

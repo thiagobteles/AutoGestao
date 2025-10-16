@@ -51,19 +51,19 @@ namespace AutoGestao.Controllers.Base
         // Sobrescrever para desabilitar criação, edição e exclusão
         public override Task<IActionResult> Create()
         {
-            TempData["ErrorMessage"] = "Logs de auditoria não podem ser criados manualmente.";
+            TempData["NotificationScript"] = "showError('Logs de auditoria não podem ser criados manualmente.')";
             return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
         }
 
         public override Task<IActionResult> Edit(long? id)
         {
-            TempData["ErrorMessage"] = "Logs de auditoria não podem ser editados.";
+            TempData["NotificationScript"] = "showError('Logs de auditoria não podem ser editados.')";
             return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
         }
 
         public override Task<IActionResult> Delete(long id)
         {
-            TempData["ErrorMessage"] = "Logs de auditoria não podem ser excluídos.";
+            TempData["NotificationScript"] = "showError('Logs de auditoria não podem ser excluídos.')";
             return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
         }
 

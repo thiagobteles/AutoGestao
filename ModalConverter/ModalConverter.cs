@@ -1,8 +1,6 @@
-using System;
-using System.IO;
 using System.Text.RegularExpressions;
 
-class Program
+partial class Program
 {
     static void Main(string[] args)
     {
@@ -27,7 +25,7 @@ class Program
         // Processar JavaScript (.js)
         ProcessJavaScriptComplete(projectPath);
         
-        // Processar Views (.cshtml) - NOVO
+        // Processar Views (.cshtml)
         ProcessViews(projectPath);
         
         // Processar Layouts (.cshtml)
@@ -36,7 +34,7 @@ class Program
         // Adicionar Response Handlers
         AddResponseHandlers(projectPath);
         
-        // Adicionar correções específicas - NOVO
+        // Adicionar correções específicas
         AddSpecificFixes(projectPath);
         
         Console.WriteLine("\n✅ CONVERSÃO FINAL CONCLUÍDA!");
@@ -92,19 +90,7 @@ class Program
                     return $"return Json(new {{ sucesso = {success}, mensagem = \"{message}\", script = \"{type}('{message}')\" }});";
                 });
                 
-                // 3. JSON com success, message e redirectUrl
-                var jsonRedirectPattern = @"return Json\(new \{ success = (true|false), message = \""([^""]+)\"", redirectUrl = ([^}]+) \}\);";
-                newContent = Regex.Replace(newContent, jsonRedirectPattern, match =>
-                {
-                    string success = match.Groups[1].Value;
-                    string message = match.Groups[2].Value;
-                    string redirectUrl = match.Groups[3].Value;
-                    string type = (success == "true") ? "showSuccess" : "showError";
-                    changed = true;
-                    return $"return Json(new {{ sucesso = {success}, mensagem = \"{message}\", script = \"{type}('{message}').then(() => window.location.href = {redirectUrl})\" }});";
-                });
-                
-                // 4. JSON que já usa 'sucesso' mas não tem script
+                // 3. JSON que já usa 'sucesso' mas não tem script
                 var jsonSucessoPattern = @"return Json\(new \{ sucesso = (true|false), mensagem = \""([^""]+)\""\s*\}\);";
                 newContent = Regex.Replace(newContent, jsonSucessoPattern, match =>
                 {
@@ -115,32 +101,7 @@ class Program
                     return $"return Json(new {{ sucesso = {sucesso}, mensagem = \"{mensagem}\", script = \"{type}('{mensagem}')\" }});";
                 });
                 
-                // 5. Casos específicos do UsuariosController - AlterarSenha
-                if (content.Contains("AlterarSenha"))
-                {
-                    var senhaPattern = @"return Json\(new \{ sucesso = false, mensagem = \""Senhas não conferem\"" \}\);";
-                    newContent = Regex.Replace(newContent, senhaPattern, match =>
-                    {
-                        changed = true;
-                        return "return Json(new { sucesso = false, mensagem = \"Senhas não conferem\", script = \"showError('As senhas informadas não conferem. Verifique e tente novamente.')\" });";
-                    });
-                    
-                    var senhaResultPattern = @"return Json\(new\s*\{\s*sucesso = resultado,\s*mensagem = resultado \? \""Senha alterada com sucesso\"" : \""Senha atual incorreta\""\s*\}\);";
-                    newContent = Regex.Replace(newContent, senhaResultPattern, match =>
-                    {
-                        changed = true;
-                        return @"if (resultado)
-            {
-                return Json(new { sucesso = true, mensagem = ""Senha alterada com sucesso"", script = ""showSuccess('Sua senha foi alterada com sucesso!')"" });
-            }
-            else
-            {
-                return Json(new { sucesso = false, mensagem = ""Senha atual incorreta"", script = ""showError('A senha atual informada está incorreta. Verifique e tente novamente.')"" });
-            }";
-                    });
-                }
-                
-                // 6. TempData com interpolação de string
+                // 4. TempData com interpolação de string
                 var tempDataInterpolationPattern = @"TempData\[\""ErrorMessage\""\] = \$\""([^""]+)\{([^}]+)\}([^""]*)\""";
                 newContent = Regex.Replace(newContent, tempDataInterpolationPattern, match =>
                 {
@@ -245,14 +206,6 @@ class Program
                     return $"showInfo('{message}')";
                 });
                 
-                // 6. Remover funções showToast duplicadas
-                var showToastFunctionPattern = @"function showToast\([^{]*\{[^}]*(?:\{[^}]*\}[^}]*)*\}";
-                newContent = Regex.Replace(newContent, showToastFunctionPattern, match =>
-                {
-                    changed = true;
-                    return "// showToast removido - usando sistema de modal centralizado";
-                }, RegexOptions.Singleline);
-                
                 if (changed)
                 {
                     File.WriteAllText(file, newContent);
@@ -266,7 +219,6 @@ class Program
         }
     }
     
-    // NOVO - Processar Views para corrigir confirms em onclick
     static void ProcessViews(string basePath)
     {
         Console.WriteLine("\n📂 Processando Views (.cshtml)...");
@@ -288,21 +240,13 @@ class Program
                 string newContent = content;
                 bool changed = false;
                 
-                // 1. onclick com confirm - padrão geral
+                // onclick com confirm - padrão geral
                 var onclickConfirmPattern = @"onclick\s*=\s*['""]([^'""]*confirm\([^'""]+\)[^'""]*)['""]";
                 newContent = Regex.Replace(newContent, onclickConfirmPattern, match =>
                 {
                     string originalOnclick = match.Groups[1].Value;
                     changed = true;
                     return $"data-confirm-action=\"{originalOnclick.Replace("\"", "&quot;")}\" onclick=\"handleConfirmClick(this, event)\"";
-                });
-                
-                // 2. Botões específicos de limpar
-                var clearButtonPattern = @"<button[^>]*onclick\s*=\s*['""]([^'""]*confirm[^'""]*limpar[^'""]*)['""][^>]*>";
-                newContent = Regex.Replace(clearButtonPattern, clearButtonPattern, match =>
-                {
-                    changed = true;
-                    return match.Value.Replace("onclick=", "data-clear-confirm=\"true\" onclick=");
                 });
                 
                 if (changed)
@@ -339,10 +283,8 @@ class Program
                 string newContent = content;
                 bool changed = false;
                 
-                // Verificar se já tem o sistema de modais
                 if (!content.Contains("complete-modal-system.js"))
                 {
-                    // Procurar onde inserir (antes do </body>)
                     var bodyClosePattern = @"(\s*</body>)";
                     if (Regex.IsMatch(content, bodyClosePattern))
                     {
@@ -372,7 +314,6 @@ class Program
                         });
                     }
                 }
-                // Se já tem mas não tem o grid-specific-fixes
                 else if (!content.Contains("grid-specific-fixes.js"))
                 {
                     var responseHandlerPattern = @"(<script src=""~/js/response-handlers\.js""></script>)";
@@ -433,7 +374,6 @@ class ResponseHandler {
 
     init() {
         this.interceptFetch();
-        this.interceptForms();
         console.log('✅ Sistema de handlers de resposta inicializado');
     }
 
@@ -530,7 +470,6 @@ console.log('🔗 Sistema de handlers automáticos carregado');";
         }
     }
     
-    // NOVO - Adicionar correções específicas
     static void AddSpecificFixes(string basePath)
     {
         Console.WriteLine("\n📂 Adicionando Correções Específicas...");
@@ -550,7 +489,6 @@ console.log('🔗 Sistema de handlers automáticos carregado');";
             return;
         }
         
-        // Conteúdo do arquivo grid-specific-fixes.js (resumido)
         string specificFixesContent = @"/**
  * CORREÇÕES ESPECÍFICAS PARA PROBLEMAS DA GRID
  */
@@ -564,8 +502,8 @@ document.addEventListener('click', async function(e) {
         const onclick = target.getAttribute('onclick');
         e.preventDefault();
         e.stopPropagation();
-        
-        const confirmMatch = onclick.match(/confirm\(['\""]([^'\""]*)['\"\"]\)/);
+        "+ @$"
+        const confirmMatch = onclick.match(/confirm\(['\""]([^'\""]*)['\""]\)/);" + @"
         const message = confirmMatch ? confirmMatch[1] : 'Tem certeza que deseja continuar?';
         
         const confirmed = await showConfirm(message, {
@@ -642,8 +580,8 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         restoreGridDoubleClick();
         
-        // Reativar dropdowns Bootstrap
-        document.querySelectorAll('[data-bs-toggle=\"dropdown\"]').forEach(button => {
+        // Reativar dropdowns Bootstrap" + $@"
+        document.querySelectorAll('[data-bs-toggle=\""dropdown\""]').forEach(button => " + @"{
             try {
                 new bootstrap.Dropdown(button);
             } catch (e) {
