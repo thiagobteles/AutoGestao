@@ -1,0 +1,54 @@
+@using AutoGestao.Models
+@using Microsoft.AspNetCore.Components
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+    .dashboard-container {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 60px);
+        overflow: hidden;
+    }
+
+    .dashboard-iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+</style>
+
+<div class="dashboard-container">
+    <iframe id="dashboardIframe"
+            src="/react-dashboard/index.html"
+            class="dashboard-iframe">
+    </iframe>
+</div>
+
+<script>
+    // Ajusta o iframe quando o menu muda
+    function ajustarIframe() {
+        const iframe = document.getElementById('dashboardIframe');
+        const sidebar = document.querySelector('.sidebar'); // Ajuste para o seletor do seu menu
+
+        if (sidebar) {
+            const sidebarWidth = sidebar.offsetWidth;
+            iframe.style.marginLeft = '0px';
+        }
+    }
+
+    // Executa quando a página carrega
+    window.addEventListener('load', ajustarIframe);
+
+    // Observa mudanças no menu (quando abre/fecha)
+    const observer = new MutationObserver(ajustarIframe);
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+    }
+</script>

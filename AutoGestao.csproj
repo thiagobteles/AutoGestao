@@ -7,9 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="ModalConverter\**" />
 	  <Compile Remove="ViewModels\**" />
+	  <Content Remove="ModalConverter\**" />
 	  <Content Remove="ViewModels\**" />
+	  <EmbeddedResource Remove="ModalConverter\**" />
 	  <EmbeddedResource Remove="ViewModels\**" />
+	  <None Remove="ModalConverter\**" />
 	  <None Remove="ViewModels\**" />
 	</ItemGroup>
 

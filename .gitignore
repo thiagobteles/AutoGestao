@@ -1,3 +1,6 @@
 /obj
 /bin
 /.vs
+/ModalConverter/bin
+/ModalConverter/obj
+/ModalConverter/.vs
