@@ -170,7 +170,7 @@ namespace AutoGestao.Controllers.Base
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao carregar dashboard: {ex.Message}";
+                TempData["NotificationScript"] = $"showError('Erro ao carregar dashboard: {ex.Message}')";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -241,7 +241,7 @@ namespace AutoGestao.Controllers.Base
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
+                TempData["NotificationScript"] = $"showError('Erro ao exportar dados: {ex.Message}')";
                 return RedirectToAction(nameof(Index));
             }
         }

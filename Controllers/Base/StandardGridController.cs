@@ -419,19 +419,27 @@ namespace AutoGestao.Controllers.Base
         {
             if (!CanCreate(entity))
             {
-                TempData["Error"] = "Você não tem permissão para cadastrar um novo registro.";
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new
+                    {
+                        sucesso = false,
+                        mensagem = "Você não tem permissão para editar este registro.",
+                        script = "showError('Você não tem permissão para editar este registro.')"
+                    });
+                }
+
+                TempData["NotificationScript"] = "showError('Você não tem permissão para editar este registro.')";
                 return Forbid();
             }
 
             // LOG: Verificar TODOS os campos recebidos
             var allProperties = typeof(T).GetProperties();
-            Console.WriteLine("========== VALORES RECEBIDOS NO CREATE ==========");
             foreach (var prop in allProperties)
             {
                 var value = prop.GetValue(entity);
                 Console.WriteLine($"{prop.Name}: {value ?? "NULL"}");
             }
-            Console.WriteLine("=================================================");
 
             if (IsAjaxRequest())
             {
@@ -449,21 +457,25 @@ namespace AutoGestao.Controllers.Base
 
                     if (Request.IsAjaxRequest())
                     {
-                        return Json(new { success = true, message = "Registro criado com sucesso!", redirectUrl = Url.Action("Index") });
+                        return Json(new
+                        {
+                            sucesso = false,
+                            mensagem = "Registro cadastrado com sucesso!",
+                            script = "showSuccess('Registro cadastrado com sucesso!')",
+                            redirectUrl = Url.Action("Index")
+                        });
                     }
 
-                    TempData["Success"] = "Registro criado com sucesso!";
+                    TempData["NotificationScript"] = "showSuccess('Registro cadastrado com sucesso!')";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"ERRO CREATE: {ex.Message}");
                     ModelState.AddModelError("", $"Erro ao criar registro: {ex.Message}");
                 }
             }
             else
             {
-                Console.WriteLine("========== ERROS DE VALIDAÇÃO ==========");
                 foreach (var error in ModelState)
                 {
                     if (error.Value.Errors.Any())
@@ -471,7 +483,6 @@ namespace AutoGestao.Controllers.Base
                         Console.WriteLine($"{error.Key}: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
                     }
                 }
-                Console.WriteLine("========================================");
             }
 
             var viewModel = await BuildFormViewModelAsync(entity, "Create");
@@ -549,29 +560,22 @@ namespace AutoGestao.Controllers.Base
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Edit(long id, T entity)
         {
-            // LOG: Verificar TODOS os campos recebidos
             var allProperties = typeof(T).GetProperties();
-            Console.WriteLine("========== VALORES RECEBIDOS NO EDIT ==========");
             foreach (var prop in allProperties)
             {
                 var value = prop.GetValue(entity);
-                Console.WriteLine($"{prop.Name}: {value ?? "NULL"}");
             }
-            Console.WriteLine("===============================================");
 
             // Verificar especificamente campos de arquivo
             var fileProperties = typeof(T).GetProperties()
                 .Where(p => p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.File ||
                             p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Image);
 
-            Console.WriteLine("========== CAMPOS DE ARQUIVO ==========");
             foreach (var prop in fileProperties)
             {
                 var value = prop.GetValue(entity);
                 Console.WriteLine($"{prop.Name}: '{value}' (IsNull: {value == null})");
             }
-
-            Console.WriteLine("========================================");
 
             if (id != entity.Id)
             {
@@ -583,11 +587,9 @@ namespace AutoGestao.Controllers.Base
             var existingEntity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (existingEntity == null)
             {
-                if (Request.IsAjaxRequest())
-                {
-                    return Json(new { success = false, message = "Registro não encontrado." });
-                }
-                return NotFound();
+                return Request.IsAjaxRequest() 
+                    ? Json(new { success = false, message = "Registro não encontrado." })
+                    : NotFound();
             }
 
             if (!CanEdit(existingEntity))
@@ -596,6 +598,7 @@ namespace AutoGestao.Controllers.Base
                 {
                     return Json(new { success = false, message = "Você não tem permissão para editar este registro." });
                 }
+
                 TempData["Error"] = "Você não tem permissão para editar este registro.";
                 return RedirectToAction(nameof(Index));
             }
@@ -618,12 +621,7 @@ namespace AutoGestao.Controllers.Base
                         // Se o novo valor está vazio mas havia um arquivo antes, manter o antigo
                         if (string.IsNullOrEmpty(newValue?.ToString()) && !string.IsNullOrEmpty(oldValue?.ToString()))
                         {
-                            Console.WriteLine($"[PRESERVANDO] {prop.Name}: mantendo valor '{oldValue}'");
                             prop.SetValue(entity, oldValue);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[ATUALIZANDO] {prop.Name}: '{oldValue}' -> '{newValue}'");
                         }
                     }
 
@@ -635,22 +633,31 @@ namespace AutoGestao.Controllers.Base
 
                     if (Request.IsAjaxRequest())
                     {
-                        return Json(new { success = true, message = "Registro atualizado com sucesso!", redirectUrl = Url.Action("Index") });
+                        return Json(new
+                        {
+                            sucesso = true,
+                            mensagem = "Registro atualizado com sucesso!",
+                            script = "showSuccess('Registro atualizado com sucesso!').then(() => window.location.reload())"
+                        });
                     }
 
-                    TempData["Success"] = "Registro atualizado com sucesso!";
+                    TempData["NotificationScript"] = "showSuccess('Registro atualizado com sucesso!')";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"ERRO: {ex.Message}");
-                    Console.WriteLine($"Stack: {ex.StackTrace}");
-
                     if (Request.IsAjaxRequest())
                     {
-                        return Json(new { success = false, message = $"Erro ao atualizar: {ex.Message}" });
+                        return Json(new
+                        {
+                            sucesso = false,
+                            mensagem = $"Erro ao atualizar: {ex.Message}",
+                            script = $"showError('Erro ao atualizar: {ex.Message}')"
+                        });
                     }
-                    ModelState.AddModelError("", $"Erro ao atualizar registro: {ex.Message}");
+
+                    TempData["NotificationScript"] = $"showError('Erro ao atualizar: {ex.Message}')";
+                    return RedirectToAction(nameof(Index));
                 }
             }
             else
@@ -769,9 +776,15 @@ namespace AutoGestao.Controllers.Base
             {
                 if (Request.IsAjaxRequest())
                 {
-                    return Json(new { success = false, message = "Você não tem permissão para excluir este registro." });
+                    return Json(new
+                    {
+                        sucesso = false,
+                        mensagem = "Você não tem permissão para excluir este registro.",
+                        script = "showError('RVocê não tem permissão para excluir este registro.!').then(() => window.location.reload())"
+                    });
                 }
-                TempData["Error"] = "Você não tem permissão para excluir este registro.";
+
+                TempData["NotificationScript"] = "showError('Você não tem permissão para excluir este registro.')";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -784,20 +797,30 @@ namespace AutoGestao.Controllers.Base
 
                 if (Request.IsAjaxRequest())
                 {
-                    return Json(new { success = true, message = "Registro excluído com sucesso!" });
+                    return Json(new
+                    {
+                        sucesso = true,
+                        mensagem = "Registro excluído com sucesso!",
+                        script = "showSuccess('Registro excluído com sucesso!').then(() => window.location.reload())"
+                    });
                 }
 
-                TempData["Success"] = "Registro excluído com sucesso!";
+                TempData["NotificationScript"] = "showSuccess('Registro excluído com sucesso!')";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 if (Request.IsAjaxRequest())
                 {
-                    return Json(new { success = false, message = $"Erro ao excluir registro: {ex.Message}" });
+                    return Json(new
+                    {
+                        sucesso = false,
+                        mensagem = $"Erro ao excluir registro: {ex.Message}",
+                        script = $"showError('Erro ao excluir registro: {ex.Message}')"
+                    });
                 }
 
-                TempData["Error"] = $"Erro ao excluir registro: {ex.Message}";
+                TempData["NotificationScript"] = $"showError('Erro ao excluir registro: {ex.Message}')";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -843,7 +866,7 @@ namespace AutoGestao.Controllers.Base
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao exportar dados: {ex.Message}";
+                TempData["NotificationScript"] = $"showError('Erro ao exportar dados: {ex.Message}')";
                 return RedirectToAction(nameof(Index));
             }
         }

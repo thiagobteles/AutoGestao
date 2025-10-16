@@ -195,14 +195,30 @@ namespace AutoGestao.Controllers
         {
             if (request.NovaSenha != request.ConfirmarSenha)
             {
-                return Json(new { sucesso = false, mensagem = "Senhas não conferem" });
+                return Json(new
+                {
+                    sucesso = false,
+                    mensagem = "Senhas não conferem",
+                    script = "showError('As senhas informadas não conferem. Verifique e tente novamente.')"
+                });
             }
 
             var resultado = await _usuarioService.AlterarSenhaAsync(request.UsuarioId, request.SenhaAtual, request.NovaSenha);
+            if (resultado)
+            {
+                return Json(new
+                {
+                    sucesso = true,
+                    mensagem = "Senha alterada com sucesso",
+                    script = "showSuccess('Sua senha foi alterada com sucesso!')"
+                });
+            }
+
             return Json(new
             {
-                sucesso = resultado,
-                mensagem = resultado ? "Senha alterada com sucesso" : "Senha atual incorreta"
+                sucesso = false,
+                mensagem = "Senha atual incorreta",
+                script = "showError('A senha atual informada está incorreta. Verifique e tente novamente.')"
             });
         }
     }

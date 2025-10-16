@@ -505,6 +505,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // ===================================================================
 
 window.confirmarExclusao = function (id) {
+    // Usar modal de confirmação padrão do sistema, depois modal de resultado
     if (confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
         const currentPath = window.location.pathname.toLowerCase();
         let controller = '';
@@ -515,13 +516,41 @@ window.confirmarExclusao = function (id) {
             controller = 'Clientes';
         } else if (currentPath.includes('vendedores')) {
             controller = 'Vendedores';
-        } else if (currentPath.includes('fornecedores')) {
-            controller = 'Fornecedores';
         }
 
         if (controller) {
             window.showLoading(true);
-            window.location.href = `/${controller}/Delete/${id}`;
+
+            // Simular exclusão e mostrar resultado
+            fetch(`/${controller}/Delete/${id}`, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(result => {
+                    window.showLoading(false);
+
+                    if (result.sucesso) {
+                        showSuccess('Registro excluído com sucesso!', {
+                            title: 'Exclusão Realizada!',
+                            buttonText: 'OK'
+                        }).then(() => {
+                            // Recarregar grid após fechar modal
+                            location.reload();
+                        });
+                    } else {
+                        showError('Não foi possível excluir o registro. ' + (result.mensagem || ''), {
+                            title: 'Erro na Exclusão',
+                            buttonText: 'Entendi'
+                        });
+                    }
+                })
+                .catch(error => {
+                    window.showLoading(false);
+                    showError('Erro de conexão durante a exclusão.', {
+                        title: 'Erro de Sistema',
+                        buttonText: 'Tentar Novamente'
+                    });
+                });
         }
     }
 };
@@ -1522,17 +1551,7 @@ if (typeof confirmarExclusao === 'function') {
 }
 
 window.confirmarExclusao = function (id) {
-    // Fechar dropdown primeiro
-    if (window.dropdownPortalSystem) {
-        window.dropdownPortalSystem.forceClose();
-    }
-
-    // Executar confirmação original se existir
-    if (typeof confirmarExclusaoOriginal === 'function') {
-        return window.confirmarExclusaoOriginal(id);
-    }
-
-    // Fallback padrão
+    // Usar modal de confirmação padrão do sistema, depois modal de resultado
     if (confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
         const currentPath = window.location.pathname.toLowerCase();
         let controller = '';
@@ -1547,7 +1566,37 @@ window.confirmarExclusao = function (id) {
 
         if (controller) {
             window.showLoading(true);
-            window.location.href = `/${controller}/Delete/${id}`;
+
+            // Simular exclusão e mostrar resultado
+            fetch(`/${controller}/Delete/${id}`, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(result => {
+                    window.showLoading(false);
+
+                    if (result.sucesso) {
+                        showSuccess('Registro excluído com sucesso!', {
+                            title: 'Exclusão Realizada!',
+                            buttonText: 'OK'
+                        }).then(() => {
+                            // Recarregar grid após fechar modal
+                            location.reload();
+                        });
+                    } else {
+                        showError('Não foi possível excluir o registro. ' + (result.mensagem || ''), {
+                            title: 'Erro na Exclusão',
+                            buttonText: 'Entendi'
+                        });
+                    }
+                })
+                .catch(error => {
+                    window.showLoading(false);
+                    showError('Erro de conexão durante a exclusão.', {
+                        title: 'Erro de Sistema',
+                        buttonText: 'Tentar Novamente'
+                    });
+                });
         }
     }
 };

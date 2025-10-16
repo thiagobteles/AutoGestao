@@ -1,0 +1,628 @@
+/* ===================================================================
+   SISTEMA COMPLETO DE MODAIS - CONFIRMAÇÃO + NOTIFICAÇÃO
+   =================================================================== */
+
+/* ===================================================================
+   1. MODAL DE CONFIRMAÇÃO
+   =================================================================== */
+
+/* Container do Modal de Confirmação */
+.confirm-modal-dialog {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* Conteúdo Base do Modal de Confirmação */
+.confirm-modal-content {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    transform: scale(0.8);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Header do Modal de Confirmação */
+.confirm-modal-header {
+    border-bottom: none;
+    padding: 2.5rem 2rem 1.5rem 2rem;
+    text-align: center;
+    position: relative;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Container do Ícone de Confirmação */
+.confirm-icon-container {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: #fff3cd;
+    border: 4px solid #ffc107;
+}
+
+.confirm-icon-container::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #ffc107;
+    opacity: 0.2;
+    animation: confirmPulse 2s infinite;
+}
+
+/* Ícone de Confirmação */
+.confirm-icon {
+    font-size: 3rem;
+    color: #856404;
+    z-index: 1;
+    position: relative;
+    animation: questionBounce 2s infinite;
+}
+
+/* Tipos de Confirmação */
+.confirm-warning .confirm-modal-header {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+}
+
+.confirm-danger .confirm-modal-header {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+}
+
+.confirm-danger .confirm-icon-container {
+    background: #fee;
+    border-color: #dc3545;
+}
+
+.confirm-danger .confirm-icon-container::before {
+    background: #dc3545;
+}
+
+.confirm-danger .confirm-icon {
+    color: #721c24;
+}
+
+.confirm-info .confirm-modal-header {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+}
+
+.confirm-info .confirm-icon-container {
+    background: #e7f3ff;
+    border-color: #17a2b8;
+}
+
+.confirm-info .confirm-icon-container::before {
+    background: #17a2b8;
+}
+
+.confirm-info .confirm-icon {
+    color: #0c5460;
+}
+
+/* Título da Confirmação */
+.confirm-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Corpo do Modal de Confirmação */
+.confirm-modal-body {
+    padding: 1.5rem 2rem;
+    text-align: center;
+    background: #fff;
+}
+
+.confirm-message {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin: 0;
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Footer do Modal de Confirmação */
+.confirm-modal-footer {
+    border-top: none;
+    padding: 1.5rem 2rem 2.5rem 2rem;
+    text-align: center;
+    background: #fff;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* Botões de Confirmação */
+.confirm-btn-cancel,
+.confirm-btn-ok {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 12px 25px;
+    border-radius: 50px;
+    border: 2px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    position: relative;
+    overflow: hidden;
+}
+
+.confirm-btn-cancel {
+    background: #fff;
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.confirm-btn-cancel:hover {
+    background: #6c757d;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+}
+
+.confirm-btn-ok {
+    background: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.confirm-btn-ok:hover {
+    background: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+}
+
+/* Botão OK para exclusão (vermelho) */
+.confirm-danger .confirm-btn-ok {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.confirm-danger .confirm-btn-ok:hover {
+    background: #c82333;
+    border-color: #bd2130;
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+}
+
+/* ===================================================================
+   2. MODAL DE NOTIFICAÇÃO (MESMO DO ARQUIVO ANTERIOR)
+   =================================================================== */
+
+/* Container do Modal */
+.notification-modal-dialog {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Conteúdo Base do Modal */
+.notification-modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Header do Modal */
+.notification-modal-header {
+    border-bottom: none;
+    padding: 2rem 2rem 1rem 2rem;
+    text-align: center;
+    position: relative;
+}
+
+/* Container do Ícone */
+.notification-icon-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.notification-icon-container::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: pulse 2s infinite;
+}
+
+/* Ícones por Tipo */
+.notification-icon {
+    font-size: 2.5rem;
+    z-index: 1;
+    position: relative;
+}
+
+/* Sucesso */
+.notification-success .notification-modal-header {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+}
+
+.notification-success .icon-success {
+    background: #28a745;
+    color: white;
+}
+
+.notification-success .icon-success::before {
+    background: #28a745;
+}
+
+.notification-success .notification-btn-close {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.notification-success .notification-btn-close:hover {
+    background: #218838;
+    border-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+/* Erro */
+.notification-error .notification-modal-header {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+}
+
+.notification-error .icon-error {
+    background: #dc3545;
+    color: white;
+}
+
+.notification-error .icon-error::before {
+    background: #dc3545;
+}
+
+.notification-error .notification-btn-close {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.notification-error .notification-btn-close:hover {
+    background: #c82333;
+    border-color: #bd2130;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+/* Warning */
+.notification-warning .notification-modal-header {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+}
+
+.notification-warning .icon-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.notification-warning .icon-warning::before {
+    background: #ffc107;
+}
+
+.notification-warning .notification-btn-close {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.notification-warning .notification-btn-close:hover {
+    background: #e0a800;
+    border-color: #d39e00;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+/* Info */
+.notification-info .notification-modal-header {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0c5460;
+}
+
+.notification-info .icon-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.notification-info .icon-info::before {
+    background: #17a2b8;
+}
+
+.notification-info .notification-btn-close {
+    background: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+.notification-info .notification-btn-close:hover {
+    background: #138496;
+    border-color: #117a8b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
+}
+
+/* Título do Modal */
+.notification-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Corpo do Modal */
+.notification-modal-body {
+    padding: 1rem 2rem;
+    text-align: center;
+}
+
+.notification-message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0;
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Footer do Modal */
+.notification-modal-footer {
+    border-top: none;
+    padding: 1rem 2rem 2rem 2rem;
+    text-align: center;
+}
+
+/* Botão de Fechar */
+.notification-btn-close {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 12px 30px;
+    border-radius: 50px;
+    border: 2px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-btn-close:focus,
+.confirm-btn-cancel:focus,
+.confirm-btn-ok:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.notification-btn-close::before,
+.confirm-btn-cancel::before,
+.confirm-btn-ok::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.6s ease;
+}
+
+.notification-btn-close:hover::before,
+.confirm-btn-cancel:hover::before,
+.confirm-btn-ok:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* ===================================================================
+   3. ANIMAÇÕES
+   =================================================================== */
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes confirmPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+}
+
+@keyframes questionBounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translate3d(0, -100%, 0);
+        visibility: visible;
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    70% {
+        transform: scale(0.9);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===================================================================
+   4. BACKDROP E RESPONSIVIDADE
+   =================================================================== */
+
+/* Backdrop customizado */
+.modal-backdrop.show {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+}
+
+/* Responsividade */
+@media (max-width: 576px) {
+    .confirm-modal-dialog,
+    .notification-modal-dialog {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+    
+    .confirm-modal-header,
+    .confirm-modal-body,
+    .confirm-modal-footer,
+    .notification-modal-header,
+    .notification-modal-body,
+    .notification-modal-footer {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    
+    .confirm-icon-container {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .notification-icon-container {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .confirm-icon {
+        font-size: 2.5rem;
+    }
+    
+    .notification-icon {
+        font-size: 2rem;
+    }
+    
+    .confirm-title,
+    .notification-title {
+        font-size: 1.3rem;
+    }
+    
+    .confirm-message,
+    .notification-message {
+        font-size: 1rem;
+    }
+    
+    .confirm-modal-footer {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .confirm-btn-cancel,
+    .confirm-btn-ok,
+    .notification-btn-close {
+        min-width: 100%;
+    }
+}
+
+/* ===================================================================
+   5. MELHORIAS DE ACESSIBILIDADE
+   =================================================================== */
+
+.confirm-modal-content:focus-within,
+.notification-modal-content:focus-within {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Estados especiais */
+.confirm-modal-content.created,
+.notification-modal-content.created {
+    animation: bounceIn 0.6s ease;
+}
+
+.confirm-modal-content.updated,
+.notification-modal-content.updated {
+    animation: slideInDown 0.5s ease;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .confirm-modal-content,
+    .notification-modal-content {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .confirm-message,
+    .notification-message {
+        color: #cbd5e0;
+    }
+    
+    .confirm-modal-body,
+    .notification-modal-body,
+    .confirm-modal-footer,
+    .notification-modal-footer {
+        background: #2d3748;
+    }
+}
+
+/* Print styles */
+@media print {
+    .modal,
+    .modal-backdrop {
+        display: none !important;
+    }
+}

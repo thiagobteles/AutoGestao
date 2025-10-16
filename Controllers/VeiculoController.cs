@@ -294,7 +294,12 @@ namespace AutoGestao.Controllers
             _context.VeiculoFotos.Add(fotoEntidade);
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, message = "Foto adicionada com sucesso!" });
+            return Json(new
+            {
+                sucesso = true,
+                mensagem = "Foto adicionada com sucesso!",
+                script = "showSuccess('Foto adicionada com sucesso!')"
+            });
         }
 
         [HttpPost]
@@ -315,10 +320,20 @@ namespace AutoGestao.Controllers
                 _context.Despesas.Add(despesa);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Despesa adicionada com sucesso!" });
+                return Json(new
+                {
+                    sucesso = true,
+                    mensagem = "Despesa adicionada com sucesso!",
+                    script = "showSucces('Despesa adicionada com sucesso!')"
+                });
             }
 
-            return Json(new { success = false, message = "Dados inválidos" });
+            return Json(new
+            {
+                sucesso = false,
+                mensagem = "Dados inválidos",
+                script = "showError('Dados inválidos')"
+            });
         }
 
         [HttpPost]
