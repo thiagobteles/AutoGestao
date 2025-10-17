@@ -4,14 +4,11 @@ class ReferenceFieldManager {
         this.cache = new Map();
         this.debounceTimers = new Map();
         this.activeRequests = new Map();
-        console.log('🔧 ReferenceFieldManager construído');
     }
 
     init() {
-        console.log('🚀 Inicializando ReferenceFieldManager...');
         this.setupEventListeners();
         this.initializeAllFields();
-        console.log('✅ ReferenceFieldManager inicializado');
     }
 
     setupEventListeners() {
@@ -23,27 +20,20 @@ class ReferenceFieldManager {
     }
 
     initializeAllFields() {
-        console.log('🔍 Procurando campos de referência...');
-
         const fields = document.querySelectorAll('.reference-search-input');
-        console.log(`📋 Encontrados ${fields.length} campos de referência`);
-
+        
         fields.forEach((input, index) => {
             if (!input.dataset.initialized) {
-                console.log(`⚙️ Inicializando campo ${index + 1}:`, input.id);
                 this.initializeField(input);
                 input.dataset.initialized = 'true';
             }
         });
 
         const clearBtns = document.querySelectorAll('.reference-clear-btn');
-        console.log(`🗑️ Encontrados ${clearBtns.length} botões de limpar`);
 
         clearBtns.forEach((btn, index) => {
             if (!btn.dataset.initialized) {
-                console.log(`⚙️ Inicializando botão limpar ${index + 1}:`, btn.id);
                 btn.addEventListener('click', (e) => {
-                    console.log('🗑️ Botão limpar clicado');
                     this.clearSelection(e);
                 });
                 btn.dataset.initialized = 'true';
@@ -51,13 +41,10 @@ class ReferenceFieldManager {
         });
 
         const createBtns = document.querySelectorAll('.reference-create-btn');
-        console.log(`➕ Encontrados ${createBtns.length} botões de criar`);
 
         createBtns.forEach((btn, index) => {
             if (!btn.dataset.initialized) {
-                console.log(`⚙️ Inicializando botão criar ${index + 1}:`, btn.id);
                 btn.addEventListener('click', (e) => {
-                    console.log('➕ Botão criar clicado');
                     this.openCreateModal(e);
                 });
                 btn.dataset.initialized = 'true';
@@ -66,20 +53,15 @@ class ReferenceFieldManager {
     }
 
     initializeField(input) {
-        console.log('⚙️ Configurando eventos para:', input.id);
-
         input.addEventListener('input', (e) => {
-            console.log('⌨️ Input detectado:', e.target.value);
             this.handleSearch(e);
         });
 
         input.addEventListener('focus', (e) => {
-            console.log('👁️ Focus detectado');
             this.handleFocus(e);
         });
 
         input.addEventListener('blur', (e) => {
-            console.log('👁️ Blur detectado');
             this.handleBlur(e);
         });
 
@@ -94,11 +76,9 @@ class ReferenceFieldManager {
         try {
             const filterConfig = input.dataset.referenceFilters;
             if (!filterConfig || filterConfig === '{}') {
-                console.log('ℹ️ Sem filtros condicionais para:', input.id);
                 return;
             }
 
-            console.log('🔍 Configurando filtros condicionais:', filterConfig);
             const config = JSON.parse(filterConfig);
 
             for (const [, filterInfo] of Object.entries(config)) {
@@ -106,13 +86,9 @@ class ReferenceFieldManager {
                     const sourceFieldName = filterInfo.value;
                     const sourceHiddenInput = document.querySelector(`input[name="${sourceFieldName}"]`);
 
-                    if (sourceHiddenInput && !sourceHiddenInput.dataset.listenerAttached) {
-                        console.log(`🔗 Vinculando filtro: ${sourceFieldName}`);
-
+                    if (sourceHiddenInput && !sourceHiddenInput.dataset.listenerAttached) {                        
                         const sourceFieldDisplayName = this.getFieldDisplayName(sourceFieldName);
-
                         sourceHiddenInput.addEventListener('change', () => {
-                            console.log(`🔄 Campo fonte mudou: ${sourceFieldName} = ${sourceHiddenInput.value}`);
 
                             const targetField = input.dataset.targetField;
                             const targetHiddenInput = document.querySelector(`input[name="${targetField}"]`);
@@ -127,11 +103,9 @@ class ReferenceFieldManager {
                             if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                                 input.disabled = true;
                                 input.placeholder = `Selecione ${sourceFieldDisplayName} primeiro`;
-                                console.log(`🔒 Campo desabilitado: ${input.id}`);
                             } else {
                                 input.disabled = false;
                                 input.placeholder = input.dataset.originalPlaceholder || 'Digite para pesquisar...';
-                                console.log(`🔓 Campo habilitado: ${input.id}`);
                             }
                         });
 
@@ -141,13 +115,12 @@ class ReferenceFieldManager {
                         if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                             input.disabled = true;
                             input.placeholder = `Selecione ${sourceFieldDisplayName} primeiro`;
-                            console.log(`🔒 Campo inicialmente desabilitado: ${input.id}`);
                         }
                     }
                 }
             }
         } catch (error) {
-            console.error('❌ Erro ao configurar filtros:', error);
+            showError('❌ Erro ao configurar filtros:')
         }
     }
 
@@ -487,7 +460,7 @@ class ReferenceFieldManager {
 
         } catch (error) {
             console.error('❌ Erro ao abrir modal:', error);
-            this.showToast('Erro ao abrir modal de criação', 'error');
+            this.showError('Erro ao abrir modal de criação');
         }
     }
 
@@ -595,13 +568,12 @@ class ReferenceFieldManager {
                 }
 
                 bootstrap.Modal.getInstance(modal).hide();
-                this.showToast(result.message || 'Registro criado com sucesso!', 'success');
+                showSuccess(result.message || 'Registro criado com sucesso!');
             } else {
                 this.showValidationErrors(form, result.errors);
             }
         } catch (error) {
-            console.error('❌ Erro ao submeter formulário:', error);
-            this.showToast('Erro ao salvar registro', 'error');
+            showError('Erro ao salvar registro');
         }
     }
 
@@ -620,21 +592,7 @@ class ReferenceFieldManager {
             }
         }
 
-        this.showToast('Por favor, corrija os erros no formulário', 'error');
-    }
-
-    showToast(message, type = 'info') {
-        if (typeof Toastify !== 'undefined') {
-            Toastify({
-                text: message,
-                duration: 3000,
-                gravity: 'top',
-                position: 'right',
-                backgroundColor: type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8',
-            }).showToast();
-        } else {
-            console.log(`[${type.toUpperCase()}] ${message}`);
-        }
+        showError('Por favor, corrija os erros no formulário');
     }
 }
 

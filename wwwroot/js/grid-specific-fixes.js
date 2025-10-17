@@ -82,11 +82,11 @@ function restoreGridDoubleClick() {
                 const currentPath = window.location.pathname;
                 let controller = '';
 
-                if (currentPath.includes('Clientes')) controller = 'Clientes';
-                else if (currentPath.includes('Veiculos')) controller = 'Veiculos';
-                else if (currentPath.includes('Vendedores')) controller = 'Vendedores';
-                else if (currentPath.includes('Fornecedores')) controller = 'Fornecedores';
-                else if (currentPath.includes('Usuarios')) controller = 'Usuarios';
+                if (currentPath.includes('Clientes')) controller = 'Cliente';
+                else if (currentPath.includes('Veiculo')) controller = 'Veiculo';
+                else if (currentPath.includes('Vendedor')) controller = 'Vendedor';
+                else if (currentPath.includes('Fornecedor')) controller = 'Fornecedor';
+                else if (currentPath.includes('Usuario')) controller = 'Usuario';
 
                 // Abrir edição
                 if (controller && entityId) {

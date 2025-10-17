@@ -142,7 +142,7 @@ const ReportHelper = {
      */
     exportToCSV(data, filename = 'export.csv') {
         if (!data || data.length === 0) {
-            alert('Nenhum dado para exportar');
+            showInfo('Nenhum dado para exportar');
             return;
         }
 
@@ -173,7 +173,7 @@ const ReportHelper = {
      */
     batchReport(entityType, entityIds) {
         if (!entityIds || entityIds.length === 0) {
-            alert('Selecione ao menos um registro');
+            showInfo('Selecione ao menos um registro');
             return;
         }
 
@@ -245,7 +245,7 @@ function addBulkReportAction() {
         .map(cb => parseInt(cb.value));
 
     if (selectedIds.length === 0) {
-        alert('Selecione ao menos um registro');
+        showInfo('Selecione ao menos um registro');
         return;
     }
 

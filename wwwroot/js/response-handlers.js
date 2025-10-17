@@ -1,8 +1,3 @@
-/**
- * SISTEMA DE HANDLERS AUTOMÁTICOS PARA RESPOSTAS JSON
- * Processa automaticamente os scripts retornados pelos controllers
- */
-
 class ResponseHandler {
     constructor() {
         this.init();
@@ -11,7 +6,6 @@ class ResponseHandler {
     init() {
         this.interceptFetch();
         this.interceptForms();
-        console.log('✅ Sistema de handlers de resposta inicializado');
     }
 
     interceptFetch() {
@@ -30,7 +24,6 @@ class ResponseHandler {
                             this.executeScript(data.script);
                         }
                     } catch (e) {
-                        // Ignorar erros de parsing JSON
                     }
                 }
                 
@@ -70,7 +63,6 @@ class ResponseHandler {
                         }
                     }
                 } catch (error) {
-                    console.error('Erro no formulário AJAX:', error);
                     showError('Erro de conexão. Tente novamente.');
                 }
             }
@@ -87,7 +79,6 @@ class ResponseHandler {
                 }, 500);
             }
         } catch (error) {
-            console.error('Erro ao executar script:', error);
         }
     }
 }
@@ -125,7 +116,6 @@ window.ajaxHelper = {
                 throw new Error(`Erro ${response.status}`);
             }
         } catch (error) {
-            console.error('Erro na requisição:', error);
             showError('Erro de conexão. Tente novamente.');
             throw error;
         }
@@ -140,14 +130,14 @@ window.confirmarExclusao = async function(id) {
         const currentPath = window.location.pathname.toLowerCase();
         let controller = '';
 
-        if (currentPath.includes('veiculos')) {
-            controller = 'Veiculos';
-        } else if (currentPath.includes('clientes')) {
-            controller = 'Clientes';
-        } else if (currentPath.includes('vendedores')) {
-            controller = 'Vendedores';
-        } else if (currentPath.includes('fornecedores')) {
-            controller = 'Fornecedores';
+        if (currentPath.includes('veiculo')) {
+            controller = 'Veiculo';
+        } else if (currentPath.includes('cliente')) {
+            controller = 'Cliente';
+        } else if (currentPath.includes('vendedor')) {
+            controller = 'Vendedor';
+        } else if (currentPath.includes('fornecedor')) {
+            controller = 'Fornecedor';
         }
 
         if (controller) {
@@ -166,5 +156,3 @@ window.confirmarExclusao = async function(id) {
         }
     }
 };
-
-console.log('🔗 Sistema de handlers automáticos carregado');

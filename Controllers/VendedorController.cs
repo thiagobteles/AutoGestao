@@ -43,7 +43,7 @@ namespace AutoGestao.Controllers
                         Name = "Sales",
                         DisplayName = "Vendas",
                         Icon = "fas fa-chart-line",
-                        Url = "/Relatorios/VendasVendedor/{id}",
+                        Url = "/Relatorio/VendasVendedor/{id}",
                         ShowCondition = (x) => ((Vendedor)x).Ativo == true
                     },
                     new()
@@ -51,7 +51,7 @@ namespace AutoGestao.Controllers
                         Name = "AlterarStatus",
                         DisplayName = "Inativar",
                         Icon = "fas fa-ban",
-                        Url = "/Vendedores/AlterarStatus/{id}",
+                        Url = "/Vendedor/AlterarStatus/{id}",
                         ShowCondition = (x) => ((Vendedor)x).Ativo == true
                     },
                     new()
@@ -59,7 +59,7 @@ namespace AutoGestao.Controllers
                         Name = "AlterarStatus",
                         DisplayName = "Ativar",
                         Icon = "fas fa-check",
-                        Url = "/Vendedores/AlterarStatus/{id}",
+                        Url = "/Vendedor/AlterarStatus/{id}",
                         ShowCondition = (x) => ((Vendedor)x).Ativo == false
                     }
                 ]);

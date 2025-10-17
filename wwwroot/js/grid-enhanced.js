@@ -248,8 +248,7 @@ class StandardGrid {
                 }
             })
             .catch(error => {
-                console.error('Erro ao carregar dados:', error);
-                this.showToast('Erro ao carregar dados: ' + error.message, 'error');
+                showError('Erro ao carregar dados: ' + error.message);
             })
             .finally(() => {
                 setTimeout(() => {
@@ -261,14 +260,14 @@ class StandardGrid {
     getAjaxUrl() {
         const currentPath = window.location.pathname.toLowerCase();
 
-        if (currentPath.includes('clientes')) {
-            return '/Clientes/GetDataAjax';
-        } else if (currentPath.includes('veiculos')) {
-            return '/Veiculos/GetDataAjax';
-        } else if (currentPath.includes('vendedores')) {
-            return '/Vendedores/GetDataAjax';
-        } else if (currentPath.includes('fornecedores')) {
-            return '/Fornecedores/GetDataAjax';
+        if (currentPath.includes('cliente')) {
+            return '/Cliente/GetDataAjax';
+        } else if (currentPath.includes('veiculo')) {
+            return '/Veiculo/GetDataAjax';
+        } else if (currentPath.includes('vendedor')) {
+            return '/Vendedor/GetDataAjax';
+        } else if (currentPath.includes('fornecedor')) {
+            return '/Fornecedor/GetDataAjax';
         }
 
         console.error('URL Ajax não identificada para:', currentPath);
@@ -447,14 +446,6 @@ class StandardGrid {
         }
     }
 
-    showToast(message, type = 'info', duration = 5000) {
-        if (typeof window.showToast === 'function') {
-            window.showToast(message, type, duration);
-        } else {
-            console.log(`Toast [${type}]: ${message}`);
-        }
-    }
-
     debug() {
         const overlay = document.querySelector(this.options.loadingSelector);
         const table = document.querySelector('.base-grid-table');
@@ -506,16 +497,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 window.confirmarExclusao = function (id) {
     // Usar modal de confirmação padrão do sistema, depois modal de resultado
-    if (confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
+    const confirmed = await showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'); if (confirmed) {
         const currentPath = window.location.pathname.toLowerCase();
         let controller = '';
 
-        if (currentPath.includes('veiculos')) {
-            controller = 'Veiculos';
-        } else if (currentPath.includes('clientes')) {
-            controller = 'Clientes';
-        } else if (currentPath.includes('vendedores')) {
-            controller = 'Vendedores';
+        if (currentPath.includes('veiculo')) {
+            controller = 'Veiculo';
+        } else if (currentPath.includes('cliente')) {
+            controller = 'Cliente';
+        } else if (currentPath.includes('vendedor')) {
+            controller = 'Vendedor';
         }
 
         if (controller) {
@@ -1046,165 +1037,11 @@ window.exportarDados = function (controller, formato = 'csv') {
 };
 
 // ===================================================================
-// SISTEMA DE NOTIFICAÇÕES MELHORADO
-// ===================================================================
-
-class ToastManager {
-    constructor() {
-        this.container = this.createContainer();
-    }
-
-    createContainer() {
-        let container = document.querySelector('.toast-container-modern');
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'toast-container-modern';
-            container.innerHTML = `
-                <style>
-                .toast-container-modern {
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    z-index: 10000;
-                    max-width: 400px;
-                }
-                .toast-modern {
-                    background: white;
-                    border-radius: 8px;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-                    margin-bottom: 10px;
-                    overflow: hidden;
-                    transform: translateX(100%);
-                    transition: transform 0.3s ease;
-                }
-                .toast-modern.show {
-                    transform: translateX(0);
-                }
-                .toast-modern.hide {
-                    transform: translateX(100%);
-                }
-                .toast-header-modern {
-                    display: flex;
-                    align-items: center;
-                    padding: 12px 16px;
-                    border-bottom: 1px solid #f0f0f0;
-                }
-                .toast-icon {
-                    width: 24px;
-                    height: 24px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-right: 8px;
-                    font-size: 12px;
-                }
-                .toast-icon.success { background: #d1fae5; color: #065f46; }
-                .toast-icon.error { background: #fee2e2; color: #991b1b; }
-                .toast-icon.warning { background: #fef3c7; color: #92400e; }
-                .toast-icon.info { background: #dbeafe; color: #1e40af; }
-                .toast-title {
-                    font-weight: 600;
-                    flex: 1;
-                }
-                .toast-close {
-                    background: none;
-                    border: none;
-                    color: #6b7280;
-                    cursor: pointer;
-                    padding: 4px;
-                }
-                .toast-body-modern {
-                    padding: 12px 16px;
-                    color: #374151;
-                }
-                .toast-progress {
-                    height: 3px;
-                    background: #f3f4f6;
-                    overflow: hidden;
-                }
-                .toast-progress-bar {
-                    height: 100%;
-                    background: currentColor;
-                    animation: progress 5s linear;
-                }
-                @keyframes progress {
-                    from { width: 100%; }
-                    to { width: 0%; }
-                }
-                </style>
-            `;
-            document.body.appendChild(container);
-        }
-        return container;
-    }
-
-    show(message, type = 'info', duration = 5000) {
-        const toast = document.createElement('div');
-        toast.className = 'toast-modern';
-
-        const iconMap = {
-            success: 'fas fa-check',
-            error: 'fas fa-times',
-            warning: 'fas fa-exclamation',
-            info: 'fas fa-info'
-        };
-
-        const titleMap = {
-            success: 'Sucesso',
-            error: 'Erro',
-            warning: 'Atenção',
-            info: 'Informação'
-        };
-
-        toast.innerHTML = `
-            <div class="toast-header-modern">
-                <div class="toast-icon ${type}">
-                    <i class="${iconMap[type]}"></i>
-                </div>
-                <div class="toast-title">${titleMap[type]}</div>
-                <button class="toast-close" onclick="this.closest('.toast-modern').classList.add('hide')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="toast-body-modern">${message}</div>
-            <div class="toast-progress">
-                <div class="toast-progress-bar"></div>
-            </div>
-        `;
-
-        this.container.appendChild(toast);
-
-        setTimeout(() => toast.classList.add('show'), 100);
-        setTimeout(() => this.hide(toast), duration);
-    }
-
-    hide(toast) {
-        toast.classList.add('hide');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }
-}
-
-// Instanciar gerenciador de toast
-const toastManager = new ToastManager();
-
-// Sobrescrever função global de toast
-window.showToast = function (message, type = 'info', duration = 5000) {
-    toastManager.show(message, type, duration);
-};
-
-// ===================================================================
 // INICIALIZAÇÃO FINAL E EXPORTAÇÕES
 // ===================================================================
 
 // Aguardar que tudo esteja carregado
 window.addEventListener('load', function () {
-    console.log('📋 Sistema de Grid completamente carregado');
-
     // Esconder qualquer loading residual
     setTimeout(() => {
         if (window.forceHideLoading) {
@@ -1423,7 +1260,7 @@ class DropdownPortalSystem {
                 item.addEventListener('click', (e) => {
                     if (action.name.toLowerCase().includes('delete') || action.name.toLowerCase().includes('excluir')) {
                         e.preventDefault();
-                        if (confirm('Tem certeza que deseja excluir este registro?')) {
+                        const confirmed = await showConfirm('Tem certeza que deseja excluir este registro?'); if (confirmed) {
                             window.location.href = action.url;
                         }
                     } else if (action.url && action.url !== '#') {
@@ -1552,16 +1389,16 @@ if (typeof confirmarExclusao === 'function') {
 
 window.confirmarExclusao = function (id) {
     // Usar modal de confirmação padrão do sistema, depois modal de resultado
-    if (confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
+    const confirmed = await showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'); if (confirmed) {
         const currentPath = window.location.pathname.toLowerCase();
         let controller = '';
 
-        if (currentPath.includes('veiculos')) {
-            controller = 'Veiculos';
-        } else if (currentPath.includes('clientes')) {
-            controller = 'Clientes';
-        } else if (currentPath.includes('vendedores')) {
-            controller = 'Vendedores';
+        if (currentPath.includes('veiculo')) {
+            controller = 'Veiculo';
+        } else if (currentPath.includes('cliente')) {
+            controller = 'Cliente';
+        } else if (currentPath.includes('vendedor')) {
+            controller = 'Vendedor';
         }
 
         if (controller) {

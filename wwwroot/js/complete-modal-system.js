@@ -1,8 +1,3 @@
-/**
- * Sistema Completo de Modais - Confirmação + Notificação
- * Substitui tanto o confirm() básico quanto o toast discreto
- */
-
 class ModalSystem {
     constructor() {
         this.isInitialized = false;
@@ -384,11 +379,6 @@ window.confirmDelete = function(itemName) {
     return window.modalSystem.confirmDelete(itemName);
 };
 
-// Compatibilidade com Toast existente
-window.showToast = function(message, type = 'success') {
-    return window.modalSystem.notify(message, type);
-};
-
 // ===================================================================
 // INTEGRAÇÃO COM SISTEMA DE GRID EXISTENTE
 // ===================================================================
@@ -402,12 +392,8 @@ window.confirmarExclusao = async function(id) {
         const currentPath = window.location.pathname.toLowerCase();
         let controller = '';
 
-        if (currentPath.includes('veiculos')) {
-            controller = 'Veiculos';
-        } else if (currentPath.includes('clientes')) {
-            controller = 'Clientes';
-        } else if (currentPath.includes('vendedores')) {
-            controller = 'Vendedores';
+        if (currentPath.includes('veiculo')) {
+            controller = 'Veiculo';
         }
 
         if (controller) {
@@ -443,5 +429,3 @@ window.confirmarExclusao = async function(id) {
         }
     }
 };
-
-console.log('🎯 Sistema Completo de Modais carregado (Confirmação + Notificação)');

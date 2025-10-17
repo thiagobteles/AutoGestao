@@ -42,7 +42,7 @@ class TabContentManager {
                 // Validar que o ID é um número válido
                 if (!id || isNaN(parseInt(id))) {
                     console.error('ID inválido:', id);
-                    this.showToast('Erro: ID do registro inválido', 'error');
+                    this.showError('Erro: ID do registro inválido');
                     return;
                 }
 
@@ -62,7 +62,7 @@ class TabContentManager {
                 // Validar que o ID é um número válido
                 if (!id || isNaN(parseInt(id))) {
                     console.error('ID inválido:', id);
-                    this.showToast('Erro: ID do registro inválido', 'error');
+                    this.showError('Erro: ID do registro inválido');
                     return;
                 }
 
@@ -124,16 +124,12 @@ class TabContentManager {
             });
 
         } catch (error) {
-            console.error('Erro ao abrir modal de criação:', error);
-            this.showToast('Erro ao abrir modal de criação: ' + error.message, 'error');
+            showError('Erro ao abrir modal de criação: ' + error.message);
         }
     }
 
     async openEditModal(controller, id, parentId, parentController) {
         try {
-            console.log('Abrindo modal de edição:', { controller, id, parentId, parentController });
-
-            // Validação extra
             if (!id || typeof id !== 'number') {
                 throw new Error(`ID inválido: ${id}`);
             }
@@ -153,7 +149,6 @@ class TabContentManager {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('Erro na resposta:', errorText);
                 throw new Error(`Erro ${response.status}: ${response.statusText}`);
             }
 
@@ -185,8 +180,7 @@ class TabContentManager {
             });
 
         } catch (error) {
-            console.error('Erro ao abrir modal de edição:', error);
-            this.showToast('Erro ao abrir modal de edição: ' + error.message, 'error');
+            showError('Erro ao abrir modal de edição: ' + error.message);
         }
     }
 
@@ -201,24 +195,16 @@ class TabContentManager {
         }
 
         const fieldName = `Id${singularParent}`;
-
-        console.log(`Campo pai calculado: ${fieldName} (de ${parentController} para ${controller})`);
-
         return fieldName;
     }
 
     async lockParentField(modal, parentField, parentId, parentController) {
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        console.log('Bloqueando campo pai:', { parentField, parentId });
-
         const hiddenInput = modal.querySelector(`input[name="${parentField}"]`);
 
         if (hiddenInput) {
-            console.log('Campo hidden encontrado:', hiddenInput);
-
             hiddenInput.value = parentId;
-
             const searchInput = modal.querySelector(`input.reference-search-input[data-target-field="${parentField}"]`);
 
             if (searchInput) {
@@ -371,7 +357,7 @@ class TabContentManager {
 
         if (!form.checkValidity()) {
             form.classList.add('was-validated');
-            this.showToast('Por favor, preencha todos os campos obrigatórios', 'warning');
+            this.showWarning('Por favor, preencha todos os campos obrigatórios');
             return;
         }
 
@@ -419,7 +405,7 @@ class TabContentManager {
                     const result = await response.json();
 
                     if (result.success) {
-                        this.showToast(result.message || 'Registro salvo com sucesso!', 'success');
+                        showSuccess(result.message || 'Registro salvo com sucesso!');
 
                         const bsModal = bootstrap.Modal.getInstance(modal);
                         if (bsModal) {
@@ -444,8 +430,7 @@ class TabContentManager {
             }
 
         } catch (error) {
-            console.error('Erro ao salvar:', error);
-            this.showToast(`Erro ao salvar: ${error.message}`, 'error');
+            showError(`Erro ao salvar: ${error.message}`);
         } finally {
             if (saveBtn) {
                 saveBtn.innerHTML = originalBtnContent;
@@ -455,7 +440,7 @@ class TabContentManager {
     }
 
     async deleteItem(controller, id) {
-        if (!confirm('Tem certeza que deseja excluir este registro?')) {
+        const confirmed = await confirmDelete(); if (!confirmed) {
             return;
         }
 
@@ -472,13 +457,13 @@ class TabContentManager {
                 const result = await response.json();
 
                 if (result.success) {
-                    this.showToast('Registro excluído com sucesso!', 'success');
+                    this.showSuccess('Registro excluído com sucesso!');
 
                     if (typeof window.tabSystem !== 'undefined') {
                         window.tabSystem.reloadActiveTab();
                     }
                 } else {
-                    this.showToast(result.message || 'Erro ao excluir registro', 'error');
+                    showError(result.message || 'Erro ao excluir registro');
                 }
             } else {
                 throw new Error(`Erro ${response.status}`);
@@ -486,7 +471,7 @@ class TabContentManager {
 
         } catch (error) {
             console.error('Erro ao excluir:', error);
-            this.showToast('Erro ao excluir registro', 'error');
+            this.showError('Erro ao excluir registro');
         }
     }
 
@@ -505,21 +490,7 @@ class TabContentManager {
             }
         }
 
-        this.showToast('Por favor, corrija os erros no formulário', 'error');
-    }
-
-    showToast(message, type = 'info') {
-        if (typeof Toastify !== 'undefined') {
-            Toastify({
-                text: message,
-                duration: 3000,
-                gravity: 'top',
-                position: 'right',
-                backgroundColor: type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8',
-            }).showToast();
-        } else {
-            alert(message);
-        }
+        this.showError('Por favor, corrija os erros no formulário');
     }
 }
 

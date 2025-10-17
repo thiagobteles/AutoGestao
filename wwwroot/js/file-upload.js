@@ -177,12 +177,12 @@
                         value: hiddenInput.value
                     });
 
-                    this.showSuccess(container, result.message);
+                    showSuccess(container, result.message);
 
                     // Substituir campo de upload por preview
                     this.replaceUploadWithPreview(container, result, input.closest('.form-group-modern'), propertyName);
                 } else {
-                    this.showError(container, result.message);
+                    showError(container, result.message);
                     input.value = '';
                     this.resetLabel(input);
                 }
@@ -293,7 +293,7 @@
             event.preventDefault();
             event.stopPropagation();
 
-            if (!confirm('Deseja realmente excluir este arquivo?')) {
+            const confirmed = await confirmDelete(); if (!confirmed) {
                 return;
             }
 
@@ -344,12 +344,12 @@
 
                     // Remover preview e recriar campo de upload
                     this.recreateUploadField(container, propertyName);
-                    this.showSuccess(container, result.message);
+                    showSuccess(container, result.message);
                 } else {
-                    this.showError(container, result.message);
+                    showError(container, result.message);
                 }
             } catch (error) {
-                this.showError(container, 'Erro ao excluir arquivo');
+                showError(container, 'Erro ao excluir arquivo');
                 console.error('[DELETE] Erro:', error);
             } finally {
                 this.hideLoading(container);
@@ -465,30 +465,6 @@
         hideLoading(container) {
             const spinner = container.querySelector('.upload-spinner');
             if (spinner) spinner.remove();
-        }
-
-        showSuccess(container, message) {
-            this.showToast(message, 'success');
-        }
-
-        showError(container, message) {
-            this.showToast(message, 'danger');
-        }
-
-        showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
-            toast.style.zIndex = '9999';
-            toast.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 150);
-            }, 3000);
         }
 
         getControllerName() {

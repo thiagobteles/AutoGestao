@@ -345,69 +345,6 @@
                 }
             });
         });
-
-        // ===================================================================
-        // SISTEMA DE NOTIFICAÇÕES TOAST
-        // ===================================================================
-        function showToast(message, type = 'info', duration = 5000) {
-            const container = getToastContainer();
-
-            const toast = document.createElement('div');
-            toast.className = 'toast-modern';
-
-            const iconMap = {
-                success: 'fas fa-check',
-                error: 'fas fa-times',
-                warning: 'fas fa-exclamation',
-                info: 'fas fa-info'
-            };
-
-            const titleMap = {
-                success: 'Sucesso',
-                error: 'Erro',
-                warning: 'Atenção',
-                info: 'Informação'
-            };
-
-            toast.innerHTML = `
-                <div class="toast-header-modern">
-                    <div class="toast-icon ${type}">
-                        <i class="${iconMap[type]}"></i>
-                    </div>
-                    <div class="toast-title">${titleMap[type]}</div>
-                    <button class="toast-close" onclick="hideToast(this.closest('.toast-modern'))">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="toast-body-modern">${message}</div>
-                <div class="toast-progress">
-                    <div class="toast-progress-bar"></div>
-                </div>
-            `;
-
-            container.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 100);
-            setTimeout(() => hideToast(toast), duration);
-        }
-
-        function getToastContainer() {
-            let container = document.querySelector('.toast-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.className = 'toast-container';
-                document.body.appendChild(container);
-            }
-            return container;
-        }
-
-        function hideToast(toast) {
-            toast.classList.add('hide');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 400);
-        }
     </script>
 
     <!-- Sistema de Grid Unificado -->
@@ -559,16 +496,13 @@
                         if (gridContainer) {
                             gridContainer.innerHTML = html;
                             updateUrl(params);
-
-                            // Reinicializar eventos após atualizar a grid
                             initializeGridEvents();
                         } else {
                             console.error('Grid container não encontrado');
                         }
                     })
                     .catch(error => {
-                        console.error('Erro ao carregar dados:', error);
-                        showToast('Erro ao carregar dados: ' + error.message, 'error');
+                        showError('Erro ao carregar dados: ' + error.message);
                     })
                     .finally(() => {
                         // Sempre esconder loading

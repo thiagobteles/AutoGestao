@@ -341,7 +341,7 @@ async function submitFormAjax(form) {
         const result = await response.json();
 
         if (result.success) {
-            showToast(result.message || 'Salvo com sucesso!', 'success');
+            showSuccess(result.message || 'Salvo com sucesso!');
             setTimeout(() => {
                 window.location.href = result.redirectUrl || window.location.pathname.replace(/\/(Create|Edit).*/, '');
             }, 1000);
@@ -349,12 +349,12 @@ async function submitFormAjax(form) {
             if (result.errors) {
                 displayErrors(result.errors, form);
             }
-            showToast(result.message || 'Erro ao salvar', 'error');
+            showError(result.message || 'Erro ao salvar');
         }
 
     } catch (error) {
         console.error('[FORM] Erro:', error);
-        showToast('Erro ao processar requisição', 'error');
+        showError('Erro ao processar requisição');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -399,27 +399,6 @@ function clearAllErrors(form) {
     }
 }
 
-function showToast(message, type = 'info') {
-    if (window.showNotification) {
-        window.showNotification(message, type);
-        return;
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} position-fixed`;
-    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    toast.innerHTML = `
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        ${message}
-    `;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
-
 // ================================================================================================
 // BUSCA AUTOMÁTICA DE CEP
 // ================================================================================================
@@ -438,13 +417,13 @@ function initializeCepAutoFill() {
 
 async function buscarCep(cep) {
     try {
-        showToast('Buscando CEP...', 'info');
+        showInfo('Buscando CEP...');
 
         const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
         const data = await response.json();
 
         if (data.erro) {
-            showToast('CEP não encontrado!', 'warning');
+            showWarning('CEP não encontrado!');
             return;
         }
 
@@ -470,11 +449,11 @@ async function buscarCep(cep) {
             }
         });
 
-        showToast('CEP encontrado com sucesso!', 'success');
+        showSuccess('CEP encontrado com sucesso!');
 
     } catch (error) {
         console.error('Erro ao buscar CEP:', error);
-        showToast('Erro ao buscar CEP!', 'error');
+        showError('Erro ao buscar CEP!');
     }
 }
 
@@ -506,48 +485,6 @@ function clearFieldErrors(field) {
     }
 }
 
-function showToast(message, type = 'info') {
-    // Usar sistema de toast existente ou criar um simples
-    if (window.showToast) {
-        window.showToast(message, type);
-    } else {
-        // Toast simples se não houver sistema
-        console.log(`${type.toUpperCase()}: ${message}`);
-
-        // Criar toast simples
-        const toast = document.createElement('div');
-        toast.className = `alert alert-${getBootstrapClass(type)} toast-simple`;
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
-            opacity: 0;
-            transition: all 0.3s ease;
-        `;
-        toast.innerHTML = `
-            <i class="${getToastIcon(type)}"></i>
-            ${message}
-            <button type="button" class="btn-close" onclick="this.parentNode.remove()"></button>
-        `;
-
-        document.body.appendChild(toast);
-
-        // Mostrar toast
-        setTimeout(() => {
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateY(0)';
-        }, 100);
-
-        // Remover automaticamente
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 300);
-        }, 4000);
-    }
-}
-
 function getBootstrapClass(type) {
     const mapping = {
         'success': 'success',
@@ -556,16 +493,6 @@ function getBootstrapClass(type) {
         'info': 'info'
     };
     return mapping[type] || 'info';
-}
-
-function getToastIcon(type) {
-    const mapping = {
-        'success': 'fas fa-check-circle',
-        'error': 'fas fa-exclamation-circle',
-        'warning': 'fas fa-exclamation-triangle',
-        'info': 'fas fa-info-circle'
-    };
-    return mapping[type] || 'fas fa-info-circle';
 }
 
 // ================================================================================================
@@ -591,10 +518,6 @@ style.textContent = `
         opacity: 1;
         max-height: 200px;
         transition-delay: 0.1s;
-    }
-    
-    .toast-simple {
-        transform: translateY(-20px);
     }
     
     .standard-form.loading {
