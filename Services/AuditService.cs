@@ -49,7 +49,7 @@ namespace AutoGestao.Services
                     UsuarioNome = usuario.Nome,
                     UsuarioEmail = usuario.Email,
                     EntidadeNome = entidadeNome,
-                    EntidadeDisplayName = GetEntityDisplayName(entidadeNome),
+                    EntidadeDisplayName = entidadeNome,
                     EntidadeId = entidadeId,
                     TipoOperacao = tipoOperacao,
                     TabelaNome = GetTableName(entidadeNome),
@@ -233,24 +233,6 @@ namespace AutoGestao.Services
             }
 
             return ip ?? "Unknown";
-        }
-
-        private static string GetEntityDisplayName(string entidadeNome)
-        {
-            // Adicione mapeamentos conforme necessário
-            var displayNames = new Dictionary<string, string>
-            {
-                { "Usuario", "Usuário" },
-                { "Cliente", "Cliente" },
-                { "Veiculo", "Veículo" },
-                { "Produto", "Produto" },
-                { "Venda", "Venda" },
-                { "Empresa", "Empresa" }
-            };
-
-            return displayNames.TryGetValue(entidadeNome, out var displayName)
-                ? displayName
-                : entidadeNome;
         }
 
         private static string GetTableName(string entidadeNome)

@@ -231,6 +231,7 @@
     <script src="~/js/complete-modal-system.js" asp-append-version="true"></script>
     <script src="~/js/response-handlers.js" asp-append-version="true"></script>
     <script src="~/js/grid-specific-fixes.js" asp-append-version="true"></script>
+    <script src="~/js/grid-controller-resolver.js" asp-append-version="true"></script>
 
     @if (!Globais.EhAutoGestao)
     {
@@ -461,27 +462,16 @@
                 const currentPath = window.location.pathname.toLowerCase();
                 let ajaxUrl;
 
-                if (currentPath.includes('veiculo'))
+                let controller = gridControllerResolver.getCurrentController(); //this.getAttribute('data-controller');
+                if (controller != null)
                 {
-                    ajaxUrl = '/Veiculo/GetVeiculoAjax';
-                }
-                else if (currentPath.includes('cliente'))
-                {
-                    ajaxUrl = '/Cliente/GetClienteAjax';
+                    ajaxUrl = `'${controller}/Get${controller}Ajax`;
                 }
                 else
                 {
-                    let controller = this.getAttribute('data-controller');
-                    if (controller != null)
-                    {
-                        ajaxUrl = `'${controller}/Get${controller}Ajax`;
-                    }
-                    else
-                    {
-                        console.error('URL Ajax não identificada para:', currentPath);
-                        forceHideLoading();
-                        return;
-                    }
+                    console.error('URL Ajax não identificada para:', currentPath);
+                    forceHideLoading();
+                    return;
                 }
 
                 fetch(`${ajaxUrl}?${params.toString()}`)
@@ -595,16 +585,7 @@
             window.confirmarExclusao = function(id) {
                 if (confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
                     const currentPath = window.location.pathname.toLowerCase();
-                    let controller = '';
-
-                    if (currentPath.includes('veiculo'))
-                    {
-                        controller = 'Veiculo';
-                    }
-                    else
-                    {
-                        controller = this.getAttribute('data-controller');
-                    }
+                    let controller = window.gridControllerResolver.getCurrentController();
 
                     if (controller)
                     {
@@ -949,8 +930,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(setupIntersectionObserver, 500);
         });
-
-        @Html.Raw(System.IO.File.ReadAllText(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "js", "grid-enhanced.js")))
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

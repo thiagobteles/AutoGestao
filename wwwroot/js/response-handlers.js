@@ -128,17 +128,7 @@ window.confirmarExclusao = async function(id) {
     
     if (confirmed) {
         const currentPath = window.location.pathname.toLowerCase();
-        let controller = '';
-
-        if (currentPath.includes('veiculo')) {
-            controller = 'Veiculo';
-        } else if (currentPath.includes('cliente')) {
-            controller = 'Cliente';
-        } else if (currentPath.includes('vendedor')) {
-            controller = 'Vendedor';
-        } else if (currentPath.includes('fornecedor')) {
-            controller = 'Fornecedor';
-        }
+        let controller = window.gridControllerResolver.getCurrentController();
 
         if (controller) {
             window.showLoading && window.showLoading(true);

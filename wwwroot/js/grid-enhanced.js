@@ -259,15 +259,10 @@ class StandardGrid {
 
     getAjaxUrl() {
         const currentPath = window.location.pathname.toLowerCase();
+        const controller = window.gridControllerResolver.getCurrentController();
 
-        if (currentPath.includes('cliente')) {
-            return '/Cliente/GetDataAjax';
-        } else if (currentPath.includes('veiculo')) {
-            return '/Veiculo/GetDataAjax';
-        } else if (currentPath.includes('vendedor')) {
-            return '/Vendedor/GetDataAjax';
-        } else if (currentPath.includes('fornecedor')) {
-            return '/Fornecedor/GetDataAjax';
+        if (controller) {
+            return `/${controller}/GetDataAjax`;
         }
 
         console.error('URL Ajax não identificada para:', currentPath);
@@ -497,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 window.confirmarExclusao = function (id) {
     // Usar modal de confirmação padrão do sistema, depois modal de resultado
-    const confirmed = await showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'); if (confirmed) {
+    const confirmed = showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'); if (confirmed) {
         const currentPath = window.location.pathname.toLowerCase();
         let controller = '';
 
@@ -1260,7 +1255,7 @@ class DropdownPortalSystem {
                 item.addEventListener('click', (e) => {
                     if (action.name.toLowerCase().includes('delete') || action.name.toLowerCase().includes('excluir')) {
                         e.preventDefault();
-                        const confirmed = await showConfirm('Tem certeza que deseja excluir este registro?'); if (confirmed) {
+                        const confirmed = showConfirm('Tem certeza que deseja excluir este registro?'); if (confirmed) {
                             window.location.href = action.url;
                         }
                     } else if (action.url && action.url !== '#') {
@@ -1389,7 +1384,7 @@ if (typeof confirmarExclusao === 'function') {
 
 window.confirmarExclusao = function (id) {
     // Usar modal de confirmação padrão do sistema, depois modal de resultado
-    const confirmed = await showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'); if (confirmed) {
+    const confirmed = showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'); if (confirmed) {
         const currentPath = window.location.pathname.toLowerCase();
         let controller = '';
 

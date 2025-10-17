@@ -1,21 +1,9 @@
-/**
- * CORREÇÕES ESPECÍFICAS PARA PROBLEMAS IDENTIFICADOS
- * - Botão Limpar usando confirm() antigo
- * - Grid perdeu duplo clique
- * - Botão de ações parou de funcionar
- */
-
-// ===================================================================
-// 1. CORREÇÃO PARA BOTÕES LIMPAR - PADRÃO EM FORMULÁRIOS
-// ===================================================================
-
-// PROBLEMA: Botões "Limpar" ainda usam confirm() nativo
-// SOLUÇÃO: Substituir por modal de confirmação
-
 // JavaScript para substituir confirmações de limpeza
 document.addEventListener('DOMContentLoaded', function () {
+
     // Interceptar cliques em botões de limpar
     document.addEventListener('click', async function (e) {
+
         // Verificar se é botão de limpar/cancelar
         if (e.target.matches('.btn-secondary, .btn-outline-secondary, [onclick*="confirm"], [onclick*="limpar"]') ||
             e.target.textContent.toLowerCase().includes('limpar') ||
@@ -48,13 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // ===================================================================
 // 2. CORREÇÃO PARA DUPLO CLIQUE NA GRID
 // ===================================================================
-
-// PROBLEMA: Grid perdeu funcionalidade de duplo clique
-// SOLUÇÃO: Reativar eventos de duplo clique
-
 function restoreGridDoubleClick() {
-    console.log('🔄 Restaurando duplo clique da grid...');
-
     // Encontrar tabelas da grid
     const gridTables = document.querySelectorAll('.base-grid-table, .grid-table, table[data-grid="true"]');
 
@@ -63,8 +45,10 @@ function restoreGridDoubleClick() {
         const rows = table.querySelectorAll('tbody tr');
 
         rows.forEach(row => {
+
             // Adicionar evento de duplo clique
             row.addEventListener('dblclick', function (e) {
+
                 // Evitar conflito com botões de ação
                 if (e.target.closest('.dropdown, .btn, button, a')) {
                     return;
@@ -80,20 +64,12 @@ function restoreGridDoubleClick() {
 
                 // Determinar controller baseado na URL
                 const currentPath = window.location.pathname;
-                let controller = '';
-
-                if (currentPath.includes('Clientes')) controller = 'Cliente';
-                else if (currentPath.includes('Veiculo')) controller = 'Veiculo';
-                else if (currentPath.includes('Vendedor')) controller = 'Vendedor';
-                else if (currentPath.includes('Fornecedor')) controller = 'Fornecedor';
-                else if (currentPath.includes('Usuario')) controller = 'Usuario';
+                let controller = window.gridControllerResolver.getCurrentController();
 
                 // Abrir edição
                 if (controller && entityId) {
                     window.location.href = `/${controller}/Edit/${entityId}`;
                 }
-
-                console.log(`📝 Duplo clique: ${controller}/${entityId}`);
             });
 
             // Adicionar cursor pointer para indicar clicável
@@ -106,16 +82,12 @@ function restoreGridDoubleClick() {
 // ===================================================================
 // 3. CORREÇÃO PARA BOTÕES DE AÇÃO (DROPDOWN)
 // ===================================================================
-
-// PROBLEMA: Botões de ação pararam de funcionar
-// SOLUÇÃO: Reativar dropdowns e eventos
-
 function restoreGridActions() {
-    console.log('🔄 Restaurando ações da grid...');
 
     // Reativar dropdowns Bootstrap
     const dropdownButtons = document.querySelectorAll('[data-bs-toggle="dropdown"], .dropdown-toggle');
     dropdownButtons.forEach(button => {
+
         // Garantir que Bootstrap dropdown funcione
         if (!button.getAttribute('data-bs-toggle')) {
             button.setAttribute('data-bs-toggle', 'dropdown');
@@ -125,7 +97,6 @@ function restoreGridActions() {
         try {
             new bootstrap.Dropdown(button);
         } catch (e) {
-            console.log('Dropdown já inicializado ou Bootstrap não disponível');
         }
     });
 
@@ -206,13 +177,7 @@ function getCurrentController() {
 // ===================================================================
 // 4. CORREÇÃO ESPECÍFICA PARA CONFIRMS EM ATRIBUTOS ONCLICK
 // ===================================================================
-
-// PROBLEMA: Elementos com onclick="confirm(...)" ainda usam confirm nativo
-// SOLUÇÃO: Interceptar e substituir
-
 function fixOnclickConfirms() {
-    console.log('🔄 Corrigindo confirms em onclick...');
-
     // Buscar todos elementos com onclick contendo confirm
     const elementsWithConfirm = document.querySelectorAll('*[onclick*="confirm"]');
 
@@ -259,21 +224,16 @@ function fixOnclickConfirms() {
 
 // Executar correções quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('🔧 Iniciando correções específicas...');
-
     // Aguardar um pouco para garantir que outros scripts carregaram
     setTimeout(function () {
         restoreGridDoubleClick();
         restoreGridActions();
         fixOnclickConfirms();
-
-        console.log('✅ Correções específicas aplicadas');
     }, 1000);
 });
 
 // Executar também após AJAX/atualizações da grid
 document.addEventListener('gridUpdated', function () {
-    console.log('🔄 Grid atualizada, reaplicando correções...');
     restoreGridDoubleClick();
     restoreGridActions();
     fixOnclickConfirms();
@@ -287,7 +247,4 @@ window.applyGridFixes = function () {
     restoreGridDoubleClick();
     restoreGridActions();
     fixOnclickConfirms();
-    console.log('✅ Correções da grid reaplicadas manualmente');
 };
-
-console.log('🛠️ Sistema de correções específicas carregado');

@@ -257,7 +257,7 @@ class TabContentManager {
 
     async fetchParentDisplayName(parentController, parentId) {
         try {
-            const response = await fetch(`/${parentController}/GetDisplayName/${parentId}`, {
+            const response = await fetch(`/${parentController}/${AutoGestao.Controllers.Base.StandardGridController.GetDisplayName(parentController)}/${parentId}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }

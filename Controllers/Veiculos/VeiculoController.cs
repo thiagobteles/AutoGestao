@@ -1,6 +1,7 @@
 using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
+using AutoGestao.Entidades.Relatorio;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
@@ -48,7 +49,7 @@ namespace AutoGestao.Controllers.Veiculos
                         Name = "Sell",
                         DisplayName = "Vender",
                         Icon = "fas fa-handshake",
-                        Url = "/Vendas/Create?idVeiculo={id}",
+                        Url = "/Venda/Create?idVeiculo={id}",
                         ShowCondition = (x) => ((Veiculo)x).Situacao == EnumSituacaoVeiculo.Estoque
                     },
                     new()
@@ -56,7 +57,7 @@ namespace AutoGestao.Controllers.Veiculos
                         Name = "Reserve",
                         DisplayName = "Reservar",
                         Icon = "fas fa-bookmark",
-                        Url = "/Veiculos/Reservar/{id}",
+                        Url = "/Veiculo/Reservar/{id}",
                         ShowCondition = (x) => ((Veiculo)x).Situacao == EnumSituacaoVeiculo.Estoque
                     },
                     new()
@@ -64,7 +65,7 @@ namespace AutoGestao.Controllers.Veiculos
                         Name = "Unreserve",
                         DisplayName = "Liberar",
                         Icon = "fas fa-bookmark-o",
-                        Url = "/Veiculos/Liberar/{id}",
+                        Url = "/Veiculo/Liberar/{id}",
                         ShowCondition = (x) => ((Veiculo)x).Situacao == EnumSituacaoVeiculo.Reservado
                     }
                 ]);
@@ -180,58 +181,58 @@ namespace AutoGestao.Controllers.Veiculos
 
         #region Endpoints Específicos
 
-        //[HttpGet]
-        //protected override async Task<IActionResult> GerarRelatorio(long id)
-        //{
-        //    var item = await _context.Veiculos
-        //        .Include(v => v.Cliente)
-        //        .Include(v => v.VeiculoMarca)
-        //        .Include(v => v.VeiculoMarcaModelo)
-        //        .Include(v => v.VeiculoCor)
-        //        .FirstOrDefaultAsync(v => v.Id == id);
+        [HttpGet]
+        public override async Task<IActionResult> GerarRelatorio(long id)
+        {
+            var item = await _context.Veiculos
+                .Include(v => v.Cliente)
+                .Include(v => v.VeiculoMarca)
+                .Include(v => v.VeiculoMarcaModelo)
+                .Include(v => v.VeiculoCor)
+                .FirstOrDefaultAsync(v => v.Id == id);
 
-        //    if (item == null)
-        //    {
-        //        return NotFound();
-        //    }
+            if (item == null)
+            {
+                return NotFound();
+            }
 
-        //    // Preparar dados para o relatório
-        //    var lancamento = new LancamentoVeiculo
-        //    {
-        //        Modelo = item.VeiculoMarcaModelo.Descricao,
-        //        Placa = item.Placa,
-        //        Ano = item.AnoComposto?.ToString(),
-        //        Chassi = item.Chassi,
-        //        Km = item.KmEntrada?.ToString(),
-        //        Cor = item.VeiculoCor.Descricao,
-        //        Combustivel = item.Combustivel.GetDescription(),
-        //        Cambio = item.Cambio.GetDescription(),
-        //        Receitas = [],
-        //        Lancamentos =
-        //        [
-        //            new()
-        //            {
-        //                DataCriacao = "25/08/2025",
-        //                Descricao = $"LAUDO CAUTELAR - {item.VeiculoMarcaModelo.Descricao}",
-        //                Status = "Pago pela loja",
-        //                Valor = 160.00m
-        //            },
-        //            new()
-        //            {
-        //                DataCriacao = "25/08/2025",
-        //                Descricao = $"Lavagem detalhada",
-        //                Status = "Pago pela loja",
-        //                Valor = 300.00m
-        //            }
-        //        ]
-        //    };
+            // Preparar dados para o relatório
+            var lancamento = new LancamentoVeiculo
+            {
+                Modelo = item.VeiculoMarcaModelo.Descricao,
+                Placa = item.Placa,
+                Ano = item.AnoComposto?.ToString(),
+                Chassi = item.Chassi,
+                Km = item.KmEntrada?.ToString(),
+                Cor = item.VeiculoCor.Descricao,
+                Combustivel = item.Combustivel.GetDescription(),
+                Cambio = item.Cambio.GetDescription(),
+                Receitas = [],
+                Lancamentos =
+                [
+                    new()
+                    {
+                        DataCriacao = "25/08/2025",
+                        Descricao = $"LAUDO CAUTELAR - {item.VeiculoMarcaModelo.Descricao}",
+                        Status = "Pago pela loja",
+                        Valor = 160.00m
+                    },
+                    new()
+                    {
+                        DataCriacao = "25/08/2025",
+                        Descricao = $"Lavagem detalhada",
+                        Status = "Pago pela loja",
+                        Valor = 300.00m
+                    }
+                ]
+            };
 
-        //    // Obter template padrão e gerar HTML
-        //    var template = _reportService.GetDefaultTemplate<LancamentoVeiculo>();
-        //    var html = _reportService.GenerateReportHtml(lancamento, template);
+            // Obter template padrão e gerar HTML
+            var template = _reportService.GetDefaultTemplate<LancamentoVeiculo>();
+            var html = _reportService.GenerateReportHtml(lancamento, template);
 
-        //    return Content(html, "text/html");
-        //}
+            return Content(html, "text/html");
+        }
 
         [HttpPost]
         public async Task<IActionResult> AdicionarDocumento(long id, IFormFile arquivo, string descricao)

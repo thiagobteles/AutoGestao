@@ -390,11 +390,7 @@ window.confirmarExclusao = async function(id) {
     
     if (confirmed) {
         const currentPath = window.location.pathname.toLowerCase();
-        let controller = '';
-
-        if (currentPath.includes('veiculo')) {
-            controller = 'Veiculo';
-        }
+        let controller = window.gridControllerResolver.getCurrentController();
 
         if (controller) {
             window.showLoading && window.showLoading(true);

@@ -1,12 +1,42 @@
+using System.Reflection;
+
 namespace AutoGestao.Helpers
 {
     /// <summary>
     /// Helper genérico para resolver nomes de controllers baseado em convenção
-    /// Convenção: NomeEntidade + "s" = NomeController
+    /// 100% automático - SEM mapeamentos manuais
     /// Exemplo: Cliente -> Clientes, Veiculo -> Veiculos, VeiculoMarca -> VeiculoMarcas
     /// </summary>
     public static class ControllerNameHelper
     {
+        /// <summary>
+        /// Obtém o nome do controller baseado no contexto atual (Controller que está executando)
+        /// </summary>
+        /// <returns>Nome do controller atual</returns>
+        public static string GetCurrentControllerName()
+        {
+            // Obter informações da stack trace para identificar o controller atual
+            var stackTrace = new System.Diagnostics.StackTrace();
+
+            for (int i = 0; i < stackTrace.FrameCount; i++)
+            {
+                var frame = stackTrace.GetFrame(i);
+                var method = frame?.GetMethod();
+                var declaringType = method?.DeclaringType;
+
+                if (declaringType != null &&
+                    declaringType.Name.EndsWith("Controller") &&
+                    declaringType.Name != "Controller" &&
+                    declaringType.Name != "StandardGridController")
+                {
+                    // Remover "Controller" do final para obter o nome
+                    return declaringType.Name[..^10]; // Remove "Controller"
+                }
+            }
+
+            throw new InvalidOperationException("Não foi possível determinar o controller atual");
+        }
+
         /// <summary>
         /// Obtém o nome do controller baseado no nome da entidade
         /// </summary>
@@ -14,13 +44,9 @@ namespace AutoGestao.Helpers
         /// <returns>Nome do controller (ex: "Clientes", "Veiculos")</returns>
         public static string GetControllerName(string entityName)
         {
-            if (string.IsNullOrWhiteSpace(entityName))
-            {
-                throw new ArgumentException("Nome da entidade não pode ser vazio", nameof(entityName));
-            }
-
-            // Convenção simples: Nome da entidade + "s"
-            return entityName + "s";
+            return string.IsNullOrWhiteSpace(entityName)
+                ? throw new ArgumentException("Nome da entidade não pode ser vazio", nameof(entityName))
+                : entityName;
         }
 
         /// <summary>
@@ -36,6 +62,16 @@ namespace AutoGestao.Helpers
             }
 
             return GetControllerName(entityType.Name);
+        }
+
+        /// <summary>
+        /// Obtém o nome do controller baseado no tipo genérico
+        /// </summary>
+        /// <typeparam name="T">Tipo da entidade</typeparam>
+        /// <returns>Nome do controller</returns>
+        public static string GetControllerName<T>()
+        {
+            return GetControllerName(typeof(T).Name);
         }
 
         /// <summary>
@@ -89,5 +125,109 @@ namespace AutoGestao.Helpers
         {
             return GetActionUrl(entityName, "Create");
         }
+
+        /// <summary>
+        /// Obtém a URL de exclusão de uma entidade
+        /// </summary>
+        /// <param name="entityName">Nome da entidade</param>
+        /// <param name="id">ID do registro</param>
+        /// <returns>URL de exclusão (ex: "/Clientes/Delete/123")</returns>
+        public static string GetDeleteUrl(string entityName, long id)
+        {
+            return GetActionUrl(entityName, "Delete", id);
+        }
+
+        /// <summary>
+        /// Obtém a URL de exportação de uma entidade
+        /// </summary>
+        /// <param name="entityName">Nome da entidade</param>
+        /// <param name="formato">Formato de exportação (opcional)</param>
+        /// <returns>URL de exportação (ex: "/Clientes/Export?formato=csv")</returns>
+        public static string GetExportUrl(string entityName, string? formato = null)
+        {
+            var url = GetActionUrl(entityName, "Export");
+
+            if (!string.IsNullOrEmpty(formato))
+            {
+                url += $"?formato={formato}";
+            }
+
+            return url;
+        }
+
+        /// <summary>
+        /// Obtém a URL AJAX para GetDataAjax de uma entidade
+        /// </summary>
+        /// <param name="entityName">Nome da entidade</param>
+        /// <returns>URL AJAX (ex: "/Clientes/GetDataAjax")</returns>
+        public static string GetAjaxUrl(string entityName)
+        {
+            return GetActionUrl(entityName, "GetDataAjax");
+        }
+
+        /// <summary>
+        /// Obtém URLs para um tipo genérico
+        /// </summary>
+        /// <typeparam name="T">Tipo da entidade</typeparam>
+        /// <returns>Objeto com URLs úteis</returns>
+        public static ControllerUrls GetUrls<T>()
+        {
+            var entityName = typeof(T).Name;
+            return new ControllerUrls
+            {
+                EntityName = entityName,
+                ControllerName = GetControllerName(entityName),
+                Index = GetActionUrl(entityName, "Index"),
+                Create = GetCreateUrl(entityName),
+                Export = GetExportUrl(entityName),
+                Ajax = GetAjaxUrl(entityName)
+            };
+        }
+
+        /// <summary>
+        /// Obtém URLs para uma entidade específica
+        /// </summary>
+        /// <typeparam name="T">Tipo da entidade</typeparam>
+        /// <param name="id">ID da entidade</param>
+        /// <returns>Objeto com URLs úteis</returns>
+        public static EntityUrls GetEntityUrls<T>(long id)
+        {
+            var entityName = typeof(T).Name;
+            return new EntityUrls
+            {
+                EntityName = entityName,
+                ControllerName = GetControllerName(entityName),
+                Id = id,
+                Details = GetDetailsUrl(entityName, id),
+                Edit = GetEditUrl(entityName, id),
+                Delete = GetDeleteUrl(entityName, id)
+            };
+        }
+    }
+
+    /// <summary>
+    /// URLs úteis para um controller
+    /// </summary>
+    public class ControllerUrls
+    {
+        public string EntityName { get; set; } = string.Empty;
+        public string ControllerName { get; set; } = string.Empty;
+        public string Index { get; set; } = string.Empty;
+        public string Create { get; set; } = string.Empty;
+        public string Export { get; set; } = string.Empty;
+        public string Ajax { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// URLs úteis para uma entidade específica
+    /// </summary>
+    public class EntityUrls
+    {
+        public string EntityName { get; set; } = string.Empty;
+        public string ControllerName { get; set; } = string.Empty;
+        public long Id { get; set; }
+        public string Details { get; set; } = string.Empty;
+        public string Edit { get; set; } = string.Empty;
+        public string Delete { get; set; } = string.Empty;
     }
 }

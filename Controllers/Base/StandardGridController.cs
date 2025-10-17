@@ -229,26 +229,6 @@ namespace AutoGestao.Controllers.Base
                 : 1;
         }
 
-        protected void PopulateEnumsInViewBag()
-        {
-            var enumProperties = typeof(T).GetProperties()
-                .Where(p => {
-                    var type = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
-                    return type.IsEnum;
-                });
-
-            foreach (var property in enumProperties)
-            {
-                var options = StandardGridController<T>.GetAutoEnumOptions(property.Name);
-                if (options.Count != 0)
-                {
-                    ViewBag.GetType().GetProperty(property.Name)?.SetValue(ViewBag, options);
-                    // Alternativamente, use ViewData:
-                    ViewData[property.Name] = options;
-                }
-            }
-        }
-
         #endregion
 
         #region Actions/EndPoints para Formulários Dinâmicos
@@ -980,7 +960,7 @@ namespace AutoGestao.Controllers.Base
         }
 
         [HttpPost]
-        public virtual async Task<IActionResult> DeleteFile([FromBody] DeleteFileRequest request)
+        public virtual async Task<IActionResult> DeleteFile([FromBody] DeleteFileRequestModel request)
         {
             try
             {
@@ -1415,35 +1395,7 @@ namespace AutoGestao.Controllers.Base
                    !StandardGridController<T>.ShouldAutoGenerateField(property);
         }
 
-        private static int GetPropertyOrder(PropertyInfo property)
-        {
-            var formField = property.GetCustomAttribute<FormFieldAttribute>();
-            if (formField != null)
-            {
-                return formField.Order;
-            }
-
-            var display = property.GetCustomAttribute<DisplayAttribute>();
-            if (display?.Order != null)
-            {
-                return display.Order;
-            }
-
-            // Ordem padrão baseada no nome
-            return property.Name.ToLower() switch
-            {
-                var name when name.Contains("nome") => 1,
-                var name when name.Contains("codigo") => 2,
-                var name when name.Contains("tipo") => 3,
-                var name when name.Contains("email") => 50,
-                var name when name.Contains("telefone") => 51,
-                var name when name.Contains("endereco") => 100,
-                var name when name.Contains("observa") => 1000,
-                _ => 500
-            };
-        }
-
-        private static string GetDisplayName(PropertyInfo property)
+        public static string GetDisplayName(PropertyInfo property)
         {
             var display = property.GetCustomAttribute<DisplayAttribute>();
             if (display?.Name != null)
@@ -1496,18 +1448,6 @@ namespace AutoGestao.Controllers.Base
                 EnumFieldType.TextArea => $"Digite as {GetDisplayName(property).ToLower()}...",
                 _ => $"Digite {GetDisplayName(property).ToLower()}"
             };
-        }
-
-        private static bool IsRequiredProperty(PropertyInfo property)
-        {
-            if (property.GetCustomAttribute<RequiredAttribute>() != null)
-            {
-                return true;
-            }
-
-            // Convenção: tipos não-nullable são obrigatórios (exceto string)
-            var type = property.PropertyType;
-            return !type.IsClass && Nullable.GetUnderlyingType(type) == null;
         }
 
         private static string GetSectionIcon(string sectionName)
@@ -2359,7 +2299,7 @@ namespace AutoGestao.Controllers.Base
                 TabId = tabId,
                 Title = title,
                 Icon = icon,
-                ControllerName = typeof(T).Name.Replace("Controller", "") + "s",
+                ControllerName = typeof(T).Name.Replace("Controller", ""),
                 ParentId = parentId,
                 ParentController = parentController,
                 Items = [.. items.Cast<object>()],
@@ -2422,12 +2362,5 @@ namespace AutoGestao.Controllers.Base
 
             return [.. columns.OrderBy(c => c.Order)];
         }
-    }
-
-    public class DeleteFileRequest
-    {
-        public string PropertyName { get; set; } = "";
-        public string FilePath { get; set; } = "";
-        public string? CustomBucket { get; set; }
     }
 }

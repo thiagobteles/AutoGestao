@@ -5,7 +5,7 @@
 
 /**
  * Obtém o nome do controller baseado no nome da entidade
- * Convenção: NomeEntidade + "s" = NomeController
+ * Convenção: NomeEntidade = NomeController
  * @param {string} entityName - Nome da entidade (ex: "Cliente", "Veiculo")
  * @returns {string} Nome do controller (ex: "Clientes", "Veiculos")
  */
@@ -15,8 +15,8 @@ function getControllerName(entityName) {
         return '';
     }
 
-    // Convenção simples: Nome da entidade + "s"
-    return entityName + 's';
+    // Convenção simples: Nome da entidade
+    return entityName;
 }
 
 /**

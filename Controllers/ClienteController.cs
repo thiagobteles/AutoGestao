@@ -54,7 +54,7 @@ namespace AutoGestao.Controllers
                         Name = "NewSale",
                         DisplayName = "Nova Venda",
                         Icon = "fas fa-handshake",
-                        Url = "/Vendas/Create?clienteId={id}",
+                        Url = "/Venda/Create?clienteId={id}",
                         ShowCondition = (x) => ((Cliente)x).Ativo == true
                     },
                     new()
@@ -62,7 +62,7 @@ namespace AutoGestao.Controllers
                         Name = "NewEvaluation",
                         DisplayName = "Nova Avaliação",
                         Icon = "fas fa-clipboard-check",
-                        Url = "/Avaliacoes/Create?clienteId={id}",
+                        Url = "/Avaliacao/Create?clienteId={id}",
                         ShowCondition = (x) => ((Cliente)x).Ativo == true
                     },
                     new()
@@ -70,7 +70,7 @@ namespace AutoGestao.Controllers
                         Name = "AlterarStatus",
                         DisplayName = "Inativar",
                         Icon = "fas fa-ban",
-                        Url = "/Clientes/AlterarStatus/{id}",
+                        Url = "/Cliente/AlterarStatus/{id}",
                         ShowCondition = (x) => ((Cliente)x).Ativo == true
                     },
                     new()
@@ -78,7 +78,7 @@ namespace AutoGestao.Controllers
                         Name = "AlterarStatus",
                         DisplayName = "Ativar",
                         Icon = "fas fa-check",
-                        Url = "/Clientes/AlterarStatus/{id}",
+                        Url = "/Cliente/AlterarStatus/{id}",
                         ShowCondition = (item) => ((Cliente)item).Ativo == false
                     }
                 ]);
@@ -130,7 +130,6 @@ namespace AutoGestao.Controllers
 
         protected override Task AfterCreate(Cliente entity)
         {
-            TempData["Success"] = $"Cliente {entity.Nome} criado com sucesso!";
             return base.AfterCreate(entity);
         }
 
@@ -142,7 +141,6 @@ namespace AutoGestao.Controllers
 
         protected override Task AfterUpdate(Cliente entity)
         {
-            TempData["Success"] = $"Cliente {entity.Nome} atualizado com sucesso!";
             return base.AfterUpdate(entity);
         }
 

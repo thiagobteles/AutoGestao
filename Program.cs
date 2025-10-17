@@ -150,7 +150,6 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
     var empresaService = scope.ServiceProvider.GetRequiredService<IEmpresaService>();
-    //ReportTemplateSeeder.SeedDefaultTemplates(context);
 
     if (Globais.EhAutoGestao)
     {
