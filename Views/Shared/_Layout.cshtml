@@ -1,11 +1,12 @@
 @using AutoGestao.Entidades
+@using AutoGestao.Entidades.Leads
 @using AutoGestao.Entidades.Veiculos
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AutoGestão</title>
+    <title>@ViewData["Title"] - @Globais.NomeApresentacao</title>
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
@@ -50,11 +51,21 @@
                 <!-- Cadastros -->
                 <div class="menu-section">
                     <div class="menu-section-title">Cadastros</div>
+                    @if (Globais.EhAutoGestao)
+                    {
+                        <div class="menu-item">
+                            <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
+                                <i class="fas fa-car"></i>
+                                <span class="menu-link-text">Veículos</span>
+                                <div class="menu-tooltip">Veículos</div>
+                            </a>
+                        </div>
+                    }
                     <div class="menu-item">
-                        <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
-                            <i class="fas fa-car"></i>
-                            <span class="menu-link-text">Veículos</span>
-                            <div class="menu-tooltip">Veículos</div>
+                        <a href="@Url.Action("Index", nameof(Lead))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Lead) ? "active" : "")">
+                            <i class="fas fa-newspaper"></i>
+                            <span class="menu-link-text">Leads</span>
+                            <div class="menu-tooltip">Leads</div>
                         </a>
                     </div>
                     <div class="menu-item">
@@ -110,12 +121,12 @@
                 </div>
 
                 <!-- Relatórios -->
-                @if (User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Financeiro"))
+                @if (Globais.EhAutoGestao && (User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Financeiro")))
                 {
                     <div class="menu-section">
                         <div class="menu-section-title">Relatórios</div>
                         <div class="menu-item">
-                            <a href="@Url.Action("Vendas", "Relatorio")" class="menu-link">
+                            <a href="@Url.Action("Venda", "Relatorio")" class="menu-link">
                                 <i class="fas fa-chart-bar"></i>
                                 <span class="menu-link-text">Vendas</span>
                                 <div class="menu-tooltip">Relatórios de Vendas</div>
@@ -158,7 +169,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a href="@Url.Action("Index", "Configuracoes")" class="menu-link">
+                            <a href="@Url.Action("Index", "Configuracao")" class="menu-link">
                                 <i class="fas fa-cog"></i>
                                 <span class="menu-link-text">Configurações</span>
                                 <div class="menu-tooltip">Configurações</div>
@@ -220,6 +231,14 @@
     <script src="~/js/complete-modal-system.js" asp-append-version="true"></script>
     <script src="~/js/response-handlers.js" asp-append-version="true"></script>
     <script src="~/js/grid-specific-fixes.js" asp-append-version="true"></script>
+
+    @if (!Globais.EhAutoGestao)
+    {
+        <!-- SCIPTS APENAS PARA UTILIZAR REACT -->
+        <script src="https://unpkg.com/react@18/umd/react.production.min.js" asp-append-version="true"></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" asp-append-version="true"></script>
+        <script src="~/react-dashboard/static/js/main.js" asp-append-version="true"></script>
+    }
 
     <!-- Esse script da aplicação vem sempre no final -->
     <script src="~/js/reference-field.js" asp-append-version="true"></script>
@@ -505,13 +524,13 @@
                 const currentPath = window.location.pathname.toLowerCase();
                 let ajaxUrl;
 
-                if (currentPath.includes('veiculos'))
+                if (currentPath.includes('veiculo'))
                 {
-                    ajaxUrl = '/Veiculos/GetVeiculosAjax';
+                    ajaxUrl = '/Veiculo/GetVeiculoAjax';
                 }
-                else if (currentPath.includes('clientes'))
+                else if (currentPath.includes('cliente'))
                 {
-                    ajaxUrl = '/Clientes/GetClientesAjax';
+                    ajaxUrl = '/Cliente/GetClienteAjax';
                 }
                 else
                 {
@@ -644,13 +663,9 @@
                     const currentPath = window.location.pathname.toLowerCase();
                     let controller = '';
 
-                    if (currentPath.includes('veiculos'))
+                    if (currentPath.includes('veiculo'))
                     {
-                        controller = 'Veiculos';
-                    }
-                    else if (currentPath.includes('clientes'))
-                    {
-                        controller = 'Clientes';
+                        controller = 'Veiculo';
                     }
                     else
                     {
@@ -719,7 +734,7 @@
                 // Filtros com debounce para busca
                 let searchTimeout;
                 const searchInputs = [
-                    'searchInput', 'searchClientes', 'searchVeiculos'
+                    'searchInput', 'searchCliente', 'searchVeiculo'
                 ];
 
                 searchInputs.forEach(inputId => {
@@ -918,25 +933,25 @@
         // Nova venda (Clientes)
         window.novaVenda = function(clienteId) {
             if (clienteId) {
-                window.location.href = `/Vendas/Create?clienteId=${clienteId}`;
+                window.location.href = `/Venda/Create?clienteId=${clienteId}`;
             } else {
-                window.location.href = '/Vendas/Create';
+                window.location.href = '/Venda/Create';
             }
         };
 
         // Nova avaliação (Clientes)
         window.novaAvaliacao = function(clienteId) {
             if (clienteId) {
-                window.location.href = `/Avaliacoes/Create?clienteId=${clienteId}`;
+                window.location.href = `/Avaliacao/Create?clienteId=${clienteId}`;
             } else {
-                window.location.href = '/Avaliacoes/Create';
+                window.location.href = '/Avaliacao/Create';
             }
         };
 
         // Vender veículo (Veículos)
         window.venderVeiculo = function(idVeiculo) {
             if (idVeiculo) {
-                window.location.href = `/Vendas/Create?idVeiculo=${idVeiculo}`;
+                window.location.href = `/Venda/Create?idVeiculo=${idVeiculo}`;
             }
         };
 

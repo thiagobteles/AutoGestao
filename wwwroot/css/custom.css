@@ -2556,7 +2556,7 @@ body .form-control[type="select-one"] {
 /* Campos de busca por nome/documento */
 input[name="search"],
 #searchInput,
-#searchClientes {
+#searchCliente {
     min-width: 200px !important;
 }
 
@@ -2949,7 +2949,7 @@ select {
 /* Campos específicos */
 input[name="search"],
 #searchInput,
-#searchClientes {
+#searchCliente {
     min-width: 160px !important;
 }
 

@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Veiculos
 {
     public class VeiculoController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Veiculo>> logger, IReportService reportService) 
         : StandardGridController<Veiculo>(context, fileStorageService, reportService, logger)

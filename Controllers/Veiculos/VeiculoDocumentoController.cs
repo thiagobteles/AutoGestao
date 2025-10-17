@@ -4,7 +4,7 @@ using AutoGestao.Entidades;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Services.Interface;
 
-namespace AutoGestao.Controllers
+namespace AutoGestao.Controllers.Veiculos
 {
     public class VeiculoDocumentoController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<VeiculoDocumento>> logger, IReportService reportService) 
         : StandardGridController<VeiculoDocumento>(context, fileStorageService, reportService, logger)

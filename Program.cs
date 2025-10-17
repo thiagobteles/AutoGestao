@@ -1,3 +1,4 @@
+using AutoGestao;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
@@ -8,7 +9,6 @@ using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Minio;
-using System.Configuration;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,8 +26,13 @@ builder.Services.AddControllersWithViews()
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("pt-BR");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
 
+// Obtem o nome do cliente
+var cliente = builder.Configuration.GetValue<string>("Cliente");
+Globais.Cliente = cliente;
+
 // Add Entity Framework com PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options => 
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection").Replace("#cliente#", cliente.ToLower())));
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -40,7 +45,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Login";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
-        options.Cookie.Name = "AutoGestao.Auth";
+        options.Cookie.Name = $"{cliente}.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
@@ -49,8 +54,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("MinioSettings"));
 
 var minioSettings = builder.Configuration.GetSection("MinioSettings").Get<MinioSettings>()!;
+minioSettings.BucketPrefix = cliente;
 
-builder.Services.AddSingleton<IMinioClient>(sp =>
+builder.Services.AddSingleton(sp =>
 {
     return new MinioClient()
         .WithEndpoint(minioSettings.Endpoint)
@@ -144,9 +150,9 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
     var empresaService = scope.ServiceProvider.GetRequiredService<IEmpresaService>();
-    ReportTemplateSeeder.SeedDefaultTemplates(context);
+    //ReportTemplateSeeder.SeedDefaultTemplates(context);
 
-    if (builder.Configuration.GetConnectionString("DefaultConnection").Contains("autogestao"))
+    if (Globais.EhAutoGestao)
     {
         await InicializarDadosPadraoAutoGestao(context, usuarioService, empresaService);
     }

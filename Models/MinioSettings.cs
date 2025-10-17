@@ -7,6 +7,6 @@ namespace AutoGestao.Models
         public string SecretKey { get; set; } = "Amigos25";
         public bool UseSSL { get; set; } = false;
         public int DefaultExpirySeconds { get; set; } = 3600;
-        public string BucketPrefix { get; set; } = "autogestao";
+        public string BucketPrefix { get; set; }
     }
 }
