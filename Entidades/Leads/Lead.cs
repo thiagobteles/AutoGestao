@@ -41,6 +41,5 @@ namespace AutoGestao.Entidades.Leads
 
         [GridStatus(ShowInGrid = false)]
         public new bool Ativo { get; set; } = true;
-
     }
 }

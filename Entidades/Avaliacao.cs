@@ -13,6 +13,8 @@ namespace AutoGestao.Entidades
         public int AnoVeiculo { get; set; }
 
         [GridField("Placa", Order = 25, Width = "100px")]
+        [ReferenceSearchable]
+        [ReferenceText]
         [FormField(Order = 1, Name = "Placa", Section = "Dados do Veículo", Icon = "fas fa-id-card", Type = EnumFieldType.Text, Placeholder = "XXX-0000")]
         public string? PlacaVeiculo { get; set; }
 

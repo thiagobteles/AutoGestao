@@ -11,6 +11,8 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 1, Name = "Tipo de Documento", Section = "Identificação", Icon = "fas fa-tags", Type = EnumFieldType.Select, Required = true, GridColumns = 2)]
         public EnumTipoDocumento TipoDocumento { get; set; } = EnumTipoDocumento.Nenhum;
 
+        [ReferenceSearchable]
+        [ReferenceText]
         [GridMain("Documento")]
         [FormField(Order = 2, Name = "Documento", Section = "Identificação", Icon = "fas fa-image", Type = EnumFieldType.Image, ImageSize = "75X75", AllowedExtensions = "jpg,jpeg,png,pdf", MaxSizeMB = 5)]
         public string? Documento { get; set; }

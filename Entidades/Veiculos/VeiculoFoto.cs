@@ -7,6 +7,8 @@ namespace AutoGestao.Entidades.Veiculos
     public class VeiculoFoto : BaseEntidade
     {
         [GridMain("Nome do Arquivo")]
+        [ReferenceSearchable]
+        [ReferenceText]
         [FormField(Order = 1, Name = "Nome do Arquivo", Section = "Arquivo", Icon = "fas fa-file", Type = EnumFieldType.Text, Required = true, ReadOnly = true, GridColumns = 2)]
         public string NomeArquivo { get; set; } = string.Empty;
 
