@@ -1,5 +1,6 @@
 using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
+using AutoGestao.Entidades;
 using AutoGestao.Entidades.Leads;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
@@ -46,6 +47,11 @@ namespace AutoGestao.Controllers
             return standardGridViewModel;
         }
 
+        protected override bool CanDelete(Lead entity)
+        {
+            return false;
+        }
+
         protected override IQueryable<Lead> ApplyFilters(IQueryable<Lead> query, Dictionary<string, object> filters)
         {
             foreach (var filter in filters)
@@ -74,63 +80,6 @@ namespace AutoGestao.Controllers
             }
 
             return query;
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public override async Task<IActionResult> Create(Lead entity)
-        {
-            if (!CanCreate(entity))
-            {
-                TempData["NotificationScript"] = "showError('Você não tem permissão para cadastrar um novo registro.')";
-                return Forbid();
-            }
-
-            var allProperties = typeof(Lead).GetProperties();
-            if (IsAjaxRequest())
-            {
-                return await HandleModalCreate(this, entity);
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    await BeforeCreate(entity);
-                    _context.Set<Lead>().Add(entity);
-                    await _context.SaveChangesAsync();
-                    await AfterCreate(entity);
-
-                    if (Request.IsAjaxRequest())
-                    {
-                        return Json(new { success = true, message = "Registro criado com sucesso!", redirectUrl = Url.Action("Index") });
-                    }
-
-                    TempData["NotificationScript"] = "showSuccess('Registro criado com sucesso!')";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Erro ao criar registro: {ex.Message}");
-                }
-            }
-            else
-            {
-                foreach (var error in ModelState)
-                {
-                    if (error.Value.Errors.Any())
-                    {
-                        Console.WriteLine($"{error.Key}: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
-                    }
-                }
-            }
-
-            var viewModel = await BuildFormViewModelAsync(entity, "Create");
-            AddModelStateToViewModel(viewModel);
-
-            return Request.IsAjaxRequest()
-                ? PartialView("_StandardFormContent", viewModel)
-                : View("_StandardForm", viewModel);
         }
     }
 }

@@ -11,6 +11,8 @@ namespace AutoGestao.Entidades
     {
         [ReportField("Descricao", Order = 1, Section = "Despesa", Type = EnumReportFieldType.Table)]
         [GridMain("Descrição", Order = 1)]
+        [ReferenceSearchable]
+        [ReferenceText]
         [FormField(Order = 1, Name = "Descrição", Section = "Informações", Icon = "fas fa-align-left", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]
         public string? Descricao { get; set; }
 
@@ -28,6 +30,7 @@ namespace AutoGestao.Entidades
         [FormField(Order = 4, Name = "Status", Section = "Informações", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true, GridColumns = 3)]
         public EnumStatusDespesa Status { get; set; } = EnumStatusDespesa.Pendente;
 
+        [ReferenceSubtitle(Order = 0, NavigationPath = "Veiculo.Codigo")]
         [FormField(Order = 40, Name = "Veículo", Section = "Vínculos", Icon = "fas fa-car", Type = EnumFieldType.Reference, Reference = typeof(Veiculo), Required = true, GridColumns = 2)]
         public long IdVeiculo { get; set; }
 

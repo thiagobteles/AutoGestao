@@ -440,7 +440,7 @@ class ReferenceFieldManager {
         const targetField = btn.dataset.targetField;
 
         try {
-            const controller = referenceType;
+            const controller = this.getControllerName(referenceType);
             const modal = this.createModal(controller, referenceType, targetField);
             document.body.appendChild(modal);
 
@@ -462,6 +462,10 @@ class ReferenceFieldManager {
             console.error('❌ Erro ao abrir modal:', error);
             this.showError('Erro ao abrir modal de criação');
         }
+    }
+
+    getControllerName(referenceType) {
+        return referenceType;
     }
 
     createModal(controller, referenceType, targetField) {

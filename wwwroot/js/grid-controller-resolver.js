@@ -27,12 +27,6 @@ class GridControllerResolver {
         return controller;
     }
 
-    /**
-     * Obtém o nome da entidade baseado no controller atual
-     * Convenção: NomeController (plural) -> NomeEntidade (singular)
-     * Exemplos: Clientes -> Cliente, Veiculos -> Veiculo, VeiculoMarcas -> VeiculoMarca
-     * @returns {string} Nome da entidade
-     */
     getCurrentEntity() {
         const controller = this.getCurrentController();
         if (!controller) return null;
@@ -44,6 +38,7 @@ class GridControllerResolver {
 
         let entity = controller;
         this.cache.set(controller, entity);
+        console.log(`🔄 Entidade derivada: ${controller} -> ${entity}`);
         return entity;
     }
 
@@ -105,6 +100,7 @@ class GridControllerResolver {
             window.showLoading(true);
         }
 
+        console.log(`🔗 Navegando para: ${url}`);
         window.location.href = url;
     }
 

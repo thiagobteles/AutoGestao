@@ -17,6 +17,8 @@ namespace AutoGestao.Entidades
         public EnumTipoPessoa TipoPessoa { get; set; }
 
         [GridMain("Nome/Razão Social")]
+        [ReferenceSearchable]
+        [ReferenceText]
         [FormField(Order = 10, Name = "Nome Completo", Section = "Dados Básicos", Icon = "fas fa-signature", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]
         public string Nome { get; set; } = string.Empty;
 

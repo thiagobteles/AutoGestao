@@ -8,6 +8,8 @@ namespace AutoGestao.Entidades
     public class Tarefa : BaseEntidade
     {
         [GridMain("Título")]
+        [ReferenceSearchable]
+        [ReferenceText]
         [FormField(Order = 1, Name = "Título", Section = "Dados Básicos", Icon = "fas fa-heading", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]
         public string Titulo { get; set; } = string.Empty;
 
