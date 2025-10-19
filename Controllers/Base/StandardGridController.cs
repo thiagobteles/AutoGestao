@@ -6,8 +6,6 @@ using AutoGestao.Extensions;
 using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Models.Grid;
-using AutoGestao.Models.Report;
-using AutoGestao.Services;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -1089,7 +1087,7 @@ namespace AutoGestao.Controllers.Base
         /// </summary>
         protected virtual bool HasTabAccess(string[] requiredRoles)
         {
-            return requiredRoles == null || requiredRoles.Length == 0 ? true : requiredRoles.Any(role => User.IsInRole(role));
+            return requiredRoles == null || requiredRoles.Length == 0 || requiredRoles.Any(role => User.IsInRole(role));
         }
 
         protected virtual async Task<StandardFormViewModel> BuildFormViewModelAsync(T entity, string action)
@@ -1283,7 +1281,7 @@ namespace AutoGestao.Controllers.Base
             return !ignoredNames.Contains(property.Name);
         }
 
-        private static List<GridAction> ObterHeaderActionsPadrao(string controllerNome)
+        private static List<GridRowAction> ObterHeaderActionsPadrao(string controllerNome)
         {
             return
                 [
@@ -1306,7 +1304,7 @@ namespace AutoGestao.Controllers.Base
                 ];
         }
 
-        private static List<GridAction> ObterRowActionsPadrao(string controllerNome)
+        private static List<GridRowAction> ObterRowActionsPadrao(string controllerNome)
         {
             return
                 [
@@ -1411,43 +1409,6 @@ namespace AutoGestao.Controllers.Base
 
             // Adicionar espaços antes de letras maiúsculas
             return System.Text.RegularExpressions.Regex.Replace(property.Name, "([a-z])([A-Z])", "$1 $2");
-        }
-
-        private static string GetDefaultIcon(PropertyInfo property)
-        {
-            var propertyName = property.Name.ToLower();
-
-            return propertyName switch
-            {
-                var name when name.Contains("nome") => "fas fa-signature",
-                var name when name.Contains("email") => "fas fa-envelope",
-                var name when name.Contains("telefone") || name.Contains("celular") => "fas fa-phone",
-                var name when name.Contains("endereco") => "fas fa-road",
-                var name when name.Contains("data") => "fas fa-calendar",
-                var name when name.Contains("valor") || name.Contains("preco") => "fas fa-dollar-sign",
-                "cpf" => "fas fa-fingerprint",
-                "cnpj" => "fas fa-building",
-                _ => "fas fa-edit"
-            };
-        }
-
-        private static string GetDefaultPlaceholder(PropertyInfo property)
-        {
-            var propertyName = property.Name.ToLower();
-            var fieldType = DetermineFieldType(property);
-
-            return fieldType switch
-            {
-                EnumFieldType.Email => "exemplo@email.com",
-                EnumFieldType.Telefone => "(00) 00000-0000",
-                EnumFieldType.Cpf => "000.000.000-00",
-                EnumFieldType.Cnpj => "00.000.000/0000-00",
-                EnumFieldType.Cep => "00000-000",
-                EnumFieldType.Currency => "R$ 0,00",
-                EnumFieldType.Date => "dd/mm/aaaa",
-                EnumFieldType.TextArea => $"Digite as {GetDisplayName(property).ToLower()}...",
-                _ => $"Digite {GetDisplayName(property).ToLower()}"
-            };
         }
 
         private static string GetSectionIcon(string sectionName)
@@ -1593,25 +1554,6 @@ namespace AutoGestao.Controllers.Base
 
         #region Automated Enum Detection and Population
 
-        private static EnumFieldType DetermineFieldType(PropertyInfo property)
-        {
-            var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-            if (type.IsEnum)
-            {
-                return EnumFieldType.Select;
-            }
-
-            return type switch
-            {
-                Type t when t == typeof(string) => EnumFieldType.Text,
-                Type t when t == typeof(int) || t == typeof(long) => EnumFieldType.Number,
-                Type t when t == typeof(decimal) || t == typeof(double) || t == typeof(float) => EnumFieldType.Currency,
-                Type t when t == typeof(DateTime) => EnumFieldType.Date,
-                Type t when t == typeof(bool) => EnumFieldType.Checkbox,
-                _ => EnumFieldType.Text
-            };
-        }
-
         private static List<SelectListItem> GetAutoEnumOptions(string propertyName)
         {
             try
@@ -1694,7 +1636,7 @@ namespace AutoGestao.Controllers.Base
                 {
                     if (rawValue != null)
                     {
-                        formattedValue = FormatFieldValueToString(rawValue, formFieldAttr.Type, property);
+                        formattedValue = StandardGridController<T>.FormatFieldValueToString(rawValue, formFieldAttr.Type, property);
                     }
                 }
                 catch (Exception ex)
@@ -1738,8 +1680,8 @@ namespace AutoGestao.Controllers.Base
                 {
                     PropertyName = property.Name,
                     DisplayName = formFieldAttr.Name ?? GetDisplayName(property),
-                    Icon = formFieldAttr.Icon ?? GetDefaultIcon(property),
-                    Placeholder = formFieldAttr.Placeholder ?? GetDefaultPlaceholder(property),
+                    Icon = formFieldAttr.Icon ?? PropertyExtensions.GetDefaultIcon(property),
+                    Placeholder = formFieldAttr.Placeholder ?? PropertyExtensions.GetDefaultPlaceholderByEnum(property),
                     Type = formFieldAttr.Type,
                     Required = isRequired,
                     ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
@@ -1770,8 +1712,7 @@ namespace AutoGestao.Controllers.Base
             return null;
         }
 
-        // NOVO MÉTODO: Converter valor para string formatada
-        private string? FormatFieldValueToString(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
+        private static string? FormatFieldValueToString(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
         {
             if (rawValue == null)
             {
@@ -1919,7 +1860,7 @@ namespace AutoGestao.Controllers.Base
             }
         }
 
-        private object? FormatFieldValue(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
+        private static object? FormatFieldValue(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
         {
             if (rawValue == null)
             {

@@ -133,5 +133,11 @@ namespace AutoGestao.Extensions
                 ? input.Trim()
                 : $"{digits[..2]}.{digits.Substring(2, 3)}.{digits.Substring(5, 3)}/{digits.Substring(8, 4)}-{digits.Substring(12, 2)}";
         }
+
+        public static string ToPlural(this string singular)
+        {
+            // Implementação simples de pluralização
+            return singular.EndsWith('s') ? singular : singular + "s";
+        }
     }
 }

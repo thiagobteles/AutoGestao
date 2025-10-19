@@ -19,7 +19,7 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Email/Login", Order = 2, Section = "Dados Básicos", Icon = "fas fa-envelope", Type = EnumFieldType.Email, Required = true)]
         public string Email { get; set; } = "";
 
-        [GridDocument("CPF", DocumentType.CPF)]
+        [GridDocument("CPF", EnumDocumentType.CPF)]
         [FormField(Name = "CPF", Order = 3, Section = "Dados Básicos", Icon = "fas fa-fingerprint", Type = EnumFieldType.Cpf)]
         public string? Cpf { get; set; }
 

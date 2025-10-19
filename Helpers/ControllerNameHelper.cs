@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace AutoGestao.Helpers
@@ -9,6 +10,8 @@ namespace AutoGestao.Helpers
     /// </summary>
     public static class ControllerNameHelper
     {
+        private static readonly ConcurrentDictionary<Type, string> _controllerNameCache = new();
+
         /// <summary>
         /// Obtém o nome do controller baseado no contexto atual (Controller que está executando)
         /// </summary>
@@ -50,18 +53,28 @@ namespace AutoGestao.Helpers
         }
 
         /// <summary>
-        /// Obtém o nome do controller baseado no tipo da entidade
+        /// Obtém nome do controller baseado no tipo da entidade
         /// </summary>
-        /// <param name="entityType">Tipo da entidade</param>
-        /// <returns>Nome do controller</returns>
         public static string GetControllerName(Type entityType)
         {
-            if (entityType == null)
+            return _controllerNameCache.GetOrAdd(entityType, type =>
             {
-                throw new ArgumentNullException(nameof(entityType));
-            }
+                var name = type.Name;
 
-            return GetControllerName(entityType.Name);
+                // Aplicar regras de pluralização e convenções
+                return name switch
+                {
+                    "Veiculo" => "Veiculos",
+                    "Cliente" => "Clientes",
+                    "Fornecedor" => "Fornecedores",
+                    "Vendedor" => "Vendedores",
+                    var n when n.EndsWith("ao") => n + "es", // ex: Opcao -> Opcoes
+                    var n when n.EndsWith("l") => n[..^1] + "is", // ex: Animal -> Animais
+                    var n when n.EndsWith("r") => n + "es", // ex: Vendedor -> Vendedores
+                    var n when n.EndsWith("s") => n, // já está no plural
+                    _ => name + "s" // regra padrão
+                };
+            });
         }
 
         /// <summary>
@@ -202,6 +215,26 @@ namespace AutoGestao.Helpers
                 Edit = GetEditUrl(entityName, id),
                 Delete = GetDeleteUrl(entityName, id)
             };
+        }
+
+        /// <summary>
+        /// Obtém display name do controller
+        /// </summary>
+        public static string GetControllerDisplayName(Type entityType)
+        {
+            var controllerName = GetControllerName(entityType);
+            return ConvertToDisplayName(controllerName);
+        }
+
+        private static string ConvertToDisplayName(string name)
+        {
+            // Converter CamelCase para palavras separadas
+            var result = System.Text.RegularExpressions.Regex.Replace(
+                name,
+                "([a-z])([A-Z])",
+                "$1 $2");
+
+            return result;
         }
     }
 

@@ -30,7 +30,7 @@ namespace AutoGestao.Entidades
         // CPF - NÃO aparece na grid principal
         // Mas aparece como subtitle na busca de referência
         // ============================================================
-        [GridDocument("CPF", DocumentType.CPF, ShowInGrid = false)]
+        [GridDocument("CPF", EnumDocumentType.CPF, ShowInGrid = false)]
         [ConditionalDisplay("TipoPessoa == 1")]
         [FormField(Order = 10, Name = "CPF", Section = "Dados Básicos", Icon = "fas fa-fingerprint", Type = EnumFieldType.Cpf)]
         public string? Cpf { get; set; }
@@ -43,7 +43,7 @@ namespace AutoGestao.Entidades
         // CNPJ - NÃO aparece na grid principal
         // Mas aparece como subtitle na busca de referência
         // ============================================================
-        [GridDocument("CNPJ", DocumentType.CNPJ, ShowInGrid = false)]
+        [GridDocument("CNPJ", EnumDocumentType.CNPJ, ShowInGrid = false)]
         [ConditionalDisplay("TipoPessoa == 2")]
         [FormField(Order = 10, Name = "CNPJ", Section = "Dados Básicos", Icon = "fas fa-building", Type = EnumFieldType.Cnpj)]
         public string? Cnpj { get; set; }

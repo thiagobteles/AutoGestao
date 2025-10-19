@@ -1,32 +1,28 @@
-using AutoGestao.Atributes;
+using AutoGestao.Helpers;
 using System.ComponentModel;
 
 namespace AutoGestao.Enumerador.Veiculo
 {
     public enum EnumSituacaoVeiculo
     {
-        [Icone("❓")]
-        [Description("Nenhum")]
-        Nenhum = 0,
-
-        [Icone("📦")]
-        [Description("Estoque")]
+        [Description("Disponível para venda")]
+        [Icon("fas fa-check-circle")]
+        [CssClass("text-success")]
         Estoque = 1,
 
-        [Icone("✅")]
         [Description("Vendido")]
+        [Icon("fas fa-handshake")]
+        [CssClass("text-info")]
         Vendido = 2,
 
-        [Icone("🔒")]
+        [Description("Em manutenção")]
+        [Icon("fas fa-wrench")]
+        [CssClass("text-warning")]
+        EmManutencao = 3,
+
         [Description("Reservado")]
-        Reservado = 3,
-
-        [Icone("🔧")]
-        [Description("Manutenção")]
-        Manutencao = 4,
-
-        [Icone("🔄")]
-        [Description("Transferido")]
-        Transferido = 5
+        [Icon("fas fa-bookmark")]
+        [CssClass("text-primary")]
+        Reservado = 4
     }
 }

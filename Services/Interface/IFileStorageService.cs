@@ -13,6 +13,8 @@ namespace AutoGestao.Services.Interface
         /// <returns>Caminho relativo do arquivo no MinIO</returns>
         Task<string> UploadFileAsync(IFormFile file, string entityName, string propertyName, long idEmpresa, string? customBucket = null);
 
+        Task<string> SaveFileAsync(IFormFile file, string entityName, long idEmpresa, string? customBucket = null);
+
         /// <summary>
         /// Obtém URL pré-assinada para download de arquivo
         /// </summary>
@@ -52,5 +54,6 @@ namespace AutoGestao.Services.Interface
         /// Lista todos os arquivos de uma propriedade
         /// </summary>
         Task<List<string>> ListFilesAsync(string entityName, string propertyName, long idEmpresa, string? customBucket = null);
+
     }
 }
