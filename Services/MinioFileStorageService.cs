@@ -62,6 +62,52 @@ namespace AutoGestao.Services
             }
         }
 
+        public async Task<string> SaveFileAsync(
+            IFormFile file,
+            string entityName,
+            long idEmpresa,
+            string? customBucket = null)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    throw new ArgumentException("Arquivo inválido");
+                }
+
+                var bucketName = customBucket ?? GetBucketName(entityName, idEmpresa);
+                await EnsureBucketExistsAsync(bucketName);
+
+                // Gerar nome único para o arquivo
+                var fileExtension = Path.GetExtension(file.FileName);
+                var uniqueFileName = $"{entityName}/{Guid.NewGuid()}{fileExtension}";
+                var contentType = file.ContentType ?? GetContentType(fileExtension);
+
+                // Upload para o MinIO
+                using var stream = file.OpenReadStream();
+                var putObjectArgs = new PutObjectArgs()
+                    .WithBucket(bucketName)
+                    .WithObject(uniqueFileName)
+                    .WithStreamData(stream)
+                    .WithObjectSize(file.Length)
+                    .WithContentType(contentType);
+
+                await _minioClient.PutObjectAsync(putObjectArgs);
+
+                _logger.LogInformation(
+                    "Arquivo enviado com sucesso: {BucketName}/{FileName}",
+                    bucketName,
+                    uniqueFileName);
+
+                return uniqueFileName;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao fazer upload do arquivo");
+                throw;
+            }
+        }
+
         public async Task<Stream> DownloadFileAsync(string filePath, string entityName, long idEmpresa, string? customBucket = null)
         {
             try

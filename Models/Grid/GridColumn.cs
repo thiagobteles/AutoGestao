@@ -19,5 +19,9 @@ namespace AutoGestao.Models.Grid
         public Func<object, string>? CustomRender { get; set; }
         public int Order { get; set; }
         public string Template { get; set; }
+        public bool ShowInGrid { get; set; } = true;
+        public Type? DataType { get; set; }
+        public bool IsKey { get; set; } = false;
+        public string Alignment { get; set; } = "left";
     }
 }

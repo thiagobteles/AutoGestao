@@ -18,6 +18,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Controllers\ClienteController.cs" />
+	  <Compile Remove="Controllers\FornecedorController.cs" />
+	  <Compile Remove="Controllers\Veiculos\VeiculoController.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">

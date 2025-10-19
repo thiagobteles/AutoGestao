@@ -15,5 +15,6 @@ namespace AutoGestao.Models
         public bool EnableAjaxSubmit { get; set; } = true;
         public bool IsEditMode { get; set; } = false;
         public bool IsDetailsMode { get; set; } = false;
+        public string EntityName { get; set; } = "";
     }
 }

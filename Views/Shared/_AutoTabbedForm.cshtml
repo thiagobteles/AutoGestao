@@ -1,0 +1,340 @@
+@model TabbedFormViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header do Formulário -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="@Model.Icon me-2"></i>@Model.Title
+                    </h2>
+                    @if (!string.IsNullOrEmpty(Model.Subtitle))
+                    {
+                        <p class="text-muted mb-0">@Model.Subtitle</p>
+                    }
+                </div>
+                
+                <a href="@Url.Action(Model.BackAction)" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>@Model.BackText
+                </a>
+            </div>
+
+            @if (Model.EnableTabs && Model.Tabs.Any())
+            {
+                <!-- Formulário Principal com Abas -->
+                <div class="card">
+                    <!-- Tabs Header -->
+                    <div class="card-header p-0">
+                        <ul class="nav nav-tabs card-header-tabs" id="formTabs" role="tablist">
+                            @foreach (var tab in Model.Tabs.Where(t => t.HasAccess).OrderBy(t => t.Order))
+                            {
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link @(tab.IsActive || tab.TabId == Model.ActiveTab ? "active" : "")" 
+                                            id="@tab.TabId-tab" 
+                                            data-bs-toggle="tab" 
+                                            data-bs-target="#@tab.TabId" 
+                                            type="button" 
+                                            role="tab" 
+                                            aria-controls="@tab.TabId" 
+                                            aria-selected="@(tab.IsActive || tab.TabId == Model.ActiveTab ? "true" : "false")"
+                                            @(tab.LazyLoad ? $"data-lazy-url=\"{Url.Action(tab.Action, tab.Controller, new { id = Model.EntityId })}\"" : "")>
+                                        <i class="@tab.TabIcon me-2"></i>@tab.TabName
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <!-- Tabs Content -->
+                    <div class="card-body">
+                        <div class="tab-content" id="formTabsContent">
+                            @foreach (var tab in Model.Tabs.Where(t => t.HasAccess).OrderBy(t => t.Order))
+                            {
+                                <div class="tab-pane fade @(tab.IsActive || tab.TabId == Model.ActiveTab ? "show active" : "")" 
+                                     id="@tab.TabId" 
+                                     role="tabpanel" 
+                                     aria-labelledby="@tab.TabId-tab">
+                                     
+                                    @if (tab.TabId == "principal" || tab.TabId == Model.ActiveTab)
+                                    {
+                                        <!-- Aba Principal com Formulário -->
+                                        <form id="autoTabbedForm" method="post" enctype="multipart/form-data" 
+                                              data-ajax="@(Model.EnableAjaxSubmit ? "true" : "false")">
+                                            @Html.AntiForgeryToken()
+                                            
+                                            <!-- Campo Id se for edição -->
+                                            @if (Model.IsEditMode && Model.Model != null)
+                                            {
+                                                var idProperty = Model.Model.GetType().GetProperty("Id");
+                                                var idValue = idProperty?.GetValue(Model.Model);
+                                                <input type="hidden" name="Id" value="@idValue" />
+                                            }
+
+                                            @if (Model.Sections.Any())
+                                            {
+                                                @foreach (var sectionItem in Model.Sections.OrderBy(s => s.GridColumns))
+                                                {
+                                                    <div class="mb-4">
+                                                        <h5 class="border-bottom pb-2 mb-3">
+                                                            <i class="@sectionItem.Icon me-2"></i>@sectionItem.Name
+                                                        </h5>
+                                                        
+                                                        <div class="row">
+                                                            @foreach (var field in sectionItem.Fields.OrderBy(f => f.Order))
+                                                            {
+                                                                var colClass = $"col-md-{12 / Math.Max(1, sectionItem.GridColumns)}";
+                                                                
+                                                                <div class="@colClass mb-3">
+                                                                    <label class="form-label">
+                                                                        @field.DisplayName
+                                                                        @if (field.Required)
+                                                                        {
+                                                                            <span class="text-danger">*</span>
+                                                                        }
+                                                                    </label>
+                                                                    
+                                                                    @switch (field.Type)
+                                                                    {
+                                                                        case AutoGestao.Enumerador.Gerais.EnumFieldType.Text:
+                                                                            <div class="input-group">
+                                                                                @if (!string.IsNullOrEmpty(field.Icon))
+                                                                                {
+                                                                                    <span class="input-group-text">
+                                                                                        <i class="@field.Icon"></i>
+                                                                                    </span>
+                                                                                }
+                                                                                <input type="text" class="form-control @field.CssClass" 
+                                                                                       name="@field.PropertyName" 
+                                                                                       value="@field.Value" 
+                                                                                       placeholder="@field.Placeholder"
+                                                                                       @(field.Required ? "required" : "")
+                                                                                       @(field.ReadOnly ? "readonly" : "") />
+                                                                            </div>
+                                                                            break;
+                                                                            
+                                                                        case AutoGestao.Enumerador.Gerais.EnumFieldType.Select:
+                                                                            <select class="form-select @field.CssClass" 
+                                                                                    name="@field.PropertyName"
+                                                                                    @(field.Required ? "required" : "")
+                                                                                    @(field.ReadOnly ? "disabled" : "")>
+                                                                                @if (!field.Required)
+                                                                                {
+                                                                                    <option value="">Selecione...</option>
+                                                                                }
+                                                                                @foreach (var option in field.Options)
+                                                                                {
+                                                                                    <option value="@option.Value" 
+                                                                                            selected="@(option.Value == field.Value)">
+                                                                                        @option.Text
+                                                                                    </option>
+                                                                                }
+                                                                            </select>
+                                                                            break;
+                                                                            
+                                                                        case AutoGestao.Enumerador.Gerais.EnumFieldType.Date:
+                                                                            <div class="input-group">
+                                                                                <span class="input-group-text">
+                                                                                    <i class="fas fa-calendar"></i>
+                                                                                </span>
+                                                                                <input type="date" class="form-control @field.CssClass" 
+                                                                                       name="@field.PropertyName" 
+                                                                                       value="@field.Value"
+                                                                                       @(field.Required ? "required" : "")
+                                                                                       @(field.ReadOnly ? "readonly" : "") />
+                                                                            </div>
+                                                                            break;
+                                                                            
+                                                                        case AutoGestao.Enumerador.Gerais.EnumFieldType.Checkbox:
+                                                                            <div class="form-check">
+                                                                                <input type="checkbox" class="form-check-input @field.CssClass" 
+                                                                                       name="@field.PropertyName" 
+                                                                                       value="true"
+                                                                                       checked="@(field.Value == "true" || field.Value == "True")"
+                                                                                       @(field.ReadOnly ? "disabled" : "") />
+                                                                                <label class="form-check-label">
+                                                                                    @field.DisplayName
+                                                                                </label>
+                                                                                <input type="hidden" name="@field.PropertyName" value="false" />
+                                                                            </div>
+                                                                            break;
+                                                                            
+                                                                        default:
+                                                                            <input type="text" class="form-control @field.CssClass" 
+                                                                                   name="@field.PropertyName" 
+                                                                                   value="@field.Value" 
+                                                                                   placeholder="@field.Placeholder"
+                                                                                   @(field.Required ? "required" : "")
+                                                                                   @(field.ReadOnly ? "readonly" : "") />
+                                                                            break;
+                                                                    }
+                                                                    
+                                                                    <!-- Validation Messages -->
+                                                                    @if (Model.ModelState.ContainsKey(field.PropertyName))
+                                                                    {
+                                                                        <div class="invalid-feedback d-block">
+                                                                            @Model.ModelState[field.PropertyName]
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                        </form>
+                                    }
+                                    else if (tab.LazyLoad)
+                                    {
+                                        <!-- Conteúdo Lazy Load -->
+                                        <div class="text-center py-4" id="loading-@tab.TabId">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Carregando...</span>
+                                            </div>
+                                            <p class="mt-2 text-muted">Carregando @tab.TabName...</p>
+                                        </div>
+                                        <div id="content-@tab.TabId" style="display: none;"></div>
+                                    }
+                                    else
+                                    {
+                                        <!-- Conteúdo Estático da Aba -->
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Conteúdo da aba @tab.TabName será carregado aqui.
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Botões do Formulário -->
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action(Model.BackAction)" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>@Model.BackText
+                            </a>
+                            
+                            <div>
+                                @if (Model.IsEditMode)
+                                {
+                                    <button type="submit" form="autoTabbedForm" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>Salvar Alterações
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" form="autoTabbedForm" class="btn btn-success">
+                                        <i class="fas fa-plus me-1"></i>Criar @Model.EntityName
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Fallback: Formulário Simples -->
+                @Html.Partial("_AutoForm", new StandardFormViewModel 
+                {
+                    Title = Model.Title,
+                    Subtitle = Model.Subtitle,
+                    Icon = Model.Icon,
+                    BackAction = Model.BackAction,
+                    BackText = Model.BackText,
+                    Model = Model.Model,
+                    Sections = Model.Sections,
+                    ModelState = Model.ModelState,
+                    EnableAjaxSubmit = Model.EnableAjaxSubmit,
+                    IsEditMode = Model.IsEditMode,
+                    IsDetailsMode = Model.IsDetailsMode
+                })
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // AJAX Form Submission para abas
+            @if (Model.EnableAjaxSubmit)
+            {
+                <text>
+                $('#autoTabbedForm').on('submit', function(e) {
+                    e.preventDefault();
+                    
+                    var formData = new FormData(this);
+                    var submitBtn = $('button[type="submit"][form="autoTabbedForm"]');
+                    
+                    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Salvando...');
+                    
+                    $.ajax({
+                        url: $(this).attr('action') || window.location.pathname,
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.success) {
+                                if (response.redirectUrl) {
+                                    window.location.href = response.redirectUrl;
+                                } else {
+                                    location.reload();
+                                }
+                            } else {
+                                alert(response.message || 'Erro ao salvar');
+                                submitBtn.prop('disabled', false).html('@(Model.IsEditMode ? "<i class=\"fas fa-save me-1\"></i>Salvar Alterações" : "<i class=\"fas fa-plus me-1\"></i>Criar " + Model.EntityName)');
+                            }
+                        },
+                        error: function() {
+                            alert('Erro ao processar solicitação');
+                            submitBtn.prop('disabled', false).html('@(Model.IsEditMode ? "<i class=\"fas fa-save me-1\"></i>Salvar Alterações" : "<i class=\"fas fa-plus me-1\"></i>Criar " + Model.EntityName)');
+                        }
+                    });
+                });
+                </text>
+            }
+
+            // Lazy Loading de Abas
+            $('button[data-bs-toggle="tab"][data-lazy-url]').on('shown.bs.tab', function(e) {
+                var $tab = $(e.target);
+                var url = $tab.data('lazy-url');
+                var tabId = $tab.attr('data-bs-target').replace('#', '');
+                var $loading = $('#loading-' + tabId);
+                var $content = $('#content-' + tabId);
+                
+                if (url && $content.is(':empty')) {
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        success: function(response) {
+                            $loading.hide();
+                            $content.html(response).show();
+                        },
+                        error: function() {
+                            $loading.hide();
+                            $content.html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar conteúdo da aba.</div>').show();
+                        }
+                    });
+                }
+            });
+
+            // Ativar primeira aba se necessário
+            @if (!string.IsNullOrEmpty(Model.ActiveTab))
+            {
+                <text>
+                var activeTab = '@Model.ActiveTab';
+                if (activeTab && $('#' + activeTab + '-tab').length) {
+                    $('#' + activeTab + '-tab').tab('show');
+                }
+                </text>
+            }
+        });
+    </script>
+}

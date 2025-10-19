@@ -344,11 +344,11 @@ namespace AutoGestao.Helpers
 
             var formatted = ApplyFormat(value.ToString()!, attr.Format ?? "");
 
-            if (attr.DocumentType == DocumentType.CPF)
+            if (attr.DocumentType == EnumDocumentType.CPF)
             {
                 return $"<span class='badge bg-primary bg-opacity-10 text-primary'>{formatted}</span>";
             }
-            else if (attr.DocumentType == DocumentType.CNPJ)
+            else if (attr.DocumentType == EnumDocumentType.CNPJ)
             {
                 return $"<span class='badge bg-success bg-opacity-10 text-success'>{formatted}</span>";
             }
