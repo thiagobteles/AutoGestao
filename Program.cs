@@ -1,10 +1,8 @@
 using AutoGestao;
-using AutoGestao.Configuration;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Services;
 using AutoGestao.Services.Interface;
@@ -78,9 +76,6 @@ builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
 builder.Services.AddScoped<IFileStorageService, MinioFileStorageService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<GenericReferenceService>();
-
-// ✨ ADICIONAR O SISTEMA ULTRA-GENÉRICO
-builder.Services.AddUltraGenericSystem();
 builder.Services.AddHttpContextAccessor();
 
 // Criar um background service para executar limpeza:
@@ -106,10 +101,6 @@ app.UseMiddleware<AutoGestao.Middleware.AuditMiddleware>();
 // 🔧 MIDDLEWARE DE AUTENTICAÇÃO
 app.UseAuthentication();
 app.UseAuthorization();
-
-
-// ✨ INICIALIZAR O SISTEMA ULTRA-GENÉRICO
-await app.ConfigureUltraGenericSystemAsync();
 
 // Configurar cultura padrão para português do Brasil
 var supportedCultures = new[] { new CultureInfo("pt-BR") };
@@ -171,9 +162,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
-
-//await EntityMetadataCache<Cliente>.Instance;
-await AutoEnumHelper.WarmUpCachesAsync();
 
 static async Task InicializarDadosPadraoAutoGestao(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
 {

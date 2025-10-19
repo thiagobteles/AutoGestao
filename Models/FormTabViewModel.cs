@@ -13,6 +13,5 @@ namespace AutoGestao.Models
         public bool HasAccess { get; set; } = true;
         public string Content { get; set; } = "";
         public Dictionary<string, object> Parameters { get; set; } = [];
-        public string CssClass { get; set; } = "";
     }
 }

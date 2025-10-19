@@ -77,7 +77,7 @@ namespace AutoGestao.Atributes
         /// </summary>
         public bool ShowInGrid { get; set; } = true;
 
-        public EnumDocumentType DocumentType { get; set; }
+        public DocumentType DocumentType { get; set; }
 
         public EnumRenderType EnumRender { get; set; } = EnumRenderType.Description;
     }
@@ -120,20 +120,20 @@ namespace AutoGestao.Atributes
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class GridDocumentAttribute : GridFieldAttribute
     {
-        public GridDocumentAttribute(string? displayName = null, EnumDocumentType type = EnumDocumentType.CPF, int order = 30) : base(displayName)
+        public GridDocumentAttribute(string? displayName = null, DocumentType type = DocumentType.CPF, int order = 30) : base(displayName)
         {
             IsSubtitle = true;
             IsSearchable = true;
             SubtitleOrder = 0;
             Order = order;
 
-            if (type == EnumDocumentType.CPF)
+            if (type == DocumentType.CPF)
             {
                 SubtitlePrefix = "CPF: ";
                 Format = "###.###.###-##";
                 DisplayName = displayName ?? "CPF";
             }
-            else if (type == EnumDocumentType.CNPJ)
+            else if (type == DocumentType.CNPJ)
             {
                 SubtitlePrefix = "CNPJ: ";
                 Format = "##.###.###/####-##";
@@ -152,5 +152,11 @@ namespace AutoGestao.Atributes
             SubtitleOrder = 1;
             Order = 50;
         }
+    }
+
+    public enum DocumentType
+    {
+        CPF,
+        CNPJ
     }
 }

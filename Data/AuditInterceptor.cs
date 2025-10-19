@@ -75,7 +75,7 @@ namespace AutoGestao.Data
             }
         }
 
-        private static ApplicationDbContext CreateAuditContext(ApplicationDbContext originalContext)
+        private ApplicationDbContext CreateAuditContext(ApplicationDbContext originalContext)
         {
             // Criar uma nova instância do contexto apenas para auditoria
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
@@ -83,13 +83,13 @@ namespace AutoGestao.Data
             return new ApplicationDbContext(optionsBuilder.Options);
         }
 
-        private static string GetEntityId(EntityEntry entry)
+        private string GetEntityId(EntityEntry entry)
         {
             var idProperty = entry.Properties.FirstOrDefault(p => p.Metadata.Name.Equals("Id", StringComparison.OrdinalIgnoreCase));
             return idProperty?.CurrentValue?.ToString() ?? "Unknown";
         }
 
-        private static EnumTipoOperacaoAuditoria GetActionType(EntityState state)
+        private EnumTipoOperacaoAuditoria GetActionType(EntityState state)
         {
             return state switch
             {
@@ -100,13 +100,13 @@ namespace AutoGestao.Data
             };
         }
 
-        private static async Task<Usuario> GetCurrentUserAsync(ApplicationDbContext auditContext)
+        private async Task<Usuario> GetCurrentUserAsync(ApplicationDbContext auditContext)
         {
             // Implementar lógica para obter usuário atual
             return await auditContext.Usuarios.FirstOrDefaultAsync();
         }
 
-        private static string GetOldValues(EntityEntry entry)
+        private string GetOldValues(EntityEntry entry)
         {
             if (entry.State == EntityState.Added)
             {
@@ -125,7 +125,7 @@ namespace AutoGestao.Data
             return System.Text.Json.JsonSerializer.Serialize(oldValues);
         }
 
-        private static string GetNewValues(EntityEntry entry)
+        private string GetNewValues(EntityEntry entry)
         {
             if (entry.State == EntityState.Deleted)
             {

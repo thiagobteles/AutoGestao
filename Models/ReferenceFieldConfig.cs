@@ -1,64 +1,70 @@
 namespace AutoGestao.Models
 {
+    /// <summary>
+    /// Configurações específicas para campos de referência
+    /// </summary>
     public class ReferenceFieldConfig
     {
+        /// <summary>
+        /// Controller usado para criar novos registros (padrão: auto-detectado)
+        /// </summary>
         public string? ControllerName { get; set; }
+
+        /// <summary>
+        /// Action para criação (padrão: "Create")
+        /// </summary>
         public string CreateAction { get; set; } = "Create";
+
+        /// <summary>
+        /// Campos a serem buscados (padrão: auto-detectado)
+        /// </summary>
         public List<string> SearchFields { get; set; } = [];
+
+        /// <summary>
+        /// Campo principal para exibição (padrão: auto-detectado)
+        /// </summary>
         public string? DisplayField { get; set; }
+
+        /// <summary>
+        /// Campos para subtitle (padrão: auto-detectado)
+        /// </summary>
         public List<string> SubtitleFields { get; set; } = [];
+
+        /// <summary>
+        /// Tamanho da página para busca (padrão: 10)
+        /// </summary>
         public int PageSize { get; set; } = 10;
+
+        /// <summary>
+        /// Minimum characters to trigger search (padrão: 2)
+        /// </summary>
         public int MinSearchLength { get; set; } = 2;
+
+        /// <summary>
+        /// Permite criar novos registros (padrão: true)
+        /// </summary>
         public bool AllowCreate { get; set; } = true;
+
+        /// <summary>
+        /// Filtros adicionais para a busca
+        /// </summary>
         public Dictionary<string, object> SearchFilters { get; set; } = [];
+
+        /// <summary>
+        /// Configurações específicas por tipo de entidade
+        /// </summary>
         public static Dictionary<Type, ReferenceFieldConfig> DefaultConfigs { get; set; } = [];
-        public string SearchUrl { get; set; } = "";
-        public Dictionary<string, object> Filters { get; set; } = [];
 
-        public static ReferenceFieldConfig GetDefault(Type referenceType)
+        /// <summary>
+        /// Obtém configuração padrão para um tipo específico
+        /// </summary>
+        /// <param name="referenceType">Tipo da entidade de referência</param>
+        /// <returns>Configuração padrão</returns>
+        public static ReferenceFieldConfig GetDefault(Type? referenceType)
         {
-            return new ReferenceFieldConfig
-            {
-                ControllerName = referenceType.Name,
-                DisplayField = GetDefaultDisplayField(referenceType),
-                SearchFields = GetDefaultSearchFields(referenceType),
-                SearchUrl = $"/{referenceType.Name}/SearchReference"
-            };
-        }
-
-        private static string GetDefaultDisplayField(Type type)
-        {
-            // Procurar propriedades comuns para display
-            var properties = type.GetProperties();
-
-            var displayProperty = properties.FirstOrDefault(p =>
-                p.Name.Equals("Nome", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("Descricao", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("Title", StringComparison.OrdinalIgnoreCase));
-
-            return displayProperty?.Name ?? "Id";
-        }
-
-        private static List<string> GetDefaultSearchFields(Type type)
-        {
-            var properties = type.GetProperties();
-            var searchFields = new List<string>();
-
-            // Adicionar campos comuns de busca
-            var commonSearchFields = new[] { "Nome", "Descricao", "Title", "Codigo", "Name" };
-
-            foreach (var fieldName in commonSearchFields)
-            {
-                var property = properties.FirstOrDefault(p =>
-                    p.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
-
-                if (property != null && property.PropertyType == typeof(string))
-                {
-                    searchFields.Add(property.Name);
-                }
-            }
-
-            return searchFields.Any() ? searchFields : ["Id"];
+            return referenceType != null && DefaultConfigs.TryGetValue(referenceType, out var config) 
+                ? config
+                : new ReferenceFieldConfig();
         }
     }
 }

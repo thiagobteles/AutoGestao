@@ -36,6 +36,5 @@ namespace AutoGestao.Models
         public string? FileUrl { get; set; }
         public string? FileName { get; set; }
         public string? FilePath { get; set; }
-        public Dictionary<string, object> DataAttributes { get; set; } = [];
     }
 }

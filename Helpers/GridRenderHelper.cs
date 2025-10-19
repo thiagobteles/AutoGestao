@@ -195,7 +195,7 @@ namespace AutoGestao.Helpers
             return result;
         }
 
-        private static string FormatDocument(string? value, EnumDocumentType type)
+        private static string FormatDocument(string? value, DocumentType type)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -204,8 +204,8 @@ namespace AutoGestao.Helpers
 
             return type switch
             {
-                EnumDocumentType.CPF => ApplyMask(value, "###.###.###-##"),
-                EnumDocumentType.CNPJ => ApplyMask(value, "##.###.###/####-##"),
+                DocumentType.CPF => ApplyMask(value, "###.###.###-##"),
+                DocumentType.CNPJ => ApplyMask(value, "##.###.###/####-##"),
                 _ => value
             };
         }

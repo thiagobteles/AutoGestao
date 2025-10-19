@@ -17,7 +17,7 @@ namespace AutoGestao.Entidades
         [FormField(Order = 1, Name = "Razão Social", Section = "Dados Básicos", Icon = "fas fa-signature", Type = EnumFieldType.Text, Required = true, Placeholder = "Digite a razão social", GridColumns = 2)]
         public string RazaoSocial { get; set; } = "";
 
-        [GridDocument("CNPJ", EnumDocumentType.CNPJ)]
+        [GridDocument("CNPJ", DocumentType.CNPJ)]
         [FormField(Order = 1, Name = "CNPJ", Section = "Dados Básicos", Icon = "fas fa-building", Type = EnumFieldType.Cnpj, Required = true)]
         public string? Cnpj { get; set; }
 
