@@ -190,10 +190,6 @@ class TabContentManager {
         }
 
         let singularParent = parentController;
-        if (singularParent.endsWith('s')) {
-            singularParent = singularParent.slice(0, -1);
-        }
-
         const fieldName = `Id${singularParent}`;
         return fieldName;
     }

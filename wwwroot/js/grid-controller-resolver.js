@@ -43,15 +43,7 @@ class GridControllerResolver {
         }
 
         let entity = controller;
-
-        // Remove 's' do final se existir (convenção plural -> singular)
-        if (controller.endsWith('s') && controller.length > 1) {
-            entity = controller.slice(0, -1);
-        }
-
         this.cache.set(controller, entity);
-        console.log(`🔄 Entidade derivada: ${controller} -> ${entity}`);
-
         return entity;
     }
 
@@ -88,7 +80,6 @@ class GridControllerResolver {
         }
 
         const ajaxUrl = `/${controller}/GetDataAjax`;
-        console.log(`📡 URL AJAX: ${ajaxUrl}`);
         return ajaxUrl;
     }
 
@@ -114,7 +105,6 @@ class GridControllerResolver {
             window.showLoading(true);
         }
 
-        console.log(`🔗 Navegando para: ${url}`);
         window.location.href = url;
     }
 

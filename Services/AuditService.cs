@@ -237,8 +237,7 @@ namespace AutoGestao.Services
 
         private static string GetTableName(string entidadeNome)
         {
-            // Converter nome da entidade para nome da tabela (plural em minúsculas)
-            return entidadeNome.ToLower() + "s";
+            return entidadeNome.ToLower();
         }
 
         public async Task<List<AuditLog>> GetLogsAsync(

@@ -265,11 +265,6 @@ namespace AutoGestao.Controllers.Base
         private static Type GetEntityType(string controller)
         {
             var entityName = controller;
-            if (entityName.EndsWith('s'))
-            {
-                entityName = entityName.Substring(0, entityName.Length - 1);
-            }
-
             var mapping = new Dictionary<string, string>
             {
                 { "Despesa", "AutoGestao.Entidades.Despesa, AutoGestao" },
@@ -297,18 +292,9 @@ namespace AutoGestao.Controllers.Base
 
         private static string GetParentFieldName(string controller, string parentController)
         {
-            if (string.IsNullOrEmpty(parentController))
-            {
-                return null;
-            }
-
-            var singularParent = parentController;
-            if (singularParent.EndsWith('s'))
-            {
-                singularParent = singularParent.Substring(0, singularParent.Length - 1);
-            }
-
-            return $"Id{singularParent}";
+            return string.IsNullOrEmpty(parentController) 
+                ? null
+                : $"Id{parentController}";
         }
 
         private static List<GridColumn> GetGridColumns(Type entityType)
