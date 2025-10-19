@@ -1,5 +1,6 @@
 using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
+using AutoGestao.Entidades;
 using AutoGestao.Entidades.Leads;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
@@ -44,6 +45,11 @@ namespace AutoGestao.Controllers
                     ];
 
             return standardGridViewModel;
+        }
+
+        protected override bool CanDelete(Lead entity)
+        {
+            return false;
         }
 
         protected override IQueryable<Lead> ApplyFilters(IQueryable<Lead> query, Dictionary<string, object> filters)

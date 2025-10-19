@@ -94,7 +94,7 @@ namespace AutoGestao.Controllers.Base
                 }
             }
 
-            return searchExpression != null 
+            return searchExpression != null
                 ? query.Where(searchExpression)
                 : query;
         }
@@ -224,7 +224,7 @@ namespace AutoGestao.Controllers.Base
         protected virtual long GetCurrentEmpresaId()
         {
             var empresaIdClaim = User.FindFirst("EmpresaId")?.Value;
-            return long.TryParse(empresaIdClaim, out var empresaId) 
+            return long.TryParse(empresaIdClaim, out var empresaId)
                 ? empresaId
                 : 1;
         }
@@ -404,28 +404,22 @@ namespace AutoGestao.Controllers.Base
                     return Json(new
                     {
                         sucesso = false,
-                        mensagem = "Você não tem permissão para editar este registro.",
-                        script = "showError('Você não tem permissão para editar este registro.')"
+                        mensagem = "Você não tem permissão para cadastrar um novo registro.",
+                        script = "showError('Você não tem permissão para cadastrar um novo registro.')"
                     });
                 }
 
-                TempData["NotificationScript"] = "showError('Você não tem permissão para editar este registro.')";
+                TempData["NotificationScript"] = "showError('Você não tem permissão para cadastrar um novo registro.')";
                 return Forbid();
             }
 
-            // LOG: Verificar TODOS os campos recebidos
-            var allProperties = typeof(T).GetProperties();
-            foreach (var prop in allProperties)
-            {
-                var value = prop.GetValue(entity);
-                Console.WriteLine($"{prop.Name}: {value ?? "NULL"}");
-            }
-
+            // Requisições AJAX (incluindo modais) usam HandleModalCreate
             if (IsAjaxRequest())
             {
                 return await HandleModalCreate(this, entity);
             }
 
+            // Fluxo padrão para formulário normal (não-AJAX)
             if (ModelState.IsValid)
             {
                 try
@@ -435,17 +429,6 @@ namespace AutoGestao.Controllers.Base
                     await _context.SaveChangesAsync();
                     await AfterCreate(entity);
 
-                    if (Request.IsAjaxRequest())
-                    {
-                        return Json(new
-                        {
-                            sucesso = false,
-                            mensagem = "Registro cadastrado com sucesso!",
-                            script = "showSuccess('Registro cadastrado com sucesso!')",
-                            redirectUrl = Url.Action("Index")
-                        });
-                    }
-
                     TempData["NotificationScript"] = "showSuccess('Registro cadastrado com sucesso!')";
                     return RedirectToAction(nameof(Index));
                 }
@@ -454,24 +437,12 @@ namespace AutoGestao.Controllers.Base
                     ModelState.AddModelError("", $"Erro ao criar registro: {ex.Message}");
                 }
             }
-            else
-            {
-                foreach (var error in ModelState)
-                {
-                    if (error.Value.Errors.Any())
-                    {
-                        Console.WriteLine($"{error.Key}: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
-                    }
-                }
-            }
 
             var viewModel = await BuildFormViewModelAsync(entity, "Create");
             AddModelStateToViewModel(viewModel);
-
-            return Request.IsAjaxRequest()
-                ? PartialView("_StandardFormContent", viewModel)
-                : View("_StandardForm", viewModel);
+            return View("_StandardForm", viewModel);
         }
+
 
         /// <summary>
         /// GET: Edit - Exibir formulário de edição
@@ -559,7 +530,7 @@ namespace AutoGestao.Controllers.Base
 
             if (id != entity.Id)
             {
-                return Request.IsAjaxRequest() 
+                return Request.IsAjaxRequest()
                     ? Json(new { success = false, message = "ID inconsistente." })
                     : NotFound();
             }
@@ -567,7 +538,7 @@ namespace AutoGestao.Controllers.Base
             var existingEntity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (existingEntity == null)
             {
-                return Request.IsAjaxRequest() 
+                return Request.IsAjaxRequest()
                     ? Json(new { success = false, message = "Registro não encontrado." })
                     : NotFound();
             }

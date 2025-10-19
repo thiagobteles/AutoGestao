@@ -465,7 +465,7 @@ class ReferenceFieldManager {
     }
 
     getControllerName(referenceType) {
-        return referenceType + 's';
+        return referenceType;
     }
 
     createModal(controller, referenceType, targetField) {

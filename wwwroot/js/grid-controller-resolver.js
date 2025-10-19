@@ -27,12 +27,6 @@ class GridControllerResolver {
         return controller;
     }
 
-    /**
-     * Obtém o nome da entidade baseado no controller atual
-     * Convenção: NomeController (plural) -> NomeEntidade (singular)
-     * Exemplos: Clientes -> Cliente, Veiculos -> Veiculo, VeiculoMarcas -> VeiculoMarca
-     * @returns {string} Nome da entidade
-     */
     getCurrentEntity() {
         const controller = this.getCurrentController();
         if (!controller) return null;
@@ -43,15 +37,8 @@ class GridControllerResolver {
         }
 
         let entity = controller;
-
-        // Remove 's' do final se existir (convenção plural -> singular)
-        if (controller.endsWith('s') && controller.length > 1) {
-            entity = controller.slice(0, -1);
-        }
-
         this.cache.set(controller, entity);
         console.log(`🔄 Entidade derivada: ${controller} -> ${entity}`);
-
         return entity;
     }
 
@@ -88,7 +75,6 @@ class GridControllerResolver {
         }
 
         const ajaxUrl = `/${controller}/GetDataAjax`;
-        console.log(`📡 URL AJAX: ${ajaxUrl}`);
         return ajaxUrl;
     }
 

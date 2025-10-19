@@ -26,18 +26,16 @@ namespace AutoGestao.Services
             try
             {
                 var httpContext = _httpContextAccessor.HttpContext;
-                var usuario = GetCurrentUser();
-
-                // ⚠️ CORREÇÃO PRINCIPAL: Validar IdEmpresa
-                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(usuario.IdEmpresa);
+                var (Id, Nome, Email, IdEmpresa) = GetCurrentUser();
+                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(IdEmpresa);
 
                 // Se não houver empresa válida, logar o erro mas não falhar
                 if (!idEmpresaValido.HasValue)
                 {
                     _logger.LogWarning(
                         "Tentativa de criar audit log sem empresa válida. Usuário: {UsuarioId}, Empresa: {IdEmpresa}",
-                        usuario.Id,
-                        usuario.IdEmpresa
+                        Id,
+                        IdEmpresa
                     );
                     return; // Não cria o log se não houver empresa válida
                 }
@@ -45,9 +43,9 @@ namespace AutoGestao.Services
                 var auditLog = new AuditLog
                 {
                     IdEmpresa = idEmpresaValido.Value,
-                    UsuarioId = usuario.Id,
-                    UsuarioNome = usuario.Nome,
-                    UsuarioEmail = usuario.Email,
+                    UsuarioId = Id,
+                    UsuarioNome = Nome,
+                    UsuarioEmail = Email,
                     EntidadeNome = entidadeNome,
                     EntidadeDisplayName = entidadeNome,
                     EntidadeId = entidadeId,
@@ -237,8 +235,7 @@ namespace AutoGestao.Services
 
         private static string GetTableName(string entidadeNome)
         {
-            // Converter nome da entidade para nome da tabela (plural em minúsculas)
-            return entidadeNome.ToLower() + "s";
+            return entidadeNome.ToLower();
         }
 
         public async Task<List<AuditLog>> GetLogsAsync(
