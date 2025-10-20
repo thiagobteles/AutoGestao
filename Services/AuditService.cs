@@ -26,16 +26,18 @@ namespace AutoGestao.Services
             try
             {
                 var httpContext = _httpContextAccessor.HttpContext;
-                var (Id, Nome, Email, IdEmpresa) = GetCurrentUser();
-                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(IdEmpresa);
+                var usuario = GetCurrentUser();
+
+                // ⚠️ CORREÇÃO PRINCIPAL: Validar IdEmpresa
+                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(usuario.IdEmpresa);
 
                 // Se não houver empresa válida, logar o erro mas não falhar
                 if (!idEmpresaValido.HasValue)
                 {
                     _logger.LogWarning(
                         "Tentativa de criar audit log sem empresa válida. Usuário: {UsuarioId}, Empresa: {IdEmpresa}",
-                        Id,
-                        IdEmpresa
+                        usuario.Id,
+                        usuario.IdEmpresa
                     );
                     return; // Não cria o log se não houver empresa válida
                 }
@@ -43,9 +45,9 @@ namespace AutoGestao.Services
                 var auditLog = new AuditLog
                 {
                     IdEmpresa = idEmpresaValido.Value,
-                    UsuarioId = Id,
-                    UsuarioNome = Nome,
-                    UsuarioEmail = Email,
+                    UsuarioId = usuario.Id,
+                    UsuarioNome = usuario.Nome,
+                    UsuarioEmail = usuario.Email,
                     EntidadeNome = entidadeNome,
                     EntidadeDisplayName = entidadeNome,
                     EntidadeId = entidadeId,

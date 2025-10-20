@@ -998,9 +998,7 @@ namespace AutoGestao.Controllers.Base
 
         public bool IsAjaxRequest()
         {
-            return Request.Headers.ContainsKey("X-Requested-With") ||
-                   Request.Query.ContainsKey("ajax") ||
-                   Request.ContentType?.Contains("application/json") == true;
+            return Request.Headers.ContainsKey("X-Requested-With") || Request.Query.ContainsKey("ajax");
         }
 
         #region Métodos para Sistema de Abas

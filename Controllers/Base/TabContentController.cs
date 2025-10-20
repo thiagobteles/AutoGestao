@@ -292,12 +292,9 @@ namespace AutoGestao.Controllers.Base
 
         private static string GetParentFieldName(string controller, string parentController)
         {
-            if (string.IsNullOrEmpty(parentController))
-            {
-                return null;
-            }
-
-            return $"Id{parentController}";
+            return string.IsNullOrEmpty(parentController) 
+                ? null
+                : $"Id{parentController}";
         }
 
         private static List<GridColumn> GetGridColumns(Type entityType)

@@ -12,8 +12,6 @@ namespace AutoGestao.Entidades
     public class Empresa : BaseEntidade
     {
         [GridMain("Razão Social")]
-        [ReferenceSearchable]
-        [ReferenceText]
         [FormField(Order = 1, Name = "Razão Social", Section = "Dados Básicos", Icon = "fas fa-signature", Type = EnumFieldType.Text, Required = true, Placeholder = "Digite a razão social", GridColumns = 2)]
         public string RazaoSocial { get; set; } = "";
 

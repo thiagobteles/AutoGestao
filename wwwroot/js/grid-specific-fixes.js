@@ -68,13 +68,13 @@ function restoreGridDoubleClick() {
 
                 // Abrir edição
                 if (controller && entityId) {
-                    window.location.href = `/${controller}/Edit/${entityId}`;
+                    window.location.href = `/${controller}/Details/${entityId}`;
                 }
             });
 
             // Adicionar cursor pointer para indicar clicável
             row.style.cursor = 'pointer';
-            row.title = 'Clique duplo para editar';
+            row.title = 'Clique duplo para visualizar';
         });
     });
 }

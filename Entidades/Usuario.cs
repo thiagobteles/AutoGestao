@@ -10,8 +10,6 @@ namespace AutoGestao.Entidades
     public class Usuario : BaseEntidade
     {
         [GridMain("Nome")]
-        [ReferenceSearchable]
-        [ReferenceText]
         [FormField(Name = "Nome Completo", Order = 1, Section = "Dados Básicos", Icon = "fas fa-user", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]
         public string Nome { get; set; } = "";
 

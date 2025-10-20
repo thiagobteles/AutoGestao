@@ -347,7 +347,7 @@ async function submitFormAjax(form) {
             }, 1000);
         } else {
             if (result.errors) {
-                displayValidationErrors(form, result.errors);
+                displayErrors(result.errors, form);
             }
             showError(result.message || 'Erro ao salvar');
         }
