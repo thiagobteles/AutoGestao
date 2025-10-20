@@ -7,9 +7,13 @@ namespace AutoGestao.Enumerador.Gerais
         Integer,
         Currency,
         Date,
+        DateTime,
         Enumerador,
         Boolean,
         Custom,
-        Actions
+        Actions,
+        Image,
+        File,
+        Percentage
     }
 }

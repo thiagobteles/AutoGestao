@@ -8,11 +8,6 @@ class GridControllerResolver {
         console.log('🚀 Grid Controller Resolver inicializado - Sistema 100% genérico');
     }
 
-    /**
-     * Obtém o nome do controller baseado no caminho atual
-     * Convenção: /NomeController/Action -> NomeController
-     * @returns {string} Nome do controller
-     */
     getCurrentController() {
         const path = window.location.pathname;
         const segments = path.split('/').filter(s => s);
@@ -23,21 +18,13 @@ class GridControllerResolver {
         }
 
         const controller = segments[0];
-        console.log(`📍 Controller detectado automaticamente: ${controller}`);
         return controller;
     }
 
-    /**
-     * Obtém o nome da entidade baseado no controller atual
-     * Convenção: NomeController (plural) -> NomeEntidade (singular)
-     * Exemplos: Clientes -> Cliente, Veiculos -> Veiculo, VeiculoMarcas -> VeiculoMarca
-     * @returns {string} Nome da entidade
-     */
     getCurrentEntity() {
         const controller = this.getCurrentController();
         if (!controller) return null;
 
-        // Cache para evitar recálculos
         if (this.cache.has(controller)) {
             return this.cache.get(controller);
         }
@@ -47,12 +34,6 @@ class GridControllerResolver {
         return entity;
     }
 
-    /**
-     * Constrói URL para action do controller atual
-     * @param {string} action - Nome da action
-     * @param {string|number} id - ID opcional
-     * @returns {string} URL completa
-     */
     buildActionUrl(action, id = null) {
         const controller = this.getCurrentController();
         if (!controller) {
@@ -68,10 +49,6 @@ class GridControllerResolver {
         return url;
     }
 
-    /**
-     * Constrói URL AJAX para GetDataAjax do controller atual
-     * @returns {string} URL para AJAX
-     */
     getAjaxUrl() {
         const controller = this.getCurrentController();
         if (!controller) {
@@ -79,25 +56,9 @@ class GridControllerResolver {
             return null;
         }
 
-        const ajaxUrl = `/${controller}/GetDataAjax`;
-        return ajaxUrl;
+        return `/${controller}/GetDataAjax`;
     }
 
-    /**
-     * Constrói URL de exportação para o controller atual
-     * @param {string} formato - Formato de exportação (csv, excel, etc)
-     * @returns {string} URL de exportação
-     */
-    getExportUrl(formato = 'csv') {
-        return this.buildActionUrl('Export') + `?formato=${formato}`;
-    }
-
-    /**
-     * Navega para action específica do controller atual
-     * @param {string} action - Nome da action
-     * @param {string|number} id - ID opcional
-     * @param {boolean} showLoading - Se deve mostrar loading
-     */
     navigateTo(action, id = null, showLoading = true) {
         const url = this.buildActionUrl(action, id);
 
@@ -108,9 +69,6 @@ class GridControllerResolver {
         window.location.href = url;
     }
 
-    /**
-     * Métodos de conveniência para ações comuns
-     */
     navigateToDetails(id) {
         this.navigateTo('Details', id);
     }
@@ -123,85 +81,117 @@ class GridControllerResolver {
         this.navigateTo('Create');
     }
 
-    navigateToDelete(id) {
-        this.navigateTo('Delete', id);
-    }
-
     navigateToIndex() {
         this.navigateTo('Index');
     }
 
-    /**
-     * Confirma exclusão de forma genérica
-     * @param {string|number} id - ID do registro
-     * @param {string} message - Mensagem personalizada (opcional)
-     */
+    async executeDelete(id) {
+        const controller = this.getCurrentController();
+        if (!controller) {
+            console.error('Controller não identificado');
+            return;
+        }
+
+        window.showLoading && window.showLoading(true);
+
+        try {
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : '';
+
+            const response = await fetch(`/${controller}/Delete/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: token ? `__RequestVerificationToken=${encodeURIComponent(token)}` : ''
+            });
+
+            window.showLoading && window.showLoading(false);
+
+            if (response.ok) {
+                const result = await response.json();
+
+                if (result.sucesso || result.success) {
+                    if (result.script) {
+                        eval(result.script);
+                    } else {
+                        await showSuccess(result.mensagem || result.message || 'Registro excluído com sucesso!', {
+                            title: 'Exclusão Realizada!',
+                            buttonText: 'OK'
+                        });
+
+                        if (window.responseHandler) {
+                            window.responseHandler.isNavigating = true;
+                        }
+
+                        setTimeout(() => {
+                            const redirectUrl = result.redirectUrl || `/${controller}`;
+                            window.location.href = redirectUrl;
+                        }, 1500);
+                    }
+                } else {
+                    await showError(result.mensagem || result.message || 'Não foi possível excluir o registro.', {
+                        title: 'Erro na Exclusão',
+                        buttonText: 'Entendi'
+                    });
+                }
+            } else {
+                throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            }
+
+        } catch (error) {
+            console.error('Erro ao excluir:', error);
+            window.showLoading && window.showLoading(false);
+
+            await showError('Erro de conexão durante a exclusão. Tente novamente.', {
+                title: 'Erro de Sistema',
+                buttonText: 'Tentar Novamente'
+            });
+        }
+    }
+
     async confirmDelete(id, message = null) {
         const defaultMessage = 'Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.';
         const confirmMessage = message || defaultMessage;
 
-        // Fechar dropdowns se existir o sistema
         if (window.dropdownPortalSystem) {
             window.dropdownPortalSystem.forceClose();
         }
 
-        // Usar sistema de confirmação customizado se existir
+        let confirmed = false;
+
         if (window.showConfirm) {
-            const confirmed = await window.showConfirm(confirmMessage);
-            if (confirmed) {
-                this.navigateToDelete(id);
-            }
+            confirmed = await window.showConfirm(confirmMessage);
+        } else if (window.confirmDelete) {
+            confirmed = await window.confirmDelete();
         } else {
-            // Fallback para confirm nativo
-            if (confirm(confirmMessage)) {
-                this.navigateToDelete(id);
-            }
+            confirmed = confirm(confirmMessage);
         }
-    }
 
-    /**
-     * Debug: Mostra informações do controller atual
-     */
-    debug() {
-        const controller = this.getCurrentController();
-        const entity = this.getCurrentEntity();
-        const ajaxUrl = this.getAjaxUrl();
-
-        console.group('🔍 Grid Controller Resolver - Debug Info');
-        console.log('Path atual:', window.location.pathname);
-        console.log('Controller:', controller);
-        console.log('Entidade:', entity);
-        console.log('URL AJAX:', ajaxUrl);
-        console.log('Cache:', Array.from(this.cache.entries()));
-        console.groupEnd();
+        if (confirmed) {
+            await this.executeDelete(id);
+        }
     }
 }
 
-// ===================================================================
-// INSTÂNCIA GLOBAL E INTEGRAÇÃO
-// ===================================================================
-
-// Criar instância global
 window.gridControllerResolver = new GridControllerResolver();
 
-// Expor métodos globais para compatibilidade
 window.getCurrentController = () => window.gridControllerResolver.getCurrentController();
 window.getCurrentEntity = () => window.gridControllerResolver.getCurrentEntity();
 window.getAjaxUrl = () => window.gridControllerResolver.getAjaxUrl();
 window.buildActionUrl = (action, id) => window.gridControllerResolver.buildActionUrl(action, id);
 
-// Funções de navegação globais
 window.navigateToDetails = (id) => window.gridControllerResolver.navigateToDetails(id);
 window.navigateToEdit = (id) => window.gridControllerResolver.navigateToEdit(id);
 window.navigateToCreate = () => window.gridControllerResolver.navigateToCreate();
 window.navigateToIndex = () => window.gridControllerResolver.navigateToIndex();
 
-// Função de confirmação de exclusão global
 window.confirmarExclusao = (id, message) => window.gridControllerResolver.confirmDelete(id, message);
 
-// Compatibilidade com nomes antigos
 window.editarRegistro = (controllerIgnorado, id) => window.gridControllerResolver.navigateToEdit(id);
 window.visualizarRegistro = (controllerIgnorado, id) => window.gridControllerResolver.navigateToDetails(id);
 window.excluirRegistro = (id) => window.gridControllerResolver.confirmDelete(id);
 
-console.log('✅ Grid Controller Resolver carregado - Sistema 100% genérico pronto!');
+console.log('✅ Grid Controller Resolver carregado!');

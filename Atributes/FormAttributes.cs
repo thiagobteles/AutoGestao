@@ -116,5 +116,7 @@ namespace AutoGestao.Atributes
         /// Tamanho máximo do arquivo em MB
         /// </summary>
         public int MaxSizeMB { get; set; } = 10;
+
+        public string CustomBucket { get; set; } = "";
     }
 }

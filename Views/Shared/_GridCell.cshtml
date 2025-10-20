@@ -41,11 +41,13 @@
                                 @foreach (var action in visibleActions)
                                 {
                                         var actionUrl = action.Url?.Replace("{id}", itemId);
+                                        var requestType = action.Type.ToString().ToLower();
                                         <text>{
                                             "name": "@action.Name",
                                             "displayName": "@action.DisplayName",
                                             "icon": "@action.Icon",
                                             "url": "@actionUrl",
+                                            "type": "@requestType",
                                             "cssClass": "@(action.Name.ToLower().Contains("delete") || action.Name.ToLower().Contains("excluir") ? "text-danger" : "")"
                                         }</text>
                                         @if (action != visibleActions.Last())
@@ -147,6 +149,17 @@
         @if (value != null && DateTime.TryParse(value.ToString(), out DateTime dateValue))
         {
             @dateValue.ToString("dd/MM/yyyy")
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case EnumGridColumnType.DateTime:
+        @if (value != null && value is DateTime dateTimeValue)
+        {
+            <span>@dateTimeValue.ToString("dd/MM/yyyy HH:mm")</span>
         }
         else
         {
@@ -295,6 +308,67 @@
             {
                 <text>@value</text>
             }
+        }
+        break;
+
+    case EnumGridColumnType.Image:
+        @if (value != null)
+        {
+            var imageUrl = value.ToString();
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                <div class="grid-image-cell">
+                    <img src="@imageUrl" alt="Imagem" class="grid-thumbnail" />
+                </div>
+            }
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case EnumGridColumnType.File:
+        @if (value != null)
+        {
+            var filePath = value.ToString();
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                var fileName = System.IO.Path.GetFileName(filePath);
+                var entityName = itemType.Name;
+                var itemId = itemType.GetProperty("Id")?.GetValue(Model.Item);
+                var empresaIdProp = itemType.GetProperty("IdEmpresa");
+                var empresaId = empresaIdProp?.GetValue(Model.Item) ?? 1;
+
+                <div class="grid-file-cell">
+                    <a href="@Url.Action("DownloadFile", new { 
+                        propertyName = Model.Column.Name, 
+                        filePath = filePath, 
+                        customBucket = formFieldAttr?.CustomBucket 
+                    })" 
+                       class="file-download-link" 
+                       title="Download: @fileName">
+                        <i class="fas fa-file-download"></i>
+                        <span class="file-name">@fileName</span>
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <span class="text-muted">-</span>
+        }
+        break;
+
+    case EnumGridColumnType.Percentage:
+        @if (value != null)
+        {
+            var percentValue = Convert.ToDecimal(value);
+            <span>@percentValue.ToString("P2")</span>
+        }
+        else
+        {
+            <span class="text-muted">-</span>
         }
         break;
 

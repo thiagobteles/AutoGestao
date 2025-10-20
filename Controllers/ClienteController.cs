@@ -5,6 +5,7 @@ using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;
+using AutoGestao.Models.Grid;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -65,22 +66,32 @@ namespace AutoGestao.Controllers
                         Url = "/Avaliacao/Create?clienteId={id}",
                         ShowCondition = (x) => ((Cliente)x).Ativo == true
                     },
-                    new()
-                    {
-                        Name = "AlterarStatus",
-                        DisplayName = "Inativar",
-                        Icon = "fas fa-ban",
-                        Url = "/Cliente/AlterarStatus/{id}",
-                        ShowCondition = (x) => ((Cliente)x).Ativo == true
-                    },
-                    new()
+                    new ()
                     {
                         Name = "AlterarStatus",
                         DisplayName = "Ativar",
-                        Icon = "fas fa-check",
-                        Url = "/Cliente/AlterarStatus/{id}",
-                        ShowCondition = (item) => ((Cliente)item).Ativo == false
-                    }
+                        Icon = "fas fa-power-on", //"fas fa-check",
+                        Url = $"/{ControllerContext.ActionDescriptor.ControllerName}/AlterarStatus/{{id}}",
+                        Type = EnumTypeRequest.Post,
+                        CssClass = "text-success",
+                        ShowCondition = (item) => {
+                            var cliente = item as Cliente;
+                            return cliente?.Ativo == false;
+                        }
+                    },
+                    new ()
+                    {
+                        Name = "AlterarStatus",
+                        DisplayName = "Inativar",
+                        Icon = "fas fa-power-off", //"fas fa-ban",
+                        Url = $"/{standardGridViewModel.ControllerName}/AlterarStatus/{{id}}",
+                        Type = EnumTypeRequest.Post,
+                        CssClass = "text-warning",
+                        ShowCondition = (item) => {
+                            var cliente = item as Cliente;
+                            return cliente?.Ativo == true;
+                        }
+                    },
                 ]);
 
             return standardGridViewModel;

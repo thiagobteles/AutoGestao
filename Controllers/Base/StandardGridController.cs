@@ -156,6 +156,11 @@ namespace AutoGestao.Controllers.Base
 
         protected virtual void ProcessFileFieldsFromRequest(T entity)
         {
+            if (!Request.HasFormContentType || Request.Method != "POST")
+            {
+                return;
+            }
+
             var fileProperties = typeof(T).GetProperties()
                 .Where(p => p.GetCustomAttribute<FormFieldAttribute>() != null &&
                            (p.GetCustomAttribute<FormFieldAttribute>().Type == EnumFieldType.File ||
@@ -399,11 +404,11 @@ namespace AutoGestao.Controllers.Base
         {
             if (!CanCreate(entity))
             {
-                if (Request.IsAjaxRequest())
+                if (IsAjaxRequest())
                 {
                     return Json(new
                     {
-                        sucesso = false,
+                        success = false,
                         mensagem = "Você não tem permissão para cadastrar um novo registro.",
                         script = "showError('Você não tem permissão para cadastrar um novo registro.')"
                     });
@@ -481,10 +486,7 @@ namespace AutoGestao.Controllers.Base
                 return NotFound();
             }
 
-            await BeforeUpdate(entity);
-
             var isModal = Request.Query.ContainsKey("modal") && Request.Query["modal"] == "true";
-
             _logger?.LogInformation("Edit chamado - Id: {Id}, IsModal: {IsModal}", id, isModal);
 
             if (isModal)
@@ -517,21 +519,10 @@ namespace AutoGestao.Controllers.Base
                 var value = prop.GetValue(entity);
             }
 
-            // Verificar especificamente campos de arquivo
-            var fileProperties = typeof(T).GetProperties()
-                .Where(p => p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.File ||
-                            p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Image);
-
-            foreach (var prop in fileProperties)
-            {
-                var value = prop.GetValue(entity);
-                Console.WriteLine($"{prop.Name}: '{value}' (IsNull: {value == null})");
-            }
-
             if (id != entity.Id)
             {
                 return Request.IsAjaxRequest()
-                    ? Json(new { success = false, message = "ID inconsistente." })
+                    ? Json(new { sucesso = false, mensagem = "ID inconsistente." })
                     : NotFound();
             }
 
@@ -539,7 +530,7 @@ namespace AutoGestao.Controllers.Base
             if (existingEntity == null)
             {
                 return Request.IsAjaxRequest()
-                    ? Json(new { success = false, message = "Registro não encontrado." })
+                    ? Json(new { sucesso = false, mensagem = "Registro não encontrado." })
                     : NotFound();
             }
 
@@ -547,7 +538,12 @@ namespace AutoGestao.Controllers.Base
             {
                 if (Request.IsAjaxRequest())
                 {
-                    return Json(new { sucesso = false, mensagem = "Você não tem permissão para editar este registro.", script = "showError('Você não tem permissão para editar este registro.')" });
+                    return Json(new
+                    {
+                        sucesso = false,
+                        mensagem = "Você não tem permissão para editar este registro.",
+                        script = "showError('Você não tem permissão para editar este registro.')"
+                    });
                 }
 
                 TempData["NotificationScript"] = "showError('Você não tem permissão para editar este registro.')";
@@ -563,14 +559,19 @@ namespace AutoGestao.Controllers.Base
                     entity.DataCadastro = existingEntity.DataCadastro;
                     entity.CriadoPorUsuarioId = existingEntity.CriadoPorUsuarioId;
 
-                    // CRITICAL: Preservar campos de arquivo que não foram alterados
+                    // Preservar campos de arquivo que não foram alterados
+                    var fileProperties = typeof(T).GetProperties()
+                        .Where(p => p.PropertyType == typeof(string) &&
+                                   (p.Name.Contains("Foto") || p.Name.Contains("Documento") ||
+                                    p.Name.Contains("Arquivo") || p.Name.Contains("Imagem")));
+
                     foreach (var prop in fileProperties)
                     {
                         var newValue = prop.GetValue(entity);
                         var oldValue = prop.GetValue(existingEntity);
 
-                        // Se o novo valor está vazio mas havia um arquivo antes, manter o antigo
-                        if (string.IsNullOrEmpty(newValue?.ToString()) && !string.IsNullOrEmpty(oldValue?.ToString()))
+                        if (string.IsNullOrEmpty(newValue?.ToString()) &&
+                            !string.IsNullOrEmpty(oldValue?.ToString()))
                         {
                             prop.SetValue(entity, oldValue);
                         }
@@ -582,13 +583,15 @@ namespace AutoGestao.Controllers.Base
                     await _context.SaveChangesAsync();
                     await AfterUpdate(existingEntity);
 
+                    // ✅ ✅ ✅ CORREÇÃO PRINCIPAL - USAR REDIRECT EM VEZ DE RELOAD ✅ ✅ ✅
                     if (Request.IsAjaxRequest())
                     {
                         return Json(new
                         {
                             sucesso = true,
                             mensagem = "Registro atualizado com sucesso!",
-                            script = "showSuccess('Registro atualizado com sucesso!').then(() => window.location.reload())"
+                            redirectUrl = Url.Action("Index"),
+                            script = "showSuccess('Registro atualizado com sucesso!')"
                         });
                     }
 
@@ -607,8 +610,7 @@ namespace AutoGestao.Controllers.Base
                         });
                     }
 
-                    TempData["NotificationScript"] = $"showError('Erro ao atualizar: {ex.Message}')";
-                    return RedirectToAction(nameof(Index));
+                    ModelState.AddModelError("", $"Erro ao atualizar registro: {ex.Message}");
                 }
             }
             else
@@ -622,7 +624,7 @@ namespace AutoGestao.Controllers.Base
                 }
             }
 
-            if (Request.IsAjaxRequest())
+            if (IsAjaxRequest())
             {
                 var errors = ModelState
                     .Where(x => x.Value.Errors.Count > 0)
@@ -714,6 +716,7 @@ namespace AutoGestao.Controllers.Base
         /// POST: Delete - Excluir entidade
         /// </summary>
         [HttpPost]
+        [HttpDelete]
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Delete(long id)
         {
@@ -725,13 +728,14 @@ namespace AutoGestao.Controllers.Base
 
             if (!CanDelete(entity))
             {
-                if (Request.IsAjaxRequest())
+                if (IsAjaxRequest())
                 {
                     return Json(new
                     {
-                        sucesso = false,
+                        success = false,
                         mensagem = "Você não tem permissão para excluir este registro.",
-                        script = "showError('RVocê não tem permissão para excluir este registro.!').then(() => window.location.reload())"
+                        redirectUrl = Url.Action("Index"),
+                        script = "showError('Você não tem permissão para excluir este registro.')"
                     });
                 }
 
@@ -746,13 +750,15 @@ namespace AutoGestao.Controllers.Base
                 await _context.SaveChangesAsync();
                 await AfterDelete(entity);
 
+                // ✅ CORREÇÃO TAMBÉM AQUI
                 if (Request.IsAjaxRequest())
                 {
                     return Json(new
                     {
                         sucesso = true,
                         mensagem = "Registro excluído com sucesso!",
-                        script = "showSuccess('Registro excluído com sucesso!').then(() => window.location.reload())"
+                        redirectUrl = Url.Action("Index"),
+                        script = "showSuccess('Registro excluído com sucesso!')"
                     });
                 }
 
@@ -761,11 +767,11 @@ namespace AutoGestao.Controllers.Base
             }
             catch (Exception ex)
             {
-                if (Request.IsAjaxRequest())
+                if (IsAjaxRequest())
                 {
                     return Json(new
                     {
-                        sucesso = false,
+                        success = false,
                         mensagem = $"Erro ao excluir registro: {ex.Message}",
                         script = $"showError('Erro ao excluir registro: {ex.Message}')"
                     });
@@ -829,7 +835,12 @@ namespace AutoGestao.Controllers.Base
             {
                 if (file == null || file.Length == 0)
                 {
-                    return Json(new { sucesso = false, mensagem = "Nenhum arquivo selecionado", script = "showError('Nenhum arquivo selecionado')" });
+                    return Json(new 
+                    { 
+                        success = false,
+                        mensagem = "Nenhum arquivo selecionado",
+                        script = "showError('Nenhum arquivo selecionado')" 
+                    });
                 }
 
                 var property = typeof(T).GetProperties()
@@ -839,7 +850,12 @@ namespace AutoGestao.Controllers.Base
 
                 if (property == null)
                 {
-                    return Json(new { sucesso = false, mensagem = "Campo não encontrado", script = "showError('Campo não encontrado')" });
+                    return Json(new 
+                    {
+                        success = false,
+                        mensagem = "Campo não encontrado",
+                        script = "showError('Campo não encontrado')"
+                    });
                 }
 
                 var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
@@ -938,7 +954,12 @@ namespace AutoGestao.Controllers.Base
                 if (string.IsNullOrEmpty(request.FilePath))
                 {
                     _logger?.LogWarning("Tentativa de exclusão com filePath vazio. PropertyName: {PropertyName}", request.PropertyName);
-                    return Json(new { sucesso = false, mensagem = "Caminho do arquivo não informado", script = "showError('Caminho do arquivo não informado')" });
+                    return Json(new 
+                    {
+                        success = false,
+                        mensagem = "Caminho do arquivo não informado",
+                        script = "showError('Caminho do arquivo não informado')"
+                    });
                 }
 
                 var entityName = typeof(T).Name;
@@ -952,16 +973,30 @@ namespace AutoGestao.Controllers.Base
 
                 if (deleted)
                 {
-                    return Json(new { sucesso = true, mensagem = "Arquivo excluído com sucesso!", script = "showSuccess('Arquivo excluído com sucesso!')" });
+                    return Json(new 
+                    { 
+                        success = true,
+                        mensagem = "Arquivo excluído com sucesso!",
+                        script = "showSuccess('Arquivo excluído com sucesso!')"
+                    });
                 }
 
-                return Json(new { sucesso = false, mensagem = "Erro ao excluir arquivo", script = "showError('Erro ao excluir arquivo')" });
+                return Json(new 
+                {
+                    success = false,
+                    mensagem = "Erro ao excluir arquivo",
+                    script = "showError('Erro ao excluir arquivo')"
+                });
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Erro ao excluir arquivo. PropertyName: {PropertyName}, FilePath: {FilePath}",
-                    request.PropertyName, request.FilePath);
-                return Json(new { success = false, message = $"Erro ao excluir arquivo: {ex.Message}" });
+                _logger?.LogError(ex, "Erro ao excluir arquivo. PropertyName: {PropertyName}, FilePath: {FilePath}", request.PropertyName, request.FilePath);
+                return Json(new
+                {
+                    success = false,
+                    message = $"Erro ao excluir arquivo: {ex.Message}",
+                    script = "showError('Erro ao excluir arquivo')"
+                });
             }
         }
 
@@ -998,7 +1033,7 @@ namespace AutoGestao.Controllers.Base
 
         public bool IsAjaxRequest()
         {
-            return Request.Headers.ContainsKey("X-Requested-With") || Request.Query.ContainsKey("ajax");
+            return Request.Headers.TryGetValue("X-Requested-With", out var value) && value == "XMLHttpRequest";
         }
 
         #region Métodos para Sistema de Abas
@@ -1284,14 +1319,16 @@ namespace AutoGestao.Controllers.Base
                         Name = "Details",
                         DisplayName = "Visualizar",
                         Icon = "fas fa-eye",
-                        Url = "/" + controllerNome + "/Details/{id}"
+                        Url =  $"/{controllerNome}/Details/{{id}}",
+                        Type = EnumTypeRequest.Get
                     },
                     new()
                     {
                         Name = "Edit",
                         DisplayName = "Editar",
                         Icon = "fas fa-edit",
-                        Url = "/" + controllerNome + "/Edit/{id}"
+                        Url =  $"/{controllerNome}/Edit/{{id}}",
+                        Type = EnumTypeRequest.Get
                     },
                     new()
                     {
@@ -1299,15 +1336,18 @@ namespace AutoGestao.Controllers.Base
                         DisplayName = "PDF",
                         Icon = "fas fa-file-pdf",
                         CssClass = "btn btn-sm btn-outline-success",
-                        Url = "/" + controllerNome + "/GerarRelatorio/{id}",
+                        Url = $"/{controllerNome}/GerarRelatorio/{{id}}",
+                        Type = EnumTypeRequest.Get
                     },
                     new()
                     {
                         Name = "Delete",
                         DisplayName = "Excluir",
                         Icon = "fas fa-trash",
-                        Url = "/" + controllerNome + "/Delete/{id}"
-                    },
+                        Url = $"/{controllerNome}/Delete/{{id}}",
+                        Type = EnumTypeRequest.Post,
+                        CssClass = "text-danger"
+                    }
                 ];
         }
 
@@ -2117,10 +2157,10 @@ namespace AutoGestao.Controllers.Base
         /// <param name="controller">Controller</param>
         /// <param name="entity">Entidade a ser criada</param>
         /// <returns>ActionResult apropriado (JSON para AJAX, View para navegação normal)</returns>
-        public static async Task<IActionResult> HandleModalCreate(StandardGridController<T> controller, T entity)
+        public async Task<IActionResult> HandleModalCreate(StandardGridController<T> controller, T entity)
         {
             // Verifica se é requisição AJAX (modal)
-            if (controller.Request.Headers.TryGetValue("X-Requested-With", out var value) && value == "XMLHttpRequest")
+            if (IsAjaxRequest())
             {
                 try
                 {

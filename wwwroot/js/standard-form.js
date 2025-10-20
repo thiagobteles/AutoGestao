@@ -296,17 +296,6 @@ function hideField(field) {
 // SUBMISSÃO AJAX
 // ================================================================================================
 
-function initializeAjaxForm() {
-    const form = document.querySelector('.standard-form');
-
-    if (!form || form.dataset.ajax !== 'true') return;
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        submitFormAjax(this);
-    });
-}
-
 async function submitFormAjax(form) {
     const submitBtn = form.querySelector('#submitBtn');
     const originalText = submitBtn?.innerHTML;
@@ -320,14 +309,6 @@ async function submitFormAjax(form) {
         clearAllErrors(form);
 
         const formData = new FormData(form);
-
-        // LOG: Ver tudo que está sendo enviado
-        console.log('========== FORM DATA SENDO ENVIADO ==========');
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-        }
-        console.log('=============================================');
-
         const actionUrl = form.action;
 
         const response = await fetch(actionUrl, {
@@ -340,25 +321,62 @@ async function submitFormAjax(form) {
 
         const result = await response.json();
 
-        if (result.success) {
-            showSuccess(result.message || 'Salvo com sucesso!');
+        if (result.success || result.sucesso) {
+
+            if (result.script) {
+                try {
+                    eval(result.script);
+                } catch (scriptError) {
+                    console.error('Erro ao executar script:', scriptError);
+                }
+            } else {
+                showSuccess(result.message || result.mensagem || 'Salvo com sucesso!');
+            }
+
+            const redirectUrl = result.redirectUrl ||
+                window.location.pathname.replace(/\/(Create|Edit).*/, '');
+
+            if (window.responseHandler) {
+                window.responseHandler.isNavigating = true;
+            }
+
             setTimeout(() => {
-                window.location.href = result.redirectUrl || window.location.pathname.replace(/\/(Create|Edit).*/, '');
-            }, 1000);
+                window.location.href = redirectUrl;
+            }, 1500);
+
         } else {
             if (result.errors) {
                 displayErrors(result.errors, form);
             }
-            showError(result.message || 'Erro ao salvar');
+
+            const errorMessage = result.message || result.mensagem || 'Erro ao salvar';
+
+            if (result.script && result.script.includes('Error')) {
+                eval(result.script);
+            } else {
+                showError(errorMessage);
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
         }
 
     } catch (error) {
         console.error('[FORM] Erro:', error);
-        showError('Erro ao processar requisição');
-    } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
+
+        const isNavigating = window.responseHandler?.isNavigating || false;
+        const isAbortError = error.name === 'AbortError' ||
+            error.message?.includes('aborted');
+
+        if (!isNavigating && !isAbortError) {
+            showError('Erro ao processar requisição');
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
         }
     }
 }
@@ -378,25 +396,66 @@ function displayValidationErrors(form, errors) {
             const feedback = document.createElement('div');
             feedback.className = 'invalid-feedback';
             feedback.style.display = 'block';
-            feedback.textContent = Array.isArray(messages) ? messages.join(', ') : messages;
+            feedback.textContent = Array.isArray(messages) ? messages[0] : messages;
+
             field.parentElement.appendChild(feedback);
         }
     }
 }
 
+function displayErrors(errors, form) {
+    if (typeof errors === 'object') {
+        displayValidationErrors(form, errors);
+    }
+}
+
 function clearAllErrors(form) {
-    form.querySelectorAll('.is-invalid').forEach(el => {
-        el.classList.remove('is-invalid');
+    form.querySelectorAll('.is-invalid').forEach(field => {
+        field.classList.remove('is-invalid');
     });
 
-    form.querySelectorAll('.invalid-feedback').forEach(el => {
-        el.remove();
+    form.querySelectorAll('.invalid-feedback').forEach(error => {
+        error.remove();
     });
 
     const alertDanger = form.querySelector('.alert-danger');
     if (alertDanger) {
         alertDanger.style.display = 'none';
     }
+}
+
+function clearFieldErrors(field) {
+    field.classList.remove('is-invalid');
+
+    const errorElement = field.parentNode.querySelector('.invalid-feedback');
+    if (errorElement) {
+        errorElement.remove();
+    }
+}
+
+function initializeAjaxForm() {
+    const form = document.querySelector('.standard-form');
+
+    if (!form || form.dataset.ajax !== 'true') return;
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitFormAjax(this);
+    });
+}
+
+(function () {
+    window.addEventListener('beforeunload', function () {
+        if (window.responseHandler) {
+            window.responseHandler.isNavigating = true;
+        }
+    });
+})();
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAjaxForm);
+} else {
+    initializeAjaxForm();
 }
 
 // ================================================================================================
@@ -461,30 +520,6 @@ async function buscarCep(cep) {
 // UTILITÁRIOS
 // ================================================================================================
 
-function clearAllErrors(form) {
-    form.querySelectorAll('.is-invalid').forEach(field => {
-        field.classList.remove('is-invalid');
-    });
-
-    form.querySelectorAll('.invalid-feedback').forEach(error => {
-        error.remove();
-    });
-
-    const alertDanger = form.querySelector('.alert-danger');
-    if (alertDanger) {
-        alertDanger.style.display = 'none';
-    }
-}
-
-function clearFieldErrors(field) {
-    field.classList.remove('is-invalid');
-
-    const errorElement = field.parentNode.querySelector('.invalid-feedback');
-    if (errorElement) {
-        errorElement.remove();
-    }
-}
-
 function getBootstrapClass(type) {
     const mapping = {
         'success': 'success',
@@ -526,4 +561,5 @@ style.textContent = `
         opacity: 0.7;
     }
 `;
+
 document.head.appendChild(style);

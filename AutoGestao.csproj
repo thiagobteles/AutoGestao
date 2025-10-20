@@ -39,4 +39,8 @@
 	  <Folder Include="Migrations\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Include="wwwroot\js\grid-action-handler.js" />
+	</ItemGroup>
+
 </Project>

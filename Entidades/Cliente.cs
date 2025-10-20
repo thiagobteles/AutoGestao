@@ -35,7 +35,6 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Observações", Order = 40, Section = "Status", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea, Placeholder = "Informações adicionais sobre o cliente...", GridColumns = 1)]
         public string? Observacoes { get; set; }
 
-        //[GridField("Foto", Order = 50, Width = "50px", ShowInGrid = true)]
         [FormField(Order = 50, Name = "Foto do Cliente", Section = "Teste", Icon = "fas fa-image", Type = EnumFieldType.Image, ImageSize = "75X75", AllowedExtensions = "jpg,jpeg,png", MaxSizeMB = 5)]
         public string? FotoCliente { get; set; }
 

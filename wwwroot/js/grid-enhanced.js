@@ -1069,6 +1069,7 @@ class DropdownPortalSystem {
 
         this.setupPortalContainer();
         this.setupEventListeners();
+        this.AjustarTypeRequest();
         this.isInitialized = true;
 
         console.log('✅ Dropdown Portal System initialized');
@@ -1338,6 +1339,167 @@ class DropdownPortalSystem {
     // Método público para forçar fechamento
     forceClose() {
         this.closeDropdown();
+    }
+
+    AjustarTypeRequest() {
+        (function () {
+            console.log('🔧 Aplicando patch para actions com Type...');
+
+            // Interceptar todos os cliques em itens do dropdown
+            document.addEventListener('click', async function (e) {
+                const dropdownItem = e.target.closest('.dropdown-item-portal, .dropdown-item');
+
+                if (!dropdownItem) return;
+
+                // Buscar dados da action no container pai
+                const container = dropdownItem.closest('.action-dropdown-container') ||
+                    document.querySelector('.action-dropdown-container');
+
+                if (!container) return;
+
+                const dataScript = container.querySelector('.dropdown-data');
+                if (!dataScript) return;
+
+                try {
+                    const data = JSON.parse(dataScript.textContent);
+                    const actionUrl = dropdownItem.getAttribute('href');
+
+                    // Encontrar a action correspondente
+                    const action = data.actions.find(a => a.url === actionUrl);
+
+                    if (!action) return;
+
+                    // Verificar o type (0 = GET, 1 = POST)
+                    if (action.type === 1 || action.type === "1") {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        console.log(`📮 Action POST detectada: ${action.name}`);
+
+                        // Fechar dropdown
+                        if (window.dropdownPortalSystem) {
+                            window.dropdownPortalSystem.forceClose();
+                        }
+
+                        // Confirmar se for delete/excluir
+                        const isDelete = action.name.toLowerCase().includes('delete') ||
+                            action.name.toLowerCase().includes('excluir');
+
+                        let confirmed = true;
+                        if (isDelete) {
+                            if (window.showConfirm) {
+                                confirmed = await window.showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.');
+                            } else if (window.confirmDelete) {
+                                confirmed = await window.confirmDelete();
+                            } else {
+                                confirmed = confirm('Tem certeza que deseja excluir este registro?');
+                            }
+                        }
+
+                        if (!confirmed) return;
+
+                        // Executar POST via AJAX
+                        await executePostAction(action.url, action.name);
+                    }
+                    // Se type === 0 (GET), deixa navegação normal acontecer
+
+                } catch (error) {
+                    console.error('Erro ao processar action:', error);
+                }
+            });
+
+            async function executePostAction(url, actionName) {
+                if (window.showLoading) {
+                    window.showLoading(true);
+                }
+
+                try {
+                    // Obter token antiforgery
+                    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                    const token = tokenInput ? tokenInput.value : '';
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token
+                        },
+                        body: token ? `__RequestVerificationToken=${encodeURIComponent(token)}` : ''
+                    });
+
+                    if (window.showLoading) {
+                        window.showLoading(false);
+                    }
+
+                    if (response.ok) {
+                        const result = await response.json();
+
+                        if (result.sucesso || result.success) {
+                            // Executar script se houver
+                            if (result.script) {
+                                eval(result.script);
+                            } else {
+                                // Mostrar sucesso
+                                const message = result.mensagem || result.message || 'Operação realizada com sucesso!';
+
+                                if (window.showSuccess) {
+                                    await window.showSuccess(message, {
+                                        title: 'Sucesso!',
+                                        buttonText: 'OK'
+                                    });
+                                } else {
+                                    alert(message);
+                                }
+
+                                // Marcar navegação
+                                if (window.responseHandler) {
+                                    window.responseHandler.isNavigating = true;
+                                }
+
+                                // Redirect
+                                setTimeout(() => {
+                                    const redirectUrl = result.redirectUrl || window.location.pathname;
+                                    window.location.href = redirectUrl;
+                                }, 1500);
+                            }
+                        } else {
+                            // Erro
+                            const errorMessage = result.mensagem || result.message || 'Erro ao executar operação.';
+
+                            if (window.showError) {
+                                await window.showError(errorMessage, {
+                                    title: 'Erro',
+                                    buttonText: 'Entendi'
+                                });
+                            } else {
+                                alert(errorMessage);
+                            }
+                        }
+                    } else {
+                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao executar POST:', error);
+
+                    if (window.showLoading) {
+                        window.showLoading(false);
+                    }
+
+                    if (window.showError) {
+                        await window.showError('Erro de conexão. Tente novamente.', {
+                            title: 'Erro de Sistema',
+                            buttonText: 'Tentar Novamente'
+                        });
+                    } else {
+                        alert('Erro de conexão. Tente novamente.');
+                    }
+                }
+            }
+
+            console.log('✅ Patch para actions com Type aplicado!');
+        })();
     }
 
     // Método para reinicializar após updates da grid
