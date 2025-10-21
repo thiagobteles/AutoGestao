@@ -1252,19 +1252,52 @@ class DropdownPortalSystem {
                 item.className = `dropdown-item-portal ${action.cssClass || ''}`;
                 item.innerHTML = `<i class="${action.icon}"></i> ${action.displayName}`;
 
-                // Event listener para ações
-                item.addEventListener('click', (e) => {
-                    if (action.name.toLowerCase().includes('delete') || action.name.toLowerCase().includes('excluir')) {
-                        e.preventDefault();
-                        const confirmed = showConfirm('Tem certeza que deseja excluir este registro?'); if (confirmed) {
+                // Adicionar atributos de dados
+                item.setAttribute('data-action-name', action.name);
+                item.setAttribute('data-action-type', action.type !== undefined ? action.type : 0);
+                item.setAttribute('data-has-handler', 'true'); // Marcar para não ser processado por AjustarTypeRequest
+
+                // Event listener para ações usando executeGridAction
+                item.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Fechar dropdown
+                    this.closeDropdown();
+
+                    // Usar sistema de execução de ações
+                    if (window.executeGridAction && typeof window.executeGridAction === 'function') {
+                        await window.executeGridAction(action, e);
+                    } else {
+                        console.error('executeGridAction não encontrado, usando fallback');
+                        // Fallback simples
+                        if (action.name.toLowerCase().includes('delete') || action.name.toLowerCase().includes('excluir')) {
+                            const confirmed = await showConfirm('Tem certeza que deseja excluir este registro?');
+                            if (confirmed) {
+                                // POST para delete
+                                if (window.showLoading) window.showLoading(true);
+                                try {
+                                    const response = await fetch(action.url, { method: 'POST' });
+                                    const result = await response.json();
+                                    if (window.showLoading) window.showLoading(false);
+                                    if (result.sucesso || result.success) {
+                                        if (window.showSuccess) {
+                                            await window.showSuccess(result.mensagem || result.message || 'Operação realizada!');
+                                        }
+                                        window.location.reload();
+                                    } else {
+                                        if (window.showError) {
+                                            window.showError(result.mensagem || result.message || 'Erro na operação');
+                                        }
+                                    }
+                                } catch (error) {
+                                    if (window.showLoading) window.showLoading(false);
+                                    if (window.showError) window.showError('Erro: ' + error.message);
+                                }
+                            }
+                        } else {
                             window.location.href = action.url;
                         }
-                    } else if (action.url && action.url !== '#') {
-                        // Deixa o comportamento padrão do link
-                        this.closeDropdown();
-                    } else {
-                        e.preventDefault();
-                        console.log(`Ação executada: ${action.name}`);
                     }
                 });
 
@@ -1351,6 +1384,12 @@ class DropdownPortalSystem {
 
                 if (!dropdownItem) return;
 
+                // Se já tem handler do createDropdownElement, não processar aqui
+                if (dropdownItem.hasAttribute('data-has-handler')) {
+                    console.log('Item já tem handler, ignorando AjustarTypeRequest');
+                    return;
+                }
+
                 // Buscar dados da action no container pai
                 const container = dropdownItem.closest('.action-dropdown-container') ||
                     document.querySelector('.action-dropdown-container');
@@ -1369,109 +1408,107 @@ class DropdownPortalSystem {
 
                     if (!action) return;
 
-                    // Verificar o type (0 = GET, 1 = POST)
-                    if (action.type === 1 || action.type === "1") {
-                        e.preventDefault();
-                        e.stopPropagation();
+                    // Prevenir comportamento padrão e propagação
+                    e.preventDefault();
+                    e.stopPropagation();
 
-                        console.log(`📮 Action POST detectada: ${action.name}`);
+                    console.log(`🎯 Action detectada via AjustarTypeRequest: ${action.name} (type: ${action.type})`);
 
-                        // Fechar dropdown
-                        if (window.dropdownPortalSystem) {
-                            window.dropdownPortalSystem.forceClose();
-                        }
-
-                        // Confirmar se for delete/excluir
-                        const isDelete = action.name.toLowerCase().includes('delete') ||
-                            action.name.toLowerCase().includes('excluir');
-
-                        let confirmed = true;
-                        if (isDelete) {
-                            if (window.showConfirm) {
-                                confirmed = await window.showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.');
-                            } else if (window.confirmDelete) {
-                                confirmed = await window.confirmDelete();
-                            } else {
-                                confirmed = confirm('Tem certeza que deseja excluir este registro?');
-                            }
-                        }
-
-                        if (!confirmed) return;
-
-                        // Executar POST via AJAX
-                        await executePostAction(action.url, action.name);
+                    // Fechar dropdown
+                    if (window.dropdownPortalSystem) {
+                        window.dropdownPortalSystem.forceClose();
                     }
-                    // Se type === 0 (GET), deixa navegação normal acontecer
+
+                    // Usar executeGridAction se disponível
+                    if (window.executeGridAction && typeof window.executeGridAction === 'function') {
+                        await window.executeGridAction(action, e);
+                    } else {
+                        console.warn('executeGridAction não disponível, usando fallback local');
+                        // Fallback local se executeGridAction não estiver disponível
+                        await executeActionFallback(action);
+                    }
 
                 } catch (error) {
                     console.error('Erro ao processar action:', error);
                 }
             });
 
-            async function executePostAction(url, actionName) {
-                if (window.showLoading) {
-                    window.showLoading(true);
+            async function executeActionFallback(action) {
+                console.log(`Executando fallback para ${action.name}`);
+
+                // Verificar tipo de requisição
+                let requestType = 'get';
+                if (typeof action.type === 'number') {
+                    switch (action.type) {
+                        case 0: requestType = 'get'; break;
+                        case 1: requestType = 'post'; break;
+                        case 2: requestType = 'put'; break;
+                        case 3: requestType = 'delete'; break;
+                    }
+                } else if (typeof action.type === 'string') {
+                    requestType = action.type.toLowerCase();
                 }
 
+                console.log(`Tipo de requisição normalizado: ${requestType}`);
+
+                if (requestType === 'get') {
+                    window.location.href = action.url;
+                    return;
+                }
+
+                // Para POST, PUT, DELETE - confirmar se for delete
+                const isDelete = action.name.toLowerCase().includes('delete') ||
+                    action.name.toLowerCase().includes('excluir');
+
+                let confirmed = true;
+                if (isDelete) {
+                    if (window.showConfirm) {
+                        confirmed = await window.showConfirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.');
+                    } else {
+                        confirmed = confirm('Tem certeza que deseja excluir este registro?');
+                    }
+                }
+
+                if (!confirmed) return;
+
+                // Executar requisição
+                if (window.showLoading) window.showLoading(true);
+
                 try {
-                    // Obter token antiforgery
                     const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
                     const token = tokenInput ? tokenInput.value : '';
 
-                    const response = await fetch(url, {
-                        method: 'POST',
+                    const response = await fetch(action.url, {
+                        method: requestType.toUpperCase(),
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'RequestVerificationToken': token
+                            'Content-Type': 'application/json',
+                            ...(token && { 'RequestVerificationToken': token })
                         },
-                        body: token ? `__RequestVerificationToken=${encodeURIComponent(token)}` : ''
+                        body: requestType !== 'get' ? JSON.stringify({}) : undefined
                     });
 
-                    if (window.showLoading) {
-                        window.showLoading(false);
-                    }
+                    if (window.showLoading) window.showLoading(false);
 
                     if (response.ok) {
                         const result = await response.json();
 
                         if (result.sucesso || result.success) {
-                            // Executar script se houver
                             if (result.script) {
                                 eval(result.script);
                             } else {
-                                // Mostrar sucesso
                                 const message = result.mensagem || result.message || 'Operação realizada com sucesso!';
-
                                 if (window.showSuccess) {
-                                    await window.showSuccess(message, {
-                                        title: 'Sucesso!',
-                                        buttonText: 'OK'
-                                    });
+                                    await window.showSuccess(message);
                                 } else {
                                     alert(message);
                                 }
-
-                                // Marcar navegação
-                                if (window.responseHandler) {
-                                    window.responseHandler.isNavigating = true;
-                                }
-
-                                // Redirect
-                                setTimeout(() => {
-                                    const redirectUrl = result.redirectUrl || window.location.pathname;
-                                    window.location.href = redirectUrl;
-                                }, 1500);
+                                window.location.reload();
                             }
                         } else {
-                            // Erro
                             const errorMessage = result.mensagem || result.message || 'Erro ao executar operação.';
-
                             if (window.showError) {
-                                await window.showError(errorMessage, {
-                                    title: 'Erro',
-                                    buttonText: 'Entendi'
-                                });
+                                await window.showError(errorMessage);
                             } else {
                                 alert(errorMessage);
                             }
@@ -1479,19 +1516,11 @@ class DropdownPortalSystem {
                     } else {
                         throw new Error(`Erro ${response.status}: ${response.statusText}`);
                     }
-
                 } catch (error) {
-                    console.error('Erro ao executar POST:', error);
-
-                    if (window.showLoading) {
-                        window.showLoading(false);
-                    }
-
+                    console.error('Erro ao executar requisição:', error);
+                    if (window.showLoading) window.showLoading(false);
                     if (window.showError) {
-                        await window.showError('Erro de conexão. Tente novamente.', {
-                            title: 'Erro de Sistema',
-                            buttonText: 'Tentar Novamente'
-                        });
+                        await window.showError('Erro de conexão. Tente novamente.');
                     } else {
                         alert('Erro de conexão. Tente novamente.');
                     }
