@@ -1369,8 +1369,12 @@ class DropdownPortalSystem {
 
                     if (!action) return;
 
-                    // Verificar o type (0 = GET, 1 = POST)
-                    if (action.type === 1 || action.type === "1") {
+                    // Verificar o type (0 = GET, 1 = POST, 2 = PUT, 3 = DELETE)
+                    // Aceita tanto número quanto string para compatibilidade
+                    const isPost = action.type === 1 || action.type === "1" ||
+                                   (typeof action.type === 'string' && action.type.toLowerCase() === 'post');
+
+                    if (isPost) {
                         e.preventDefault();
                         e.stopPropagation();
 

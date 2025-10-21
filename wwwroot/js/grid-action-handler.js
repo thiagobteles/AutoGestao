@@ -14,8 +14,6 @@ async function executeGridAction(action, event) {
     }
 
     try {
-        // Obter tipo de requisição (padrão: get)
-        const requestType = (action.type || 'get').toLowerCase();
         const url = action.url;
 
         if (!url) {
@@ -24,7 +22,22 @@ async function executeGridAction(action, event) {
             return;
         }
 
-        console.log(`🚀 Executando ação: ${action.name} | Tipo: ${requestType} | URL: ${url}`);
+        // Normalizar tipo de requisição (aceita número ou string)
+        // 0 = GET, 1 = POST, 2 = PUT, 3 = DELETE
+        let requestType = 'get';
+        if (typeof action.type === 'number') {
+            switch (action.type) {
+                case 0: requestType = 'get'; break;
+                case 1: requestType = 'post'; break;
+                case 2: requestType = 'put'; break;
+                case 3: requestType = 'delete'; break;
+                default: requestType = 'get';
+            }
+        } else if (typeof action.type === 'string') {
+            requestType = action.type.toLowerCase();
+        }
+
+        console.log(`🚀 Executando ação: ${action.name} | Tipo: ${requestType} (original: ${action.type}) | URL: ${url}`);
 
         // Processar baseado no tipo de requisição
         switch (requestType) {
@@ -314,17 +327,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Adicionar listener global para ações do dropdown
     document.addEventListener('click', function(e) {
         const dropdownItem = e.target.closest('.dropdown-item-portal');
-        
+
         if (dropdownItem) {
             e.preventDefault();
             e.stopPropagation();
 
             // Obter dados da ação do elemento
+            let actionType = dropdownItem.getAttribute('data-action-type') || '0';
+
+            // Converter para número se for string numérica, senão mantém a string
+            if (!isNaN(actionType)) {
+                actionType = parseInt(actionType, 10);
+            }
+
             const actionData = {
                 name: dropdownItem.getAttribute('data-action-name') || '',
                 displayName: dropdownItem.textContent.trim(),
                 url: dropdownItem.getAttribute('href'),
-                type: dropdownItem.getAttribute('data-action-type') || 'get'
+                type: actionType
             };
 
             // Executar a ação

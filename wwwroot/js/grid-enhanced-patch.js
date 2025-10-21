@@ -52,11 +52,12 @@
                     item.href = action.url || '#';
                     item.className = `dropdown-item-portal ${action.cssClass || ''}`;
                     item.innerHTML = `<i class="${action.icon}"></i> ${action.displayName}`;
-                    
+
                     // Adicionar atributos de dados para o handler
+                    // Aceita tanto número quanto string
                     item.setAttribute('data-action-name', action.name);
-                    item.setAttribute('data-action-type', action.type || 'get');
-                    
+                    item.setAttribute('data-action-type', action.type !== undefined ? action.type : 0);
+
                     // Event listener para ações usando o novo sistema
                     item.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -68,8 +69,21 @@
                         } else {
                             console.error('executeGridAction não está disponível');
                             // Fallback para método antigo
-                            const actionType = (action.type || 'get').toLowerCase();
-                            
+                            let actionType = 'get';
+
+                            // Normalizar tipo (aceita número ou string)
+                            if (typeof action.type === 'number') {
+                                switch (action.type) {
+                                    case 0: actionType = 'get'; break;
+                                    case 1: actionType = 'post'; break;
+                                    case 2: actionType = 'put'; break;
+                                    case 3: actionType = 'delete'; break;
+                                    default: actionType = 'get';
+                                }
+                            } else if (typeof action.type === 'string') {
+                                actionType = action.type.toLowerCase();
+                            }
+
                             if (actionType === 'get') {
                                 window.location.href = action.url;
                             } else if (actionType === 'post') {

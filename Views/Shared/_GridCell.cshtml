@@ -41,13 +41,13 @@
                                 @foreach (var action in visibleActions)
                                 {
                                         var actionUrl = action.Url?.Replace("{id}", itemId);
-                                        var requestType = action.Type.ToString().ToLower();
+                                        var requestTypeValue = (int)action.Type;
                                         <text>{
                                             "name": "@action.Name",
                                             "displayName": "@action.DisplayName",
                                             "icon": "@action.Icon",
                                             "url": "@actionUrl",
-                                            "type": "@requestType",
+                                            "type": @requestTypeValue,
                                             "cssClass": "@(action.Name.ToLower().Contains("delete") || action.Name.ToLower().Contains("excluir") ? "text-danger" : "")"
                                         }</text>
                                         @if (action != visibleActions.Last())
