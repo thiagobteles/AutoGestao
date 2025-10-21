@@ -182,7 +182,6 @@
                                     break;
 
                                 case EnumFieldType.Date:
-                                    @* CORREÇÃO: Usar função segura para formatar data *@
                                     <input type="date"
                                            class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                            id="@field.PropertyName"
@@ -193,7 +192,6 @@
                                     break;
 
                                 case EnumFieldType.DateTime:
-                                    @* CORREÇÃO: Usar função segura para formatar datetime *@
                                     <input type="datetime-local"
                                            class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                            id="@field.PropertyName"
@@ -205,13 +203,13 @@
 
                                 case EnumFieldType.TextArea:
                                     <textarea id="@field.PropertyName"
-                              class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
-                              name="@field.PropertyName"
-                              rows="3"
-                              placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
-                              @(field.Required || field.IsConditionallyRequired ? "required" : "")
-                              @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty)
-                              @(field.ReadOnly ? "readonly" : string.Empty)>@field.Value</textarea>
+                                      class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                      name="@field.PropertyName"
+                                      rows="3"
+                                      placeholder="@(field.ReadOnly ? "" : field.Placeholder)"
+                                      @(field.Required || field.IsConditionallyRequired ? "required" : "")
+                                      @(!string.IsNullOrEmpty(field.ValidationRegex) ? $"pattern=\"{field.ValidationRegex}\"" : string.Empty)
+                                      @(field.ReadOnly ? "readonly" : string.Empty)>@field.Value</textarea>
                                     break;
 
                                 case EnumFieldType.Select:
