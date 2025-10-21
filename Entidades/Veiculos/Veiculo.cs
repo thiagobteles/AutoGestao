@@ -20,14 +20,9 @@ namespace AutoGestao.Entidades.Veiculos
     [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 6, Controller = "Despesa", RequiredRoles = new[] { "Admin", "Financeiro" })]
     public class Veiculo : BaseEntidade
     {
-        // Cammpo aparece no RPT
-        [ReportField("Codigo", Section = "AUTOMÓVEL", Order = 1)]
-        
-        // Campo aparece na GRID
-        [GridId()]
-
-        // Campo aparece no CADASTRO/EDIÇÃO
-        [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Text, ReadOnly = true, Required = false, GridColumns = 2)]
+        [ReportField("Codigo", Section = "AUTOMÓVEL", Order = 1)] // Cammpo aparece no RPT
+        [GridId()] // Campo aparece na GRID
+        [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Text, ReadOnly = true, Required = false, GridColumns = 2)] // Campo aparece no CADASTRO/EDIÇÃO
         public string Codigo { get; set; } = string.Empty;
 
         // ============================================================
@@ -50,9 +45,6 @@ namespace AutoGestao.Entidades.Veiculos
         [FormField(Order = 1, Name = "Placa", Section = "Identificação", Icon = "fas fa-id-card", Type = EnumFieldType.Text, Required = true, Placeholder = "XXX-0000 ou XXX0X00")]
         public string Placa { get; set; } = string.Empty;
 
-        // ============================================================
-        // SITUAÇÃO - Enum com ícone + descrição
-        // ============================================================
         [GridField("Situação", Order = 50, Width = "100px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Order = 30, Name = "Situação", Section = "Status", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true)]
         public EnumSituacaoVeiculo Situacao { get; set; } = EnumSituacaoVeiculo.Estoque;
