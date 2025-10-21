@@ -74,7 +74,7 @@
 }
 
 .confirm-danger .confirm-modal-header {
-    background: #fffafa;
+    background: indianred;
     border-bottom-color: #fee;
 }
 
@@ -83,7 +83,7 @@
 }
 
 .confirm-danger .confirm-icon {
-    color: #dc2626;
+    color: indianred;
 }
 
 .confirm-info .confirm-modal-header {
@@ -176,15 +176,17 @@
 
 /* Botão OK para exclusão (vermelho) */
 .confirm-danger .confirm-btn-ok {
-    background: #dc2626;
-    border-color: #dc2626;
+    background: indianred;
+    border-color: indianred;
+    color: white;
 }
 
-.confirm-danger .confirm-btn-ok:hover {
-    background: #b91c1c;
-    border-color: #b91c1c;
-    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-}
+    .confirm-danger .confirm-btn-ok:hover {
+        color: white;
+        background: indianred;
+        border-color: #b91c1c;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    }
 
 /* ===================================================================
    2. MODAL DE NOTIFICAÇÃO
@@ -255,11 +257,12 @@
     color: white;
 }
 
-.notification-success .notification-btn-close:hover {
-    background: #047857;
-    border-color: #047857;
-    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
-}
+    .notification-success .notification-btn-close:hover {
+        background: #047857;
+        border-color: #047857;
+        box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+        color: white;
+    }
 
 /* Erro */
 .notification-error .notification-modal-header {
@@ -269,20 +272,21 @@
 
 .notification-error .icon-error {
     background: #fef2f2;
-    color: #dc2626;
+    color: indianred;
 }
 
 .notification-error .notification-btn-close {
-    background: #dc2626;
-    border-color: #dc2626;
+    background: indianred;
+    border-color: indianred;
     color: white;
 }
 
-.notification-error .notification-btn-close:hover {
-    background: #b91c1c;
-    border-color: #b91c1c;
-    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-}
+    .notification-error .notification-btn-close:hover {
+        background: #b91c1c;
+        border-color: #b91c1c;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        color: white;
+    }
 
 /* Warning */
 .notification-warning .notification-modal-header {
@@ -375,18 +379,21 @@
     overflow: hidden;
 }
 
-.notification-btn-close:focus,
-.confirm-btn-cancel:focus,
-.confirm-btn-ok:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
+    .notification-btn-close:focus,
+    .confirm-btn-cancel:focus,
+    .confirm-btn-ok:focus {
+        outline: none;
+        color: black;
+        border-color: black;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
 
-.notification-btn-close::before,
-.confirm-btn-cancel::before,
-.confirm-btn-ok::before {
-    display: none;
-}
+    .notification-btn-close::before,
+    .confirm-btn-cancel::before,
+    .confirm-btn-ok::before {
+        display: none;
+        color: black;
+    }
 
 /* ===================================================================
    3. ANIMAÇÕES (SUAVIZADAS)
