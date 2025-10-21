@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoGestao.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251009062515_Abas")]
-    partial class Abas
+    [Migration("20251021031408_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -159,97 +159,6 @@ namespace AutoGestao.Migrations
                     b.HasIndex("EntidadeNome", "EntidadeId");
 
                     b.ToTable("audit_logs", (string)null);
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.Avaliacao", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AlteradoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<int>("AnoVeiculo")
-                        .HasColumnType("integer")
-                        .HasColumnName("ano_veiculo");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<long?>("CriadoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataAvaliacao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_avaliacao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<long?>("IdCliente")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_cliente");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.Property<long?>("IdVeiculoMarca")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_veiculo_marca");
-
-                    b.Property<long?>("IdVeiculoMarcaModelo")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_veiculo_marca_modelo");
-
-                    b.Property<long?>("IdVendedorResponsavel")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_vendedor_responsavel");
-
-                    b.Property<string>("Observacoes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("observacoes");
-
-                    b.Property<string>("PlacaVeiculo")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("placa_veiculo");
-
-                    b.Property<int>("StatusAvaliacao")
-                        .HasColumnType("integer")
-                        .HasColumnName("status_avaliacao");
-
-                    b.Property<decimal?>("ValorOferecido")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("valor_oferecido");
-
-                    b.HasKey("Id")
-                        .HasName("pk_avaliacoes");
-
-                    b.HasIndex("IdCliente");
-
-                    b.HasIndex("IdEmpresa");
-
-                    b.HasIndex("IdVeiculoMarca");
-
-                    b.HasIndex("IdVeiculoMarcaModelo");
-
-                    b.HasIndex("IdVendedorResponsavel");
-
-                    b.ToTable("avaliacoes", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Cliente", b =>
@@ -401,148 +310,6 @@ namespace AutoGestao.Migrations
                     b.ToTable("clientes", (string)null);
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Despesa", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AlteradoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<long?>("CriadoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<DateTime>("DataDespesa")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_despesa");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("descricao");
-
-                    b.Property<long>("IdDespesaTipo")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_despesa_tipo");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.Property<long>("IdFornecedor")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_fornecedor");
-
-                    b.Property<long>("IdVeiculo")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_veiculo");
-
-                    b.Property<string>("NumeroNF")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("numero_nf");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("valor");
-
-                    b.HasKey("Id")
-                        .HasName("pk_despesas");
-
-                    b.HasIndex("DataDespesa");
-
-                    b.HasIndex("IdDespesaTipo");
-
-                    b.HasIndex("IdEmpresa");
-
-                    b.HasIndex("IdFornecedor");
-
-                    b.HasIndex("IdVeiculo");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("despesas", (string)null);
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.DespesaTipo", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AlteradoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<long?>("CriadoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("descricao");
-
-                    b.Property<long?>("EmpresaId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("empresa_id");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.HasKey("Id")
-                        .HasName("pk_despesa_tipos");
-
-                    b.HasIndex("Descricao")
-                        .IsUnique();
-
-                    b.HasIndex("EmpresaId");
-
-                    b.HasIndex("IdEmpresa");
-
-                    b.ToTable("despesa_tipos", (string)null);
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.Empresa", b =>
                 {
                     b.Property<long>("Id")
@@ -653,7 +420,7 @@ namespace AutoGestao.Migrations
                     b.ToTable("empresas", (string)null);
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Fornecedor", b =>
+            modelBuilder.Entity("AutoGestao.Entidades.Lead", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -667,43 +434,21 @@ namespace AutoGestao.Migrations
                         .HasColumnName("alterado_por_usuario_id");
 
                     b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
+                        .HasDefaultValue(true)
                         .HasColumnName("ativo");
 
-                    b.Property<string>("Bairro")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("bairro");
-
-                    b.Property<string>("CEP")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("cep");
-
                     b.Property<string>("Celular")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("celular");
 
-                    b.Property<string>("Cidade")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("cidade");
-
-                    b.Property<string>("Cnpj")
-                        .HasMaxLength(18)
-                        .HasColumnType("character varying(18)")
-                        .HasColumnName("cnpj");
-
-                    b.Property<string>("Complemento")
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)")
-                        .HasColumnName("complemento");
-
-                    b.Property<string>("Cpf")
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)")
-                        .HasColumnName("cpf");
+                    b.Property<string>("Contexto")
+                        .HasMaxLength(-1)
+                        .HasColumnType("text")
+                        .HasColumnName("contexto");
 
                     b.Property<long?>("CriadoPorUsuarioId")
                         .HasColumnType("bigint")
@@ -717,10 +462,6 @@ namespace AutoGestao.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("data_cadastro");
 
-                    b.Property<DateTime?>("DataNascimento")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_nascimento");
-
                     b.Property<string>("Email")
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)")
@@ -729,16 +470,6 @@ namespace AutoGestao.Migrations
                     b.Property<long?>("EmpresaId")
                         .HasColumnType("bigint")
                         .HasColumnName("empresa_id");
-
-                    b.Property<string>("Endereco")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("endereco");
-
-                    b.Property<int>("Estado")
-                        .HasMaxLength(2)
-                        .HasColumnType("integer")
-                        .HasColumnName("estado");
 
                     b.Property<long>("IdEmpresa")
                         .HasColumnType("bigint")
@@ -750,130 +481,27 @@ namespace AutoGestao.Migrations
                         .HasColumnType("character varying(250)")
                         .HasColumnName("nome");
 
-                    b.Property<string>("Numero")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("numero");
-
-                    b.Property<string>("Observacoes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("observacoes");
-
-                    b.Property<string>("Rg")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("rg");
-
-                    b.Property<string>("Telefone")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("telefone");
-
-                    b.Property<int>("TipoPessoa")
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("tipo_pessoa");
+                        .HasDefaultValue(1)
+                        .HasColumnName("status");
+
+                    b.Property<int>("TipoRetornoContato")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("tipo_retorno_contato");
 
                     b.HasKey("Id")
-                        .HasName("pk_fornecedores");
-
-                    b.HasIndex("Cnpj")
-                        .IsUnique()
-                        .HasFilter("cnpj IS NOT NULL");
-
-                    b.HasIndex("Cpf")
-                        .IsUnique()
-                        .HasFilter("cpf IS NOT NULL");
+                        .HasName("pk_leads");
 
                     b.HasIndex("EmpresaId");
 
-                    b.HasIndex("Nome")
-                        .HasDatabaseName("ix_fornecedor_nome");
-
-                    b.ToTable("fornecedores", (string)null);
+                    b.ToTable("leads", (string)null);
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Parcela", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AlteradoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<long?>("CriadoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<DateTime?>("DataPagamento")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_pagamento");
-
-                    b.Property<DateTime>("DataVencimento")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_vencimento");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.Property<long>("IdVenda")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_venda");
-
-                    b.Property<int>("NumeroParcela")
-                        .HasColumnType("integer")
-                        .HasColumnName("numero_parcela");
-
-                    b.Property<string>("Observacoes")
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)")
-                        .HasColumnName("observacoes");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("valor");
-
-                    b.Property<decimal?>("ValorPago")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("valor_pago");
-
-                    b.HasKey("Id")
-                        .HasName("pk_parcelas");
-
-                    b.HasIndex("DataVencimento");
-
-                    b.HasIndex("IdEmpresa");
-
-                    b.HasIndex("IdVenda");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("parcelas", (string)null);
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.ReportTemplateEntity", b =>
+            modelBuilder.Entity("AutoGestao.Entidades.Relatorio.ReportTemplateEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -950,172 +578,6 @@ namespace AutoGestao.Migrations
                     b.HasIndex("TipoEntidade", "IsPadrao");
 
                     b.ToTable("report_templates", (string)null);
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.ReportTemplateUsage", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AlteradoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<long?>("CriadoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<DateTime>("DataGeracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_geracao");
-
-                    b.Property<long?>("EmpresaId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("empresa_id");
-
-                    b.Property<long>("EntidadeId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entidade_id");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.Property<long>("IdReportTemplate")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_report_template");
-
-                    b.Property<long?>("IdUsuario")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_usuario");
-
-                    b.Property<string>("TipoEntidade")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("tipo_entidade");
-
-                    b.Property<string>("UsuarioNome")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("usuario_nome");
-
-                    b.HasKey("Id")
-                        .HasName("pk_report_template_usages");
-
-                    b.HasIndex("DataGeracao");
-
-                    b.HasIndex("EmpresaId");
-
-                    b.HasIndex("IdReportTemplate");
-
-                    b.HasIndex("TipoEntidade", "EntidadeId");
-
-                    b.ToTable("report_template_usages", (string)null);
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.Tarefa", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AlteradoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<long?>("CriadoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<DateTime?>("DataConclusao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_conclusao");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_criacao");
-
-                    b.Property<DateTime?>("DataVencimento")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_vencimento");
-
-                    b.Property<string>("Descricao")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("descricao");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.Property<long?>("IdResponsavel")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_responsavel");
-
-                    b.Property<long?>("IdResponsavelUsuario")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_responsavel_usuario");
-
-                    b.Property<int>("Prioridade")
-                        .HasColumnType("integer")
-                        .HasColumnName("prioridade");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("titulo");
-
-                    b.HasKey("Id")
-                        .HasName("pk_tarefas");
-
-                    b.HasIndex("DataVencimento");
-
-                    b.HasIndex("IdEmpresa");
-
-                    b.HasIndex("IdResponsavel");
-
-                    b.HasIndex("IdResponsavelUsuario");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("tarefas", (string)null);
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Usuario", b =>
@@ -1831,199 +1293,6 @@ namespace AutoGestao.Migrations
                     b.ToTable("veiculo_marca_modelos", (string)null);
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Venda", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AlteradoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<long?>("CriadoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<DateTime>("DataVenda")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_venda");
-
-                    b.Property<int>("FormaPagamento")
-                        .HasColumnType("integer")
-                        .HasColumnName("forma_pagamento");
-
-                    b.Property<long>("IdCliente")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_cliente");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.Property<long>("IdVeiculo")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_veiculo");
-
-                    b.Property<long>("IdVendedor")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_vendedor");
-
-                    b.Property<int?>("NumeroParcelas")
-                        .HasColumnType("integer")
-                        .HasColumnName("numero_parcelas");
-
-                    b.Property<string>("Observacoes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("observacoes");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<decimal?>("ValorEntrada")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("valor_entrada");
-
-                    b.Property<decimal>("ValorVenda")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("valor_venda");
-
-                    b.HasKey("Id")
-                        .HasName("pk_vendas");
-
-                    b.HasIndex("DataVenda");
-
-                    b.HasIndex("IdCliente");
-
-                    b.HasIndex("IdEmpresa");
-
-                    b.HasIndex("IdVeiculo");
-
-                    b.HasIndex("IdVendedor");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("vendas", (string)null);
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.Vendedor", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AlteradoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("alterado_por_usuario_id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<string>("Celular")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("celular");
-
-                    b.Property<string>("Cnpj")
-                        .HasMaxLength(18)
-                        .HasColumnType("character varying(18)")
-                        .HasColumnName("cnpj");
-
-                    b.Property<string>("Cpf")
-                        .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)")
-                        .HasColumnName("cpf");
-
-                    b.Property<long?>("CriadoPorUsuarioId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("criado_por_usuario_id");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_alteracao");
-
-                    b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_cadastro");
-
-                    b.Property<DateTime?>("DataNascimento")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_nascimento");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)")
-                        .HasColumnName("email");
-
-                    b.Property<long?>("EmpresaId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("empresa_id");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.Property<decimal?>("Meta")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("meta");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)")
-                        .HasColumnName("nome");
-
-                    b.Property<decimal?>("PercentualComissao")
-                        .HasColumnType("decimal(5,2)")
-                        .HasColumnName("percentual_comissao");
-
-                    b.Property<string>("Rg")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("rg");
-
-                    b.Property<string>("Telefone")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("telefone");
-
-                    b.Property<int>("TipoPessoa")
-                        .HasColumnType("integer")
-                        .HasColumnName("tipo_pessoa");
-
-                    b.HasKey("Id")
-                        .HasName("pk_vendedores");
-
-                    b.HasIndex("Cpf")
-                        .IsUnique();
-
-                    b.HasIndex("EmpresaId");
-
-                    b.ToTable("vendedores", (string)null);
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.AuditLog", b =>
                 {
                     b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
@@ -2042,90 +1311,7 @@ namespace AutoGestao.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Avaliacao", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Cliente", "Cliente")
-                        .WithMany("Avaliacoes")
-                        .HasForeignKey("IdCliente")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("IdEmpresa")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Veiculos.VeiculoMarca", "VeiculoMarca")
-                        .WithMany()
-                        .HasForeignKey("IdVeiculoMarca")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("AutoGestao.Entidades.Veiculos.VeiculoMarcaModelo", "VeiculoMarcaModelo")
-                        .WithMany()
-                        .HasForeignKey("IdVeiculoMarcaModelo")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("AutoGestao.Entidades.Vendedor", "VendedorResponsavel")
-                        .WithMany("Avaliacoes")
-                        .HasForeignKey("IdVendedorResponsavel")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Cliente");
-
-                    b.Navigation("Empresa");
-
-                    b.Navigation("VeiculoMarca");
-
-                    b.Navigation("VeiculoMarcaModelo");
-
-                    b.Navigation("VendedorResponsavel");
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.Cliente", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("EmpresaId");
-
-                    b.Navigation("Empresa");
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.Despesa", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.DespesaTipo", "DespesaTipo")
-                        .WithMany()
-                        .HasForeignKey("IdDespesaTipo")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("IdEmpresa")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Fornecedor", "Fornecedor")
-                        .WithMany()
-                        .HasForeignKey("IdFornecedor")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Veiculos.Veiculo", "Veiculo")
-                        .WithMany("Despesas")
-                        .HasForeignKey("IdVeiculo")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DespesaTipo");
-
-                    b.Navigation("Empresa");
-
-                    b.Navigation("Fornecedor");
-
-                    b.Navigation("Veiculo");
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.DespesaTipo", b =>
                 {
                     b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
                         .WithMany()
@@ -2143,7 +1329,7 @@ namespace AutoGestao.Migrations
                     b.Navigation("Empresa");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Fornecedor", b =>
+            modelBuilder.Entity("AutoGestao.Entidades.Lead", b =>
                 {
                     b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
                         .WithMany()
@@ -2152,74 +1338,13 @@ namespace AutoGestao.Migrations
                     b.Navigation("Empresa");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Parcela", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("IdEmpresa")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Venda", "Venda")
-                        .WithMany("Parcelas")
-                        .HasForeignKey("IdVenda")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Empresa");
-
-                    b.Navigation("Venda");
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.ReportTemplateEntity", b =>
+            modelBuilder.Entity("AutoGestao.Entidades.Relatorio.ReportTemplateEntity", b =>
                 {
                     b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId");
 
                     b.Navigation("Empresa");
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.ReportTemplateUsage", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("EmpresaId");
-
-                    b.HasOne("AutoGestao.Entidades.ReportTemplateEntity", "ReportTemplate")
-                        .WithMany()
-                        .HasForeignKey("IdReportTemplate")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Empresa");
-
-                    b.Navigation("ReportTemplate");
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.Tarefa", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("IdEmpresa")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Vendedor", "Responsavel")
-                        .WithMany("Tarefas")
-                        .HasForeignKey("IdResponsavel")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("AutoGestao.Entidades.Usuario", "ResponsavelUsuario")
-                        .WithMany("TarefasResponsavel")
-                        .HasForeignKey("IdResponsavelUsuario")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Empresa");
-
-                    b.Navigation("Responsavel");
-
-                    b.Navigation("ResponsavelUsuario");
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Usuario", b =>
@@ -2385,94 +1510,26 @@ namespace AutoGestao.Migrations
                     b.Navigation("VeiculoMarca");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.Venda", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Cliente", "Cliente")
-                        .WithMany("Vendas")
-                        .HasForeignKey("IdCliente")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("IdEmpresa")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Veiculos.Veiculo", "Veiculo")
-                        .WithMany("Vendas")
-                        .HasForeignKey("IdVeiculo")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Vendedor", "Vendedor")
-                        .WithMany("Vendas")
-                        .HasForeignKey("IdVendedor")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Cliente");
-
-                    b.Navigation("Empresa");
-
-                    b.Navigation("Veiculo");
-
-                    b.Navigation("Vendedor");
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.Vendedor", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("EmpresaId");
-
-                    b.Navigation("Empresa");
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.Cliente", b =>
                 {
-                    b.Navigation("Avaliacoes");
-
                     b.Navigation("Veiculos");
-
-                    b.Navigation("Vendas");
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Usuario", b =>
                 {
                     b.Navigation("AuditLogs");
-
-                    b.Navigation("TarefasResponsavel");
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.Veiculo", b =>
                 {
-                    b.Navigation("Despesas");
-
                     b.Navigation("Documentos");
 
                     b.Navigation("Fotos");
-
-                    b.Navigation("Vendas");
                 });
 
             modelBuilder.Entity("AutoGestao.Entidades.Veiculos.VeiculoMarca", b =>
                 {
                     b.Navigation("Modelos");
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.Venda", b =>
-                {
-                    b.Navigation("Parcelas");
-                });
-
-            modelBuilder.Entity("AutoGestao.Entidades.Vendedor", b =>
-                {
-                    b.Navigation("Avaliacoes");
-
-                    b.Navigation("Tarefas");
-
-                    b.Navigation("Vendas");
                 });
 #pragma warning restore 612, 618
         }

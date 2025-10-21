@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -31,15 +31,22 @@ namespace AutoGestao.Migrations
                     bairro = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     complemento = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
                     observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true)
+                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
+                    empresa_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_empresas", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_empresas_empresas_empresa_id",
+                        column: x => x.empresa_id,
+                        principalTable: "empresas",
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -56,12 +63,14 @@ namespace AutoGestao.Migrations
                     bairro = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     complemento = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
                     observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    foto_cliente = table.Column<string>(type: "character varying(10000)", maxLength: 10000, nullable: true),
+                    documento_rg = table.Column<string>(type: "character varying(10000)", maxLength: 10000, nullable: true),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
                     alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     empresa_id = table.Column<long>(type: "bigint", nullable: true),
                     tipo_pessoa = table.Column<int>(type: "integer", nullable: false),
                     nome = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
@@ -84,66 +93,59 @@ namespace AutoGestao.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "despesa_tipos",
+                name: "leads",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    descricao = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    ativo = table.Column<bool>(type: "boolean", nullable: false),
+                    nome = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    celular = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    tipo_retorno_contato = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                    status = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                    contexto = table.Column<string>(type: "text", maxLength: -1, nullable: true),
+                    ativo = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
                     alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     empresa_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_despesa_tipos", x => x.id);
+                    table.PrimaryKey("pk_leads", x => x.id);
                     table.ForeignKey(
-                        name: "FK_despesa_tipos_empresas_empresa_id",
+                        name: "FK_leads_empresas_empresa_id",
                         column: x => x.empresa_id,
                         principalTable: "empresas",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "fornecedores",
+                name: "report_templates",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    endereco = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    cidade = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    estado = table.Column<int>(type: "integer", maxLength: 2, nullable: false),
-                    cep = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
-                    numero = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    complemento = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                    bairro = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    ativo = table.Column<bool>(type: "boolean", nullable: false),
+                    nome = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    tipo_entidade = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    descricao = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    template_json = table.Column<string>(type: "text", nullable: false),
+                    is_padrao = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    ativo = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
                     alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
-                    empresa_id = table.Column<long>(type: "bigint", nullable: true),
-                    tipo_pessoa = table.Column<int>(type: "integer", nullable: false),
-                    nome = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    data_nascimento = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    cpf = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: true),
-                    rg = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    cnpj = table.Column<string>(type: "character varying(18)", maxLength: 18, nullable: true),
-                    email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                    telefone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    celular = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true)
+                    empresa_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_fornecedores", x => x.id);
+                    table.PrimaryKey("pk_report_templates", x => x.id);
                     table.ForeignKey(
-                        name: "FK_fornecedores_empresas_empresa_id",
+                        name: "FK_report_templates_empresas_empresa_id",
                         column: x => x.empresa_id,
                         principalTable: "empresas",
                         principalColumn: "id");
@@ -157,19 +159,19 @@ namespace AutoGestao.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     nome = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    senha_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    confirmar_senha = table.Column<string>(type: "text", nullable: true),
                     cpf = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: true),
                     telefone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     perfil = table.Column<int>(type: "integer", nullable: false),
                     ultimo_login = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    senha_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    confirmar_senha = table.Column<string>(type: "text", nullable: true),
                     observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
+                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -189,12 +191,12 @@ namespace AutoGestao.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     descricao = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
                     alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     empresa_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -214,12 +216,12 @@ namespace AutoGestao.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     descricao = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
                     alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     empresa_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -239,12 +241,12 @@ namespace AutoGestao.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     descricao = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
                     alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     empresa_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -264,12 +266,12 @@ namespace AutoGestao.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     descricao = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
                     alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     empresa_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -277,37 +279,6 @@ namespace AutoGestao.Migrations
                     table.PrimaryKey("pk_veiculo_marcas", x => x.id);
                     table.ForeignKey(
                         name: "FK_veiculo_marcas_empresas_empresa_id",
-                        column: x => x.empresa_id,
-                        principalTable: "empresas",
-                        principalColumn: "id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "vendedores",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    nome = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    cpf = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                    telefone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    celular = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    percentual_comissao = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
-                    meta = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    ativo = table.Column<bool>(type: "boolean", nullable: false),
-                    data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
-                    empresa_id = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_vendedores", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_vendedores_empresas_empresa_id",
                         column: x => x.empresa_id,
                         principalTable: "empresas",
                         principalColumn: "id");
@@ -338,12 +309,12 @@ namespace AutoGestao.Migrations
                     mensagem_erro = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     duracao_ms = table.Column<long>(type: "bigint", nullable: true),
                     data_hora = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
+                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -371,12 +342,12 @@ namespace AutoGestao.Migrations
                     descricao = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     id_veiculo_marca = table.Column<long>(type: "bigint", nullable: true),
                     VeiculoMarcaId = table.Column<long>(type: "bigint", nullable: true),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
+                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -401,109 +372,6 @@ namespace AutoGestao.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "tarefas",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    titulo = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    descricao = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
-                    prioridade = table.Column<int>(type: "integer", nullable: false),
-                    data_criacao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    data_vencimento = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    data_conclusao = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    id_responsavel = table.Column<long>(type: "bigint", nullable: true),
-                    id_responsavel_usuario = table.Column<long>(type: "bigint", nullable: true),
-                    ativo = table.Column<bool>(type: "boolean", nullable: false),
-                    data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_tarefas", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_tarefas_empresas_id_empresa",
-                        column: x => x.id_empresa,
-                        principalTable: "empresas",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_tarefas_usuarios_id_responsavel_usuario",
-                        column: x => x.id_responsavel_usuario,
-                        principalTable: "usuarios",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_tarefas_vendedores_id_responsavel",
-                        column: x => x.id_responsavel,
-                        principalTable: "vendedores",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "avaliacoes",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ano_veiculo = table.Column<int>(type: "integer", nullable: false),
-                    placa_veiculo = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
-                    valor_oferecido = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    data_avaliacao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    status_avaliacao = table.Column<int>(type: "integer", nullable: false),
-                    id_cliente = table.Column<long>(type: "bigint", nullable: true),
-                    id_vendedor_responsavel = table.Column<long>(type: "bigint", nullable: true),
-                    id_veiculo_marca = table.Column<long>(type: "bigint", nullable: true),
-                    id_veiculo_marca_modelo = table.Column<long>(type: "bigint", nullable: true),
-                    observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    ativo = table.Column<bool>(type: "boolean", nullable: false),
-                    data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_avaliacoes", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_avaliacoes_clientes_id_cliente",
-                        column: x => x.id_cliente,
-                        principalTable: "clientes",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_avaliacoes_empresas_id_empresa",
-                        column: x => x.id_empresa,
-                        principalTable: "empresas",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_avaliacoes_veiculo_marca_modelos_id_veiculo_marca_modelo",
-                        column: x => x.id_veiculo_marca_modelo,
-                        principalTable: "veiculo_marca_modelos",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_avaliacoes_veiculo_marcas_id_veiculo_marca",
-                        column: x => x.id_veiculo_marca,
-                        principalTable: "veiculo_marcas",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_avaliacoes_vendedores_id_vendedor_responsavel",
-                        column: x => x.id_vendedor_responsavel,
-                        principalTable: "vendedores",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "veiculos",
                 columns: table => new
                 {
@@ -512,7 +380,6 @@ namespace AutoGestao.Migrations
                     codigo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     placa = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
                     situacao = table.Column<int>(type: "integer", nullable: false),
-                    preco_venda = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     chassi = table.Column<string>(type: "character varying(17)", maxLength: 17, nullable: true),
                     renavam = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: true),
                     id_veiculo_marca = table.Column<long>(type: "bigint", nullable: false),
@@ -521,7 +388,6 @@ namespace AutoGestao.Migrations
                     ano_modelo = table.Column<int>(type: "integer", nullable: false),
                     id_veiculo_cor = table.Column<long>(type: "bigint", nullable: true),
                     motorizacao = table.Column<string>(type: "text", nullable: true),
-                    quilometragem = table.Column<int>(type: "integer", nullable: true),
                     capacidade_porta_malas = table.Column<int>(type: "integer", nullable: true),
                     combustivel = table.Column<int>(type: "integer", nullable: false),
                     cambio = table.Column<int>(type: "integer", nullable: false),
@@ -530,22 +396,24 @@ namespace AutoGestao.Migrations
                     numero_portas = table.Column<int>(type: "integer", nullable: false),
                     pericia_cautelar = table.Column<int>(type: "integer", nullable: false),
                     origem_veiculo = table.Column<int>(type: "integer", nullable: false),
+                    preco_compra = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     id_cliente = table.Column<long>(type: "bigint", nullable: false),
                     data_entrada = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    preco_compra = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    km_saida = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    km_entrada = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     data_saida = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    km_saida = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
+                    preco_venda = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     status = table.Column<int>(type: "integer", nullable: false),
                     id_veiculo_filial = table.Column<long>(type: "bigint", nullable: true),
                     id_veiculo_localizacao = table.Column<long>(type: "bigint", nullable: true),
                     observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     opcionais = table.Column<string>(type: "text", nullable: true),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
+                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -595,73 +463,22 @@ namespace AutoGestao.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "despesas",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    descricao = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    valor = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    numero_nf = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    data_despesa = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    status = table.Column<int>(type: "integer", nullable: false),
-                    id_veiculo = table.Column<long>(type: "bigint", nullable: false),
-                    id_despesa_tipo = table.Column<long>(type: "bigint", nullable: false),
-                    id_fornecedor = table.Column<long>(type: "bigint", nullable: false),
-                    ativo = table.Column<bool>(type: "boolean", nullable: false),
-                    data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_despesas", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_despesas_despesa_tipos_id_despesa_tipo",
-                        column: x => x.id_despesa_tipo,
-                        principalTable: "despesa_tipos",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_despesas_empresas_id_empresa",
-                        column: x => x.id_empresa,
-                        principalTable: "empresas",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_despesas_fornecedores_id_fornecedor",
-                        column: x => x.id_fornecedor,
-                        principalTable: "fornecedores",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_despesas_veiculos_id_veiculo",
-                        column: x => x.id_veiculo,
-                        principalTable: "veiculos",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "veiculo_documentos",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     tipo_documento = table.Column<int>(type: "integer", nullable: false),
-                    nome_arquivo = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    caminho_arquivo = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    documento = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     observacoes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     data_upload = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     id_veiculo = table.Column<long>(type: "bigint", nullable: false),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
+                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -688,16 +505,17 @@ namespace AutoGestao.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     nome_arquivo = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     caminho_arquivo = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    foto = table.Column<string>(type: "character varying(10000)", maxLength: 10000, nullable: false),
                     descricao = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     data_upload = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     principal = table.Column<bool>(type: "boolean", nullable: false),
                     id_veiculo = table.Column<long>(type: "bigint", nullable: false),
+                    id_empresa = table.Column<long>(type: "bigint", nullable: false),
                     ativo = table.Column<bool>(type: "boolean", nullable: false),
                     data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
+                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -716,96 +534,6 @@ namespace AutoGestao.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "vendas",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    valor_venda = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    valor_entrada = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    numero_parcelas = table.Column<int>(type: "integer", nullable: true),
-                    forma_pagamento = table.Column<int>(type: "integer", nullable: false),
-                    status = table.Column<int>(type: "integer", nullable: false),
-                    data_venda = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    id_cliente = table.Column<long>(type: "bigint", nullable: false),
-                    id_veiculo = table.Column<long>(type: "bigint", nullable: false),
-                    id_vendedor = table.Column<long>(type: "bigint", nullable: false),
-                    observacoes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    ativo = table.Column<bool>(type: "boolean", nullable: false),
-                    data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_vendas", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_vendas_clientes_id_cliente",
-                        column: x => x.id_cliente,
-                        principalTable: "clientes",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_vendas_empresas_id_empresa",
-                        column: x => x.id_empresa,
-                        principalTable: "empresas",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_vendas_veiculos_id_veiculo",
-                        column: x => x.id_veiculo,
-                        principalTable: "veiculos",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_vendas_vendedores_id_vendedor",
-                        column: x => x.id_vendedor,
-                        principalTable: "vendedores",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "parcelas",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    numero_parcela = table.Column<int>(type: "integer", nullable: false),
-                    valor = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    data_vencimento = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    data_pagamento = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    valor_pago = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
-                    observacoes = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
-                    id_venda = table.Column<long>(type: "bigint", nullable: false),
-                    ativo = table.Column<bool>(type: "boolean", nullable: false),
-                    data_cadastro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    data_alteracao = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    criado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    alterado_por_usuario_id = table.Column<long>(type: "bigint", nullable: true),
-                    id_empresa = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_parcelas", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_parcelas_empresas_id_empresa",
-                        column: x => x.id_empresa,
-                        principalTable: "empresas",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_parcelas_vendas_id_venda",
-                        column: x => x.id_venda,
-                        principalTable: "vendas",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_audit_logs_data_hora",
                 table: "audit_logs",
@@ -814,7 +542,7 @@ namespace AutoGestao.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_audit_logs_entidade_nome_entidade_id",
                 table: "audit_logs",
-                columns: ["entidade_nome", "entidade_id"]);
+                columns: new[] { "entidade_nome", "entidade_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_logs_id_empresa",
@@ -825,31 +553,6 @@ namespace AutoGestao.Migrations
                 name: "IX_audit_logs_usuario_id",
                 table: "audit_logs",
                 column: "usuario_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_avaliacoes_id_cliente",
-                table: "avaliacoes",
-                column: "id_cliente");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_avaliacoes_id_empresa",
-                table: "avaliacoes",
-                column: "id_empresa");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_avaliacoes_id_veiculo_marca",
-                table: "avaliacoes",
-                column: "id_veiculo_marca");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_avaliacoes_id_veiculo_marca_modelo",
-                table: "avaliacoes",
-                column: "id_veiculo_marca_modelo");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_avaliacoes_id_vendedor_responsavel",
-                table: "avaliacoes",
-                column: "id_vendedor_responsavel");
 
             migrationBuilder.CreateIndex(
                 name: "ix_cliente_nome",
@@ -876,119 +579,29 @@ namespace AutoGestao.Migrations
                 column: "empresa_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_despesa_tipos_descricao",
-                table: "despesa_tipos",
-                column: "descricao",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_despesa_tipos_empresa_id",
-                table: "despesa_tipos",
+                name: "IX_empresas_empresa_id",
+                table: "empresas",
                 column: "empresa_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_despesa_tipos_id_empresa",
-                table: "despesa_tipos",
-                column: "id_empresa");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_despesas_data_despesa",
-                table: "despesas",
-                column: "data_despesa");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_despesas_id_despesa_tipo",
-                table: "despesas",
-                column: "id_despesa_tipo");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_despesas_id_empresa",
-                table: "despesas",
-                column: "id_empresa");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_despesas_id_fornecedor",
-                table: "despesas",
-                column: "id_fornecedor");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_despesas_id_veiculo",
-                table: "despesas",
-                column: "id_veiculo");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_despesas_status",
-                table: "despesas",
-                column: "status");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_fornecedor_nome",
-                table: "fornecedores",
-                column: "nome");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_fornecedores_cnpj",
-                table: "fornecedores",
-                column: "cnpj",
-                unique: true,
-                filter: "cnpj IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_fornecedores_cpf",
-                table: "fornecedores",
-                column: "cpf",
-                unique: true,
-                filter: "cpf IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_fornecedores_empresa_id",
-                table: "fornecedores",
+                name: "IX_leads_empresa_id",
+                table: "leads",
                 column: "empresa_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_parcelas_data_vencimento",
-                table: "parcelas",
-                column: "data_vencimento");
+                name: "IX_report_templates_empresa_id",
+                table: "report_templates",
+                column: "empresa_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_parcelas_id_empresa",
-                table: "parcelas",
-                column: "id_empresa");
+                name: "IX_report_templates_tipo_entidade",
+                table: "report_templates",
+                column: "tipo_entidade");
 
             migrationBuilder.CreateIndex(
-                name: "IX_parcelas_id_venda",
-                table: "parcelas",
-                column: "id_venda");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_parcelas_status",
-                table: "parcelas",
-                column: "status");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_tarefas_data_vencimento",
-                table: "tarefas",
-                column: "data_vencimento");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_tarefas_id_empresa",
-                table: "tarefas",
-                column: "id_empresa");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_tarefas_id_responsavel",
-                table: "tarefas",
-                column: "id_responsavel");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_tarefas_id_responsavel_usuario",
-                table: "tarefas",
-                column: "id_responsavel_usuario");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_tarefas_status",
-                table: "tarefas",
-                column: "status");
+                name: "IX_report_templates_tipo_entidade_is_padrao",
+                table: "report_templates",
+                columns: new[] { "tipo_entidade", "is_padrao" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_usuarios_id_empresa",
@@ -1154,47 +767,6 @@ namespace AutoGestao.Migrations
                 column: "renavam",
                 unique: true,
                 filter: "renavam IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_vendas_data_venda",
-                table: "vendas",
-                column: "data_venda");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_vendas_id_cliente",
-                table: "vendas",
-                column: "id_cliente");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_vendas_id_empresa",
-                table: "vendas",
-                column: "id_empresa");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_vendas_id_veiculo",
-                table: "vendas",
-                column: "id_veiculo");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_vendas_id_vendedor",
-                table: "vendas",
-                column: "id_vendedor");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_vendas_status",
-                table: "vendas",
-                column: "status");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_vendedores_cpf",
-                table: "vendedores",
-                column: "cpf",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_vendedores_empresa_id",
-                table: "vendedores",
-                column: "empresa_id");
         }
 
         /// <inheritdoc />
@@ -1204,16 +776,10 @@ namespace AutoGestao.Migrations
                 name: "audit_logs");
 
             migrationBuilder.DropTable(
-                name: "avaliacoes");
+                name: "leads");
 
             migrationBuilder.DropTable(
-                name: "despesas");
-
-            migrationBuilder.DropTable(
-                name: "parcelas");
-
-            migrationBuilder.DropTable(
-                name: "tarefas");
+                name: "report_templates");
 
             migrationBuilder.DropTable(
                 name: "veiculo_documentos");
@@ -1222,22 +788,10 @@ namespace AutoGestao.Migrations
                 name: "veiculo_fotos");
 
             migrationBuilder.DropTable(
-                name: "despesa_tipos");
-
-            migrationBuilder.DropTable(
-                name: "fornecedores");
-
-            migrationBuilder.DropTable(
-                name: "vendas");
-
-            migrationBuilder.DropTable(
                 name: "usuarios");
 
             migrationBuilder.DropTable(
                 name: "veiculos");
-
-            migrationBuilder.DropTable(
-                name: "vendedores");
 
             migrationBuilder.DropTable(
                 name: "clientes");
