@@ -149,19 +149,8 @@ class ModalSystem {
         modalContent.className = 'modal-content confirm-modal-content';
         modalContent.classList.add(`confirm-${config.type}`);
 
-        // Animação de entrada
-        modalContent.style.transform = 'scale(0.8)';
-        modalContent.style.opacity = '0';
-
-        // Mostrar modal
+        // Mostrar modal com animação suave
         this.confirmModal.show();
-
-        // Animar entrada
-        setTimeout(() => {
-            modalContent.style.transition = 'all 0.3s ease';
-            modalContent.style.transform = 'scale(1)';
-            modalContent.style.opacity = '1';
-        }, 100);
 
         // Retornar promise
         return new Promise((resolve) => {
@@ -197,12 +186,7 @@ class ModalSystem {
     }
 
     cleanupConfirm() {
-        const modalContent = document.querySelector('.confirm-modal-content');
-        if (modalContent) {
-            modalContent.style.transform = '';
-            modalContent.style.opacity = '';
-            modalContent.style.transition = '';
-        }
+        // Cleanup simplificado - apenas remove classes se necessário
     }
 
     // ===================================================================
@@ -266,19 +250,8 @@ class ModalSystem {
         messageElement.textContent = message;
         button.innerHTML = `<i class="${config.buttonIcon} me-2"></i>${options.buttonText || config.buttonText}`;
 
-        // Animação de entrada
-        modalContent.style.transform = 'scale(0.8)';
-        modalContent.style.opacity = '0';
-
-        // Mostrar modal
+        // Mostrar modal com animação suave
         this.notificationModal.show();
-
-        // Animar entrada
-        setTimeout(() => {
-            modalContent.style.transition = 'all 0.3s ease';
-            modalContent.style.transform = 'scale(1)';
-            modalContent.style.opacity = '1';
-        }, 100);
 
         // Auto-focus no botão
         modal.addEventListener('shown.bs.modal', () => {
@@ -298,12 +271,7 @@ class ModalSystem {
     }
 
     cleanupNotification() {
-        const modalContent = document.querySelector('.notification-modal-content');
-        if (modalContent) {
-            modalContent.style.transform = '';
-            modalContent.style.opacity = '';
-            modalContent.style.transition = '';
-        }
+        // Cleanup simplificado - apenas remove classes se necessário
     }
 
     // ===================================================================
