@@ -19,17 +19,22 @@ class ReferenceFieldManager {
         });
     }
 
-    initializeAllFields() {
-        const fields = document.querySelectorAll('.reference-search-input');
-        
+    initializeAllFields(context = document) {
+        console.log('🔧 Inicializando campos de referência...', context === document ? 'documento completo' : 'contexto específico');
+
+        const fields = context.querySelectorAll('.reference-search-input');
+
+        console.log(`📝 Encontrados ${fields.length} campos de referência`);
+
         fields.forEach((input, index) => {
             if (!input.dataset.initialized) {
+                console.log(`✨ Inicializando campo: ${input.id}`);
                 this.initializeField(input);
                 input.dataset.initialized = 'true';
             }
         });
 
-        const clearBtns = document.querySelectorAll('.reference-clear-btn');
+        const clearBtns = context.querySelectorAll('.reference-clear-btn');
 
         clearBtns.forEach((btn, index) => {
             if (!btn.dataset.initialized) {
@@ -40,7 +45,7 @@ class ReferenceFieldManager {
             }
         });
 
-        const createBtns = document.querySelectorAll('.reference-create-btn');
+        const createBtns = context.querySelectorAll('.reference-create-btn');
 
         createBtns.forEach((btn, index) => {
             if (!btn.dataset.initialized) {
@@ -50,6 +55,8 @@ class ReferenceFieldManager {
                 btn.dataset.initialized = 'true';
             }
         });
+
+        console.log('✅ Inicialização de campos de referência concluída');
     }
 
     initializeField(input) {
@@ -586,7 +593,9 @@ class ReferenceFieldManager {
             window.initializeConditionalFields();
         }
 
-        this.initializeAllFields();
+        // Inicializar campos de referência dentro do modal
+        console.log('🔄 Inicializando campos de referência dentro do modal...');
+        this.initializeAllFields(modal);
     }
 
     async handleModalSubmit(modal, form) {
