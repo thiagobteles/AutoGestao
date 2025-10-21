@@ -470,7 +470,7 @@ class ReferenceFieldManager {
         modal.id = 'referenceCreateModal';
         modal.tabIndex = -1;
         modal.innerHTML = `
-            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-dialog modal-reference-create modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">
@@ -495,7 +495,8 @@ class ReferenceFieldManager {
 
     async loadCreateContent(modal, controller) {
         try {
-            const response = await fetch(`/${controller}/Create`, {
+            // Adicionar ?modal=true para receber apenas o formulário sem layout
+            const response = await fetch(`/${controller}/Create?modal=true`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
@@ -629,3 +630,92 @@ if (document.readyState === 'loading') {
 
 window.referenceFieldManager = referenceFieldManager;
 console.log('✅ referenceFieldManager disponível globalmente');
+
+// ===================================================================
+// CSS PARA MODAL DE REFERÊNCIA
+// ===================================================================
+
+// Adicionar CSS customizado para o modal de referência
+const referenceModalStyles = document.createElement('style');
+referenceModalStyles.textContent = `
+    /* Modal maior para formulários de referência */
+    .modal-reference-create {
+        max-width: 90vw !important;
+        width: 90vw !important;
+        margin: 1.75rem auto;
+    }
+
+    @media (min-width: 1200px) {
+        .modal-reference-create {
+            max-width: 1400px !important;
+            width: 1400px !important;
+        }
+    }
+
+    /* Garantir altura adequada */
+    .modal-reference-create .modal-content {
+        min-height: 80vh;
+        max-height: 90vh;
+    }
+
+    .modal-reference-create .modal-body {
+        max-height: calc(90vh - 120px);
+        overflow-y: auto;
+        padding: 2rem;
+    }
+
+    /* Ocultar elementos de layout se aparecerem no modal */
+    #referenceCreateModal .sidebar,
+    #referenceCreateModal .navbar-top,
+    #referenceCreateModal .main-header,
+    #referenceCreateModal .main-footer,
+    #referenceCreateModal .content-wrapper > .container-fluid > .row > .col-md-3,
+    #referenceCreateModal nav.navbar,
+    #referenceCreateModal aside,
+    #referenceCreateModal footer {
+        display: none !important;
+    }
+
+    /* Garantir que o formulário ocupe todo o espaço */
+    #referenceCreateModal .standard-form,
+    #referenceCreateModal .form-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ajustar card do formulário dentro do modal */
+    #referenceCreateModal .card {
+        border: none !important;
+        box-shadow: none !important;
+        margin-bottom: 0 !important;
+    }
+
+    #referenceCreateModal .card-header {
+        display: none !important;
+    }
+
+    #referenceCreateModal .card-body {
+        padding: 0 !important;
+    }
+
+    /* Melhorar espaçamento dos campos no modal */
+    #referenceCreateModal .form-group-modern {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Botões de ação no rodapé do modal */
+    #referenceCreateModal .form-actions {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 1rem 0;
+        margin-top: 2rem;
+        border-top: 1px solid #dee2e6;
+        z-index: 10;
+    }
+`;
+
+document.head.appendChild(referenceModalStyles);
+console.log('✅ CSS do modal de referência aplicado');
