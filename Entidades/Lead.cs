@@ -2,7 +2,7 @@ using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 
-namespace AutoGestao.Entidades.Leads
+namespace AutoGestao.Entidades
 {
     [ReportConfig("Detalhes do lead", Icon = "fas fa-book", ShowLogo = true, ShowDate = true)]
     [FormConfig(Title = "Lead´s", Subtitle = "Gerencie os leads", Icon = "fas fa-book", EnableAjaxSubmit = true)]

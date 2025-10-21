@@ -42,8 +42,6 @@ namespace AutoGestao.Entidades
         public string? DocumentoRG { get; set; }
 
         // Navigation properties
-        public virtual ICollection<Venda> Vendas { get; set; } = [];
-        public virtual ICollection<Avaliacao> Avaliacoes { get; set; } = [];
         public virtual ICollection<Veiculo> Veiculos { get; set; } = [];
     }
 }

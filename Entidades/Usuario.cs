@@ -44,7 +44,6 @@ namespace AutoGestao.Entidades
         public string? Observacoes { get; set; }
 
         // Navigation properties
-        public virtual ICollection<Tarefa> TarefasResponsavel { get; set; } = [];
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = [];
         public virtual ICollection<BaseEntidade> EntidadesCriadas { get; set; } = [];
         public virtual ICollection<BaseEntidade> EntidadesAlteradas { get; set; } = [];

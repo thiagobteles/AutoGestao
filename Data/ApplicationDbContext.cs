@@ -1,5 +1,4 @@
 using AutoGestao.Entidades;
-using AutoGestao.Entidades.Leads;
 using AutoGestao.Entidades.Relatorio;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
@@ -13,8 +12,6 @@ namespace AutoGestao.Data
         #region DbSets
 
         public DbSet<Cliente> Clientes { get; set; }
-        public DbSet<Vendedor> Vendedores { get; set; }
-        public DbSet<Fornecedor> Fornecedores { get; set; }
         public DbSet<Veiculo> Veiculos { get; set; }
         public DbSet<VeiculoCor> VeiculoCores { get; set; }
         public DbSet<VeiculoFilial> VeiculoFiliais { get; set; }
@@ -23,12 +20,6 @@ namespace AutoGestao.Data
         public DbSet<VeiculoMarcaModelo> VeiculoMarcaModelos { get; set; }
         public DbSet<VeiculoFoto> VeiculoFotos { get; set; }
         public DbSet<VeiculoDocumento> VeiculoDocumentos { get; set; }
-        public DbSet<Venda> Vendas { get; set; }
-        public DbSet<Parcela> Parcelas { get; set; }
-        public DbSet<Avaliacao> Avaliacoes { get; set; }
-        public DbSet<Despesa> Despesas { get; set; }
-        public DbSet<DespesaTipo> DespesaTipos { get; set; }
-        public DbSet<Tarefa> Tarefas { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Empresa> Empresas { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
@@ -136,55 +127,6 @@ namespace AutoGestao.Data
             });
 
             // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE VENDEDOR
-            // ===========================================
-            modelBuilder.Entity<Vendedor>().ToTable("vendedores");
-            modelBuilder.Entity<Vendedor>(entity =>
-            {
-                entity.Property(e => e.TipoPessoa).IsRequired();
-                entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
-                entity.Property(e => e.Cpf).HasMaxLength(14).IsRequired();
-                entity.Property(e => e.Email).HasMaxLength(150);
-                entity.Property(e => e.Cnpj).HasMaxLength(18);
-                entity.Property(e => e.Rg).HasMaxLength(20);
-                entity.Property(e => e.Email).HasMaxLength(150);
-                entity.Property(e => e.Telefone).HasMaxLength(20);
-                entity.Property(e => e.Celular).HasMaxLength(20);
-                entity.Property(e => e.PercentualComissao).HasColumnType("decimal(5,2)");
-                entity.Property(e => e.Meta).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.Ativo).IsRequired();
-                entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
-            });
-
-            // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE FORNECEDOR
-            // ===========================================
-            modelBuilder.Entity<Fornecedor>().ToTable("fornecedores");
-            modelBuilder.Entity<Fornecedor>(entity =>
-            {
-                entity.Property(e => e.TipoPessoa).IsRequired();
-                entity.Property(e => e.Nome).HasMaxLength(250).IsRequired();
-                entity.Property(e => e.Cpf).HasMaxLength(14);
-                entity.Property(e => e.Cnpj).HasMaxLength(18);
-                entity.Property(e => e.Rg).HasMaxLength(20);
-                entity.Property(e => e.Email).HasMaxLength(150);
-                entity.Property(e => e.Telefone).HasMaxLength(20);
-                entity.Property(e => e.Celular).HasMaxLength(20);
-                entity.Property(e => e.Endereco).HasMaxLength(500);
-                entity.Property(e => e.Cidade).HasMaxLength(100);
-                entity.Property(e => e.Estado).HasMaxLength(2);
-                entity.Property(e => e.CEP).HasMaxLength(10);
-                entity.Property(e => e.Numero).HasMaxLength(20);
-                entity.Property(e => e.Complemento).HasMaxLength(150);
-                entity.Property(e => e.Bairro).HasMaxLength(100);
-                entity.Property(e => e.Ativo).IsRequired();
-                entity.Property(e => e.Observacoes).HasMaxLength(2000);
-                entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
-            });
-
-            // ===========================================
             // CONFIGURAÇÕES DA ENTIDADE VEÍCULO
             // ===========================================
             modelBuilder.Entity<Veiculo>().ToTable("veiculos");
@@ -280,95 +222,6 @@ namespace AutoGestao.Data
                 entity.Property(e => e.Documento).HasMaxLength(500).IsRequired();
                 entity.Property(e => e.Observacoes).HasMaxLength(500).IsRequired();
                 entity.Property(e => e.DataUpload).IsRequired();
-                entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
-            });
-
-            // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE VENDA
-            // ===========================================
-            modelBuilder.Entity<Venda>().ToTable("vendas");
-            modelBuilder.Entity<Venda>(entity =>
-            {
-                entity.Property(e => e.ValorVenda).HasColumnType("decimal(18,2)").IsRequired();
-                entity.Property(e => e.ValorEntrada).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.FormaPagamento).IsRequired();
-                entity.Property(e => e.Status).IsRequired();
-                entity.Property(e => e.Observacoes).HasMaxLength(2000);
-                entity.Property(e => e.DataVenda).IsRequired();
-                entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
-            });
-
-            // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE PARCELA
-            // ===========================================
-            modelBuilder.Entity<Parcela>().ToTable("parcelas");
-            modelBuilder.Entity<Parcela>(entity =>
-            {
-                entity.Property(e => e.NumeroParcela).IsRequired();
-                entity.Property(e => e.Valor).HasColumnType("decimal(18,2)").IsRequired();
-                entity.Property(e => e.ValorPago).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.DataVencimento).IsRequired();
-                entity.Property(e => e.Status).IsRequired();
-                entity.Property(e => e.Observacoes).HasMaxLength(250);
-                entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
-            });
-
-            // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE AVALIACAO
-            // ===========================================
-            modelBuilder.Entity<Avaliacao>().ToTable("avaliacoes");
-            modelBuilder.Entity<Avaliacao>(entity =>
-            {
-                entity.Property(e => e.AnoVeiculo).IsRequired();
-                entity.Property(e => e.PlacaVeiculo).HasMaxLength(10);
-                entity.Property(e => e.ValorOferecido).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.Observacoes).HasMaxLength(2000);
-                entity.Property(e => e.DataAvaliacao).IsRequired();
-                entity.Property(e => e.StatusAvaliacao).IsRequired();
-                entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
-            });
-
-            // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE DESPESA
-            // ===========================================
-            modelBuilder.Entity<Despesa>().ToTable("despesas");
-            modelBuilder.Entity<Despesa>(entity =>
-            {
-                entity.Property(e => e.Descricao).HasMaxLength(500).IsRequired();
-                entity.Property(e => e.Valor).HasColumnType("decimal(18,2)").IsRequired();
-                entity.Property(e => e.NumeroNF).HasMaxLength(50);
-                entity.Property(e => e.DataDespesa).IsRequired();
-                entity.Property(e => e.Status).IsRequired();
-                entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
-            });
-
-            // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE DESPESA TIPO
-            // ===========================================
-            modelBuilder.Entity<DespesaTipo>().ToTable("despesa_tipos");
-            modelBuilder.Entity<DespesaTipo>(entity =>
-            {
-                entity.Property(e => e.Descricao).HasMaxLength(100).IsRequired();
-                entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
-            });
-
-            // ===========================================
-            // CONFIGURAÇÕES DA ENTIDADE TAREFA
-            // ===========================================
-            modelBuilder.Entity<Tarefa>().ToTable("tarefas");
-            modelBuilder.Entity<Tarefa>(entity =>
-            {
-                entity.Property(e => e.Titulo).HasMaxLength(200).IsRequired();
-                entity.Property(e => e.Descricao).HasMaxLength(2000);
-                entity.Property(e => e.Status).IsRequired();
-                entity.Property(e => e.Prioridade).IsRequired();
-                entity.Property(e => e.DataCriacao).IsRequired();
                 entity.Property(e => e.DataCadastro).IsRequired();
                 entity.Property(e => e.DataAlteracao).IsRequired();
             });
@@ -510,44 +363,6 @@ namespace AutoGestao.Data
             modelBuilder.Entity<VeiculoDocumento>().HasOne(vd => vd.Veiculo).WithMany(v => v.Documentos).HasForeignKey(vd => vd.IdVeiculo).OnDelete(DeleteBehavior.Cascade);
 
             // ===========================================
-            // RELACIONAMENTOS DA VENDA
-            // ===========================================
-            modelBuilder.Entity<Venda>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Venda>().HasOne(v => v.Cliente).WithMany(c => c.Vendas).HasForeignKey(v => v.IdCliente).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Venda>().HasOne(v => v.Veiculo).WithMany(ve => ve.Vendas).HasForeignKey(v => v.IdVeiculo).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Venda>().HasOne(v => v.Vendedor).WithMany(ve => ve.Vendas).HasForeignKey(v => v.IdVendedor).OnDelete(DeleteBehavior.Restrict);
-
-            // ===========================================
-            // RELACIONAMENTOS DA PARCELA
-            // ===========================================
-            modelBuilder.Entity<Parcela>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Parcela>().HasOne(p => p.Venda).WithMany(v => v.Parcelas).HasForeignKey(p => p.IdVenda).OnDelete(DeleteBehavior.Cascade);
-
-            // ===========================================
-            // RELACIONAMENTOS DAS DESPESAS
-            // ===========================================
-            modelBuilder.Entity<Despesa>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Despesa>().HasOne(d => d.Veiculo).WithMany(v => v.Despesas).HasForeignKey(d => d.IdVeiculo).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Despesa>().HasOne(d => d.DespesaTipo).WithMany().HasForeignKey(d => d.IdDespesaTipo).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Despesa>().HasOne(d => d.Fornecedor).WithMany().HasForeignKey(d => d.IdFornecedor).OnDelete(DeleteBehavior.Restrict);
-
-            // ===========================================
-            // RELACIONAMENTOS DAS AVALIAÇÕES
-            // ===========================================
-            modelBuilder.Entity<Avaliacao>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Avaliacao>().HasOne(a => a.Cliente).WithMany(c => c.Avaliacoes).HasForeignKey(a => a.IdCliente).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VendedorResponsavel).WithMany(v => v.Avaliacoes).HasForeignKey(a => a.IdVendedorResponsavel).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VeiculoMarca).WithMany().HasForeignKey(a => a.IdVeiculoMarca).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Avaliacao>().HasOne(a => a.VeiculoMarcaModelo).WithMany().HasForeignKey(a => a.IdVeiculoMarcaModelo).OnDelete(DeleteBehavior.SetNull);
-
-            // ===========================================
-            // RELACIONAMENTOS DAS TAREFAS
-            // ===========================================
-            modelBuilder.Entity<Tarefa>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Tarefa>().HasOne(t => t.Responsavel).WithMany(v => v.Tarefas).HasForeignKey(t => t.IdResponsavel).OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Tarefa>().HasOne(t => t.ResponsavelUsuario).WithMany(u => u.TarefasResponsavel).HasForeignKey(t => t.IdResponsavelUsuario).OnDelete(DeleteBehavior.SetNull);
-
-            // ===========================================
             // RELACIONAMENTOS DO USUARIO
             // ===========================================
             modelBuilder.Entity<Usuario>().HasOne(u => u.Empresa).WithMany().HasForeignKey(u => u.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
@@ -569,17 +384,6 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Cliente>().HasIndex(c => c.Cnpj).IsUnique().HasFilter("cnpj IS NOT NULL");
 
             // ===========================================
-            // ÍNDICES ÚNICOS - VENDEDOR
-            // ===========================================
-            modelBuilder.Entity<Vendedor>().HasIndex(v => v.Cpf).IsUnique();
-
-            // ===========================================
-            // ÍNDICES ÚNICOS - FORNECEDOR
-            // ===========================================
-            modelBuilder.Entity<Fornecedor>().HasIndex(f => f.Cpf).IsUnique().HasFilter("cpf IS NOT NULL");
-            modelBuilder.Entity<Fornecedor>().HasIndex(f => f.Cnpj).IsUnique().HasFilter("cnpj IS NOT NULL");
-
-            // ===========================================
             // ÍNDICES ÚNICOS - VEÍCULO
             // ===========================================
             modelBuilder.Entity<Veiculo>().HasIndex(v => v.Codigo).IsUnique();
@@ -594,35 +398,6 @@ namespace AutoGestao.Data
             modelBuilder.Entity<VeiculoFilial>().HasIndex(f => f.Descricao).IsUnique();
             modelBuilder.Entity<VeiculoLocalizacao>().HasIndex(l => l.Descricao).IsUnique();
             modelBuilder.Entity<VeiculoMarca>().HasIndex(m => m.Descricao).IsUnique();
-            modelBuilder.Entity<DespesaTipo>().HasIndex(dt => dt.Descricao).IsUnique();
-
-            // ===========================================
-            // ÍNDICES PARA PERFORMANCE - VENDA
-            // ===========================================
-            modelBuilder.Entity<Venda>().HasIndex(v => v.DataVenda);
-            modelBuilder.Entity<Venda>().HasIndex(v => v.Status);
-            modelBuilder.Entity<Venda>().HasIndex(v => v.IdCliente);
-            modelBuilder.Entity<Venda>().HasIndex(v => v.IdVendedor);
-
-            // ===========================================
-            // ÍNDICES PARA PERFORMANCE - PARCELA
-            // ===========================================
-            modelBuilder.Entity<Parcela>().HasIndex(p => p.DataVencimento);
-            modelBuilder.Entity<Parcela>().HasIndex(p => p.Status);
-
-            // ===========================================
-            // ÍNDICES PARA PERFORMANCE - DESPESA
-            // ===========================================
-            modelBuilder.Entity<Despesa>().HasIndex(d => d.DataDespesa);
-            modelBuilder.Entity<Despesa>().HasIndex(d => d.Status);
-
-            // ===========================================
-            // ÍNDICES PARA PERFORMANCE - TAREFA
-            // ===========================================
-            modelBuilder.Entity<Tarefa>().HasIndex(t => t.Status);
-            modelBuilder.Entity<Tarefa>().HasIndex(t => t.DataVencimento);
-            modelBuilder.Entity<Tarefa>().HasIndex(t => t.IdResponsavel);
-            modelBuilder.Entity<Tarefa>().HasIndex(t => t.IdResponsavelUsuario);
 
             // ===========================================
             // ÍNDICES PARA PERFORMANCE - CLIENTE
@@ -630,25 +405,14 @@ namespace AutoGestao.Data
             modelBuilder.Entity<Cliente>().HasIndex(c => c.Nome).HasDatabaseName("ix_cliente_nome");
 
             // ===========================================
-            // ÍNDICES PARA PERFORMANCE - FORNECEDOR
-            // ===========================================
-            modelBuilder.Entity<Fornecedor>().HasIndex(f => f.Nome).HasDatabaseName("ix_fornecedor_nome");
-
-            // ===========================================
             // ÍNDICES PARA EMPRESA
             // ===========================================
-            modelBuilder.Entity<Venda>().HasIndex(v => v.IdEmpresa);
-            modelBuilder.Entity<Parcela>().HasIndex(p => p.IdEmpresa);
             modelBuilder.Entity<Veiculo>().HasIndex(v => v.IdEmpresa);
-            modelBuilder.Entity<Tarefa>().HasIndex(t => t.IdEmpresa);
-            modelBuilder.Entity<Avaliacao>().HasIndex(a => a.IdEmpresa);
-            modelBuilder.Entity<Despesa>().HasIndex(d => d.IdEmpresa);
             modelBuilder.Entity<Usuario>().HasIndex(u => u.IdEmpresa);
             modelBuilder.Entity<VeiculoCor>().HasIndex(c => c.IdEmpresa);
             modelBuilder.Entity<VeiculoFilial>().HasIndex(f => f.IdEmpresa);
             modelBuilder.Entity<VeiculoLocalizacao>().HasIndex(l => l.IdEmpresa);
             modelBuilder.Entity<VeiculoMarca>().HasIndex(m => m.IdEmpresa);
-            modelBuilder.Entity<DespesaTipo>().HasIndex(dt => dt.IdEmpresa);
             modelBuilder.Entity<AuditLog>().HasIndex(a => a.IdEmpresa);
 
             // ===========================================
@@ -659,17 +423,6 @@ namespace AutoGestao.Data
             modelBuilder.Entity<AuditLog>().HasIndex(a => new { a.EntidadeNome, a.EntidadeId });
 
             #endregion CONFIGURAÇÕES DE ÍNDICES
-
-            #region RELACIONAMENTOS DE AUDITORIA
-
-            // ===========================================
-            // RELACIONAMENTOS DE AUDITORIA INDIVIDUAIS
-            // Opcional: descomentar se desejar ter relacionamentos explícitos
-            // ===========================================
-            // modelBuilder.Entity<Cliente>().HasOne<Usuario>().WithMany().HasForeignKey(e => e.CriadoPorUsuarioId).OnDelete(DeleteBehavior.SetNull);
-            // modelBuilder.Entity<Cliente>().HasOne<Usuario>().WithMany().HasForeignKey(e => e.AlteradoPorUsuarioId).OnDelete(DeleteBehavior.SetNull);
-
-            #endregion
         }
     }
 }

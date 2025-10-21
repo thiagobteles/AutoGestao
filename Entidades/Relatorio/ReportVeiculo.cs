@@ -5,7 +5,7 @@ namespace AutoGestao.Entidades.Relatorio
 {
     // Configuração básica do relatório
     [ReportConfig("Relatório de Lançamento de Veículo", Subtitle = "Detalhes completos do lançamento", Icon = "fas fa-car", ShowLogo = true, ShowDate = true)]
-    public class LancamentoVeiculo : BaseEntidade
+    public class ReportVeiculo : BaseEntidade
     {
         // Campos básicos aparecerão na seção "Dados do Veículo"
         [ReportField("Modelo", Section = "AUTOMÓVEL", Order = 1)]

@@ -155,11 +155,7 @@ namespace AutoGestao.Entidades.Veiculos
         public virtual VeiculoCor? VeiculoCor { get; set; }
         public virtual VeiculoFilial? VeiculoFilial { get; set; }
         public virtual VeiculoLocalizacao? VeiculoLocalizacao { get; set; }
-        public virtual ICollection<Venda> Vendas { get; set; } = [];
         public virtual ICollection<VeiculoFoto> Fotos { get; set; } = [];
         public virtual ICollection<VeiculoDocumento> Documentos { get; set; } = [];
-
-        [ReportTable("Resumo das Receitas", ShowTotal = true, TotalField = "Valor", Order = 1)]
-        public virtual ICollection<Despesa> Despesas { get; set; } = [];
     }
 }

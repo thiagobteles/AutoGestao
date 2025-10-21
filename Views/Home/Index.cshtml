@@ -133,31 +133,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="card-modern">
-                <div class="card-header-modern">
-                    <i class="fas fa-clock"></i>
-                    Vendas recentes
-                </div>
-                <div class="card-body-modern">
-                    <div class="activity-list">
-                        @{
-                            foreach (var vendaAtual in Model.UltimasVendas)
-                            {
-                                <div class="activity-item d-flex align-items-center mb-3">
-                                    <div class="activity-icon bg-success text-white rounded-circle me-3" style="width: 25px; height: 25px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-plus fa-sm"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-semibold">@vendaAtual.Vendedor.Nome</div>
-                                        <small class="text-muted">@vendaAtual.Veiculo.MarcaModelo @vendaAtual.Veiculo.AnoComposto - @vendaAtual.ValorVenda.ToString("C")</small>
-                                    </div>
-                                </div>
-                            }
-                        }
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Terceira linha - Gráficos e Tabelas Full Width -->

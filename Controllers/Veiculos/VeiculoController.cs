@@ -197,7 +197,7 @@ namespace AutoGestao.Controllers.Veiculos
             }
 
             // Preparar dados para o relatório
-            var lancamento = new LancamentoVeiculo
+            var lancamento = new ReportVeiculo
             {
                 Modelo = item.VeiculoMarcaModelo.Descricao,
                 Placa = item.Placa,
@@ -228,7 +228,7 @@ namespace AutoGestao.Controllers.Veiculos
             };
 
             // Obter template padrão e gerar HTML
-            var template = _reportService.GetDefaultTemplate<LancamentoVeiculo>();
+            var template = _reportService.GetDefaultTemplate<ReportVeiculo>();
             var html = _reportService.GenerateReportHtml(lancamento, template);
 
             return Content(html, "text/html");
@@ -300,40 +300,6 @@ namespace AutoGestao.Controllers.Veiculos
                 sucesso = true,
                 mensagem = "Foto adicionada com sucesso!",
                 script = "showSuccess('Foto adicionada com sucesso!')"
-            });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AdicionarDespesa(long id, DespesaCreateViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var despesa = new Despesa
-                {
-                    IdVeiculo = id,
-                    IdFornecedor = model.IdFornecedor,
-                    Descricao = model.Descricao,
-                    Valor = model.Valor,
-                    DataDespesa = model.DataDespesa,
-                    Status = EnumStatusDespesa.Pendente
-                };
-
-                _context.Despesas.Add(despesa);
-                await _context.SaveChangesAsync();
-
-                return Json(new
-                {
-                    sucesso = true,
-                    mensagem = "Despesa adicionada com sucesso!",
-                    script = "showSucces('Despesa adicionada com sucesso!')"
-                });
-            }
-
-            return Json(new
-            {
-                sucesso = false,
-                mensagem = "Dados inválidos",
-                script = "showError('Dados inválidos')"
             });
         }
 

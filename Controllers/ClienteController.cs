@@ -155,25 +155,9 @@ namespace AutoGestao.Controllers
             return base.AfterUpdate(entity);
         }
 
-        protected override Task BeforeDelete(Cliente entity)
-        {
-            // Verificar se pode deletar
-            var temVendas = _context.Vendas.Any(v => v.IdCliente == entity.Id);
-
-            return temVendas
-                ? throw new InvalidOperationException("Não é possível excluir cliente com vendas associadas")
-                : base.BeforeDelete(entity);
-        }
-
         protected override bool CanEdit(Cliente entity)
         {
             return entity.Ativo;
-        }
-
-        protected override bool CanDelete(Cliente entity)
-        {
-            var temVendas = _context.Vendas.Any(v => v.IdCliente == entity.Id);
-            return !temVendas;
         }
 
         protected override void ConfigureFormFields(List<FormFieldViewModel> fields, Cliente entity, string action)
