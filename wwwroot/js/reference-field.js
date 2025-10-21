@@ -518,10 +518,29 @@ class ReferenceFieldManager {
         const form = modal.querySelector('.standard-form, form');
         if (!form) return;
 
-        form.addEventListener('submit', async (e) => {
+        // Prevenir múltiplas inicializações
+        if (form.dataset.modalFormInitialized === 'true') {
+            console.log('Formulário modal já inicializado, ignorando duplicação');
+            return;
+        }
+
+        form.dataset.modalFormInitialized = 'true';
+
+        // Remover listener anterior se existir
+        const oldHandler = form._modalSubmitHandler;
+        if (oldHandler) {
+            form.removeEventListener('submit', oldHandler);
+        }
+
+        // Criar novo handler
+        const submitHandler = async (e) => {
             e.preventDefault();
+            e.stopImmediatePropagation();
             await this.handleModalSubmit(modal, form);
-        });
+        };
+
+        form._modalSubmitHandler = submitHandler;
+        form.addEventListener('submit', submitHandler);
 
         if (typeof window.initializeMasks === 'function') {
             window.initializeMasks();

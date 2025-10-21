@@ -52,8 +52,19 @@ class ResponseHandler {
         document.addEventListener('submit', async (e) => {
             const form = e.target;
 
-            if (form.hasAttribute('data-ajax') || form.classList.contains('ajax-form')) {
+            // Ignorar formulários que já foram inicializados pelo standard-form.js
+            if (form.dataset.ajaxInitialized === 'true') {
+                console.log('Formulário já processado por standard-form.js, ignorando response-handler');
+                return;
+            }
+
+            // Processar apenas formulários com data-ajax ou ajax-form que NÃO sejam standard-form
+            if ((form.hasAttribute('data-ajax') || form.classList.contains('ajax-form')) &&
+                !form.classList.contains('standard-form')) {
+
                 e.preventDefault();
+
+                console.log('ResponseHandler processando formulário');
 
                 try {
                     const formData = new FormData(form);

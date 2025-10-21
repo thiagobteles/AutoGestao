@@ -438,10 +438,30 @@ function initializeAjaxForm() {
 
     if (!form || form.dataset.ajax !== 'true') return;
 
-    form.addEventListener('submit', function (e) {
+    // Prevenir múltiplas inicializações
+    if (form.dataset.ajaxInitialized === 'true') {
+        console.log('Formulário AJAX já inicializado, ignorando duplicação');
+        return;
+    }
+
+    console.log('Inicializando formulário AJAX');
+    form.dataset.ajaxInitialized = 'true';
+
+    // Remover listeners anteriores se existirem
+    const oldSubmitHandler = form._submitHandler;
+    if (oldSubmitHandler) {
+        form.removeEventListener('submit', oldSubmitHandler);
+    }
+
+    // Criar novo handler e armazenar referência
+    const submitHandler = function (e) {
         e.preventDefault();
+        e.stopImmediatePropagation(); // Prevenir outros handlers
         submitFormAjax(this);
-    });
+    };
+
+    form._submitHandler = submitHandler;
+    form.addEventListener('submit', submitHandler);
 }
 
 (function () {
@@ -452,11 +472,12 @@ function initializeAjaxForm() {
     });
 })();
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeAjaxForm);
-} else {
-    initializeAjaxForm();
-}
+// Remover esta inicialização duplicada - já é chamado via initializeStandardForm() no DOMContentLoaded
+// if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', initializeAjaxForm);
+// } else {
+//     initializeAjaxForm();
+// }
 
 // ================================================================================================
 // BUSCA AUTOMÁTICA DE CEP
