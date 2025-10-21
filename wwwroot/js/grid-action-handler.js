@@ -2,6 +2,9 @@
 // GRID ACTION HANDLER - Processa tipo de requisição HTTP (GET/POST/PUT/DELETE)
 // ===================================================================
 
+// Flag global para prevenir execuções duplicadas
+let isExecutingAction = false;
+
 /**
  * Executa uma ação baseada no tipo de requisição HTTP configurado
  * @param {Object} action - Objeto da ação contendo url, type, name, displayName
@@ -13,12 +16,21 @@ async function executeGridAction(action, event) {
         event.stopPropagation();
     }
 
+    // Prevenir execuções duplicadas
+    if (isExecutingAction) {
+        console.warn('⚠️ Ação já está sendo executada, ignorando chamada duplicada');
+        return;
+    }
+
     try {
+        isExecutingAction = true;
+
         const url = action.url;
 
         if (!url) {
             console.error('URL não definida para a ação:', action);
             showError('Erro: URL da ação não configurada');
+            isExecutingAction = false;
             return;
         }
 
@@ -66,8 +78,14 @@ async function executeGridAction(action, event) {
     } catch (error) {
         console.error('Erro ao executar ação:', error);
         showError(`Erro ao executar ação: ${error.message}`);
+        isExecutingAction = false;
     }
 }
+
+// Resetar flag quando a página for recarregada
+window.addEventListener('beforeunload', () => {
+    isExecutingAction = false;
+});
 
 /**
  * Executa uma ação GET (navegação normal)
@@ -98,6 +116,7 @@ async function executePostAction(url, action) {
 
         if (!confirmed) {
             console.log('❌ Exclusão cancelada pelo usuário');
+            isExecutingAction = false;
             return;
         }
     }
@@ -132,23 +151,31 @@ async function executePostAction(url, action) {
         // Processar resposta
         if (result.success || result.sucesso) {
             const message = result.message || result.mensagem || 'Operação realizada com sucesso!';
-            
-            if (typeof showSuccess === 'function') {
-                await showSuccess(message);
-            } else {
-                alert(message);
+
+            // Marcar que estamos navegando para evitar múltiplas mensagens
+            if (window.responseHandler) {
+                window.responseHandler.isNavigating = true;
             }
 
-            // Executar script se houver
-            if (result.script) {
-                eval(result.script);
+            if (typeof showSuccess === 'function') {
+                // Mostrar mensagem e aguardar fechamento antes de recarregar
+                showSuccess(message).then(() => {
+                    console.log('✅ Modal fechado, recarregando página...');
+                    window.location.reload();
+                });
             } else {
-                // Recarregar a página
+                alert(message);
                 window.location.reload();
             }
+
+            // Executar script se houver (em vez de reload)
+            if (result.script) {
+                eval(result.script);
+            }
+
         } else {
             const errorMessage = result.message || result.mensagem || 'Erro ao executar a operação';
-            
+
             if (typeof showError === 'function') {
                 showError(errorMessage);
             } else {
@@ -158,12 +185,13 @@ async function executePostAction(url, action) {
 
     } catch (error) {
         console.error('Erro na requisição POST:', error);
-        
+
         if (typeof showError === 'function') {
             showError(`Erro ao executar operação: ${error.message}`);
         } else {
             alert(`Erro ao executar operação: ${error.message}`);
         }
+        isExecutingAction = false;
     } finally {
         if (typeof showLoading === 'function') {
             showLoading(false);
@@ -251,6 +279,7 @@ async function executeDeleteAction(url, action) {
 
     if (!confirmed) {
         console.log('❌ Exclusão cancelada pelo usuário');
+        isExecutingAction = false;
         return;
     }
 
@@ -280,32 +309,42 @@ async function executeDeleteAction(url, action) {
 
         if (result.success || result.sucesso) {
             const message = result.message || result.mensagem || 'Registro excluído com sucesso!';
-            
-            if (typeof showSuccess === 'function') {
-                await showSuccess(message);
-            } else {
-                alert(message);
+
+            // Marcar que estamos navegando
+            if (window.responseHandler) {
+                window.responseHandler.isNavigating = true;
             }
 
-            window.location.reload();
+            if (typeof showSuccess === 'function') {
+                // Aguardar fechamento do modal antes de recarregar
+                showSuccess(message).then(() => {
+                    console.log('✅ Modal fechado, recarregando página...');
+                    window.location.reload();
+                });
+            } else {
+                alert(message);
+                window.location.reload();
+            }
         } else {
             const errorMessage = result.message || result.mensagem || 'Erro ao excluir registro';
-            
+
             if (typeof showError === 'function') {
                 showError(errorMessage);
             } else {
                 alert(errorMessage);
             }
+            isExecutingAction = false;
         }
 
     } catch (error) {
         console.error('Erro na requisição DELETE:', error);
-        
+
         if (typeof showError === 'function') {
             showError(`Erro ao executar operação: ${error.message}`);
         } else {
             alert(`Erro ao executar operação: ${error.message}`);
         }
+        isExecutingAction = false;
     } finally {
         if (typeof showLoading === 'function') {
             showLoading(false);
