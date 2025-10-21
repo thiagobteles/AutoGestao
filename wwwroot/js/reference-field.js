@@ -486,6 +486,14 @@ class ReferenceFieldManager {
                             </div>
                         </div>
                     </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </button>
+                        <button type="button" class="btn btn-primary" id="modalSaveBtn">
+                            <i class="fas fa-save me-2"></i>Salvar
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -543,6 +551,33 @@ class ReferenceFieldManager {
         form._modalSubmitHandler = submitHandler;
         form.addEventListener('submit', submitHandler);
 
+        // Ocultar botões originais do formulário (evitar duplicação)
+        const formActions = form.querySelector('.form-actions, .card-footer');
+        if (formActions) {
+            formActions.style.display = 'none';
+        }
+
+        // Wire up modal footer Save button
+        const modalSaveBtn = modal.querySelector('#modalSaveBtn');
+        if (modalSaveBtn) {
+            modalSaveBtn.addEventListener('click', async () => {
+                const originalText = modalSaveBtn.innerHTML;
+
+                try {
+                    // Mostrar loading
+                    modalSaveBtn.disabled = true;
+                    modalSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+
+                    // Submeter o formulário
+                    await this.handleModalSubmit(modal, form);
+                } catch (error) {
+                    // Restaurar botão em caso de erro
+                    modalSaveBtn.disabled = false;
+                    modalSaveBtn.innerHTML = originalText;
+                }
+            });
+        }
+
         if (typeof window.initializeMasks === 'function') {
             window.initializeMasks();
         }
@@ -555,6 +590,9 @@ class ReferenceFieldManager {
     }
 
     async handleModalSubmit(modal, form) {
+        const modalSaveBtn = modal.querySelector('#modalSaveBtn');
+        const originalText = modalSaveBtn?.innerHTML;
+
         try {
             const formData = new FormData(form);
             const action = form.action;
@@ -586,10 +624,21 @@ class ReferenceFieldManager {
                 bootstrap.Modal.getInstance(modal).hide();
                 showSuccess(result.message || 'Registro criado com sucesso!');
             } else {
+                // Restaurar botão em caso de erro de validação
+                if (modalSaveBtn && originalText) {
+                    modalSaveBtn.disabled = false;
+                    modalSaveBtn.innerHTML = originalText;
+                }
                 this.showValidationErrors(form, result.errors);
             }
         } catch (error) {
+            // Restaurar botão em caso de erro
+            if (modalSaveBtn && originalText) {
+                modalSaveBtn.disabled = false;
+                modalSaveBtn.innerHTML = originalText;
+            }
             showError('Erro ao salvar registro');
+            throw error; // Re-throw para o handler no setupModalForm
         }
     }
 
@@ -656,12 +705,30 @@ referenceModalStyles.textContent = `
     .modal-reference-create .modal-content {
         min-height: 80vh;
         max-height: 90vh;
+        display: flex;
+        flex-direction: column;
     }
 
     .modal-reference-create .modal-body {
-        max-height: calc(90vh - 120px);
+        flex: 1;
         overflow-y: auto;
         padding: 2rem;
+        max-height: calc(90vh - 180px);
+    }
+
+    /* Modal footer sempre visível */
+    .modal-reference-create .modal-footer {
+        position: sticky;
+        bottom: 0;
+        background: #f8f9fa;
+        border-top: 2px solid #dee2e6;
+        padding: 1rem 1.5rem;
+        z-index: 1000;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+
+    .modal-reference-create .modal-footer .btn {
+        min-width: 120px;
     }
 
     /* Ocultar elementos de layout se aparecerem no modal */
