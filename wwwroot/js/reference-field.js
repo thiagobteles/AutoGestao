@@ -617,9 +617,95 @@ class ReferenceFieldManager {
             window.initializeConditionalFields();
         }
 
+        // Preencher campos dependentes com valores da tela pai
+        this.prefillDependentFields(modal);
+
         // Inicializar campos de referência dentro do modal
         console.log('🔄 Inicializando campos de referência dentro do modal...');
         this.initializeAllFields(modal);
+    }
+
+    prefillDependentFields(modal) {
+        console.log('🔍 Verificando campos dependentes para pré-preencher...');
+
+        // Obter contexto pai (modal pai ou página principal)
+        const parentContext = this.getParentContext(modal);
+
+        // Buscar todos os campos de referência no modal
+        const referenceFields = modal.querySelectorAll('.reference-search-input');
+
+        referenceFields.forEach(input => {
+            try {
+                const filterConfig = input.dataset.referenceFilters;
+                if (!filterConfig || filterConfig === '{}') return;
+
+                const config = JSON.parse(filterConfig);
+
+                // Para cada filtro, verificar se é uma propriedade
+                for (const [filterField, filterInfo] of Object.entries(config)) {
+                    if (filterInfo.isProperty) {
+                        const sourceFieldName = filterInfo.value;
+
+                        // Buscar o campo correspondente na tela pai
+                        const parentHiddenInput = this.getFieldInContext(parentContext, sourceFieldName, 'name');
+                        const parentSearchInput = this.getFieldInContext(parentContext, `${sourceFieldName}_search`, 'id');
+
+                        if (parentHiddenInput && parentHiddenInput.value && parentHiddenInput.value !== '0') {
+                            const parentValue = parentHiddenInput.value;
+                            const parentDisplayText = parentSearchInput ? parentSearchInput.value : '';
+
+                            console.log(`✅ Preenchendo campo ${input.dataset.targetField} com valor da tela pai:`, {
+                                sourceField: sourceFieldName,
+                                value: parentValue,
+                                displayText: parentDisplayText
+                            });
+
+                            // Preencher o campo no modal
+                            const targetField = input.dataset.targetField;
+                            const modalHiddenInput = this.getFieldInContext(modal, targetField, 'name');
+
+                            if (modalHiddenInput) {
+                                modalHiddenInput.value = parentValue;
+                                input.value = parentDisplayText;
+                                input.classList.add('selected');
+
+                                // Bloquear o campo (readonly)
+                                input.readOnly = true;
+                                input.disabled = true;
+                                input.classList.add('bg-light', 'text-muted');
+
+                                // Desabilitar botões de adicionar e limpar
+                                const createBtn = modal.querySelector(`#${targetField}_create`);
+                                const clearBtn = modal.querySelector(`#${targetField}_clear`);
+
+                                if (createBtn) {
+                                    createBtn.style.display = 'none';
+                                }
+
+                                if (clearBtn) {
+                                    clearBtn.style.display = 'none';
+                                }
+
+                                // Adicionar ícone de "cadeado" para indicar que está bloqueado
+                                const container = input.closest('.reference-field-container');
+                                if (container && !container.querySelector('.field-locked-icon')) {
+                                    const lockIcon = document.createElement('div');
+                                    lockIcon.className = 'field-locked-icon';
+                                    lockIcon.innerHTML = '<i class="fas fa-lock text-muted ms-2"></i>';
+                                    lockIcon.style.cssText = 'position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;';
+                                    container.style.position = 'relative';
+                                    container.appendChild(lockIcon);
+                                }
+
+                                console.log(`🔒 Campo ${targetField} bloqueado com valor herdado da tela pai`);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro ao pré-preencher campo:', error);
+            }
+        });
     }
 
     async handleModalSubmit(modal, form) {
