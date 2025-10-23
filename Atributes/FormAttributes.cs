@@ -117,6 +117,9 @@ namespace AutoGestao.Atributes
         /// </summary>
         public int MaxSizeMB { get; set; } = 10;
 
+        /// <summary>
+        /// Caso o arquivo precise ser salvo em um bucket diferente
+        /// </summary>
         public string CustomBucket { get; set; } = "";
     }
 }

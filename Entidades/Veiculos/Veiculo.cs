@@ -4,20 +4,13 @@ using AutoGestao.Enumerador.Veiculo;
 
 namespace AutoGestao.Entidades.Veiculos
 {
-    // Anotação para geração de Relatório
-    [ReportConfig("Detalhes do veículo", Icon = "fas fa-car", ShowLogo = true, ShowDate = true)]
-
-    // Anotação para geração da GRID
-    [FormConfig(Title = "Veículo", Subtitle = "Gerencie todas as informações do veículo", Icon = "fas fa-car", EnableAjaxSubmit = true)]
-    
-    // Anotações para geração de TABS
-    [FormTabs(EnableTabs = true, DefaultTab = "principal")]
+   
+    [ReportConfig("Detalhes do veículo", Icon = "fas fa-car", ShowLogo = true, ShowDate = true)]  // Anotação para geração de Relatório
+    [FormConfig(Title = "Veículo", Subtitle = "Gerencie todas as informações do veículo", Icon = "fas fa-car", EnableAjaxSubmit = true)] // Anotação para geração da GRID
+    [FormTabs(EnableTabs = true, DefaultTab = "principal")] // Anotações para geração de TABS
     [FormTab("arquivos", "Arquivos", TabIcon = "fas fa-folder", Order = 1, Controller = "VeiculoDocumento", LazyLoad = true)]
-    [FormTab("nfe", "NFE", TabIcon = "fas fa-file-invoice", Order = 2, Controller = "VeiculoDocumento", LazyLoad = true)]
     [FormTab("midias", "Mídias", TabIcon = "fas fa-images", Order = 3, Controller = "VeiculoFoto", LazyLoad = true)]
-    [FormTab("lancamentos", "Lançamentos", TabIcon = "fas fa-list", Order = 4, Controller = "Despesa", LazyLoad = true)]
-    //[FormTab("web", "Web", TabIcon = "fas fa-globe", Order = 5, Controller = "VeiculoWeb")]
-    [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 6, Controller = "Despesa", RequiredRoles = new[] { "Admin", "Financeiro" })]
+    //[FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 6, Controller = "Despesa", RequiredRoles = new[] { "Admin", "Financeiro" })]
     public class Veiculo : BaseEntidade
     {
         [ReportField("Codigo", Section = "AUTOMÓVEL", Order = 1)] // Cammpo aparece no RPT
