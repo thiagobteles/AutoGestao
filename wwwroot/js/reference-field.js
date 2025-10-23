@@ -88,17 +88,20 @@ class ReferenceFieldManager {
 
             const config = JSON.parse(filterConfig);
 
+            // Obter contexto do campo (modal ou página principal)
+            const context = input.closest('.modal') || document;
+
             for (const [, filterInfo] of Object.entries(config)) {
                 if (filterInfo.isProperty) {
                     const sourceFieldName = filterInfo.value;
-                    const sourceHiddenInput = document.querySelector(`input[name="${sourceFieldName}"]`);
+                    const sourceHiddenInput = this.getFieldInContext(context, sourceFieldName, 'name');
 
-                    if (sourceHiddenInput && !sourceHiddenInput.dataset.listenerAttached) {                        
-                        const sourceFieldDisplayName = this.getFieldDisplayName(sourceFieldName);
+                    if (sourceHiddenInput && !sourceHiddenInput.dataset.listenerAttached) {
+                        const sourceFieldDisplayName = this.getFieldDisplayName(sourceFieldName, context);
                         sourceHiddenInput.addEventListener('change', () => {
 
                             const targetField = input.dataset.targetField;
-                            const targetHiddenInput = document.querySelector(`input[name="${targetField}"]`);
+                            const targetHiddenInput = this.getFieldInContext(context, targetField, 'name');
 
                             if (targetHiddenInput && targetHiddenInput.value && targetHiddenInput.value !== '0') {
                                 input.value = '';
@@ -131,8 +134,8 @@ class ReferenceFieldManager {
         }
     }
 
-    getFieldDisplayName(fieldName) {
-        const field = document.querySelector(`input[name="${fieldName}"]`);
+    getFieldDisplayName(fieldName, context = document) {
+        const field = this.getFieldInContext(context, fieldName, 'name');
         if (field) {
             const container = field.closest('.form-group-modern, .form-group');
             if (container) {
@@ -150,7 +153,10 @@ class ReferenceFieldManager {
 
         console.log(`🔍 Busca iniciada: "${searchTerm}"`);
 
-        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+        // Obter contexto do campo
+        const context = input.closest('.modal') || document;
+        const hiddenInput = this.getFieldInContext(context, targetField, 'name');
+
         if (hiddenInput && hiddenInput.value !== '0') {
             hiddenInput.value = '0';
             input.classList.remove('selected');
@@ -310,10 +316,13 @@ class ReferenceFieldManager {
             const config = JSON.parse(filterConfig);
             const filters = {};
 
+            // Obter contexto do campo
+            const context = input.closest('.modal') || document;
+
             for (const [filterField, filterInfo] of Object.entries(config)) {
                 if (filterInfo.isProperty) {
                     const sourceFieldName = filterInfo.value;
-                    const sourceInput = document.querySelector(`input[name="${sourceFieldName}"]`);
+                    const sourceInput = this.getFieldInContext(context, sourceFieldName, 'name');
 
                     if (sourceInput && sourceInput.value && sourceInput.value !== '0') {
                         filters[filterField] = sourceInput.value;
@@ -374,7 +383,10 @@ class ReferenceFieldManager {
         input.value = text;
         input.classList.add('selected');
 
-        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+        // Obter contexto do campo
+        const context = input.closest('.modal') || document;
+        const hiddenInput = this.getFieldInContext(context, targetField, 'name');
+
         if (hiddenInput) {
             hiddenInput.value = id;
             hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
@@ -393,8 +405,11 @@ class ReferenceFieldManager {
 
         const btn = event.target.closest('.reference-clear-btn');
         const targetField = btn.id.replace('_clear', '');
-        const searchInput = document.querySelector(`input[id="${targetField}_search"]`);
-        const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+
+        // Obter contexto do botão
+        const context = btn.closest('.modal') || document;
+        const searchInput = this.getFieldInContext(context, `${targetField}_search`, 'id');
+        const hiddenInput = this.getFieldInContext(context, targetField, 'name');
 
         if (hiddenInput && searchInput) {
             searchInput.value = '';
@@ -472,10 +487,19 @@ class ReferenceFieldManager {
     }
 
     createModal(controller, referenceType, targetField) {
+        // Detectar nível do modal atual
+        const currentModal = event?.target?.closest('.modal');
+        const currentLevel = currentModal ? parseInt(currentModal.dataset.modalLevel || '0') : 0;
+        const newLevel = currentLevel + 1;
+
+        console.log(`📊 Criando modal nível ${newLevel} (pai: ${currentLevel})`);
+
         const modal = document.createElement('div');
         modal.className = 'modal fade';
-        modal.id = 'referenceCreateModal';
+        modal.id = `referenceCreateModal_${newLevel}_${Date.now()}`;
         modal.tabIndex = -1;
+        modal.dataset.modalLevel = newLevel;
+        modal.dataset.targetField = targetField;
         modal.innerHTML = `
             <div class="modal-dialog modal-reference-create modal-dialog-scrollable">
                 <div class="modal-content">
@@ -486,7 +510,7 @@ class ReferenceFieldManager {
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" data-modal-context="${newLevel}">
                         <div class="text-center py-5">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Carregando...</span>
@@ -497,14 +521,13 @@ class ReferenceFieldManager {
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <i class="fas fa-times me-2"></i>Cancelar
                         </button>
-                        <button type="button" class="btn btn-primary" id="modalSaveBtn">
+                        <button type="button" class="btn btn-primary" id="modalSaveBtn_${newLevel}">
                             <i class="fas fa-save me-2"></i>Salvar
                         </button>
                     </div>
                 </div>
             </div>
         `;
-        modal.dataset.targetField = targetField;
         return modal;
     }
 
@@ -564,8 +587,9 @@ class ReferenceFieldManager {
             formActions.style.display = 'none';
         }
 
-        // Wire up modal footer Save button
-        const modalSaveBtn = modal.querySelector('#modalSaveBtn');
+        // Wire up modal footer Save button - usar ID com nível do modal
+        const modalLevel = modal.dataset.modalLevel || '1';
+        const modalSaveBtn = modal.querySelector(`#modalSaveBtn_${modalLevel}`);
         if (modalSaveBtn) {
             modalSaveBtn.addEventListener('click', async () => {
                 const originalText = modalSaveBtn.innerHTML;
@@ -599,7 +623,8 @@ class ReferenceFieldManager {
     }
 
     async handleModalSubmit(modal, form) {
-        const modalSaveBtn = modal.querySelector('#modalSaveBtn');
+        const modalLevel = modal.dataset.modalLevel || '1';
+        const modalSaveBtn = modal.querySelector(`#modalSaveBtn_${modalLevel}`);
         const originalText = modalSaveBtn?.innerHTML;
 
         try {
@@ -620,8 +645,17 @@ class ReferenceFieldManager {
 
             if (result.success) {
                 const targetField = modal.dataset.targetField;
-                const searchInput = document.querySelector(`input[id="${targetField}_search"]`);
-                const hiddenInput = document.querySelector(`input[name="${targetField}"]`);
+
+                // Buscar o contexto correto (modal pai ou página principal)
+                const parentContext = this.getParentContext(modal);
+                const searchInput = this.getFieldInContext(parentContext, `${targetField}_search`, 'id');
+                const hiddenInput = this.getFieldInContext(parentContext, targetField, 'name');
+
+                console.log(`✅ Atualizando campo ${targetField} no contexto pai`, {
+                    context: parentContext === document ? 'página principal' : 'modal pai',
+                    searchInput: searchInput?.id,
+                    hiddenInput: hiddenInput?.name
+                });
 
                 if (searchInput && hiddenInput) {
                     searchInput.value = result.text || result.name;
@@ -649,6 +683,37 @@ class ReferenceFieldManager {
             showError('Erro ao salvar registro');
             throw error; // Re-throw para o handler no setupModalForm
         }
+    }
+
+    // Método auxiliar para obter o contexto pai de um modal
+    getParentContext(modal) {
+        const currentLevel = parseInt(modal.dataset.modalLevel || '1');
+
+        if (currentLevel <= 1) {
+            // Modal de nível 1 - contexto é a página principal
+            return document;
+        }
+
+        // Modal aninhado - buscar modal pai
+        const parentLevel = currentLevel - 1;
+        const parentModal = document.querySelector(`.modal[data-modal-level="${parentLevel}"]`);
+
+        if (parentModal) {
+            console.log(`🔍 Contexto pai encontrado: modal nível ${parentLevel}`);
+            return parentModal;
+        }
+
+        // Fallback para documento se não encontrar modal pai
+        console.warn(`⚠️ Modal pai nível ${parentLevel} não encontrado, usando documento`);
+        return document;
+    }
+
+    // Método auxiliar para buscar campo dentro de um contexto específico
+    getFieldInContext(context, fieldValue, attributeName = 'name') {
+        if (attributeName === 'id') {
+            return context.querySelector(`#${fieldValue}`);
+        }
+        return context.querySelector(`[${attributeName}="${fieldValue}"]`);
     }
 
     showValidationErrors(form, errors) {
