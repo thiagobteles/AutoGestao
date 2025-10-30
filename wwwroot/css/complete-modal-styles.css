@@ -265,10 +265,10 @@
     }
 
 /* Erro */
-.notification-error .notification-modal-header {
+/*.notification-error .notification-modal-header {
     background: #fffafa;
     border-bottom-color: #fee;
-}
+}*/
 
 .notification-error .icon-error {
     background: #fef2f2;
