@@ -546,6 +546,11 @@ class ReferenceFieldManager {
             const modalBody = modal.querySelector('.modal-body');
             modalBody.innerHTML = html;
 
+            console.log('✅ Conteúdo do modal carregado, tamanho:', html.length, 'caracteres');
+
+            // Aguardar um pequeno delay para o navegador processar o HTML
+            await new Promise(resolve => setTimeout(resolve, 100));
+
             this.setupModalForm(modal);
         } catch (error) {
             console.error('❌ Erro ao carregar conteúdo:', error);
@@ -612,35 +617,55 @@ class ReferenceFieldManager {
         // Preencher campos dependentes com valores da tela pai
         this.prefillDependentFields(modal);
 
-        // Aguardar um frame para garantir que o DOM está completamente renderizado
-        requestAnimationFrame(() => {
+        console.log('⏳ Aguardando renderização completa do DOM no modal...');
+
+        // Aguardar múltiplos frames para garantir renderização completa
+        setTimeout(() => {
+            console.log('🎭 Frame 1: Inicializando máscaras...');
+
             // Inicializar máscaras no modal
             if (typeof window.initializeMasks === 'function') {
-                console.log('🎭 Inicializando máscaras no modal...');
                 window.initializeMasks();
             }
 
-            // Aguardar mais um frame antes de inicializar campos condicionais
-            requestAnimationFrame(() => {
+            setTimeout(() => {
+                console.log('🔄 Frame 2: Inicializando campos condicionais...');
+
+                // Verificar se há campos condicionais antes de inicializar
+                const conditionalFields = modal.querySelectorAll('[data-conditional-display-rule], [data-conditional-field]');
+                console.log(`🔍 Campos condicionais encontrados no modal: ${conditionalFields.length}`);
+
+                if (conditionalFields.length > 0) {
+                    // Log dos campos encontrados
+                    conditionalFields.forEach((field, index) => {
+                        console.log(`  ${index + 1}. ${field.dataset.fieldName || field.id}:`, {
+                            displayRule: field.dataset.conditionalDisplayRule,
+                            conditionalField: field.dataset.conditionalField,
+                            conditionalValue: field.dataset.conditionalValue
+                        });
+                    });
+                }
+
                 // Inicializar campos condicionais simples
                 if (typeof window.initializeConditionalFields === 'function') {
-                    console.log('🔄 Inicializando campos condicionais no modal...');
                     window.initializeConditionalFields();
                 }
 
                 // Inicializar campos condicionais avançados
                 if (typeof window.AdvancedConditionalFields?.initialize === 'function') {
-                    console.log('🚀 Inicializando campos condicionais avançados no modal...');
                     window.AdvancedConditionalFields.initialize();
                 }
 
-                // Inicializar campos de referência dentro do modal
-                console.log('🔄 Inicializando campos de referência dentro do modal...');
-                this.initializeAllFields(modal);
+                setTimeout(() => {
+                    console.log('📋 Frame 3: Inicializando campos de referência...');
 
-                console.log('✅ Todas as inicializações do modal concluídas');
-            });
-        });
+                    // Inicializar campos de referência dentro do modal
+                    this.initializeAllFields(modal);
+
+                    console.log('✅ Todas as inicializações do modal concluídas');
+                }, 100);
+            }, 100);
+        }, 150);
     }
 
     prefillDependentFields(modal) {
