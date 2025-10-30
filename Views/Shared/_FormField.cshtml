@@ -1,7 +1,20 @@
 @model FormFieldViewModel
 @using AutoGestao.Enumerador.Gerais
 
-<div class="form-group mb-3">
+<div class="form-group mb-3"
+     data-field-name="@Model.PropertyName"
+     @if (!string.IsNullOrEmpty(Model.ConditionalDisplayRule))
+     {
+         @:data-conditional-display-rule="@Model.ConditionalDisplayRule"
+     }
+     @if (!string.IsNullOrEmpty(Model.ConditionalRequiredRule))
+     {
+         @:data-conditional-required-rule="@Model.ConditionalRequiredRule"
+     }
+     @if (!string.IsNullOrEmpty(Model.ConditionalRequiredMessage))
+     {
+         @:data-conditional-required-message="@Model.ConditionalRequiredMessage"
+     }>
     @if (Model.Type != EnumFieldType.Hidden)
     {
         <label for="@Model.PropertyName" class="form-label">
