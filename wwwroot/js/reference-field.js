@@ -609,20 +609,38 @@ class ReferenceFieldManager {
             });
         }
 
-        if (typeof window.initializeMasks === 'function') {
-            window.initializeMasks();
-        }
-
-        if (typeof window.initializeConditionalFields === 'function') {
-            window.initializeConditionalFields();
-        }
-
         // Preencher campos dependentes com valores da tela pai
         this.prefillDependentFields(modal);
 
-        // Inicializar campos de referência dentro do modal
-        console.log('🔄 Inicializando campos de referência dentro do modal...');
-        this.initializeAllFields(modal);
+        // Aguardar um frame para garantir que o DOM está completamente renderizado
+        requestAnimationFrame(() => {
+            // Inicializar máscaras no modal
+            if (typeof window.initializeMasks === 'function') {
+                console.log('🎭 Inicializando máscaras no modal...');
+                window.initializeMasks();
+            }
+
+            // Aguardar mais um frame antes de inicializar campos condicionais
+            requestAnimationFrame(() => {
+                // Inicializar campos condicionais simples
+                if (typeof window.initializeConditionalFields === 'function') {
+                    console.log('🔄 Inicializando campos condicionais no modal...');
+                    window.initializeConditionalFields();
+                }
+
+                // Inicializar campos condicionais avançados
+                if (typeof window.AdvancedConditionalFields?.initialize === 'function') {
+                    console.log('🚀 Inicializando campos condicionais avançados no modal...');
+                    window.AdvancedConditionalFields.initialize();
+                }
+
+                // Inicializar campos de referência dentro do modal
+                console.log('🔄 Inicializando campos de referência dentro do modal...');
+                this.initializeAllFields(modal);
+
+                console.log('✅ Todas as inicializações do modal concluídas');
+            });
+        });
     }
 
     prefillDependentFields(modal) {
