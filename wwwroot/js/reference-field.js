@@ -628,84 +628,117 @@ class ReferenceFieldManager {
     prefillDependentFields(modal) {
         console.log('🔍 Verificando campos dependentes para pré-preencher...');
 
-        // Obter contexto pai (modal pai ou página principal)
-        const parentContext = this.getParentContext(modal);
-
-        // Buscar todos os campos de referência no modal
-        const referenceFields = modal.querySelectorAll('.reference-search-input');
-
-        referenceFields.forEach(input => {
-            try {
-                const filterConfig = input.dataset.referenceFilters;
-                if (!filterConfig || filterConfig === '{}') return;
-
-                const config = JSON.parse(filterConfig);
-
-                // Para cada filtro, verificar se é uma propriedade
-                for (const [filterField, filterInfo] of Object.entries(config)) {
-                    if (filterInfo.isProperty) {
-                        const sourceFieldName = filterInfo.value;
-
-                        // Buscar o campo correspondente na tela pai
-                        const parentHiddenInput = this.getFieldInContext(parentContext, sourceFieldName, 'name');
-                        const parentSearchInput = this.getFieldInContext(parentContext, `${sourceFieldName}_search`, 'id');
-
-                        if (parentHiddenInput && parentHiddenInput.value && parentHiddenInput.value !== '0') {
-                            const parentValue = parentHiddenInput.value;
-                            const parentDisplayText = parentSearchInput ? parentSearchInput.value : '';
-
-                            console.log(`✅ Preenchendo campo ${input.dataset.targetField} com valor da tela pai:`, {
-                                sourceField: sourceFieldName,
-                                value: parentValue,
-                                displayText: parentDisplayText
-                            });
-
-                            // Preencher o campo no modal
-                            const targetField = input.dataset.targetField;
-                            const modalHiddenInput = this.getFieldInContext(modal, targetField, 'name');
-
-                            if (modalHiddenInput) {
-                                modalHiddenInput.value = parentValue;
-                                input.value = parentDisplayText;
-                                input.classList.add('selected');
-
-                                // Bloquear o campo (readonly)
-                                input.readOnly = true;
-                                input.disabled = true;
-                                input.classList.add('bg-light', 'text-muted');
-
-                                // Desabilitar botões de adicionar e limpar
-                                const createBtn = modal.querySelector(`#${targetField}_create`);
-                                const clearBtn = modal.querySelector(`#${targetField}_clear`);
-
-                                if (createBtn) {
-                                    createBtn.style.display = 'none';
-                                }
-
-                                if (clearBtn) {
-                                    clearBtn.style.display = 'none';
-                                }
-
-                                // Adicionar ícone de "cadeado" para indicar que está bloqueado
-                                const container = input.closest('.reference-field-container');
-                                if (container && !container.querySelector('.field-locked-icon')) {
-                                    const lockIcon = document.createElement('div');
-                                    lockIcon.className = 'field-locked-icon';
-                                    lockIcon.innerHTML = '<i class="fas fa-lock text-muted ms-2"></i>';
-                                    lockIcon.style.cssText = 'position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;';
-                                    container.style.position = 'relative';
-                                    container.appendChild(lockIcon);
-                                }
-
-                                console.log(`🔒 Campo ${targetField} bloqueado com valor herdado da tela pai`);
-                            }
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('❌ Erro ao pré-preencher campo:', error);
+        try {
+            // Obter o campo da tela pai que abriu este modal
+            const targetFieldName = modal.dataset.targetField;
+            if (!targetFieldName) {
+                console.log('⚠️ Modal não tem targetField definido');
+                return;
             }
-        });
+
+            console.log(`📝 Modal foi aberto pelo campo: ${targetFieldName}`);
+
+            // Obter contexto pai (modal pai ou página principal)
+            const parentContext = this.getParentContext(modal);
+
+            // Buscar o campo de referência na tela pai que abriu este modal
+            const parentReferenceInput = this.getFieldInContext(parentContext, `${targetFieldName}_search`, 'id');
+
+            if (!parentReferenceInput) {
+                console.log(`⚠️ Campo ${targetFieldName}_search não encontrado no contexto pai`);
+                return;
+            }
+
+            // Ler os filtros configurados no campo da tela pai
+            const filterConfig = parentReferenceInput.dataset.referenceFilters;
+            if (!filterConfig || filterConfig === '{}') {
+                console.log('ℹ️ Campo pai não possui filtros configurados');
+                return;
+            }
+
+            const config = JSON.parse(filterConfig);
+            console.log('📋 Filtros do campo pai:', config);
+
+            // Para cada filtro configurado
+            for (const [filterFieldName, filterInfo] of Object.entries(config)) {
+                // Só processar filtros que sejam referências a propriedades (isProperty = true)
+                if (filterInfo.isProperty) {
+                    const sourceFieldName = filterInfo.value; // Nome do campo na tela pai (ex: "IdVeiculoMarca")
+
+                    console.log(`🔄 Processando filtro: ${filterFieldName} ← ${sourceFieldName}`);
+
+                    // Buscar o valor do campo na tela pai
+                    const parentHiddenInput = this.getFieldInContext(parentContext, sourceFieldName, 'name');
+                    const parentSearchInput = this.getFieldInContext(parentContext, `${sourceFieldName}_search`, 'id');
+
+                    if (!parentHiddenInput || !parentHiddenInput.value || parentHiddenInput.value === '0') {
+                        console.log(`⚠️ Campo ${sourceFieldName} na tela pai está vazio ou não encontrado`);
+                        continue;
+                    }
+
+                    const parentValue = parentHiddenInput.value;
+                    const parentDisplayText = parentSearchInput ? parentSearchInput.value : '';
+
+                    console.log(`✅ Valor encontrado na tela pai: ${sourceFieldName} = ${parentValue} (${parentDisplayText})`);
+
+                    // Agora preencher o campo correspondente NO MODAL
+                    // O filterFieldName é o nome do campo no modal (ex: "IdVeiculoMarca")
+                    const modalSearchInput = this.getFieldInContext(modal, `${filterFieldName}_search`, 'id');
+                    const modalHiddenInput = this.getFieldInContext(modal, filterFieldName, 'name');
+
+                    if (!modalSearchInput || !modalHiddenInput) {
+                        console.log(`⚠️ Campo ${filterFieldName} não encontrado no modal`);
+                        continue;
+                    }
+
+                    // Preencher e bloquear o campo no modal
+                    modalHiddenInput.value = parentValue;
+                    modalSearchInput.value = parentDisplayText;
+                    modalSearchInput.classList.add('selected');
+
+                    // Bloquear o campo (readonly)
+                    modalSearchInput.readOnly = true;
+                    modalSearchInput.disabled = true;
+                    modalSearchInput.classList.add('bg-light', 'text-muted');
+                    modalSearchInput.style.cursor = 'not-allowed';
+
+                    // Desabilitar botões de adicionar e limpar
+                    const createBtn = modal.querySelector(`#${filterFieldName}_create`);
+                    const clearBtn = modal.querySelector(`#${filterFieldName}_clear`);
+
+                    if (createBtn) {
+                        createBtn.style.display = 'none';
+                    }
+
+                    if (clearBtn) {
+                        clearBtn.style.display = 'none';
+                    }
+
+                    // Adicionar ícone de "cadeado" para indicar que está bloqueado
+                    const container = modalSearchInput.closest('.reference-field-container');
+                    if (container && !container.querySelector('.field-locked-icon')) {
+                        const lockIcon = document.createElement('div');
+                        lockIcon.className = 'field-locked-icon';
+                        lockIcon.innerHTML = '<i class="fas fa-lock text-muted"></i>';
+                        lockIcon.style.cssText = 'position: absolute; right: 80px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 10;';
+
+                        if (!container.style.position || container.style.position === 'static') {
+                            container.style.position = 'relative';
+                        }
+
+                        container.appendChild(lockIcon);
+                    }
+
+                    // Adicionar tooltip explicativo
+                    modalSearchInput.title = `Campo herdado da tela anterior (não editável)`;
+
+                    console.log(`🔒 Campo ${filterFieldName} no modal bloqueado com valor: ${parentValue} (${parentDisplayText})`);
+                }
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao pré-preencher campos dependentes:', error);
+        }
     }
 
     async handleModalSubmit(modal, form) {
