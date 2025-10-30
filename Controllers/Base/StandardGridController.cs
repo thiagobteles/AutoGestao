@@ -194,7 +194,14 @@ namespace AutoGestao.Controllers.Base
 
         protected virtual Task BeforeCreate(T entity)
         {
-            ProcessFileFieldsFromRequest(entity); // ADICIONE ESTA LINHA
+            ProcessFileFieldsFromRequest(entity);
+
+            // Garantir que IdEmpresa seja preenchido se estiver em 0
+            if (entity.IdEmpresa == 0)
+            {
+                entity.IdEmpresa = GetCurrentEmpresaId();
+            }
+
             entity.DataCadastro = DateTime.UtcNow;
             return Task.CompletedTask;
         }
