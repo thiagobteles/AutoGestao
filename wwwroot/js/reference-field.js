@@ -631,9 +631,33 @@ class ReferenceFieldManager {
             setTimeout(() => {
                 console.log('🔄 Frame 2: Inicializando campos condicionais...');
 
+                // DEBUG: Ver o HTML real do modal
+                const modalBody = modal.querySelector('.modal-body');
+                console.log('📄 HTML do modal (primeiros 1000 caracteres):');
+                console.log(modalBody?.innerHTML.substring(0, 1000));
+
                 // Verificar se há campos condicionais antes de inicializar
                 const conditionalFields = modal.querySelectorAll('[data-conditional-display-rule], [data-conditional-field]');
                 console.log(`🔍 Campos condicionais encontrados no modal: ${conditionalFields.length}`);
+
+                // DEBUG: Verificar todos os form-group no modal
+                const allFormGroups = modal.querySelectorAll('.form-group');
+                console.log(`📦 Total de form-groups no modal: ${allFormGroups.length}`);
+
+                if (allFormGroups.length > 0) {
+                    console.log('📋 Primeiros 3 form-groups:');
+                    allFormGroups.forEach((group, index) => {
+                        if (index < 3) {
+                            console.log(`  ${index + 1}. Atributos:`, {
+                                'data-field-name': group.dataset.fieldName,
+                                'data-conditional-display-rule': group.dataset.conditionalDisplayRule,
+                                'data-conditional-field': group.dataset.conditionalField,
+                                'data-conditional-value': group.dataset.conditionalValue,
+                                'outerHTML (100 chars)': group.outerHTML.substring(0, 100)
+                            });
+                        }
+                    });
+                }
 
                 if (conditionalFields.length > 0) {
                     // Log dos campos encontrados
