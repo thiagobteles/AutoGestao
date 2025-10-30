@@ -1675,6 +1675,11 @@ namespace AutoGestao.Controllers.Base
                 if (conditionalDisplayAttr != null)
                 {
                     displayRule = conditionalDisplayAttr.Rule;
+                    _logger?.LogInformation("🔍 Campo {PropertyName} tem ConditionalDisplay: '{Rule}'", property.Name, displayRule);
+                }
+                else
+                {
+                    _logger?.LogInformation("⚠️ Campo {PropertyName} NÃO tem ConditionalDisplay", property.Name);
                 }
 
                 var shouldDisplay = true;
@@ -1750,7 +1755,7 @@ namespace AutoGestao.Controllers.Base
                     }
                 }
 
-                return new FormFieldViewModel
+                var fieldViewModel = new FormFieldViewModel
                 {
                     PropertyName = property.Name,
                     DisplayName = formFieldAttr.Name ?? GetDisplayName(property),
@@ -1781,6 +1786,11 @@ namespace AutoGestao.Controllers.Base
                     FilePath = filePath,
                     ImageSize = formFieldAttr.Type == EnumFieldType.Image ? (formFieldAttr.ImageSize ?? "150x150") : null
                 };
+
+                _logger?.LogInformation("✅ FormFieldViewModel criado para {PropertyName} - ConditionalDisplayRule: '{Rule}'",
+                    property.Name, fieldViewModel.ConditionalDisplayRule);
+
+                return fieldViewModel;
             }
 
             return null;
