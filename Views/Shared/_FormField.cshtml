@@ -1,9 +1,6 @@
 @model FormFieldViewModel
 @using AutoGestao.Enumerador.Gerais
 
-@* LOG RAZOR *@
-<script>console.log('🔍 RAZOR _FormField - PropertyName:', '@Model.PropertyName', 'ConditionalDisplayRule:', '@Model.ConditionalDisplayRule');</script>
-
 @{
     var conditionalDisplayAttr = !string.IsNullOrEmpty(Model.ConditionalDisplayRule)
         ? $"data-conditional-display-rule=\"{Model.ConditionalDisplayRule}\""
