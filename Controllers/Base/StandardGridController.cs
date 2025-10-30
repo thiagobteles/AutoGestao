@@ -1675,18 +1675,19 @@ namespace AutoGestao.Controllers.Base
                 if (conditionalDisplayAttr != null)
                 {
                     displayRule = conditionalDisplayAttr.Rule;
-                    _logger?.LogInformation("🔍 Campo {PropertyName} tem ConditionalDisplay: '{Rule}'", property.Name, displayRule);
-                }
-                else
-                {
-                    _logger?.LogInformation("⚠️ Campo {PropertyName} NÃO tem ConditionalDisplay", property.Name);
                 }
 
+                // IMPORTANTE: Campos com ConditionalDisplay devem SEMPRE ser incluídos no HTML
+                // A visibilidade será gerenciada pelo JavaScript no frontend
+                // Se avaliarmos a condição aqui e shouldDisplay = false, o campo será REMOVIDO do HTML
+                // e o JavaScript não conseguirá aplicar a lógica condicional
                 var shouldDisplay = true;
-                if (!string.IsNullOrEmpty(displayRule))
-                {
-                    shouldDisplay = ConditionalExpressionEvaluator.Evaluate(displayRule, entity, typeof(T));
-                }
+
+                // Não avaliar a condição aqui - deixar o JavaScript gerenciar
+                // if (!string.IsNullOrEmpty(displayRule))
+                // {
+                //     shouldDisplay = ConditionalExpressionEvaluator.Evaluate(displayRule, entity, typeof(T));
+                // }
 
                 var requiredRule = conditionalRequiredAttr?.Rule ?? "";
                 var isConditionallyRequired = false;
@@ -1755,7 +1756,7 @@ namespace AutoGestao.Controllers.Base
                     }
                 }
 
-                var fieldViewModel = new FormFieldViewModel
+                return new FormFieldViewModel
                 {
                     PropertyName = property.Name,
                     DisplayName = formFieldAttr.Name ?? GetDisplayName(property),
@@ -1786,11 +1787,6 @@ namespace AutoGestao.Controllers.Base
                     FilePath = filePath,
                     ImageSize = formFieldAttr.Type == EnumFieldType.Image ? (formFieldAttr.ImageSize ?? "150x150") : null
                 };
-
-                _logger?.LogInformation("✅ FormFieldViewModel criado para {PropertyName} - ConditionalDisplayRule: '{Rule}'",
-                    property.Name, fieldViewModel.ConditionalDisplayRule);
-
-                return fieldViewModel;
             }
 
             return null;
