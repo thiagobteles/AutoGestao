@@ -720,7 +720,7 @@ class ReferenceFieldManager {
                         const lockIcon = document.createElement('div');
                         lockIcon.className = 'field-locked-icon';
                         lockIcon.innerHTML = '<i class="fas fa-lock text-muted"></i>';
-                        lockIcon.style.cssText = 'position: absolute; right: 80px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 10;';
+                        lockIcon.style.cssText = 'position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 10;';
 
                         if (!container.style.position || container.style.position === 'static') {
                             container.style.position = 'relative';
@@ -979,3 +979,30 @@ referenceModalStyles.textContent = `
 
 document.head.appendChild(referenceModalStyles);
 console.log('✅ CSS do modal de referência aplicado');
+
+// CSS adicional para garantir que popups fiquem acima dos modais
+const additionalStyles = document.createElement('style');
+additionalStyles.textContent = `
+    /* Garantir que modais de notificação fiquem acima dos modais de referência */
+    #confirmModal,
+    #notificationModal {
+        z-index: 1070 !important;
+    }
+
+    #confirmModal .modal-backdrop,
+    #notificationModal .modal-backdrop {
+        z-index: 1069 !important;
+    }
+
+    /* Quando há múltiplos modais abertos, o backdrop do popup deve ficar acima */
+    .modal-backdrop.show {
+        z-index: 1055;
+    }
+
+    .modal-backdrop.show + .modal-backdrop.show {
+        z-index: 1069;
+    }
+`;
+
+document.head.appendChild(additionalStyles);
+console.log('✅ CSS adicional aplicado (z-index para popups)');
