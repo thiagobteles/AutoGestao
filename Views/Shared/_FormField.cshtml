@@ -1,6 +1,9 @@
 @model FormFieldViewModel
 @using AutoGestao.Enumerador.Gerais
 
+@* LOG RAZOR *@
+<script>console.log('🔍 RAZOR _FormField - PropertyName:', '@Model.PropertyName', 'ConditionalDisplayRule:', '@Model.ConditionalDisplayRule');</script>
+
 <div class="form-group mb-3"
      data-field-name="@Model.PropertyName"
      @Html.Raw(string.IsNullOrEmpty(Model.ConditionalDisplayRule) ? "" : $"data-conditional-display-rule=\"{Model.ConditionalDisplayRule}\"")
