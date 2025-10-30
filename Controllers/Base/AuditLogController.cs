@@ -67,7 +67,7 @@ namespace AutoGestao.Controllers.Base
             return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
         }
 
-        protected override bool CanCreate(AuditLog entity)
+        protected override bool CanCreate(AuditLog? entity)
         {
             return false; // Auditoria é read-only
         }

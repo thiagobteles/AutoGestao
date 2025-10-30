@@ -23,3 +23,9 @@ dotnet_diagnostic.CA1861.severity = none
 
 # CS8601: Possível atribuição de referência nula.
 dotnet_diagnostic.CS8601.severity = none
+
+# CS8600: Conversão de literal nula ou possível valor nulo em tipo não anulável.
+dotnet_diagnostic.CS8600.severity = none
+
+# CS8605: Executando a conversão unboxing de um valor possivelmente nulo.
+dotnet_diagnostic.CS8605.severity = none

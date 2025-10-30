@@ -73,7 +73,7 @@ namespace AutoGestao.Controllers.Base
                 return query;
             }
 
-            Expression<Func<T, bool>> searchExpression = null;
+            Expression<Func<T, bool>>? searchExpression = null;
             var parameter = Expression.Parameter(typeof(T), typeof(T).Name);
 
             foreach (var filter in filters)

@@ -1,5 +1,4 @@
 using AutoGestao.Atributes;
-using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;

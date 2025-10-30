@@ -1,10 +1,6 @@
 using AutoGestao.Atributes;
-using AutoGestao.Atributes;
-using AutoGestao.Controllers;
-using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
-using System.ComponentModel.DataAnnotations;
 
 namespace AutoGestao.Entidades
 {
