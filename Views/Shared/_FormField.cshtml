@@ -4,11 +4,25 @@
 @* LOG RAZOR *@
 <script>console.log('🔍 RAZOR _FormField - PropertyName:', '@Model.PropertyName', 'ConditionalDisplayRule:', '@Model.ConditionalDisplayRule');</script>
 
+@{
+    var conditionalDisplayAttr = !string.IsNullOrEmpty(Model.ConditionalDisplayRule)
+        ? $"data-conditional-display-rule=\"{Model.ConditionalDisplayRule}\""
+        : "";
+
+    var conditionalRequiredAttr = !string.IsNullOrEmpty(Model.ConditionalRequiredRule)
+        ? $"data-conditional-required-rule=\"{Model.ConditionalRequiredRule}\""
+        : "";
+
+    var conditionalMessageAttr = !string.IsNullOrEmpty(Model.ConditionalRequiredMessage)
+        ? $"data-conditional-required-message=\"{Model.ConditionalRequiredMessage}\""
+        : "";
+}
+
 <div class="form-group mb-3"
      data-field-name="@Model.PropertyName"
-     @Html.Raw(string.IsNullOrEmpty(Model.ConditionalDisplayRule) ? "" : $"data-conditional-display-rule=\"{Model.ConditionalDisplayRule}\"")
-     @Html.Raw(string.IsNullOrEmpty(Model.ConditionalRequiredRule) ? "" : $"data-conditional-required-rule=\"{Model.ConditionalRequiredRule}\"")
-     @Html.Raw(string.IsNullOrEmpty(Model.ConditionalRequiredMessage) ? "" : $"data-conditional-required-message=\"{Model.ConditionalRequiredMessage}\"")>
+     @Html.Raw(conditionalDisplayAttr)
+     @Html.Raw(conditionalRequiredAttr)
+     @Html.Raw(conditionalMessageAttr)>
     @if (Model.Type != EnumFieldType.Hidden)
     {
         <label for="@Model.PropertyName" class="form-label">
