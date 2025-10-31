@@ -22,6 +22,9 @@
         const modalForms = document.querySelectorAll('.modal form');
 
         modalForms.forEach(form => {
+            // IMPORTANTE: Desabilitar validação HTML5 nativa (que mostra mensagens em inglês)
+            form.setAttribute('novalidate', 'novalidate');
+
             // Adicionar listener de submit
             form.addEventListener('submit', function (e) {
                 const modal = form.closest('.modal');
@@ -36,6 +39,7 @@
                     if (!validationResult.isValid) {
                         e.preventDefault();
                         e.stopPropagation();
+                        e.stopImmediatePropagation();
 
                         // Mostrar popup com erros
                         showValidationErrors(validationResult.errors, modal);
@@ -44,11 +48,13 @@
                         scrollToFirstError(validationResult.errors, modal);
 
                         console.log('❌ Validação falhou:', validationResult.errors);
+
+                        return false;
                     } else {
                         console.log('✅ Validação passou');
                     }
                 }
-            });
+            }, true); // UseCapture = true para capturar antes de outros handlers
         });
     }
 
@@ -143,6 +149,8 @@
      * @param {HTMLElement} modal - Modal container
      */
     function showValidationErrors(errors, modal) {
+        console.log('🚨 Mostrando erros de validação:', errors.length, 'erros');
+
         // Construir lista de erros em HTML
         const errorList = errors.map((error, index) =>
             `<li class="validation-error-item">
@@ -163,8 +171,34 @@
 
         // Usar o sistema de notificação existente
         if (window.showError) {
+            console.log('📢 Chamando showError()...');
             window.showError(errorMessage);
+
+            // Forçar z-index do modal de notificação após criação
+            setTimeout(() => {
+                const notificationModal = document.getElementById('notificationModal');
+                if (notificationModal) {
+                    console.log('🔝 Forçando z-index do modal de notificação');
+                    notificationModal.style.zIndex = '99999';
+
+                    const dialog = notificationModal.querySelector('.modal-dialog');
+                    if (dialog) {
+                        dialog.style.zIndex = '100000';
+                    }
+
+                    // Forçar backdrop também
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach((backdrop, index) => {
+                        // O último backdrop (mais recente) deve ser o da notificação
+                        if (index === backdrops.length - 1) {
+                            backdrop.style.zIndex = '99998';
+                            console.log('🔝 Ajustado z-index do backdrop');
+                        }
+                    });
+                }
+            }, 100);
         } else {
+            console.log('⚠️ showError() não disponível, usando alert');
             alert(`Campos obrigatórios não preenchidos:\n\n${errors.map(e => '• ' + e.label).join('\n')}`);
         }
 
@@ -230,17 +264,43 @@
         const fieldContainer = firstErrorField.closest('.form-group');
 
         if (fieldContainer) {
-            // Scroll suave até o campo com erro
-            fieldContainer.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-                inline: 'nearest'
-            });
+            // Encontrar o container de scroll do modal
+            const modalContent = modal.querySelector('.modal-form-content') ||
+                                modal.querySelector('.modal-body');
+
+            if (modalContent) {
+                // Calcular a posição do campo em relação ao container
+                const fieldTop = fieldContainer.offsetTop;
+                const containerScrollTop = modalContent.scrollTop;
+                const containerHeight = modalContent.clientHeight;
+
+                // Calcular a posição de scroll ideal (campo no centro)
+                const scrollPosition = fieldTop - (containerHeight / 2) + (fieldContainer.offsetHeight / 2);
+
+                console.log('📍 Fazendo scroll até campo com erro:', {
+                    fieldTop,
+                    scrollPosition,
+                    containerHeight
+                });
+
+                // Scroll suave no container do modal
+                modalContent.scrollTo({
+                    top: scrollPosition,
+                    behavior: 'smooth'
+                });
+            }
 
             // Focar no campo após o scroll (com pequeno delay)
             setTimeout(() => {
                 firstErrorField.focus();
-            }, 500);
+
+                // Adicionar animação de destaque extra
+                fieldContainer.style.transition = 'transform 0.3s';
+                fieldContainer.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    fieldContainer.style.transform = 'scale(1)';
+                }, 300);
+            }, 600);
         }
     }
 
