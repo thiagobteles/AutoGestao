@@ -88,7 +88,15 @@
                 <div class="form-grid grid-cols-@sectionItem.GridColumns">
                     @foreach (var field in sectionItem.Fields.Where(f => f.ShouldDisplay).OrderBy(f => f.Order))
                     {
-                        <div class="form-field-wrapper" style="grid-column: span @field.GridColumns;">
+                        @{
+                            // Calcular span correto:
+                            // GridColumns do campo indica "quantos campos desse tipo cabem por linha"
+                            // Então span = totalColunasDaSeção / GridColumnsDoField
+                            // Exemplo: seção com 3 colunas, campo com GridColumns=3 → span = 3/3 = 1 (1/3 da linha)
+                            //          seção com 3 colunas, campo com GridColumns=1 → span = 3/1 = 3 (linha inteira)
+                            var span = sectionItem.GridColumns / field.GridColumns;
+                        }
+                        <div class="form-field-wrapper" style="grid-column: span @span;">
                             @await Html.PartialAsync("_FormField", field)
                         </div>
                     }
