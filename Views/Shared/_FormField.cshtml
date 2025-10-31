@@ -217,6 +217,65 @@
                    name="@Model.PropertyName"
                    value="@fieldValue" />
             break;
+
+        case EnumFieldType.File:
+            <div class="file-upload-container">
+                @if (!string.IsNullOrEmpty(Model.FileUrl))
+                {
+                    <div class="current-file mb-2">
+                        <i class="fas fa-file-pdf me-2"></i>
+                        <a href="@Model.FileUrl" target="_blank">@Model.FileName</a>
+                        <input type="hidden" name="@(Model.PropertyName)_Existing" value="@Model.FilePath" />
+                    </div>
+                }
+                <input type="file"
+                       class="form-control"
+                       id="@Model.PropertyName"
+                       name="@Model.PropertyName"
+                       accept="@(!string.IsNullOrEmpty(Model.AllowedExtensions) ? string.Join(",", Model.AllowedExtensions.Split(',').Select(ext => "." + ext.Trim())) : "*")"
+                       @(Model.Required && string.IsNullOrEmpty(Model.FileUrl) ? "required" : "")
+                       @(Model.ReadOnly ? "disabled" : "") />
+                @if (!string.IsNullOrEmpty(Model.AllowedExtensions))
+                {
+                    <small class="form-text text-muted">Extensões permitidas: @Model.AllowedExtensions</small>
+                }
+                @if (Model.MaxSizeMB > 0)
+                {
+                    <small class="form-text text-muted d-block">Tamanho máximo: @Model.MaxSizeMB MB</small>
+                }
+            </div>
+            break;
+
+        case EnumFieldType.Image:
+            <div class="image-upload-container">
+                @if (!string.IsNullOrEmpty(Model.FileUrl))
+                {
+                    <div class="current-image mb-2">
+                        <img src="@Model.FileUrl" alt="@Model.DisplayName" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                        <input type="hidden" name="@(Model.PropertyName)_Existing" value="@Model.FilePath" />
+                    </div>
+                }
+                <input type="file"
+                       class="form-control"
+                       id="@Model.PropertyName"
+                       name="@Model.PropertyName"
+                       accept="image/*,@(!string.IsNullOrEmpty(Model.AllowedExtensions) ? string.Join(",", Model.AllowedExtensions.Split(',').Select(ext => "." + ext.Trim())) : "")"
+                       @(Model.Required && string.IsNullOrEmpty(Model.FileUrl) ? "required" : "")
+                       @(Model.ReadOnly ? "disabled" : "") />
+                @if (!string.IsNullOrEmpty(Model.AllowedExtensions))
+                {
+                    <small class="form-text text-muted">Extensões permitidas: @Model.AllowedExtensions</small>
+                }
+                @if (Model.MaxSizeMB > 0)
+                {
+                    <small class="form-text text-muted d-block">Tamanho máximo: @Model.MaxSizeMB MB</small>
+                }
+                @if (!string.IsNullOrEmpty(Model.ImageSize))
+                {
+                    <small class="form-text text-muted d-block">Tamanho recomendado: @Model.ImageSize</small>
+                }
+            </div>
+            break;
     }
 
     @if (!string.IsNullOrEmpty(Model.ValidationMessage))
