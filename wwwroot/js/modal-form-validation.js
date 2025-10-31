@@ -171,32 +171,9 @@
 
         // Usar o sistema de notificação existente
         if (window.showError) {
-            console.log('📢 Chamando showError()...');
+            console.log('📢 Chamando showError() com', errors.length, 'erros');
+            console.log('📋 HTML gerado:', errorMessage.substring(0, 200));
             window.showError(errorMessage);
-
-            // Forçar z-index do modal de notificação após criação
-            setTimeout(() => {
-                const notificationModal = document.getElementById('notificationModal');
-                if (notificationModal) {
-                    console.log('🔝 Forçando z-index do modal de notificação');
-                    notificationModal.style.zIndex = '99999';
-
-                    const dialog = notificationModal.querySelector('.modal-dialog');
-                    if (dialog) {
-                        dialog.style.zIndex = '100000';
-                    }
-
-                    // Forçar backdrop também
-                    const backdrops = document.querySelectorAll('.modal-backdrop');
-                    backdrops.forEach((backdrop, index) => {
-                        // O último backdrop (mais recente) deve ser o da notificação
-                        if (index === backdrops.length - 1) {
-                            backdrop.style.zIndex = '99998';
-                            console.log('🔝 Ajustado z-index do backdrop');
-                        }
-                    });
-                }
-            }, 100);
         } else {
             console.log('⚠️ showError() não disponível, usando alert');
             alert(`Campos obrigatórios não preenchidos:\n\n${errors.map(e => '• ' + e.label).join('\n')}`);

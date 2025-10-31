@@ -247,11 +247,31 @@ class ModalSystem {
         // Atualizar conteúdo
         icon.className = `notification-icon ${config.icon}`;
         title.textContent = options.title || config.title;
-        messageElement.textContent = message;
+
+        // CORREÇÃO: Usar innerHTML para suportar HTML formatado
+        messageElement.innerHTML = message;
+
         button.innerHTML = `<i class="${config.buttonIcon} me-2"></i>${options.buttonText || config.buttonText}`;
+
+        // FORÇAR Z-INDEX ANTES DE MOSTRAR
+        modal.style.zIndex = '99999';
+        modal.querySelector('.modal-dialog').style.zIndex = '100000';
 
         // Mostrar modal com animação suave
         this.notificationModal.show();
+
+        // Forçar z-index após mostrar também
+        setTimeout(() => {
+            modal.style.zIndex = '99999';
+            const dialog = modal.querySelector('.modal-dialog');
+            if (dialog) dialog.style.zIndex = '100000';
+
+            // Ajustar backdrop
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            if (backdrops.length > 0) {
+                backdrops[backdrops.length - 1].style.zIndex = '99998';
+            }
+        }, 50);
 
         // Auto-focus no botão
         modal.addEventListener('shown.bs.modal', () => {
