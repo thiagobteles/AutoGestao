@@ -1143,6 +1143,16 @@ namespace AutoGestao.Controllers.Base
                 };
 
                 section.GridColumns = section.Fields.Count != 0 ? section.Fields.Max(f => f.GridColumns) : 1;
+
+                _logger?.LogInformation("📊 Seção '{SectionName}' - GridColumns calculado: {GridColumns} (máx de {FieldCount} campos)",
+                    section.Name, section.GridColumns, section.Fields.Count);
+
+                foreach (var field in section.Fields.Take(3))
+                {
+                    _logger?.LogInformation("   - Campo '{FieldName}': GridColumns = {GridColumns}",
+                        field.PropertyName, field.GridColumns);
+                }
+
                 viewModel.Sections.Add(section);
             }
 
