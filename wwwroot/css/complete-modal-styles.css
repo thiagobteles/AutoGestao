@@ -425,6 +425,17 @@
    4. BACKDROP E RESPONSIVIDADE
    =================================================================== */
 
+/* Z-INDEX: Garantir que modais de notificação fiquem acima de modais de cadastro */
+#confirmModal,
+#notificationModal {
+    z-index: 1070 !important;
+}
+
+#confirmModal .modal-backdrop,
+#notificationModal .modal-backdrop {
+    z-index: 1065 !important;
+}
+
 /* Backdrop customizado - mais suave */
 .modal-backdrop.show {
     background: rgba(0, 0, 0, 0.4);
