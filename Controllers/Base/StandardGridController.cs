@@ -1786,7 +1786,9 @@ namespace AutoGestao.Controllers.Base
                     FileUrl = fileUrl,
                     FileName = fileName,
                     FilePath = filePath,
-                    ImageSize = formFieldAttr.Type == EnumFieldType.Image ? (formFieldAttr.ImageSize ?? "150x150") : null
+                    ImageSize = formFieldAttr.Type == EnumFieldType.Image ? (formFieldAttr.ImageSize ?? "150x150") : null,
+                    AllowedExtensions = formFieldAttr.AllowedExtensions ?? "",
+                    MaxSizeMB = formFieldAttr.MaxSizeMB
                 };
             }
 
