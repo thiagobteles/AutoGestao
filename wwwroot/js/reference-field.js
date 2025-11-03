@@ -112,7 +112,7 @@ class ReferenceFieldManager {
 
                             if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                                 input.disabled = true;
-                                input.placeholder = `Primeiramente selecione o campo '${sourceFieldDisplayName}'`;
+                                input.placeholder = `Primeiramente selecione o campo ${sourceFieldDisplayName}`;
                             } else {
                                 input.disabled = false;
                                 input.placeholder = input.dataset.originalPlaceholder || 'Digite para pesquisar...';
@@ -124,7 +124,7 @@ class ReferenceFieldManager {
                         // Verificar estado inicial
                         if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                             input.disabled = true;
-                            input.placeholder = `Primeiramente selecione o campo '${sourceFieldDisplayName}'`;
+                            input.placeholder = `Primeiramente selecione o campo ${sourceFieldDisplayName}`;
                         }
                     }
                 }

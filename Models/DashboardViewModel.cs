@@ -13,5 +13,7 @@ namespace AutoGestao.Models
         public decimal MetaMensal { get; set; } = 50000;
         public decimal ComparativoComMesAnterior { get; set; }
         public List<Cliente> Aniversariantes { get; set; }
+        //public List<Venda> UltimasVendas { get; set; }
+        public List<long> UltimasVendas { get; set; }
     }
 }
