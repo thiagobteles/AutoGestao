@@ -54,6 +54,7 @@ namespace AutoGestao.Atributes
     {
         /// <summary>
         /// Indica se deve buscar relação (Include)
+        /// Exemplo: [ReferenceSubtitle(NavigationPath = "VeiculoMarca.Descricao")]
         /// </summary>
         public string? NavigationPath { get; set; }
     }
