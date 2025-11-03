@@ -1077,9 +1077,10 @@ class ReferenceFieldManager {
                     modalSearchInput.classList.add('bg-light', 'text-muted');
                     modalSearchInput.style.cursor = 'not-allowed';
 
-                    // Desabilitar botões de adicionar e limpar
+                    // Desabilitar botões de adicionar, limpar e buscar
                     const createBtn = modal.querySelector(`#${filterFieldName}_create`);
                     const clearBtn = modal.querySelector(`#${filterFieldName}_clear`);
+                    const searchBtn = modal.querySelector(`#${filterFieldName}_search_all`);
 
                     if (createBtn) {
                         createBtn.style.display = 'none';
@@ -1087,6 +1088,16 @@ class ReferenceFieldManager {
 
                     if (clearBtn) {
                         clearBtn.style.display = 'none';
+                    }
+
+                    if (searchBtn) {
+                        searchBtn.style.display = 'none';
+                    }
+
+                    // Esconder o btn-group se todos os botões foram escondidos
+                    const btnGroup = createBtn?.parentElement;
+                    if (btnGroup && btnGroup.classList.contains('btn-group')) {
+                        btnGroup.style.display = 'none';
                     }
 
                     // Adicionar ícone de "cadeado" para indicar que está bloqueado
