@@ -672,6 +672,9 @@ class ReferenceFieldManager {
                 }
             }
 
+            // Adicionar limite de 50 registros
+            filters.pageSize = 50;
+
             // Fazer requisição para buscar registros
             const queryParams = new URLSearchParams(filters);
             const response = await fetch(`/${controller}/Search?${queryParams}`, {
@@ -685,16 +688,20 @@ class ReferenceFieldManager {
             const data = await response.json();
             this.renderSearchResults(modal, data, targetField);
 
-            // Adicionar filtro local
+            // Adicionar filtro com busca no backend
             const modalLevel = modal.dataset.modalLevel;
             const searchModalInput = modal.querySelector(`#searchModalInput_${modalLevel}`);
             if (searchModalInput) {
+                let debounceTimer;
                 searchModalInput.addEventListener('input', (e) => {
-                    this.filterSearchResults(modal, e.target.value);
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        this.searchInModal(modal, controller, btn, e.target.value);
+                    }, 500); // 500ms de debounce
                 });
             }
 
-            console.log('✅ Conteúdo de busca carregado');
+            console.log('✅ Conteúdo de busca carregado (50 primeiros registros)');
 
         } catch (error) {
             console.error('❌ Erro ao carregar conteúdo de busca:', error);
@@ -704,6 +711,77 @@ class ReferenceFieldManager {
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     Erro ao carregar registros. Por favor, tente novamente.
+                </div>
+            `;
+        }
+    }
+
+    async searchInModal(modal, controller, btn, searchText) {
+        try {
+            const modalLevel = modal.dataset.modalLevel;
+            const resultsContainer = modal.querySelector(`#searchModalResults_${modalLevel}`);
+
+            // Mostrar loading
+            resultsContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Buscando...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Buscando registros...</p>
+                </div>
+            `;
+
+            const context = btn.closest('.modal') || document;
+            const targetField = btn.dataset.targetField;
+            const searchInput = this.getFieldInContext(context, `${targetField}_search`, 'id');
+
+            // Obter filtros configurados
+            let filters = {};
+            if (searchInput && searchInput.dataset.referenceFilters) {
+                const filterConfig = JSON.parse(searchInput.dataset.referenceFilters);
+
+                for (const [filterFieldName, filterInfo] of Object.entries(filterConfig)) {
+                    if (filterInfo.isProperty) {
+                        const sourceFieldName = filterInfo.value;
+                        const sourceHiddenInput = this.getFieldInContext(context, sourceFieldName, 'name');
+                        if (sourceHiddenInput && sourceHiddenInput.value && sourceHiddenInput.value !== '0') {
+                            filters[filterFieldName] = sourceHiddenInput.value;
+                        }
+                    } else {
+                        filters[filterFieldName] = filterInfo.value;
+                    }
+                }
+            }
+
+            // Adicionar filtro de busca e limite
+            filters.pageSize = 50;
+            if (searchText && searchText.trim()) {
+                filters.searchTerm = searchText.trim();
+            }
+
+            // Fazer requisição para buscar registros
+            const queryParams = new URLSearchParams(filters);
+            const response = await fetch(`/${controller}/Search?${queryParams}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao buscar registros');
+            }
+
+            const data = await response.json();
+            this.renderSearchResults(modal, data, targetField);
+
+            console.log(`✅ Busca concluída: ${data.length} registros encontrados`);
+
+        } catch (error) {
+            console.error('❌ Erro na busca:', error);
+            const modalLevel = modal.dataset.modalLevel;
+            const resultsContainer = modal.querySelector(`#searchModalResults_${modalLevel}`);
+            resultsContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erro ao buscar registros. Por favor, tente novamente.
                 </div>
             `;
         }
@@ -740,7 +818,11 @@ class ReferenceFieldManager {
             `;
         }).join('');
 
-        resultsContainer.innerHTML = `<div class="search-results-list">${resultsHtml}</div>`;
+        const countInfo = data.length >= 50
+            ? `<small class="text-muted mb-2 d-block"><i class="fas fa-info-circle"></i> Mostrando os primeiros 50 registros. Use o filtro para refinar a busca.</small>`
+            : `<small class="text-muted mb-2 d-block"><i class="fas fa-info-circle"></i> ${data.length} registro(s) encontrado(s).</small>`;
+
+        resultsContainer.innerHTML = `${countInfo}<div class="search-results-list">${resultsHtml}</div>`;
 
         // Adicionar event listeners para os botões de seleção
         resultsContainer.querySelectorAll('.search-result-select-btn').forEach(btn => {
@@ -786,23 +868,6 @@ class ReferenceFieldManager {
 
             console.log(`✅ Registro selecionado: ${displayText} (ID: ${id})`);
         }
-    }
-
-    filterSearchResults(modal, filterText) {
-        const modalLevel = modal.dataset.modalLevel;
-        const resultsContainer = modal.querySelector(`#searchModalResults_${modalLevel}`);
-        const items = resultsContainer.querySelectorAll('.search-result-item');
-
-        const lowerFilter = filterText.toLowerCase();
-
-        items.forEach(item => {
-            const text = item.dataset.displayText.toLowerCase();
-            if (text.includes(lowerFilter)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
     }
 
     createModal(controller, referenceType, targetField) {
