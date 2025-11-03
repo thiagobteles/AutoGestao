@@ -2502,11 +2502,66 @@ namespace AutoGestao.Controllers.Base
                 return string.Empty;
             }
 
-            var values = properties
-                .Select(p => p.GetValue(item)?.ToString())
-                .Where(v => !string.IsNullOrEmpty(v));
+            var values = new List<string>();
+
+            foreach (var prop in properties.OrderBy(p => p.GetCustomAttribute<ReferenceSubtitleAttribute>()?.Order ?? 999))
+            {
+                var attr = prop.GetCustomAttribute<ReferenceSubtitleAttribute>();
+                string? value = null;
+
+                // Se tem NavigationPath, navegar pelas propriedades relacionadas
+                if (!string.IsNullOrEmpty(attr?.NavigationPath))
+                {
+                    value = NavigatePropertyPath(item, attr.NavigationPath);
+                }
+                else
+                {
+                    // Caso contrário, pegar valor direto da propriedade
+                    value = prop.GetValue(item)?.ToString();
+                }
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    // Adicionar prefixo se configurado
+                    if (!string.IsNullOrEmpty(attr?.Prefix))
+                    {
+                        value = attr.Prefix + value;
+                    }
+
+                    values.Add(value);
+                }
+            }
 
             return string.Join(" • ", values);
+        }
+
+        private string? NavigatePropertyPath(object obj, string path)
+        {
+            if (obj == null || string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+
+            var parts = path.Split('.');
+            object? current = obj;
+
+            foreach (var part in parts)
+            {
+                if (current == null)
+                {
+                    return null;
+                }
+
+                var prop = current.GetType().GetProperty(part);
+                if (prop == null)
+                {
+                    return null;
+                }
+
+                current = prop.GetValue(current);
+            }
+
+            return current?.ToString();
         }
     }
 }

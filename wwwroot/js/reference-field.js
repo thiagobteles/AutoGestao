@@ -613,7 +613,7 @@ class ReferenceFieldManager {
         modal.dataset.modalLevel = newLevel;
         modal.dataset.targetField = targetField;
         modal.innerHTML = `
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">
@@ -733,8 +733,8 @@ class ReferenceFieldManager {
                         <div class="search-result-title">${displayText}</div>
                         ${subtitle ? `<div class="search-result-subtitle">${subtitle}</div>` : ''}
                     </div>
-                    <button type="button" class="btn btn-sm btn-primary search-result-select-btn">
-                        <i class="fas fa-check me-1"></i>Selecionar
+                    <button type="button" class="btn btn-sm btn-primary search-result-select-btn" title="Selecionar">
+                        <i class="fas fa-check"></i>
                     </button>
                 </div>
             `;
@@ -745,9 +745,20 @@ class ReferenceFieldManager {
         // Adicionar event listeners para os botões de seleção
         resultsContainer.querySelectorAll('.search-result-select-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Impedir que o clique no botão dispare o duplo clique do item
                 const item = e.target.closest('.search-result-item');
                 this.selectSearchResult(modal, item, targetField);
             });
+        });
+
+        // Adicionar event listener para duplo clique nos itens
+        resultsContainer.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('dblclick', (e) => {
+                this.selectSearchResult(modal, item, targetField);
+            });
+
+            // Adicionar visual feedback ao hover
+            item.style.cursor = 'pointer';
         });
     }
 
