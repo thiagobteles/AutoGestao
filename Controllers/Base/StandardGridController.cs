@@ -2392,30 +2392,38 @@ namespace AutoGestao.Controllers.Base
         /// Busca todos os registros da entidade para seleção em campo de referência
         /// </summary>
         [HttpGet]
-        public virtual async Task<IActionResult> Search(Dictionary<string, string>? filters = null)
+        public virtual async Task<IActionResult> Search()
         {
             try
             {
                 var query = GetBaseQuery();
 
-                // Aplicar filtros se fornecidos
-                if (filters != null && filters.Count > 0)
+                // Ler filtros da query string manualmente
+                var queryString = HttpContext.Request.Query;
+                foreach (var queryParam in queryString)
                 {
-                    foreach (var filter in filters)
+                    var property = typeof(T).GetProperty(queryParam.Key);
+                    if (property != null)
                     {
-                        var property = typeof(T).GetProperty(filter.Key);
-                        if (property != null)
+                        try
                         {
+                            // Obter o tipo base (sem Nullable)
+                            var targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
                             // Converter valor do filtro para o tipo correto
-                            var filterValue = Convert.ChangeType(filter.Value, property.PropertyType);
+                            object filterValue = Convert.ChangeType(queryParam.Value.ToString(), targetType);
 
                             var parameter = Expression.Parameter(typeof(T), "x");
                             var propertyAccess = Expression.Property(parameter, property);
-                            var constant = Expression.Constant(filterValue);
+                            var constant = Expression.Constant(filterValue, property.PropertyType);
                             var equality = Expression.Equal(propertyAccess, constant);
                             var lambda = Expression.Lambda<Func<T, bool>>(equality, parameter);
 
                             query = query.Where(lambda);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.LogWarning(ex, "Não foi possível aplicar filtro {FilterKey}={FilterValue}", queryParam.Key, queryParam.Value);
                         }
                     }
                 }
