@@ -5,10 +5,9 @@
 /* Container do campo de referência */
 .reference-field-container {
     position: relative;
-    display: flex;
-    align-items: stretch;
-    gap: 0.5rem;
+    display: block; /* Alterado de flex para block para não interferir no layout do grid */
     width: 100%; /* Respeita a largura do container pai (grid-column) */
+    max-width: 100%; /* Garante que não ultrapasse o container pai */
 }
 
 /* Input group - mantém input e botões na mesma linha */
@@ -16,7 +15,7 @@
     display: flex;
     flex-wrap: nowrap !important; /* Impede quebra de linha */
     align-items: stretch;
-    flex: 1;
+    width: 100%; /* Usa 100% da largura do container pai */
 }
 
 /* Grupo de botões - juntos e sem espaço entre eles */
@@ -222,8 +221,8 @@
    ============================================================================= */
 
 .modal-xl .modal-dialog {
-    max-width: 1600px;
-    width: 90%;
+    max-width: 95vw;
+    width: 95vw;
     margin: 1rem auto;
 }
 
@@ -236,6 +235,7 @@
     max-height: 95vh;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .modal-header.bg-primary {
@@ -306,12 +306,14 @@
 /* Responsividade para modal */
 @media (max-width: 1200px) {
     .modal-xl .modal-dialog {
-        max-width: 95%;
+        max-width: 98vw;
+        width: 98vw;
         margin: 0.5rem auto;
     }
 
     .modal-xl .modal-content {
         min-height: 90vh;
+        width: 100%;
     }
 }
 
