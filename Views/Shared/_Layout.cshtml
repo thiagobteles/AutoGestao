@@ -9,6 +9,7 @@
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/collapsible-menu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/reference-field.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/file-upload.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/grid-system.css" asp-append-version="true" />
@@ -47,33 +48,75 @@
                     </div>
                 </div>
 
-                <!-- Cadastros -->
+                <!-- Cadastros com Submenus -->
                 <div class="menu-section">
                     <div class="menu-section-title">Cadastros</div>
+
+                    <!-- Menu Item Expansível: Cadastros Básicos -->
+                    <div class="menu-item has-submenu">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="fas fa-database"></i>
+                            <span class="menu-link-text">Cadastros Básicos</span>
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                            <div class="menu-tooltip">Cadastros Básicos</div>
+                        </a>
+                        <div class="submenu">
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", nameof(Cliente))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Cliente) ? "active" : "")">
+                                    <i class="fas fa-users"></i>
+                                    <span class="menu-link-text">Clientes</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", nameof(Lead))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Lead) ? "active" : "")">
+                                    <i class="fas fa-newspaper"></i>
+                                    <span class="menu-link-text">Leads</span>
+                                </a>
+                            </div>
+                            @if (Globais.EhAutoGestao)
+                            {
+                                <div class="menu-item">
+                                    <a href="@Url.Action("Index", "Fornecedor")" class="menu-link submenu-link">
+                                        <i class="fas fa-truck"></i>
+                                        <span class="menu-link-text">Fornecedores</span>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
                     @if (Globais.EhAutoGestao)
                     {
-                        <div class="menu-item">
-                            <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
+                        <!-- Menu Item Expansível: Veículos -->
+                        <div class="menu-item has-submenu">
+                            <a href="javascript:void(0)" class="menu-link menu-toggle">
                                 <i class="fas fa-car"></i>
                                 <span class="menu-link-text">Veículos</span>
+                                <i class="fas fa-chevron-down submenu-arrow"></i>
                                 <div class="menu-tooltip">Veículos</div>
                             </a>
+                            <div class="submenu">
+                                <div class="menu-item">
+                                    <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
+                                        <i class="fas fa-car-side"></i>
+                                        <span class="menu-link-text">Todos os Veículos</span>
+                                    </a>
+                                </div>
+                                <div class="menu-item">
+                                    <a href="@Url.Action("Index", nameof(VeiculoMarca))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoMarca) ? "active" : "")">
+                                        <i class="fas fa-copyright"></i>
+                                        <span class="menu-link-text">Marcas</span>
+                                    </a>
+                                </div>
+                                <div class="menu-item">
+                                    <a href="@Url.Action("Index", nameof(VeiculoCor))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoCor) ? "active" : "")">
+                                        <i class="fas fa-palette"></i>
+                                        <span class="menu-link-text">Cores</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     }
-                    <div class="menu-item">
-                        <a href="@Url.Action("Index", nameof(Lead))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Lead) ? "active" : "")">
-                            <i class="fas fa-newspaper"></i>
-                            <span class="menu-link-text">Leads</span>
-                            <div class="menu-tooltip">Leads</div>
-                        </a>
-                    </div>
-                    <div class="menu-item">
-                        <a href="@Url.Action("Index", nameof(Cliente))" class="menu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Cliente) ? "active" : "")">
-                            <i class="fas fa-users"></i>
-                            <span class="menu-link-text">Clientes</span>
-                            <div class="menu-tooltip">Clientes</div>
-                        </a>
-                    </div>
                 </div>
 
                 <!-- Relatórios -->
@@ -81,19 +124,27 @@
                 {
                     <div class="menu-section">
                         <div class="menu-section-title">Relatórios</div>
-                        <div class="menu-item">
-                            <a href="@Url.Action("Venda", "Relatorio")" class="menu-link">
-                                <i class="fas fa-chart-bar"></i>
-                                <span class="menu-link-text">Vendas</span>
-                                <div class="menu-tooltip">Relatórios de Vendas</div>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a href="@Url.Action("Estoque", "Relatorio")" class="menu-link">
+                        <div class="menu-item has-submenu">
+                            <a href="javascript:void(0)" class="menu-link menu-toggle">
                                 <i class="fas fa-chart-line"></i>
-                                <span class="menu-link-text">Estoque</span>
-                                <div class="menu-tooltip">Relatórios de Estoque</div>
+                                <span class="menu-link-text">Relatórios</span>
+                                <i class="fas fa-chevron-down submenu-arrow"></i>
+                                <div class="menu-tooltip">Relatórios</div>
                             </a>
+                            <div class="submenu">
+                                <div class="menu-item">
+                                    <a href="@Url.Action("Venda", "Relatorio")" class="menu-link submenu-link">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <span class="menu-link-text">Vendas</span>
+                                    </a>
+                                </div>
+                                <div class="menu-item">
+                                    <a href="@Url.Action("Estoque", "Relatorio")" class="menu-link submenu-link">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span class="menu-link-text">Estoque</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 }
@@ -267,6 +318,135 @@
                     sidebarOverlay.classList.remove('show');
                 }
             });
+        });
+    </script>
+
+    <!-- SISTEMA DE MENU COLAPSÁVEL -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Inicializando menu colapsável...');
+
+            // Selecionar todos os itens de menu que têm submenu
+            const menuToggles = document.querySelectorAll('.menu-toggle');
+
+            menuToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const menuItem = this.closest('.menu-item.has-submenu');
+                    const isExpanded = menuItem.classList.contains('expanded');
+
+                    // Se o sidebar estiver colapsado, não fazer nada
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar.classList.contains('collapsed')) {
+                        return;
+                    }
+
+                    // Fechar outros submenus da mesma seção
+                    const parentSection = menuItem.closest('.menu-section');
+                    const otherExpandedItems = parentSection.querySelectorAll('.menu-item.has-submenu.expanded');
+                    otherExpandedItems.forEach(item => {
+                        if (item !== menuItem) {
+                            item.classList.remove('expanded');
+                        }
+                    });
+
+                    // Toggle do item atual
+                    if (isExpanded) {
+                        menuItem.classList.remove('expanded');
+                        console.log('📂 Submenu fechado');
+                    } else {
+                        menuItem.classList.add('expanded');
+                        console.log('📂 Submenu aberto');
+                    }
+                });
+            });
+
+            // Expandir automaticamente o submenu se houver um item ativo dentro dele
+            function expandActiveSubmenu() {
+                const activeLinks = document.querySelectorAll('.submenu-link.active');
+                activeLinks.forEach(link => {
+                    const menuItem = link.closest('.menu-item.has-submenu');
+                    if (menuItem) {
+                        menuItem.classList.add('expanded');
+                        menuItem.classList.add('has-active-child');
+                        console.log('📂 Submenu expandido automaticamente (contém item ativo)');
+                    }
+                });
+            }
+
+            // Executar ao carregar
+            expandActiveSubmenu();
+
+            // Fechar todos os submenus quando o sidebar for colapsado
+            const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            function closeAllSubmenus() {
+                const expandedItems = document.querySelectorAll('.menu-item.has-submenu.expanded');
+                expandedItems.forEach(item => {
+                    item.classList.remove('expanded');
+                });
+            }
+
+            if (sidebarCollapseBtn) {
+                sidebarCollapseBtn.addEventListener('click', function() {
+                    setTimeout(closeAllSubmenus, 50);
+                });
+            }
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    setTimeout(closeAllSubmenus, 50);
+                });
+            }
+
+            // Salvar estado dos submenus no localStorage
+            function saveSubmenuState() {
+                const expandedMenus = [];
+                document.querySelectorAll('.menu-item.has-submenu.expanded').forEach(item => {
+                    const menuLink = item.querySelector('.menu-toggle');
+                    const menuText = menuLink ? menuLink.querySelector('.menu-link-text')?.textContent : null;
+                    if (menuText) {
+                        expandedMenus.push(menuText);
+                    }
+                });
+                localStorage.setItem('expandedMenus', JSON.stringify(expandedMenus));
+            }
+
+            // Restaurar estado dos submenus do localStorage
+            function restoreSubmenuState() {
+                try {
+                    const savedMenus = JSON.parse(localStorage.getItem('expandedMenus') || '[]');
+                    savedMenus.forEach(menuText => {
+                        const menuLinks = document.querySelectorAll('.menu-toggle');
+                        menuLinks.forEach(link => {
+                            const linkText = link.querySelector('.menu-link-text')?.textContent;
+                            if (linkText === menuText) {
+                                const menuItem = link.closest('.menu-item.has-submenu');
+                                if (menuItem) {
+                                    menuItem.classList.add('expanded');
+                                }
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('Erro ao restaurar estado dos submenus:', error);
+                }
+            }
+
+            // Restaurar estado salvo
+            restoreSubmenuState();
+
+            // Salvar estado quando um submenu for expandido/colapsado
+            menuToggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    setTimeout(saveSubmenuState, 50);
+                });
+            });
+
+            console.log('✅ Menu colapsável inicializado com sucesso');
         });
     </script>
 
