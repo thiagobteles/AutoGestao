@@ -10,9 +10,19 @@
     gap: 0.5rem;
 }
 
+/* Input group - mantém input e botões na mesma linha */
+.reference-field-container .input-group {
+    display: flex;
+    flex-wrap: nowrap !important; /* Impede quebra de linha */
+    align-items: stretch;
+    flex: 1;
+    gap: 0.5rem;
+}
+
 /* Input de busca */
 .reference-search-input {
     flex: 1;
+    min-width: 0; /* Permite que o input encolha sem quebrar o layout */
     padding: 0.5rem 1rem;
     border: 1px solid #ced4da;
     border-radius: 6px;
@@ -59,6 +69,16 @@
     align-items: center;
     justify-content: center;
     min-width: 38px;
+    flex-shrink: 0; /* Impede que os botões encolham */
+    white-space: nowrap; /* Impede quebra de texto interno */
+}
+
+/* Garantir que botões não quebrem mesmo com validação */
+.reference-clear-btn,
+.reference-create-btn,
+.reference-search-btn {
+    flex-basis: auto !important;
+    flex-grow: 0 !important;
 }
 
 .reference-clear-btn {
@@ -80,6 +100,22 @@
         background: #28a745;
         color: white;
     }
+
+.reference-search-btn {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+    .reference-search-btn:hover {
+        background: #007bff;
+        color: white;
+    }
+
+/* Botão de busca desabilitado */
+.reference-search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 /* Dropdown de resultados */
 .reference-dropdown {
@@ -351,6 +387,74 @@
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 0.25rem;
+}
+
+/* Garantir que input com erro não quebre o layout */
+.reference-search-input.is-invalid {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Garantir que container mantenha layout durante validação */
+.reference-field-container .input-group.has-error,
+.reference-field-container .input-group .is-invalid {
+    display: flex;
+    flex-wrap: nowrap !important;
+}
+
+/* Forçar input group a manter estrutura flexbox mesmo com Bootstrap */
+.input-group.has-validation {
+    flex-wrap: nowrap !important;
+}
+
+/* =============================================================================
+   SEARCH MODAL STYLES
+   ============================================================================= */
+
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.search-result-content {
+    flex: 1;
+}
+
+.search-result-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.search-result-subtitle {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.search-result-select-btn {
+    flex-shrink: 0;
+    min-width: 120px;
 }
 
 /* =============================================================================

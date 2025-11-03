@@ -2387,5 +2387,118 @@ namespace AutoGestao.Controllers.Base
 
             return [.. columns.OrderBy(c => c.Order)];
         }
+
+        /// <summary>
+        /// Busca todos os registros da entidade para seleção em campo de referência
+        /// </summary>
+        [HttpGet]
+        public virtual async Task<IActionResult> Search(Dictionary<string, string>? filters = null)
+        {
+            try
+            {
+                var query = GetBaseQuery();
+
+                // Aplicar filtros se fornecidos
+                if (filters != null && filters.Count > 0)
+                {
+                    foreach (var filter in filters)
+                    {
+                        var property = typeof(T).GetProperty(filter.Key);
+                        if (property != null)
+                        {
+                            // Converter valor do filtro para o tipo correto
+                            var filterValue = Convert.ChangeType(filter.Value, property.PropertyType);
+
+                            var parameter = Expression.Parameter(typeof(T), "x");
+                            var propertyAccess = Expression.Property(parameter, property);
+                            var constant = Expression.Constant(filterValue);
+                            var equality = Expression.Equal(propertyAccess, constant);
+                            var lambda = Expression.Lambda<Func<T, bool>>(equality, parameter);
+
+                            query = query.Where(lambda);
+                        }
+                    }
+                }
+
+                var items = await query.Take(100).ToListAsync();
+
+                // Obter configuração de campo de referência
+                var displayProperty = GetDisplayProperty();
+                var subtitleProperties = GetSubtitleProperties();
+
+                var results = items.Select(item => new
+                {
+                    id = item.Id,
+                    displayText = GetDisplayText(item, displayProperty),
+                    subtitle = GetSubtitle(item, subtitleProperties)
+                }).ToList();
+
+                return Json(results);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao buscar registros para seleção");
+                return StatusCode(500, new { error = "Erro ao buscar registros", details = ex.Message });
+            }
+        }
+
+        private PropertyInfo? GetDisplayProperty()
+        {
+            // Buscar propriedade marcada com ReferenceTextAttribute
+            var property = typeof(T).GetProperties()
+                .FirstOrDefault(p => p.GetCustomAttribute<ReferenceTextAttribute>() != null);
+
+            if (property != null)
+            {
+                return property;
+            }
+
+            // Se não encontrou, buscar propriedades comuns
+            var commonNames = new[] { "Nome", "Descricao", "Titulo", "Codigo" };
+            foreach (var name in commonNames)
+            {
+                property = typeof(T).GetProperty(name);
+                if (property != null)
+                {
+                    return property;
+                }
+            }
+
+            // Retornar Id como fallback
+            return typeof(T).GetProperty("Id");
+        }
+
+        private List<PropertyInfo> GetSubtitleProperties()
+        {
+            // Buscar propriedades marcadas com ReferenceSubtitleAttribute
+            return typeof(T).GetProperties()
+                .Where(p => p.GetCustomAttribute<ReferenceSubtitleAttribute>() != null)
+                .ToList();
+        }
+
+        private string GetDisplayText(T item, PropertyInfo? property)
+        {
+            if (property == null)
+            {
+                return $"ID: {item.Id}";
+            }
+
+            var value = property.GetValue(item);
+            return value?.ToString() ?? $"ID: {item.Id}";
+        }
+
+        private string GetSubtitle(T item, List<PropertyInfo> properties)
+        {
+            if (properties.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var values = properties
+                .Select(p => p.GetValue(item)?.ToString())
+                .Where(v => !string.IsNullOrEmpty(v));
+
+            return string.Join(" • ", values);
+        }
     }
 }

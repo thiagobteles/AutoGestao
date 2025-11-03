@@ -35,6 +35,15 @@
         @if (!isReadOnly)
         {
             <button type="button"
+                    class="btn btn-primary reference-search-btn"
+                    id="@(fieldId)_search_all"
+                    title="Buscar registros existentes"
+                    data-reference-type="@referenceType"
+                    data-target-field="@fieldId">
+                <i class="fas fa-search"></i>
+            </button>
+
+            <button type="button"
                     class="btn btn-success reference-create-btn"
                     id="@(fieldId)_create"
                     title="Criar novo registro"

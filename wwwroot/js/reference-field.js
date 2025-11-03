@@ -56,6 +56,17 @@ class ReferenceFieldManager {
             }
         });
 
+        const searchBtns = context.querySelectorAll('.reference-search-btn');
+
+        searchBtns.forEach((btn, index) => {
+            if (!btn.dataset.initialized) {
+                btn.addEventListener('click', (e) => {
+                    this.openSearchModal(e);
+                });
+                btn.dataset.initialized = 'true';
+            }
+        });
+
         console.log('✅ Inicialização de campos de referência concluída');
     }
 
@@ -110,21 +121,87 @@ class ReferenceFieldManager {
                                 this.hideDropdown(input);
                             }
 
+                            // Obter os botões associados ao campo
+                            const createBtn = this.getFieldInContext(context, `${targetField}_create`, 'id');
+                            const clearBtn = this.getFieldInContext(context, `${targetField}_clear`, 'id');
+                            const searchBtn = this.getFieldInContext(context, `${targetField}_search_all`, 'id');
+
                             if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
+                                // Desabilitar campo e botões
                                 input.disabled = true;
-                                input.placeholder = `Primeiramente selecione o campo ${sourceFieldDisplayName}`;
+                                input.placeholder = `Primeiramente selecione o campo '${sourceFieldDisplayName}'`;
+
+                                if (createBtn) {
+                                    createBtn.disabled = true;
+                                    createBtn.style.opacity = '0.5';
+                                    createBtn.style.cursor = 'not-allowed';
+                                    createBtn.title = `Primeiro selecione '${sourceFieldDisplayName}'`;
+                                }
+                                if (clearBtn) {
+                                    clearBtn.disabled = true;
+                                    clearBtn.style.opacity = '0.5';
+                                    clearBtn.style.cursor = 'not-allowed';
+                                }
+                                if (searchBtn) {
+                                    searchBtn.disabled = true;
+                                    searchBtn.style.opacity = '0.5';
+                                    searchBtn.style.cursor = 'not-allowed';
+                                    searchBtn.title = `Primeiro selecione '${sourceFieldDisplayName}'`;
+                                }
                             } else {
+                                // Habilitar campo e botões
                                 input.disabled = false;
                                 input.placeholder = input.dataset.originalPlaceholder || 'Digite para pesquisar...';
+
+                                if (createBtn) {
+                                    createBtn.disabled = false;
+                                    createBtn.style.opacity = '1';
+                                    createBtn.style.cursor = 'pointer';
+                                    createBtn.title = 'Criar novo registro';
+                                }
+                                if (clearBtn) {
+                                    clearBtn.disabled = false;
+                                    clearBtn.style.opacity = '1';
+                                    clearBtn.style.cursor = 'pointer';
+                                }
+                                if (searchBtn) {
+                                    searchBtn.disabled = false;
+                                    searchBtn.style.opacity = '1';
+                                    searchBtn.style.cursor = 'pointer';
+                                    searchBtn.title = 'Buscar registros existentes';
+                                }
                             }
                         });
 
                         sourceHiddenInput.dataset.listenerAttached = 'true';
 
-                        // Verificar estado inicial
+                        // Verificar estado inicial e desabilitar campo e botões se necessário
+                        const targetField = input.dataset.targetField;
+                        const createBtn = this.getFieldInContext(context, `${targetField}_create`, 'id');
+                        const clearBtn = this.getFieldInContext(context, `${targetField}_clear`, 'id');
+                        const searchBtn = this.getFieldInContext(context, `${targetField}_search_all`, 'id');
+
                         if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                             input.disabled = true;
-                            input.placeholder = `Primeiramente selecione o campo ${sourceFieldDisplayName}`;
+                            input.placeholder = `Primeiramente selecione o campo '${sourceFieldDisplayName}'`;
+
+                            if (createBtn) {
+                                createBtn.disabled = true;
+                                createBtn.style.opacity = '0.5';
+                                createBtn.style.cursor = 'not-allowed';
+                                createBtn.title = `Primeiro selecione '${sourceFieldDisplayName}'`;
+                            }
+                            if (clearBtn) {
+                                clearBtn.disabled = true;
+                                clearBtn.style.opacity = '0.5';
+                                clearBtn.style.cursor = 'not-allowed';
+                            }
+                            if (searchBtn) {
+                                searchBtn.disabled = true;
+                                searchBtn.style.opacity = '0.5';
+                                searchBtn.style.cursor = 'not-allowed';
+                                searchBtn.title = `Primeiro selecione '${sourceFieldDisplayName}'`;
+                            }
                         }
                     }
                 }
@@ -484,6 +561,237 @@ class ReferenceFieldManager {
             console.error('❌ Erro ao abrir modal:', error);
             this.showError('Erro ao abrir modal de criação');
         }
+    }
+
+    async openSearchModal(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log('🔍 Abrindo modal de busca...');
+
+        const btn = event.target.closest('.reference-search-btn');
+        const referenceType = btn.dataset.referenceType;
+        const targetField = btn.dataset.targetField;
+
+        try {
+            const controller = referenceType;
+            const modal = this.createSearchModal(controller, referenceType, targetField);
+            document.body.appendChild(modal);
+
+            await this.loadSearchContent(modal, controller, btn);
+
+            const bsModal = new bootstrap.Modal(modal, {
+                backdrop: 'static',
+                keyboard: true
+            });
+            bsModal.show();
+
+            modal.addEventListener('hidden.bs.modal', () => {
+                modal.remove();
+            });
+
+            console.log('✅ Modal de busca aberto');
+
+        } catch (error) {
+            console.error('❌ Erro ao abrir modal de busca:', error);
+            this.showError('Erro ao abrir modal de busca');
+        }
+    }
+
+    createSearchModal(controller, referenceType, targetField) {
+        // Detectar nível do modal atual
+        const currentModal = event?.target?.closest('.modal');
+        const currentLevel = currentModal ? parseInt(currentModal.dataset.modalLevel || '0') : 0;
+        const newLevel = currentLevel + 1;
+
+        console.log(`📊 Criando modal de busca nível ${newLevel} (pai: ${currentLevel})`);
+
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = `referenceSearchModal_${newLevel}_${Date.now()}`;
+        modal.tabIndex = -1;
+        modal.dataset.modalLevel = newLevel;
+        modal.dataset.targetField = targetField;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-search me-2"></i>
+                            Buscar ${referenceType}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" data-modal-context="${newLevel}">
+                        <div class="mb-3">
+                            <input type="text"
+                                   class="form-control"
+                                   id="searchModalInput_${newLevel}"
+                                   placeholder="Digite para filtrar resultados...">
+                        </div>
+                        <div id="searchModalResults_${newLevel}">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        return modal;
+    }
+
+    async loadSearchContent(modal, controller, btn) {
+        try {
+            const context = btn.closest('.modal') || document;
+            const targetField = btn.dataset.targetField;
+            const searchInput = this.getFieldInContext(context, `${targetField}_search`, 'id');
+
+            // Obter filtros configurados
+            let filters = {};
+            if (searchInput && searchInput.dataset.referenceFilters) {
+                const filterConfig = JSON.parse(searchInput.dataset.referenceFilters);
+
+                for (const [filterFieldName, filterInfo] of Object.entries(filterConfig)) {
+                    if (filterInfo.isProperty) {
+                        const sourceFieldName = filterInfo.value;
+                        const sourceHiddenInput = this.getFieldInContext(context, sourceFieldName, 'name');
+                        if (sourceHiddenInput && sourceHiddenInput.value && sourceHiddenInput.value !== '0') {
+                            filters[filterFieldName] = sourceHiddenInput.value;
+                        }
+                    } else {
+                        filters[filterFieldName] = filterInfo.value;
+                    }
+                }
+            }
+
+            // Fazer requisição para buscar registros
+            const queryParams = new URLSearchParams(filters);
+            const response = await fetch(`/${controller}/Search?${queryParams}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao buscar registros');
+            }
+
+            const data = await response.json();
+            this.renderSearchResults(modal, data, targetField);
+
+            // Adicionar filtro local
+            const modalLevel = modal.dataset.modalLevel;
+            const searchModalInput = modal.querySelector(`#searchModalInput_${modalLevel}`);
+            if (searchModalInput) {
+                searchModalInput.addEventListener('input', (e) => {
+                    this.filterSearchResults(modal, e.target.value);
+                });
+            }
+
+            console.log('✅ Conteúdo de busca carregado');
+
+        } catch (error) {
+            console.error('❌ Erro ao carregar conteúdo de busca:', error);
+            const modalLevel = modal.dataset.modalLevel;
+            const resultsContainer = modal.querySelector(`#searchModalResults_${modalLevel}`);
+            resultsContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erro ao carregar registros. Por favor, tente novamente.
+                </div>
+            `;
+        }
+    }
+
+    renderSearchResults(modal, data, targetField) {
+        const modalLevel = modal.dataset.modalLevel;
+        const resultsContainer = modal.querySelector(`#searchModalResults_${modalLevel}`);
+
+        if (!data || data.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nenhum registro encontrado.
+                </div>
+            `;
+            return;
+        }
+
+        const resultsHtml = data.map(item => {
+            const displayText = item.displayText || item.nome || item.descricao || `ID: ${item.id}`;
+            const subtitle = item.subtitle || '';
+
+            return `
+                <div class="search-result-item" data-id="${item.id}" data-display-text="${displayText}">
+                    <div class="search-result-content">
+                        <div class="search-result-title">${displayText}</div>
+                        ${subtitle ? `<div class="search-result-subtitle">${subtitle}</div>` : ''}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary search-result-select-btn">
+                        <i class="fas fa-check me-1"></i>Selecionar
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        resultsContainer.innerHTML = `<div class="search-results-list">${resultsHtml}</div>`;
+
+        // Adicionar event listeners para os botões de seleção
+        resultsContainer.querySelectorAll('.search-result-select-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const item = e.target.closest('.search-result-item');
+                this.selectSearchResult(modal, item, targetField);
+            });
+        });
+    }
+
+    selectSearchResult(modal, item, targetField) {
+        const id = item.dataset.id;
+        const displayText = item.dataset.displayText;
+
+        // Obter o contexto correto (modal pai ou documento)
+        const parentContext = this.getParentContext(modal);
+
+        const searchInput = this.getFieldInContext(parentContext, `${targetField}_search`, 'id');
+        const hiddenInput = this.getFieldInContext(parentContext, targetField, 'name');
+
+        if (searchInput && hiddenInput) {
+            searchInput.value = displayText;
+            hiddenInput.value = id;
+            searchInput.classList.add('selected');
+
+            // Disparar evento de mudança
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // Fechar o modal
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            bsModal.hide();
+
+            console.log(`✅ Registro selecionado: ${displayText} (ID: ${id})`);
+        }
+    }
+
+    filterSearchResults(modal, filterText) {
+        const modalLevel = modal.dataset.modalLevel;
+        const resultsContainer = modal.querySelector(`#searchModalResults_${modalLevel}`);
+        const items = resultsContainer.querySelectorAll('.search-result-item');
+
+        const lowerFilter = filterText.toLowerCase();
+
+        items.forEach(item => {
+            const text = item.dataset.displayText.toLowerCase();
+            if (text.includes(lowerFilter)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     }
 
     createModal(controller, referenceType, targetField) {
