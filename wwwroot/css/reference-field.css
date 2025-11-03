@@ -35,6 +35,11 @@
     transition: all 0.2s ease;
 }
 
+/* Sobrescrever min-width do Bootstrap para input-group */
+.reference-field-container .input-group > .reference-search-input {
+    min-width: 200px !important;
+}
+
     .reference-search-input:focus {
         outline: none;
         border-color: #667eea;
