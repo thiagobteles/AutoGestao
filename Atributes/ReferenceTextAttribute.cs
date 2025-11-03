@@ -10,7 +10,6 @@ namespace AutoGestao.Atributes
     {
         /// <summary>
         /// Indica se deve buscar relação (Include)
-        /// Exemplo: [ReferenceText(NavigationPath = "VeiculoMarca.Descricao")]
         /// </summary>
         public string? NavigationPath { get; set; }
     }

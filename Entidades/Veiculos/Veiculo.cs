@@ -32,8 +32,8 @@ namespace AutoGestao.Entidades.Veiculos
         [GridField("Ano", Order = 30, Width = "100px")]
         public string AnoComposto => $"{AnoFabricacao}/{AnoModelo}";
 
-        [ReferenceSearchable]
         [ReferenceText]
+        [ReferenceSearchable]
         [GridField("Placa", Order = 40, Width = "120px")]
         [FormField(Order = 1, Name = "Placa", Section = "Identificação", Icon = "fas fa-id-card", Type = EnumFieldType.Text, Required = true, Placeholder = "XXX-0000 ou XXX0X00")]
         public string Placa { get; set; } = string.Empty;

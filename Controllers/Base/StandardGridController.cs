@@ -1678,18 +1678,7 @@ namespace AutoGestao.Controllers.Base
                     displayRule = conditionalDisplayAttr.Rule;
                 }
 
-                // IMPORTANTE: Campos com ConditionalDisplay devem SEMPRE ser incluídos no HTML
-                // A visibilidade será gerenciada pelo JavaScript no frontend
-                // Se avaliarmos a condição aqui e shouldDisplay = false, o campo será REMOVIDO do HTML
-                // e o JavaScript não conseguirá aplicar a lógica condicional
                 var shouldDisplay = true;
-
-                // Não avaliar a condição aqui - deixar o JavaScript gerenciar
-                // if (!string.IsNullOrEmpty(displayRule))
-                // {
-                //     shouldDisplay = ConditionalExpressionEvaluator.Evaluate(displayRule, entity, typeof(T));
-                // }
-
                 var requiredRule = conditionalRequiredAttr?.Rule ?? "";
                 var isConditionallyRequired = false;
                 var requiredMessage = conditionalRequiredAttr?.ErrorMessage ?? "";
@@ -1912,16 +1901,15 @@ namespace AutoGestao.Controllers.Base
                 // Buscar propriedade com [ReferenceText] ou [GridMain]
                 var displayProperty = referenceType.GetProperties()
                     .FirstOrDefault(p =>
-                        p.GetCustomAttributes(typeof(ReferenceTextAttribute), false).Any() ||
-                        p.GetCustomAttributes(typeof(GridMainAttribute), false).Any());
+                        p.GetCustomAttributes(typeof(ReferenceTextAttribute), false).Length != 0 ||
+                        p.GetCustomAttributes(typeof(GridMainAttribute), false).Length != 0);
 
                 if (displayProperty == null)
                 {
                     // Fallback: tentar Nome, Descricao ou qualquer string
                     displayProperty = referenceType.GetProperty("Nome") ??
                                     referenceType.GetProperty("Descricao") ??
-                                    referenceType.GetProperties()
-                                        .FirstOrDefault(p => p.PropertyType == typeof(string) && p.Name != "Id");
+                                    referenceType.GetProperties().FirstOrDefault(p => p.PropertyType == typeof(string) && p.Name != "Id");
                 }
 
                 if (displayProperty != null)
