@@ -8,6 +8,7 @@
     display: flex;
     align-items: stretch;
     gap: 0.5rem;
+    width: 100%; /* Respeita a largura do container pai (grid-column) */
 }
 
 /* Input group - mantém input e botões na mesma linha */
@@ -37,7 +38,7 @@
 
 /* Sobrescrever min-width do Bootstrap para input-group */
 .reference-field-container .input-group > .reference-search-input {
-    min-width: 200px !important;
+    min-width: 150px !important; /* Reduzido de 200px para melhor adaptar em grids */
 }
 
     .reference-search-input:focus {
