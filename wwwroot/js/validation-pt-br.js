@@ -65,15 +65,40 @@
                 input.classList.add('is-invalid');
 
                 // Criar ou atualizar mensagem de erro
-                let errorDiv = input.nextElementSibling;
-                if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
-                    errorDiv = document.createElement('div');
+                // Para campos de referência, colocar no container específico
+                let container = null;
+                if (input.classList.contains('reference-search-input')) {
+                    const referenceContainer = input.closest('.reference-field-container');
+                    if (referenceContainer) {
+                        container = referenceContainer.querySelector('.reference-validation-container');
+                    }
+                }
+
+                if (container) {
+                    // Limpar feedback anterior
+                    const existingFeedback = container.querySelector('.invalid-feedback');
+                    if (existingFeedback) {
+                        existingFeedback.remove();
+                    }
+
+                    // Adicionar novo feedback
+                    const errorDiv = document.createElement('div');
                     errorDiv.className = 'invalid-feedback';
                     errorDiv.style.display = 'block';
-                    input.parentNode.insertBefore(errorDiv, input.nextSibling);
+                    errorDiv.textContent = message;
+                    container.appendChild(errorDiv);
+                } else {
+                    // Para campos normais, manter comportamento padrão
+                    let errorDiv = input.nextElementSibling;
+                    if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+                        errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback';
+                        errorDiv.style.display = 'block';
+                        input.parentNode.insertBefore(errorDiv, input.nextSibling);
+                    }
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
                 }
-                errorDiv.textContent = message;
-                errorDiv.style.display = 'block';
             }
         };
     })(), true);
@@ -85,9 +110,24 @@
             input.setCustomValidity('');
             input.classList.remove('is-invalid');
 
-            const errorDiv = input.nextElementSibling;
-            if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
-                errorDiv.style.display = 'none';
+            // Para campos de referência, limpar no container específico
+            if (input.classList.contains('reference-search-input')) {
+                const referenceContainer = input.closest('.reference-field-container');
+                if (referenceContainer) {
+                    const container = referenceContainer.querySelector('.reference-validation-container');
+                    if (container) {
+                        const errorDiv = container.querySelector('.invalid-feedback');
+                        if (errorDiv) {
+                            errorDiv.remove();
+                        }
+                    }
+                }
+            } else {
+                // Para campos normais
+                const errorDiv = input.nextElementSibling;
+                if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                    errorDiv.style.display = 'none';
+                }
             }
         }
     });

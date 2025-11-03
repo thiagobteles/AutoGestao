@@ -34,32 +34,37 @@
 
         @if (!isReadOnly)
         {
-            <button type="button"
-                    class="btn btn-primary reference-search-btn"
-                    id="@(fieldId)_search_all"
-                    title="Buscar registros existentes"
-                    data-reference-type="@referenceType"
-                    data-target-field="@fieldId">
-                <i class="fas fa-search"></i>
-            </button>
+            <div class="btn-group" role="group">
+                <button type="button"
+                        class="btn btn-primary reference-search-btn"
+                        id="@(fieldId)_search_all"
+                        title="Buscar registros existentes"
+                        data-reference-type="@referenceType"
+                        data-target-field="@fieldId">
+                    <i class="fas fa-search"></i>
+                </button>
 
-            <button type="button"
-                    class="btn btn-success reference-create-btn"
-                    id="@(fieldId)_create"
-                    title="Criar novo registro"
-                    data-reference-type="@referenceType"
-                    data-target-field="@fieldId">
-                <i class="fas fa-plus"></i>
-            </button>
+                <button type="button"
+                        class="btn btn-success reference-create-btn"
+                        id="@(fieldId)_create"
+                        title="Criar novo registro"
+                        data-reference-type="@referenceType"
+                        data-target-field="@fieldId">
+                    <i class="fas fa-plus"></i>
+                </button>
 
-            <button type="button"
-                    class="btn btn-outline-secondary reference-clear-btn"
-                    id="@(fieldId)_clear"
-                    title="Limpar seleção">
-                <i class="fas fa-times"></i>
-            </button>
+                <button type="button"
+                        class="btn btn-outline-secondary reference-clear-btn"
+                        id="@(fieldId)_clear"
+                        title="Limpar seleção">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         }
     </div>
 
     <div class="reference-dropdown" id="@(fieldId)_dropdown" style="display: none;"></div>
+
+    @* Container para mensagens de validação - aparece abaixo do input *@
+    <div class="reference-validation-container"></div>
 </div>
