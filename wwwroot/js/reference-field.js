@@ -129,13 +129,13 @@ class ReferenceFieldManager {
                             if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                                 // Desabilitar campo e botões
                                 input.disabled = true;
-                                input.placeholder = `Primeiramente selecione o campo '${sourceFieldDisplayName}'`;
+                                input.placeholder = `Primeiramente selecione o campo ${sourceFieldDisplayName}`;
 
                                 if (createBtn) {
                                     createBtn.disabled = true;
                                     createBtn.style.opacity = '0.5';
                                     createBtn.style.cursor = 'not-allowed';
-                                    createBtn.title = `Primeiro selecione '${sourceFieldDisplayName}'`;
+                                    createBtn.title = `Primeiro selecione ${sourceFieldDisplayName}`;
                                 }
                                 if (clearBtn) {
                                     clearBtn.disabled = true;
@@ -146,7 +146,7 @@ class ReferenceFieldManager {
                                     searchBtn.disabled = true;
                                     searchBtn.style.opacity = '0.5';
                                     searchBtn.style.cursor = 'not-allowed';
-                                    searchBtn.title = `Primeiro selecione '${sourceFieldDisplayName}'`;
+                                    searchBtn.title = `Primeiro selecione ${sourceFieldDisplayName}`;
                                 }
                             } else {
                                 // Habilitar campo e botões
@@ -183,13 +183,13 @@ class ReferenceFieldManager {
 
                         if (!sourceHiddenInput.value || sourceHiddenInput.value === '0') {
                             input.disabled = true;
-                            input.placeholder = `Primeiramente selecione o campo '${sourceFieldDisplayName}'`;
+                            input.placeholder = `Primeiramente selecione o campo ${sourceFieldDisplayName}`;
 
                             if (createBtn) {
                                 createBtn.disabled = true;
                                 createBtn.style.opacity = '0.5';
                                 createBtn.style.cursor = 'not-allowed';
-                                createBtn.title = `Primeiro selecione '${sourceFieldDisplayName}'`;
+                                createBtn.title = `Primeiro selecione ${sourceFieldDisplayName}`;
                             }
                             if (clearBtn) {
                                 clearBtn.disabled = true;
@@ -200,7 +200,7 @@ class ReferenceFieldManager {
                                 searchBtn.disabled = true;
                                 searchBtn.style.opacity = '0.5';
                                 searchBtn.style.cursor = 'not-allowed';
-                                searchBtn.title = `Primeiro selecione '${sourceFieldDisplayName}'`;
+                                searchBtn.title = `Primeiro selecione ${sourceFieldDisplayName}`;
                             }
                         }
                     }
