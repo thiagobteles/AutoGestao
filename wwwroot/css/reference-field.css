@@ -27,7 +27,7 @@
 /* Input de busca */
 .reference-search-input {
     flex: 1;
-    min-width: 0; /* Permite que o input encolha sem quebrar o layout */
+    min-width: 200px; /* Garante tamanho mínimo para digitação confortável */
     padding: 0.5rem 1rem;
     border: 1px solid #ced4da;
     border-radius: 6px;
