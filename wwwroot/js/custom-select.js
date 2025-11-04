@@ -162,10 +162,9 @@ function toggleDropdown(wrapper) {
     const isActive = trigger.classList.contains('active');
 
     // Fechar todos os outros dropdowns
-    document.querySelectorAll('.custom-select-trigger.active').forEach(t => {
-        if (t !== trigger) {
-            t.classList.remove('active');
-            t.parentNode.querySelector('.custom-select-dropdown').classList.remove('active');
+    document.querySelectorAll('.custom-select-wrapper.active').forEach(w => {
+        if (w !== wrapper) {
+            closeDropdown(w);
         }
     });
 
@@ -180,6 +179,7 @@ function openDropdown(wrapper) {
     const trigger = wrapper.querySelector('.custom-select-trigger');
     const dropdown = wrapper.querySelector('.custom-select-dropdown');
 
+    wrapper.classList.add('active'); // Adicionar active no wrapper para z-index alto
     trigger.classList.add('active');
     dropdown.classList.add('active');
 }
@@ -188,6 +188,7 @@ function closeDropdown(wrapper) {
     const trigger = wrapper.querySelector('.custom-select-trigger');
     const dropdown = wrapper.querySelector('.custom-select-dropdown');
 
+    wrapper.classList.remove('active'); // Remover active do wrapper
     trigger.classList.remove('active');
     dropdown.classList.remove('active');
 }

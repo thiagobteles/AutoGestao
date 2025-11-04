@@ -5,6 +5,11 @@
 .custom-select-wrapper {
     position: relative;
     width: 100%;
+    z-index: 1; /* Base z-index para o wrapper */
+}
+
+.custom-select-wrapper.active {
+    z-index: 9999; /* Z-index alto quando aberto para ficar acima de tudo */
 }
 
 .custom-select-trigger {
@@ -76,7 +81,7 @@
     margin-top: -1px;
     max-height: 250px;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 10000; /* Z-index muito alto para garantir que fique acima de sections */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: none;
 }
@@ -99,8 +104,13 @@
     }
 
     .custom-select-option.selected {
-        background-color: var(--gradient-primary);
-        color: white;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        font-weight: 500;
+    }
+
+    .custom-select-option.selected span {
+        color: white !important;
     }
 
     .custom-select-option i {
@@ -110,7 +120,7 @@
     }
 
     .custom-select-option.selected i {
-        color: white;
+        color: white !important;
     }
 
 /* Scrollbar customizada */
@@ -144,6 +154,18 @@
 .custom-select-trigger:focus,
 .custom-select-trigger.active {
     outline: none;
+}
+
+/* Garantir que sections não cortem o dropdown */
+.form-section,
+.card-modern,
+.card-body {
+    overflow: visible !important;
+}
+
+/* Garantir que o wrapper tenha espaço para o dropdown */
+.form-field-group:has(.custom-select-wrapper) {
+    overflow: visible !important;
 }
 
 /* Responsividade */
