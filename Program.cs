@@ -75,6 +75,7 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
 builder.Services.AddScoped<IFileStorageService, MinioFileStorageService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<EntityInspectorService>();
 builder.Services.AddScoped<GenericReferenceService>();
 builder.Services.AddHttpContextAccessor();
 
