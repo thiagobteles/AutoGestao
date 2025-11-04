@@ -72,8 +72,22 @@
     width: 0;
 }
 
+/* IMPORTANTE: Forçar esconder submenus quando sidebar collapsed */
 .sidebar.collapsed .menu-item.has-submenu > .submenu {
-    display: none;
+    display: none !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
+}
+
+/* Forçar remover classe expanded quando sidebar collapsed */
+.sidebar.collapsed .menu-item.has-submenu.expanded {
+    /* Não remover a classe, mas garantir que o submenu não apareça */
+}
+
+.sidebar.collapsed .menu-item.has-submenu.expanded > .submenu {
+    display: none !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
 }
 
 /* Tooltip para menu colapsado com submenu */
@@ -83,29 +97,30 @@
 }
 
 /* Animações de Entrada dos Itens do Submenu */
-.submenu .menu-item {
+/* Desabilitar animações quando sidebar está collapsed */
+.sidebar:not(.collapsed) .submenu .menu-item {
     opacity: 0;
     transform: translateX(-10px);
     animation: slideInSubmenu 0.3s ease forwards;
 }
 
-.submenu .menu-item:nth-child(1) {
+.sidebar:not(.collapsed) .submenu .menu-item:nth-child(1) {
     animation-delay: 0.05s;
 }
 
-.submenu .menu-item:nth-child(2) {
+.sidebar:not(.collapsed) .submenu .menu-item:nth-child(2) {
     animation-delay: 0.1s;
 }
 
-.submenu .menu-item:nth-child(3) {
+.sidebar:not(.collapsed) .submenu .menu-item:nth-child(3) {
     animation-delay: 0.15s;
 }
 
-.submenu .menu-item:nth-child(4) {
+.sidebar:not(.collapsed) .submenu .menu-item:nth-child(4) {
     animation-delay: 0.2s;
 }
 
-.submenu .menu-item:nth-child(5) {
+.sidebar:not(.collapsed) .submenu .menu-item:nth-child(5) {
     animation-delay: 0.25s;
 }
 

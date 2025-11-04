@@ -349,52 +349,59 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🔧 Inicializando menu colapsável...');
 
-            // Selecionar todos os itens de menu que têm submenu
-            const menuToggles = document.querySelectorAll('.menu-toggle');
+            // IMPORTANTE: Aguardar um ciclo para garantir que o sidebar foi inicializado
+            setTimeout(function() {
+                const sidebar = document.getElementById('sidebar');
+                const isSidebarCollapsed = sidebar && sidebar.classList.contains('collapsed');
 
-            menuToggles.forEach(toggle => {
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                console.log('🔧 Estado do sidebar ao inicializar menu:', isSidebarCollapsed ? 'COLLAPSED' : 'EXPANDED');
 
-                    const menuItem = this.closest('.menu-item.has-submenu');
-                    const isExpanded = menuItem.classList.contains('expanded');
+                // Selecionar todos os itens de menu que têm submenu
+                const menuToggles = document.querySelectorAll('.menu-toggle');
 
-                    // Se o sidebar estiver colapsado, não fazer nada
-                    const sidebar = document.getElementById('sidebar');
-                    if (sidebar.classList.contains('collapsed')) {
-                        return;
-                    }
+                menuToggles.forEach(toggle => {
+                    toggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
 
-                    // Fechar outros submenus da mesma seção
-                    const parentSection = menuItem.closest('.menu-section');
-                    const otherExpandedItems = parentSection.querySelectorAll('.menu-item.has-submenu.expanded');
-                    otherExpandedItems.forEach(item => {
-                        if (item !== menuItem) {
-                            item.classList.remove('expanded');
+                        const menuItem = this.closest('.menu-item.has-submenu');
+                        const isExpanded = menuItem.classList.contains('expanded');
+
+                        // Se o sidebar estiver colapsado, não fazer nada
+                        const sidebar = document.getElementById('sidebar');
+                        if (sidebar.classList.contains('collapsed')) {
+                            return;
+                        }
+
+                        // Fechar outros submenus da mesma seção
+                        const parentSection = menuItem.closest('.menu-section');
+                        const otherExpandedItems = parentSection.querySelectorAll('.menu-item.has-submenu.expanded');
+                        otherExpandedItems.forEach(item => {
+                            if (item !== menuItem) {
+                                item.classList.remove('expanded');
+                            }
+                        });
+
+                        // Toggle do item atual
+                        if (isExpanded) {
+                            menuItem.classList.remove('expanded');
+                            console.log('📂 Submenu fechado');
+                        } else {
+                            menuItem.classList.add('expanded');
+                            console.log('📂 Submenu aberto');
                         }
                     });
-
-                    // Toggle do item atual
-                    if (isExpanded) {
-                        menuItem.classList.remove('expanded');
-                        console.log('📂 Submenu fechado');
-                    } else {
-                        menuItem.classList.add('expanded');
-                        console.log('📂 Submenu aberto');
-                    }
                 });
-            });
 
-            // Expandir automaticamente o submenu se houver um item ativo dentro dele
-            // SOMENTE se o sidebar não estiver colapsado
-            function expandActiveSubmenu() {
-                // Aguardar um pouco para garantir que o estado do sidebar foi restaurado
-                setTimeout(() => {
+                // Expandir automaticamente o submenu se houver um item ativo dentro dele
+                // SOMENTE se o sidebar não estiver colapsado
+                function expandActiveSubmenu() {
                     const sidebar = document.getElementById('sidebar');
+                    const isCollapsed = sidebar && sidebar.classList.contains('collapsed');
+
                     // Não expandir se o sidebar estiver colapsado
-                    if (sidebar && sidebar.classList.contains('collapsed')) {
-                        console.log('📂 Submenu não expandido (sidebar collapsed)');
+                    if (isCollapsed) {
+                        console.log('📂 Submenu NÃO expandido (sidebar collapsed)');
                         return;
                     }
 
@@ -407,57 +414,65 @@
                             console.log('📂 Submenu expandido automaticamente (contém item ativo)');
                         }
                     });
-                }, 100);
-            }
+                }
 
-            // Executar ao carregar
-            expandActiveSubmenu();
+                // Executar ao carregar SOMENTE se não estiver collapsed
+                if (!isSidebarCollapsed) {
+                    expandActiveSubmenu();
+                }
 
-            // Fechar todos os submenus quando o sidebar for colapsado
-            const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
-            const sidebarToggle = document.getElementById('sidebarToggle');
+                // Fechar todos os submenus quando o sidebar for colapsado
+                const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+                const sidebarToggle = document.getElementById('sidebarToggle');
 
-            function closeAllSubmenus() {
-                const expandedItems = document.querySelectorAll('.menu-item.has-submenu.expanded');
-                expandedItems.forEach(item => {
-                    item.classList.remove('expanded');
-                });
-            }
+                function closeAllSubmenus() {
+                    const expandedItems = document.querySelectorAll('.menu-item.has-submenu.expanded');
+                    expandedItems.forEach(item => {
+                        item.classList.remove('expanded');
+                    });
+                    console.log('📂 Todos os submenus fechados');
+                }
 
-            if (sidebarCollapseBtn) {
-                sidebarCollapseBtn.addEventListener('click', function() {
-                    setTimeout(closeAllSubmenus, 50);
-                });
-            }
+                if (sidebarCollapseBtn) {
+                    sidebarCollapseBtn.addEventListener('click', function() {
+                        setTimeout(closeAllSubmenus, 50);
+                    });
+                }
 
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', function() {
-                    setTimeout(closeAllSubmenus, 50);
-                });
-            }
+                if (sidebarToggle) {
+                    sidebarToggle.addEventListener('click', function() {
+                        setTimeout(closeAllSubmenus, 50);
+                    });
+                }
 
-            // Salvar estado dos submenus no localStorage
-            function saveSubmenuState() {
-                const expandedMenus = [];
-                document.querySelectorAll('.menu-item.has-submenu.expanded').forEach(item => {
-                    const menuLink = item.querySelector('.menu-toggle');
-                    const menuText = menuLink ? menuLink.querySelector('.menu-link-text')?.textContent : null;
-                    if (menuText) {
-                        expandedMenus.push(menuText);
-                    }
-                });
-                localStorage.setItem('expandedMenus', JSON.stringify(expandedMenus));
-            }
-
-            // Restaurar estado dos submenus do localStorage
-            // SOMENTE se o sidebar não estiver colapsado
-            function restoreSubmenuState() {
-                // Aguardar um pouco para garantir que o estado do sidebar foi restaurado
-                setTimeout(() => {
+                // Salvar estado dos submenus no localStorage
+                function saveSubmenuState() {
                     const sidebar = document.getElementById('sidebar');
-                    // Não restaurar se o sidebar estiver colapsado
+                    // Não salvar estado se sidebar estiver collapsed
                     if (sidebar && sidebar.classList.contains('collapsed')) {
-                        console.log('📂 Estado dos submenus não restaurado (sidebar collapsed)');
+                        return;
+                    }
+
+                    const expandedMenus = [];
+                    document.querySelectorAll('.menu-item.has-submenu.expanded').forEach(item => {
+                        const menuLink = item.querySelector('.menu-toggle');
+                        const menuText = menuLink ? menuLink.querySelector('.menu-link-text')?.textContent : null;
+                        if (menuText) {
+                            expandedMenus.push(menuText);
+                        }
+                    });
+                    localStorage.setItem('expandedMenus', JSON.stringify(expandedMenus));
+                }
+
+                // Restaurar estado dos submenus do localStorage
+                // SOMENTE se o sidebar não estiver colapsado
+                function restoreSubmenuState() {
+                    const sidebar = document.getElementById('sidebar');
+                    const isCollapsed = sidebar && sidebar.classList.contains('collapsed');
+
+                    // Não restaurar se o sidebar estiver colapsado
+                    if (isCollapsed) {
+                        console.log('📂 Estado dos submenus NÃO restaurado (sidebar collapsed)');
                         return;
                     }
 
@@ -471,6 +486,7 @@
                                     const menuItem = link.closest('.menu-item.has-submenu');
                                     if (menuItem) {
                                         menuItem.classList.add('expanded');
+                                        console.log('📂 Submenu restaurado:', menuText);
                                     }
                                 }
                             });
@@ -478,20 +494,22 @@
                     } catch (error) {
                         console.error('Erro ao restaurar estado dos submenus:', error);
                     }
-                }, 100);
-            }
+                }
 
-            // Restaurar estado salvo
-            restoreSubmenuState();
+                // Restaurar estado salvo SOMENTE se não estiver collapsed
+                if (!isSidebarCollapsed) {
+                    restoreSubmenuState();
+                }
 
-            // Salvar estado quando um submenu for expandido/colapsado
-            menuToggles.forEach(toggle => {
-                toggle.addEventListener('click', function() {
-                    setTimeout(saveSubmenuState, 50);
+                // Salvar estado quando um submenu for expandido/colapsado
+                menuToggles.forEach(toggle => {
+                    toggle.addEventListener('click', function() {
+                        setTimeout(saveSubmenuState, 50);
+                    });
                 });
-            });
 
-            console.log('✅ Menu colapsável inicializado com sucesso');
+                console.log('✅ Menu colapsável inicializado com sucesso');
+            }, 50); // Aguardar sidebar ser inicializado primeiro
         });
     </script>
 
