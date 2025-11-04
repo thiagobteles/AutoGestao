@@ -3747,14 +3747,7 @@ html body .sidebar.collapsed::before {
    HOVER ANIMATIONS
    =================================================================== */
 
-.base-grid-table tbody tr {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-    .base-grid-table tbody tr:hover {
-        transform: translateX(4px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
+/* Efeitos de hover removidos para melhor UX */
 
 .badge-compact {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

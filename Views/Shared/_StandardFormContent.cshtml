@@ -209,21 +209,38 @@
                                     break;
 
                                 case EnumFieldType.Select:
+                                    @{
+                                        var selectedValue = field.Value?.ToString() ?? "";
+                                        var hasIcons = field.Options.Any(o => o.Text.Contains("[ICON:"));
+                                        var selectClass = hasIcons ? "form-control enum-select" : "form-control";
+                                    }
                                     <select id="@field.PropertyName"
-                                            class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                            class="@selectClass @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                             name="@field.PropertyName"
                                             @(field.Required || field.IsConditionallyRequired ? "required" : "")
                                             @(field.ReadOnly ? "disabled" : string.Empty)>
                                         <option value="">Selecione...</option>
-                                        @{
-                                            var selectedValue = field.Value?.ToString() ?? "";
-                                        }
 
                                         @foreach (var option in field.Options)
                                         {
+                                            var dataIcon = "";
+                                            var displayText = option.Text;
+
+                                            // Extrair ícone do formato: [ICON:fas fa-check]Descrição
+                                            if (option.Text.StartsWith("[ICON:"))
+                                            {
+                                                var iconEndIndex = option.Text.IndexOf(']');
+                                                if (iconEndIndex > 0)
+                                                {
+                                                    dataIcon = option.Text.Substring(6, iconEndIndex - 6);
+                                                    displayText = option.Text.Substring(iconEndIndex + 1);
+                                                }
+                                            }
+
                                             <option value="@option.Value"
+                                                    data-icon="@dataIcon"
                                                     selected="@(selectedValue == option.Value)">
-                                                @option.Text
+                                                @displayText
                                             </option>
                                         }
                                     </select>
