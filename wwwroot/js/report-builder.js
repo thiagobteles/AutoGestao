@@ -513,7 +513,14 @@ const TemplateBuilder = {
      */
     loadTemplate(templateJson) {
         try {
-            const template = templateJson;
+            // Se templateJson é string, fazer parse. Se já é objeto, usar direto
+            const template = typeof templateJson === 'string'
+                ? JSON.parse(templateJson)
+                : templateJson;
+
+            if (!template || !template.sections) {
+                throw new Error('Template inválido ou sem seções');
+            }
 
             this.sections = template.sections.map((section, index) => ({
                 id: 'section-' + index,
@@ -528,7 +535,7 @@ const TemplateBuilder = {
             this.renderSections();
         } catch (error) {
             console.error('Erro ao carregar template:', error);
-            this.showError('Erro ao carregar template');
+            this.showError('Erro ao carregar template: ' + error.message);
         }
     },
 

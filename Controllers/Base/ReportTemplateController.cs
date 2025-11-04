@@ -66,7 +66,7 @@ namespace AutoGestao.Controllers.Base
                 DisplayName = "Clonar",
                 Icon = "fas fa-copy",
                 CssClass = "btn btn-sm btn-outline-info",
-                OnClick = "cloneTemplate({id})",
+                Url = "/ReportTemplate/Clone/{id}",
                 Type = EnumTypeRequest.Post
             });
 

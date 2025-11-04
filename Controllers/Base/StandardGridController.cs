@@ -909,7 +909,7 @@ namespace AutoGestao.Controllers.Base
                                     Para imprimir relatórios, é necessário configurar um template de impressão
                                     no <strong>ReportBuilder</strong>.
                                 </p>
-                                <a href='/ReportBuilder' class='btn'>Configurar Template</a>
+                                <a href='/ReportBuilder/Create?entityType={entityType}' class='btn'>Configurar Template</a>
                             </div>
                         </body>
                         </html>";
