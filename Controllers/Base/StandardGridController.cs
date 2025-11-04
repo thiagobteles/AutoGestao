@@ -2388,8 +2388,28 @@ namespace AutoGestao.Controllers.Base
 
                 // Ler filtros da query string manualmente
                 var queryString = HttpContext.Request.Query;
+                string? searchTerm = null;
+                int pageSize = 100;
+
                 foreach (var queryParam in queryString)
                 {
+                    // Processar parâmetro searchTerm separadamente
+                    if (queryParam.Key.Equals("searchTerm", StringComparison.OrdinalIgnoreCase))
+                    {
+                        searchTerm = queryParam.Value.ToString();
+                        continue;
+                    }
+
+                    // Processar parâmetro pageSize separadamente
+                    if (queryParam.Key.Equals("pageSize", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (int.TryParse(queryParam.Value.ToString(), out int parsedSize))
+                        {
+                            pageSize = Math.Min(parsedSize, 100); // Máximo de 100
+                        }
+                        continue;
+                    }
+
                     var property = typeof(T).GetProperty(queryParam.Key);
                     if (property != null)
                     {
@@ -2416,7 +2436,13 @@ namespace AutoGestao.Controllers.Base
                     }
                 }
 
-                var items = await query.Take(100).ToListAsync();
+                // Aplicar busca textual se searchTerm foi fornecido
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    query = ApplyTextSearch(query, searchTerm);
+                }
+
+                var items = await query.Take(pageSize).ToListAsync();
 
                 // Obter configuração de campo de referência
                 var displayProperty = GetDisplayProperty();
@@ -2436,6 +2462,89 @@ namespace AutoGestao.Controllers.Base
                 _logger?.LogError(ex, "Erro ao buscar registros para seleção");
                 return StatusCode(500, new { error = "Erro ao buscar registros", details = ex.Message });
             }
+        }
+
+        private IQueryable<T> ApplyTextSearch(IQueryable<T> query, string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return query;
+
+            // Buscar propriedades marcadas com ReferenceSearchableAttribute
+            var searchableProperties = typeof(T).GetProperties()
+                .Where(p => p.GetCustomAttribute<ReferenceSearchableAttribute>() != null && p.PropertyType == typeof(string))
+                .ToList();
+
+            // Se não houver ReferenceSearchable, buscar ReferenceText
+            if (!searchableProperties.Any())
+            {
+                var referenceTextProp = typeof(T).GetProperties()
+                    .FirstOrDefault(p => p.GetCustomAttribute<ReferenceTextAttribute>() != null && p.PropertyType == typeof(string));
+
+                if (referenceTextProp != null)
+                {
+                    searchableProperties.Add(referenceTextProp);
+                }
+            }
+
+            // Se ainda não houver, buscar propriedades comuns
+            if (!searchableProperties.Any())
+            {
+                var commonNames = new[] { "Nome", "Descricao", "Titulo", "Codigo" };
+                foreach (var name in commonNames)
+                {
+                    var prop = typeof(T).GetProperty(name);
+                    if (prop != null && prop.PropertyType == typeof(string))
+                    {
+                        searchableProperties.Add(prop);
+                    }
+                }
+            }
+
+            // Se não encontrou nenhuma propriedade searchable, retornar query original
+            if (!searchableProperties.Any())
+            {
+                _logger?.LogWarning("Nenhuma propriedade searchable encontrada para tipo {TypeName}", typeof(T).Name);
+                return query;
+            }
+
+            // Construir expressão OR para buscar em todas as propriedades
+            var parameter = Expression.Parameter(typeof(T), "x");
+            Expression? orExpression = null;
+
+            var searchTermLower = searchTerm.ToLower();
+            var searchTermConstant = Expression.Constant(searchTermLower);
+
+            foreach (var prop in searchableProperties)
+            {
+                // x.PropertyName
+                var propertyAccess = Expression.Property(parameter, prop);
+
+                // x.PropertyName != null
+                var notNullCheck = Expression.NotEqual(propertyAccess, Expression.Constant(null, typeof(string)));
+
+                // x.PropertyName.ToLower()
+                var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                var propertyToLower = Expression.Call(propertyAccess, toLowerMethod!);
+
+                // x.PropertyName.ToLower().Contains(searchTerm.ToLower())
+                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                var containsCall = Expression.Call(propertyToLower, containsMethod!, searchTermConstant);
+
+                // x.PropertyName != null && x.PropertyName.ToLower().Contains(searchTerm.ToLower())
+                var condition = Expression.AndAlso(notNullCheck, containsCall);
+
+                // Combinar com OR
+                orExpression = orExpression == null ? condition : Expression.OrElse(orExpression, condition);
+            }
+
+            if (orExpression != null)
+            {
+                var lambda = Expression.Lambda<Func<T, bool>>(orExpression, parameter);
+                query = query.Where(lambda);
+                _logger?.LogInformation("Aplicado filtro de busca textual: '{SearchTerm}' em {PropertyCount} propriedades", searchTerm, searchableProperties.Count);
+            }
+
+            return query;
         }
 
         private PropertyInfo? GetDisplayProperty()
