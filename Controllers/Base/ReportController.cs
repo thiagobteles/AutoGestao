@@ -293,7 +293,7 @@ namespace AutoGestao.Controllers.Base
             };
         }
 
-        private static string GenerateReportHtmlDynamic(object entity, ReportTemplate template)
+        public static string GenerateReportHtmlDynamic(object entity, ReportTemplate template)
         {
             var html = new System.Text.StringBuilder();
 

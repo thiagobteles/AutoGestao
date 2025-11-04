@@ -11,16 +11,10 @@ namespace AutoGestao.Controllers
     /// <summary>
     /// Controller para construção visual de templates de relatórios
     /// </summary>
-    public class ReportBuilderController : Controller
+    public class ReportBuilderController(ApplicationDbContext context) : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly EntityInspectorService _entityInspector;
-
-        public ReportBuilderController(ApplicationDbContext context)
-        {
-            _context = context;
-            _entityInspector = new EntityInspectorService(context);
-        }
+        private readonly ApplicationDbContext _context = context;
+        private readonly EntityInspectorService _entityInspector = new(context);
 
         /// <summary>
         /// Página principal do builder
@@ -181,7 +175,6 @@ namespace AutoGestao.Controllers
 
                 // Gerar HTML usando o template
                 var html = Base.ReportController.GenerateReportHtmlDynamic(sampleEntity, request.Template);
-
                 return Json(new { success = true, html });
             }
             catch (Exception ex)
@@ -189,23 +182,5 @@ namespace AutoGestao.Controllers
                 return Json(new { success = false, message = $"Erro ao gerar preview: {ex.Message}" });
             }
         }
-    }
-
-    // ==================== MODELS DE REQUEST ====================
-
-    public class SaveTemplateRequest
-    {
-        public long? TemplateId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string EntityType { get; set; } = string.Empty;
-        public string? Description { get; set; }
-        public bool IsDefault { get; set; }
-        public ReportTemplate Template { get; set; } = new();
-    }
-
-    public class PreviewRequest
-    {
-        public string EntityType { get; set; } = string.Empty;
-        public ReportTemplate Template { get; set; } = new();
     }
 }

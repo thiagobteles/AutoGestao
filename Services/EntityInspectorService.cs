@@ -9,26 +9,16 @@ namespace AutoGestao.Services
     /// <summary>
     /// Serviço para inspecionar entidades e descobrir suas propriedades e relacionamentos
     /// </summary>
-    public class EntityInspectorService
+    public class EntityInspectorService(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
-
-        public EntityInspectorService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         /// <summary>
         /// Obtém informações sobre uma entidade por nome
         /// </summary>
         public EntityInfo GetEntityInfo(string entityName)
         {
-            var entityType = FindEntityType(entityName);
-            if (entityType == null)
-            {
-                throw new Exception($"Entidade '{entityName}' não encontrada");
-            }
-
+            var entityType = FindEntityType(entityName) ?? throw new Exception($"Entidade '{entityName}' não encontrada");
             var formConfig = entityType.GetCustomAttribute<FormConfigAttribute>();
 
             return new EntityInfo
@@ -43,9 +33,9 @@ namespace AutoGestao.Services
         /// <summary>
         /// Obtém todas as propriedades de uma entidade, incluindo propriedades navegacionais
         /// </summary>
-        private List<PropertyInfo> GetEntityProperties(Type entityType, string prefix = "")
+        private List<PropertyInfoInspector> GetEntityProperties(Type entityType, string prefix = "")
         {
-            var properties = new List<PropertyInfo>();
+            var properties = new List<PropertyInfoInspector>();
 
             foreach (var prop in entityType.GetProperties())
             {
@@ -69,10 +59,10 @@ namespace AutoGestao.Services
                 var referenceText = prop.GetCustomAttribute<ReferenceTextAttribute>();
 
                 // Adicionar a propriedade
-                properties.Add(new PropertyInfo
+                properties.Add(new PropertyInfoInspector
                 {
                     PropertyName = fullPath,
-                    Label = formField?.Name ?? gridField?.Label ?? prop.Name,
+                    Label = formField?.Name ?? gridField?.DisplayName ?? prop.Name,
                     PropertyType = GetSimpleTypeName(prop.PropertyType),
                     Section = formField?.Section ?? "Geral",
                     Icon = formField?.Icon ?? "fas fa-field",
@@ -96,7 +86,7 @@ namespace AutoGestao.Services
                                 var navFormField = navProp.GetCustomAttribute<FormFieldAttribute>();
                                 var navFullPath = $"{prop.Name}.{navProp.Name}";
 
-                                properties.Add(new PropertyInfo
+                                properties.Add(new PropertyInfoInspector
                                 {
                                     PropertyName = navFullPath,
                                     Label = $"{prop.Name} - {navFormField?.Name ?? navProp.Name}",
@@ -211,13 +201,13 @@ namespace AutoGestao.Services
         public string Name { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string Icon { get; set; } = string.Empty;
-        public List<PropertyInfo> Properties { get; set; } = new();
+        public List<PropertyInfoInspector> Properties { get; set; } = [];
     }
 
     /// <summary>
     /// Informações sobre uma propriedade
     /// </summary>
-    public class PropertyInfo
+    public class PropertyInfoInspector
     {
         public string PropertyName { get; set; } = string.Empty;
         public string Label { get; set; } = string.Empty;
