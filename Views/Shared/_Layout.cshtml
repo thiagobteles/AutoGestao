@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="~/css/file-upload.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/grid-system.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/complete-modal-styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom-select.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
@@ -237,6 +238,7 @@
 
     <!-- Esse script da aplicação vem sempre no final -->
     <script src="~/js/reference-field.js" asp-append-version="true"></script>
+    <script src="~/js/custom-select.js" asp-append-version="true"></script>
 
     <script>
         window.loadReactDashboard = function() {
@@ -387,21 +389,25 @@
             // Expandir automaticamente o submenu se houver um item ativo dentro dele
             // SOMENTE se o sidebar não estiver colapsado
             function expandActiveSubmenu() {
-                const sidebar = document.getElementById('sidebar');
-                // Não expandir se o sidebar estiver colapsado
-                if (sidebar && sidebar.classList.contains('collapsed')) {
-                    return;
-                }
-
-                const activeLinks = document.querySelectorAll('.submenu-link.active');
-                activeLinks.forEach(link => {
-                    const menuItem = link.closest('.menu-item.has-submenu');
-                    if (menuItem) {
-                        menuItem.classList.add('expanded');
-                        menuItem.classList.add('has-active-child');
-                        console.log('📂 Submenu expandido automaticamente (contém item ativo)');
+                // Aguardar um pouco para garantir que o estado do sidebar foi restaurado
+                setTimeout(() => {
+                    const sidebar = document.getElementById('sidebar');
+                    // Não expandir se o sidebar estiver colapsado
+                    if (sidebar && sidebar.classList.contains('collapsed')) {
+                        console.log('📂 Submenu não expandido (sidebar collapsed)');
+                        return;
                     }
-                });
+
+                    const activeLinks = document.querySelectorAll('.submenu-link.active');
+                    activeLinks.forEach(link => {
+                        const menuItem = link.closest('.menu-item.has-submenu');
+                        if (menuItem) {
+                            menuItem.classList.add('expanded');
+                            menuItem.classList.add('has-active-child');
+                            console.log('📂 Submenu expandido automaticamente (contém item ativo)');
+                        }
+                    });
+                }, 100);
             }
 
             // Executar ao carregar
@@ -446,29 +452,33 @@
             // Restaurar estado dos submenus do localStorage
             // SOMENTE se o sidebar não estiver colapsado
             function restoreSubmenuState() {
-                const sidebar = document.getElementById('sidebar');
-                // Não restaurar se o sidebar estiver colapsado
-                if (sidebar && sidebar.classList.contains('collapsed')) {
-                    return;
-                }
+                // Aguardar um pouco para garantir que o estado do sidebar foi restaurado
+                setTimeout(() => {
+                    const sidebar = document.getElementById('sidebar');
+                    // Não restaurar se o sidebar estiver colapsado
+                    if (sidebar && sidebar.classList.contains('collapsed')) {
+                        console.log('📂 Estado dos submenus não restaurado (sidebar collapsed)');
+                        return;
+                    }
 
-                try {
-                    const savedMenus = JSON.parse(localStorage.getItem('expandedMenus') || '[]');
-                    savedMenus.forEach(menuText => {
-                        const menuLinks = document.querySelectorAll('.menu-toggle');
-                        menuLinks.forEach(link => {
-                            const linkText = link.querySelector('.menu-link-text')?.textContent;
-                            if (linkText === menuText) {
-                                const menuItem = link.closest('.menu-item.has-submenu');
-                                if (menuItem) {
-                                    menuItem.classList.add('expanded');
+                    try {
+                        const savedMenus = JSON.parse(localStorage.getItem('expandedMenus') || '[]');
+                        savedMenus.forEach(menuText => {
+                            const menuLinks = document.querySelectorAll('.menu-toggle');
+                            menuLinks.forEach(link => {
+                                const linkText = link.querySelector('.menu-link-text')?.textContent;
+                                if (linkText === menuText) {
+                                    const menuItem = link.closest('.menu-item.has-submenu');
+                                    if (menuItem) {
+                                        menuItem.classList.add('expanded');
+                                    }
                                 }
-                            }
+                            });
                         });
-                    });
-                } catch (error) {
-                    console.error('Erro ao restaurar estado dos submenus:', error);
-                }
+                    } catch (error) {
+                        console.error('Erro ao restaurar estado dos submenus:', error);
+                    }
+                }, 100);
             }
 
             // Restaurar estado salvo
