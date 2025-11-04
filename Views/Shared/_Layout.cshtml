@@ -77,72 +77,66 @@
                                     <span class="menu-link-text">Leads</span>
                                 </a>
                             </div>
-                            @* @if (Globais.EhAutoGestao)
-                            {
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Index", "Fornecedor")" class="menu-link submenu-link">
-                                        <i class="fas fa-truck"></i>
-                                        <span class="menu-link-text">Fornecedores</span>
-                                    </a>
-                                </div>
-                            } *@
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", "Fornecedor")" class="menu-link submenu-link">
+                                    <i class="fas fa-truck"></i>
+                                    <span class="menu-link-text">Fornecedores</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    @if (Globais.EhAutoGestao)
-                    {
-                        <!-- Menu Item Expansível: Veículos -->
-                        <div class="menu-item has-submenu">
-                            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                                <i class="fas fa-car"></i>
-                                <span class="menu-link-text">Veículos</span>
-                                <i class="fas fa-chevron-down submenu-arrow"></i>
-                                <div class="menu-tooltip">Veículos</div>
-                            </a>
-                            <div class="submenu">
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
-                                        <i class="fas fa-car-side"></i>
-                                        <span class="menu-link-text">Veículos</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Index", nameof(VeiculoMarca))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoMarca) ? "active" : "")">
-                                        <i class="fas fa-copyright"></i>
-                                        <span class="menu-link-text">Marcas</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Index", nameof(VeiculoMarcaModelo))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoMarcaModelo) ? "active" : "")">
-                                        <i class="fas fa-copyright"></i>
-                                        <span class="menu-link-text">Modelo</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Index", nameof(VeiculoCor))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoCor) ? "active" : "")">
-                                        <i class="fas fa-palette"></i>
-                                        <span class="menu-link-text">Cores</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Index", nameof(VeiculoFilial))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoFilial) ? "active" : "")">
-                                        <i class="fas fa-palette"></i>
-                                        <span class="menu-link-text">Filial</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Index", nameof(VeiculoLocalizacao))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoLocalizacao) ? "active" : "")">
-                                        <i class="fas fa-palette"></i>
-                                        <span class="menu-link-text">Localização</span>
-                                    </a>
-                                </div>
+                    <!-- Menu Item Expansível: Veículos -->
+                    <div class="menu-item has-submenu">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="fas fa-car"></i>
+                            <span class="menu-link-text">Veículos</span>
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                            <div class="menu-tooltip">Veículos</div>
+                        </a>
+                        <div class="submenu">
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
+                                    <i class="fas fa-car-side"></i>
+                                    <span class="menu-link-text">Veículos</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", nameof(VeiculoMarca))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoMarca) ? "active" : "")">
+                                    <i class="fas fa-copyright"></i>
+                                    <span class="menu-link-text">Marcas</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", nameof(VeiculoMarcaModelo))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoMarcaModelo) ? "active" : "")">
+                                    <i class="fas fa-copyright"></i>
+                                    <span class="menu-link-text">Modelo</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", nameof(VeiculoCor))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoCor) ? "active" : "")">
+                                    <i class="fas fa-palette"></i>
+                                    <span class="menu-link-text">Cores</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", nameof(VeiculoFilial))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoFilial) ? "active" : "")">
+                                    <i class="fas fa-palette"></i>
+                                    <span class="menu-link-text">Filial</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="@Url.Action("Index", nameof(VeiculoLocalizacao))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoLocalizacao) ? "active" : "")">
+                                    <i class="fas fa-palette"></i>
+                                    <span class="menu-link-text">Localização</span>
+                                </a>
                             </div>
                         </div>
-                    }
+                    </div>
                 </div>
 
                 <!-- Relatórios -->
-                @if (Globais.EhAutoGestao && (User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Financeiro")))
+                @if (User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Financeiro"))
                 {
                     <div class="menu-section">
                         <div class="menu-section-title">Relatórios</div>
@@ -155,19 +149,7 @@
                             </a>
                             <div class="submenu">
                                 <div class="menu-item">
-                                    <a href="@Url.Action("Venda", "Relatorio")" class="menu-link submenu-link">
-                                        <i class="fas fa-chart-bar"></i>
-                                        <span class="menu-link-text">Vendas</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Estoque", "Relatorio")" class="menu-link submenu-link">
-                                        <i class="fas fa-chart-line"></i>
-                                        <span class="menu-link-text">Estoque</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="@Url.Action("Index", "ReportTemplate")" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ReportTemplate" ? "active" : "")">
+                                    <a href="@Url.Action("Index", "ReportBuilder")" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ReportBuilder" ? "active" : "")">
                                         <i class="fas fa-file-alt"></i>
                                         <span class="menu-link-text">Templates de Relatórios</span>
                                     </a>
