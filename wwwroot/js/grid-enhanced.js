@@ -374,7 +374,7 @@ class StandardGrid {
 
         if (id && controller) {
             this.showLoading(true);
-            window.location.href = `/${controller}/Details/${id}`;
+            window.location.href = `/${controller}/Edit/${id}`;
         }
     }
 
