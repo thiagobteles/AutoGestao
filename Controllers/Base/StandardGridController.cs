@@ -841,8 +841,80 @@ namespace AutoGestao.Controllers.Base
 
                 if (template == null)
                 {
-                    TempData["NotificationScript"] = $"showError('Nenhum template padrão configurado para {entityType}. Configure um template em ReportBuilder.')";
-                    return RedirectToAction(nameof(Index));
+                    // Retornar HTML com mensagem amigável
+                    var errorHtml = $@"
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset='UTF-8'>
+                            <title>Layout de Impressão Não Configurado</title>
+                            <style>
+                                body {{
+                                    font-family: 'Segoe UI', Arial, sans-serif;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    min-height: 100vh;
+                                    margin: 0;
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                }}
+                                .container {{
+                                    background: white;
+                                    padding: 3rem;
+                                    border-radius: 1rem;
+                                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                                    text-align: center;
+                                    max-width: 500px;
+                                }}
+                                .icon {{
+                                    font-size: 4rem;
+                                    color: #f59e0b;
+                                    margin-bottom: 1rem;
+                                }}
+                                h1 {{
+                                    color: #1f2937;
+                                    margin-bottom: 1rem;
+                                    font-size: 1.5rem;
+                                }}
+                                p {{
+                                    color: #6b7280;
+                                    margin-bottom: 2rem;
+                                    line-height: 1.6;
+                                }}
+                                .btn {{
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    color: white;
+                                    padding: 0.75rem 2rem;
+                                    border: none;
+                                    border-radius: 0.5rem;
+                                    font-size: 1rem;
+                                    cursor: pointer;
+                                    text-decoration: none;
+                                    display: inline-block;
+                                    transition: transform 0.2s;
+                                }}
+                                .btn:hover {{
+                                    transform: translateY(-2px);
+                                    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+                                }}
+                            </style>
+                        </head>
+                        <body>
+                            <div class='container'>
+                                <div class='icon'>⚠️</div>
+                                <h1>Layout de Impressão Não Configurado</h1>
+                                <p>
+                                    Nenhum template padrão foi configurado para <strong>{entityType}</strong>.
+                                    <br><br>
+                                    Para imprimir relatórios, é necessário configurar um template de impressão
+                                    no <strong>ReportBuilder</strong>.
+                                </p>
+                                <a href='/ReportBuilder' class='btn'>Configurar Template</a>
+                            </div>
+                        </body>
+                        </html>";
+
+                    return Content(errorHtml, "text/html");
                 }
 
                 // Desserializar o template JSON
@@ -1378,7 +1450,8 @@ namespace AutoGestao.Controllers.Base
                         Icon = "fas fa-file-pdf",
                         CssClass = "btn btn-sm btn-outline-success",
                         Url = $"/{controllerNome}/GerarRelatorio/{{id}}",
-                        Type = EnumTypeRequest.Get
+                        Type = EnumTypeRequest.Get,
+                        Target = "_blank"
                     },
                     new()
                     {
