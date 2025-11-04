@@ -14,7 +14,7 @@
 }
 
     .base-grid-table thead {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--gradient-primary);
         color: #fff;
         position: sticky;
         top: 0;
@@ -80,7 +80,7 @@
     }
 
     .nav-link-modern.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--gradient-primary);
         color: #fff;
         box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
     }
@@ -191,7 +191,7 @@
 
 /* Header do Modal */
 .modal-header.bg-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: var(--gradient-primary) !important;
 }
 
 /* Animação de entrada do modal */
@@ -266,7 +266,7 @@
 
     #tabItemModal .form-control:focus,
     #tabItemModal .form-select:focus {
-        border-color: #667eea;
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
     }
 
