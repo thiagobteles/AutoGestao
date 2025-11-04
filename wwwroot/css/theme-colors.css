@@ -1,0 +1,142 @@
+/* =============================================================================
+   SISTEMA DE CORES DO TEMA - EDITE AQUI PARA MUDAR AS CORES DO SISTEMA
+   ============================================================================= */
+
+:root {
+    /* =========================================================================
+       CORES PRIMÁRIAS (Principal identidade visual do sistema)
+       ========================================================================= */
+    --primary-color: #7BA3D9;           /* Azul pastel suave - cor principal */
+    --primary-dark: #5A89C7;            /* Azul pastel escuro - hover/active */
+    --primary-light: #95C4E8;           /* Azul pastel claro - backgrounds leves */
+    --primary-lighter: #B8D9F2;         /* Azul muito claro - backgrounds sutis */
+
+    /* =========================================================================
+       GRADIENTES (Usados em headers, botões principais, etc)
+       ========================================================================= */
+    --gradient-primary: linear-gradient(135deg, #7BA3D9 0%, #5A89C7 100%);
+    --gradient-primary-vertical: linear-gradient(180deg, #7BA3D9 0%, #5A89C7 100%);
+    --gradient-primary-hover: linear-gradient(135deg, #8BB3E3 0%, #6A99D1 100%);
+
+    /* =========================================================================
+       CORES SECUNDÁRIAS E DE SUPORTE
+       ========================================================================= */
+    --secondary-color: #B0BEC5;         /* Cinza azulado pastel */
+    --accent-color: #95C4E8;            /* Acento - mesma cor que primary-light */
+
+    /* =========================================================================
+       CORES DE FEEDBACK (Sucesso, Aviso, Erro, Info)
+       ========================================================================= */
+    --success-color: #81C995;           /* Verde pastel */
+    --success-dark: #66B37F;            /* Verde pastel escuro */
+    --success-light: #A5DCAF;           /* Verde pastel claro */
+
+    --warning-color: #F4C17D;           /* Amarelo/laranja pastel */
+    --warning-dark: #E5A95C;            /* Amarelo/laranja pastel escuro */
+    --warning-light: #F9D89F;           /* Amarelo/laranja pastel claro */
+
+    --danger-color: #E89B9B;            /* Vermelho/rosa pastel */
+    --danger-dark: #DA7A7A;             /* Vermelho/rosa pastel escuro */
+    --danger-light: #F2BDBD;            /* Vermelho/rosa pastel claro */
+
+    --info-color: #87CEEB;              /* Azul céu pastel */
+    --info-dark: #6BB6D4;               /* Azul céu pastel escuro */
+    --info-light: #A8DDED;              /* Azul céu pastel claro */
+
+    /* =========================================================================
+       CORES NEUTRAS (Textos, bordas, backgrounds)
+       ========================================================================= */
+    --dark-color: #2D3748;              /* Texto principal */
+    --gray-dark: #4A5568;               /* Texto secundário */
+    --gray-medium: #718096;             /* Texto desabilitado */
+    --gray-light: #CBD5E0;              /* Bordas */
+    --gray-lighter: #E2E8F0;            /* Bordas claras */
+    --light-color: #F7FAFC;             /* Background claro */
+    --white: #FFFFFF;                   /* Branco puro */
+
+    /* =========================================================================
+       SIDEBAR (Menu lateral)
+       ========================================================================= */
+    --sidebar-bg: #2D3748;              /* Background do sidebar */
+    --sidebar-text: #A0AEC0;            /* Cor do texto no sidebar */
+    --sidebar-active: #7BA3D9;          /* Cor do item ativo (usa primary-color) */
+    --sidebar-hover: rgba(123, 163, 217, 0.1); /* Background ao passar o mouse */
+
+    /* =========================================================================
+       DIMENSÕES DO LAYOUT
+       ========================================================================= */
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 70px;
+    --topbar-height: 60px;
+
+    /* =========================================================================
+       SOMBRAS
+       ========================================================================= */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* =========================================================================
+       BORDAS
+       ========================================================================= */
+    --border-color: #E2E8F0;
+    --border-radius-sm: 0.25rem;
+    --border-radius: 0.5rem;
+    --border-radius-lg: 0.75rem;
+    --border-radius-xl: 1rem;
+
+    /* =========================================================================
+       TRANSIÇÕES
+       ========================================================================= */
+    --transition-fast: 150ms ease;
+    --transition-normal: 300ms ease;
+    --transition-slow: 500ms ease;
+}
+
+/* =============================================================================
+   CLASSES UTILITÁRIAS DE CORES
+   ============================================================================= */
+
+/* Backgrounds */
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-primary-light { background-color: var(--primary-light) !important; }
+.bg-success { background-color: var(--success-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+
+/* Textos */
+.text-primary { color: var(--primary-color) !important; }
+.text-success { color: var(--success-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-danger { color: var(--danger-color) !important; }
+.text-info { color: var(--info-color) !important; }
+
+/* Bordas */
+.border-primary { border-color: var(--primary-color) !important; }
+.border-success { border-color: var(--success-color) !important; }
+.border-warning { border-color: var(--warning-color) !important; }
+.border-danger { border-color: var(--danger-color) !important; }
+.border-info { border-color: var(--info-color) !important; }
+
+/* =============================================================================
+   NOTAS PARA CUSTOMIZAÇÃO
+   ============================================================================= */
+
+/*
+ * Para mudar as cores do sistema, edite apenas as variáveis acima.
+ *
+ * Exemplo - Para mudar para um tema verde:
+ * --primary-color: #81C995;
+ * --primary-dark: #66B37F;
+ * --primary-light: #A5DCAF;
+ *
+ * Exemplo - Para mudar para um tema rosa:
+ * --primary-color: #E89B9B;
+ * --primary-dark: #DA7A7A;
+ * --primary-light: #F2BDBD;
+ *
+ * Todas as cores do sistema serão atualizadas automaticamente!
+ */

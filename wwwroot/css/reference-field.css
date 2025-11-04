@@ -41,7 +41,7 @@
 
     .reference-search-input:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
     }
 
@@ -172,7 +172,7 @@
 
     .reference-dropdown-item:hover,
     .reference-dropdown-item.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--gradient-primary);
         color: white;
     }
 
@@ -240,7 +240,7 @@
 }
 
 .modal-header.bg-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: var(--gradient-primary) !important;
     border-bottom: none;
     padding: 1rem 1.5rem;
     flex-shrink: 0;
@@ -399,7 +399,7 @@
 
     .reference-dropdown-item:hover::before,
     .reference-dropdown-item.active::before {
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        background: var(--gradient-primary-vertical);
     }
 
 /* =============================================================================
@@ -464,7 +464,7 @@
 }
 
 .search-result-item:hover {
-    border-color: #667eea;
+    border-color: var(--primary-color);
     background: #f8f9ff;
     box-shadow: 0 1px 4px rgba(102, 126, 234, 0.15);
 }
