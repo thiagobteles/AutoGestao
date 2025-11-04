@@ -66,46 +66,59 @@
     case EnumGridColumnType.Enumerador:
         @try
         {
-            var displayText = value?.ToString();
             if (value is Enum enumValue)
             {
                 var icone = enumValue.GetIcone();
                 var descricao = enumValue.GetDescription();
 
-                if (Model.Column.EnumRender == EnumRenderType.Icon)
-                {
-                    // Mostra apenas o ícone se existir, senão mostra a descrição
-                    displayText = !string.IsNullOrEmpty(icone) ? icone : descricao;
-                }
-                else if (Model.Column.EnumRender == EnumRenderType.IconDescription)
-                {
-                    // Mostra ícone + descrição apenas se tiver ícone, senão apenas descrição
-                    displayText = !string.IsNullOrEmpty(icone)
-                        ? $"{icone} {descricao}"
-                        : descricao;
-                }
-                else if (Model.Column.EnumRender == EnumRenderType.DescriptionIcon)
-                {
-                    // Mostra descrição + ícone apenas se tiver ícone, senão apenas descrição
-                    displayText = !string.IsNullOrEmpty(icone)
-                        ? $"{descricao} {icone}"
-                        : descricao;
-                }
-                else
-                {
-                    // EnumRenderType.Description - mostra apenas a descrição
-                    displayText = descricao;
-                }
+                <span class="person-type">
+                    @if (Model.Column.EnumRender == EnumRenderType.Icon)
+                    {
+                        // Mostra apenas o ícone se existir, senão mostra a descrição
+                        if (!string.IsNullOrEmpty(icone))
+                        {
+                            <i class="@icone" title="@descricao"></i>
+                        }
+                        else
+                        {
+                            @descricao
+                        }
+                    }
+                    else if (Model.Column.EnumRender == EnumRenderType.IconDescription)
+                    {
+                        // Mostra ícone + descrição
+                        if (!string.IsNullOrEmpty(icone))
+                        {
+                            <i class="@icone me-1"></i>
+                        }
+                        @descricao
+                    }
+                    else if (Model.Column.EnumRender == EnumRenderType.DescriptionIcon)
+                    {
+                        // Mostra descrição + ícone
+                        @descricao
+                        if (!string.IsNullOrEmpty(icone))
+                        {
+                            <i class="@icone ms-1"></i>
+                        }
+                    }
+                    else
+                    {
+                        // EnumRenderType.Description - mostra apenas a descrição
+                        @descricao
+                    }
+                </span>
             }
             else if (value != null && bool.TryParse(value.ToString(), out bool enumBoolValue))
             {
                 <span class="status-badge @(enumBoolValue ? "status-active" : "status-inactive")">
                     @(enumBoolValue ? "✅" : "❌")
                 </span>
-                break;
             }
-
-            <span class="person-type">@displayText</span>
+            else
+            {
+                <span class="person-type">@value</span>
+            }
         }
         catch
         {
