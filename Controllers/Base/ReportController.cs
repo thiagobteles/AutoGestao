@@ -341,10 +341,32 @@ namespace AutoGestao.Controllers.Base
                     {
                         var value = GetNestedPropertyValue(entity, field.PropertyName);
                         var formattedValue = FormatValue(value, field.Format);
+                        var columnSpan = field.ColumnSpan ?? 1;
+                        var boldClass = field.Bold ? "font-weight-bold" : "";
+                        var displayClass = field.DisplayType == "badge" ? "field-badge" : field.DisplayType == "highlight" ? "field-highlight" : "";
 
-                        html.AppendLine("<div class='grid-item'>");
+                        html.AppendLine($"<div class='grid-item {boldClass}' style='grid-column: span {columnSpan};'>");
                         html.AppendLine($"<label>{field.Label}:</label>");
-                        html.AppendLine($"<span>{formattedValue}</span>");
+                        html.AppendLine($"<span class='{displayClass}'>{formattedValue}</span>");
+                        html.AppendLine("</div>");
+                    }
+
+                    html.AppendLine("</div>");
+                }
+                else if (section.Type == "row")
+                {
+                    html.AppendLine("<div class='row-container'>");
+
+                    foreach (var field in section.Fields.OrderBy(f => f.Order))
+                    {
+                        var value = GetNestedPropertyValue(entity, field.PropertyName);
+                        var formattedValue = FormatValue(value, field.Format);
+                        var boldClass = field.Bold ? "font-weight-bold" : "";
+                        var displayClass = field.DisplayType == "badge" ? "field-badge" : field.DisplayType == "highlight" ? "field-highlight" : "";
+
+                        html.AppendLine($"<div class='row-item {boldClass}'>");
+                        html.AppendLine($"<label>{field.Label}:</label>");
+                        html.AppendLine($"<span class='{displayClass}'>{formattedValue}</span>");
                         html.AppendLine("</div>");
                     }
 
@@ -494,36 +516,328 @@ namespace AutoGestao.Controllers.Base
         private static string GetReportStyles()
         {
             return @"
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: Arial, sans-serif; padding: 40px; font-size: 12px; line-height: 1.6; }
-                .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
-                .report-header h1 { font-size: 24px; font-weight: bold; }
-                .report-header h2 { font-size: 20px; text-align: right; }
-                .report-info { font-size: 11px; color: #666; margin-bottom: 30px; }
-                .report-section { margin-bottom: 30px; page-break-inside: avoid; }
-                .section-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333; }
-                .section-subtitle { font-size: 13px; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 15px; }
-                .grid-container { display: grid; gap: 12px; margin-bottom: 20px; }
-                .grid-item { display: flex; gap: 8px; line-height: 1.6; }
-                .grid-item label { font-weight: bold; min-width: 140px; }
-                .grid-item span { flex: 1; }
-                .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                .report-table th, .report-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                .report-table th { background-color: #f5f5f5; font-weight: bold; font-size: 11px; }
-                .report-table td { font-size: 11px; }
-                .report-table tfoot td { font-weight: bold; background-color: #f9f9f9; border-top: 2px solid #000; }
+                /* ===== RESET E BASE ===== */
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+
+                body {
+                    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+                    padding: 40px;
+                    font-size: 13px;
+                    line-height: 1.6;
+                    color: #2c3e50;
+                    background: #f8f9fa;
+                }
+
+                /* ===== CABEÇALHO DO RELATÓRIO ===== */
+                .report-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 30px;
+                    padding: 25px 30px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+                }
+
+                .header-left h1 {
+                    font-size: 28px;
+                    font-weight: 700;
+                    letter-spacing: -0.5px;
+                    margin-bottom: 5px;
+                }
+
+                .header-right h2 {
+                    font-size: 22px;
+                    font-weight: 600;
+                    text-align: right;
+                    opacity: 0.95;
+                }
+
+                .report-info {
+                    font-size: 12px;
+                    color: #7f8c8d;
+                    margin-bottom: 30px;
+                    padding: 12px 20px;
+                    background: white;
+                    border-left: 4px solid #667eea;
+                    border-radius: 4px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                }
+
+                /* ===== SEÇÕES DO RELATÓRIO ===== */
+                .report-section {
+                    margin-bottom: 35px;
+                    page-break-inside: avoid;
+                    background: white;
+                    padding: 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                    transition: box-shadow 0.3s ease;
+                }
+
+                .report-section:hover {
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+                }
+
+                .section-title {
+                    font-size: 20px;
+                    font-weight: 700;
+                    margin-bottom: 15px;
+                    color: #2c3e50;
+                    padding-bottom: 12px;
+                    border-bottom: 3px solid #667eea;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .section-title i {
+                    color: #667eea;
+                }
+
+                .section-subtitle {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #7f8c8d;
+                    margin-bottom: 20px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid #ecf0f1;
+                }
+
+                /* ===== GRID LAYOUT ===== */
+                .grid-container {
+                    display: grid;
+                    gap: 18px;
+                    margin-bottom: 20px;
+                }
+
+                .grid-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    padding: 12px 15px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    border-left: 3px solid #e9ecef;
+                    transition: all 0.2s ease;
+                }
+
+                .grid-item:hover {
+                    background: #f1f3f5;
+                    border-left-color: #667eea;
+                }
+
+                .grid-item label {
+                    font-weight: 600;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    color: #7f8c8d;
+                }
+
+                .grid-item span {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #2c3e50;
+                }
+
+                .grid-item.font-weight-bold span {
+                    font-weight: 700;
+                    color: #1a252f;
+                }
+
+                /* ===== ROW LAYOUT ===== */
+                .row-container {
+                    margin-bottom: 20px;
+                }
+
+                .row-item {
+                    display: grid;
+                    grid-template-columns: 200px 1fr;
+                    gap: 15px;
+                    padding: 15px 20px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                    border-left: 4px solid #667eea;
+                }
+
+                .row-item label {
+                    font-weight: 700;
+                    font-size: 13px;
+                    color: #2c3e50;
+                }
+
+                .row-item span {
+                    font-size: 14px;
+                    color: #495057;
+                }
+
+                /* ===== FIELD STYLES ===== */
+                .field-badge {
+                    display: inline-block;
+                    padding: 4px 12px;
+                    background: #667eea;
+                    color: white;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 600;
+                }
+
+                .field-highlight {
+                    background: #fff3cd;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    border-left: 3px solid #ffc107;
+                    font-weight: 600;
+                }
+
+                /* ===== TABELAS ===== */
+                .report-table {
+                    width: 100%;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                    margin-top: 15px;
+                    background: white;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+                }
+
+                .report-table thead {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+
+                .report-table th {
+                    padding: 14px 12px;
+                    text-align: left;
+                    font-weight: 600;
+                    font-size: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    border: none;
+                }
+
+                .report-table td {
+                    padding: 12px;
+                    border-bottom: 1px solid #ecf0f1;
+                    font-size: 13px;
+                }
+
+                .report-table tbody tr {
+                    transition: background-color 0.2s ease;
+                }
+
+                .report-table tbody tr:hover {
+                    background-color: #f8f9fa;
+                }
+
+                .report-table tbody tr:last-child td {
+                    border-bottom: none;
+                }
+
+                .report-table tfoot td {
+                    font-weight: 700;
+                    background: #f8f9fa;
+                    border-top: 3px solid #667eea;
+                    padding: 14px 12px;
+                    font-size: 14px;
+                }
+
+                /* ===== UTILITÁRIOS ===== */
                 .text-right { text-align: right !important; }
                 .text-center { text-align: center !important; }
-                .action-buttons { margin-top: 30px; text-align: center; }
-                .btn-print, .btn-close { padding: 12px 24px; margin: 0 5px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 500; }
-                .btn-print { background: #000; color: #fff; }
-                .btn-close { background: #666; color: #fff; }
-                .btn-print:hover { background: #333; }
-                .btn-close:hover { background: #888; }
+
+                /* ===== BOTÕES DE AÇÃO ===== */
+                .action-buttons {
+                    margin-top: 40px;
+                    text-align: center;
+                    padding: 20px;
+                }
+
+                .btn-print, .btn-close {
+                    padding: 14px 32px;
+                    margin: 0 8px;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 15px;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                }
+
+                .btn-print {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+
+                .btn-close {
+                    background: #6c757d;
+                    color: white;
+                }
+
+                .btn-print:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                }
+
+                .btn-close:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+                }
+
+                /* ===== IMPRESSÃO ===== */
                 @media print {
-                    body { padding: 20px; }
-                    .no-print { display: none !important; }
-                    .report-section { page-break-inside: avoid; }
+                    body {
+                        padding: 15px;
+                        background: white;
+                    }
+
+                    .no-print {
+                        display: none !important;
+                    }
+
+                    .report-section {
+                        page-break-inside: avoid;
+                        box-shadow: none;
+                        border: 1px solid #dee2e6;
+                    }
+
+                    .report-header {
+                        background: #667eea !important;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+
+                    .report-table thead {
+                        background: #667eea !important;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                }
+
+                /* ===== ANIMAÇÕES ===== */
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .report-section {
+                    animation: fadeIn 0.4s ease-out;
                 }
             ";
         }
