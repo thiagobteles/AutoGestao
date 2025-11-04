@@ -496,16 +496,10 @@ body {
     border-radius: 1rem;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
     overflow: hidden;
     width: 100%;
     max-width: none;
 }
-
-    .card-modern:hover {
-        box-shadow: var(--shadow-lg);
-        transform: translateY(-2px);
-    }
 
 .card-header-modern {
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
@@ -3859,17 +3853,8 @@ html body .sidebar.collapsed::before {
     }
 
 /* ===================================================================
-   CARD ANIMATIONS
+   CARD ANIMATIONS - REMOVIDOS PARA MELHOR UX
    =================================================================== */
-
-.card-modern {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-    .card-modern:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
 
 /* ===================================================================
    BUTTON ANIMATIONS
@@ -4043,24 +4028,8 @@ html body .sidebar.collapsed::before {
 }
 
 /* ===================================================================
-   PERFORMANCE OPTIMIZATIONS
+   PERFORMANCE OPTIMIZATIONS - EFEITOS REMOVIDOS PARA MELHOR UX
    =================================================================== */
-
-.base-grid-table,
-.base-grid-table *,
-.btn-modern,
-.card-modern {
-    will-change: transform;
-}
-
-    /* Usar transform3d para forçar aceleração de hardware */
-    .base-grid-table tbody tr:hover {
-        transform: translate3d(4px, 0, 0);
-    }
-
-    .card-modern:hover {
-        transform: translate3d(0, -4px, 0);
-    }
 
 /* ===================================================================
    PRINT STYLES
