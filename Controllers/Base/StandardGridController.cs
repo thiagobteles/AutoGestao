@@ -815,6 +815,59 @@ namespace AutoGestao.Controllers.Base
             }
         }
 
+        /// <summary>
+        /// GET: GerarRelatorio - Gerar relatório PDF para entidade
+        /// </summary>
+        [HttpGet]
+        public virtual async Task<IActionResult> GerarRelatorio(long id)
+        {
+            try
+            {
+                // Carregar a entidade com todas as navegações
+                var query = GetBaseQuery();
+                var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
+
+                if (entity == null)
+                {
+                    TempData["NotificationScript"] = "showError('Registro não encontrado.')";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Buscar template padrão para este tipo de entidade
+                var entityType = typeof(T).Name;
+                var template = await _context.ReportTemplates
+                    .Where(t => t.TipoEntidade == entityType && t.IsPadrao && t.Ativo)
+                    .FirstOrDefaultAsync();
+
+                if (template == null)
+                {
+                    TempData["NotificationScript"] = $"showError('Nenhum template padrão configurado para {entityType}. Configure um template em ReportBuilder.')";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Desserializar o template JSON
+                var reportTemplate = System.Text.Json.JsonSerializer.Deserialize<ReportTemplate>(template.TemplateJson);
+
+                if (reportTemplate == null)
+                {
+                    TempData["NotificationScript"] = "showError('Erro ao processar template do relatório.')";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Gerar HTML do relatório
+                var html = ReportBuilderController.GenerateReportHtmlDynamic(entity, reportTemplate);
+
+                // Retornar HTML para impressão/PDF
+                return Content(html, "text/html");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao gerar relatório para {EntityType} ID {Id}", typeof(T).Name, id);
+                TempData["NotificationScript"] = $"showError('Erro ao gerar relatório: {ex.Message}')";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
         [HttpPost]
         public virtual async Task<IActionResult> UploadFile(string propertyName, IFormFile file, string? customBucket = null)
         {
