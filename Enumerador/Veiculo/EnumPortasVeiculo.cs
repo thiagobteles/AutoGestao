@@ -5,31 +5,31 @@ namespace AutoGestao.Enumerador.Veiculo
 {
     public enum EnumPortasVeiculo
     {
-        [Icone("⭕")]
+        [Icone("fas fa-circle")]
         [Description("0")]
         Nenhuma = 0,
 
-        [Icone("1️⃣")]
+        [Icone("fas fa-door-closed")]
         [Description("1")]
         Uma = 1,
 
-        [Icone("2️⃣")]
+        [Icone("fas fa-door-closed")]
         [Description("2")]
         Duas = 2,
 
-        [Icone("3️⃣")]
+        [Icone("fas fa-door-closed")]
         [Description("3")]
         Tres = 3,
 
-        [Icone("4️⃣")]
+        [Icone("fas fa-door-closed")]
         [Description("4")]
         Quatro = 4,
 
-        [Icone("5️⃣")]
+        [Icone("fas fa-door-closed")]
         [Description("5")]
         Cinco = 5,
 
-        [Icone("6️⃣")]
+        [Icone("fas fa-door-closed")]
         [Description("6")]
         Seis = 6,
     }

@@ -5,23 +5,23 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumPrioridade
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("🟢")]
+        [Icone("fas fa-arrow-down")]
         [Description("Baixa")]
         Baixa = 1,
 
-        [Icone("🟡")]
+        [Icone("fas fa-minus")]
         [Description("Média")]
         Media = 2,
 
-        [Icone("🟠")]
+        [Icone("fas fa-arrow-up")]
         [Description("Alta")]
         Alta = 3,
 
-        [Icone("🔴")]
+        [Icone("fas fa-exclamation-circle")]
         [Description("Crítica")]
         Critica = 4
     }

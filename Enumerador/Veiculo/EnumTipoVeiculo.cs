@@ -5,19 +5,19 @@ namespace AutoGestao.Enumerador.Veiculo
 {
     public enum EnumTipoVeiculo
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
-     
-        [Icone("🏢")]
+
+        [Icone("fas fa-warehouse")]
         [Description("Próprio")]
         Proprio = 1,
-        
-        [Icone("🤝")]
+
+        [Icone("fas fa-handshake")]
         [Description("Consignado")]
         Consignado = 2,
 
-        [Icone("👥")]
+        [Icone("fas fa-users")]
         [Description("Terceiros")]
         Terceiros = 3
     }

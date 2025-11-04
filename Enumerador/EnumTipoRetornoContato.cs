@@ -5,11 +5,11 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumTipoRetornoContato
     {
-        [Icone("💬")]
+        [Icone("fab fa-whatsapp")]
         [Description("Whatsapp")]
         Whatsapp = 1,
 
-        [Icone("📞")]
+        [Icone("fas fa-phone")]
         [Description("Ligação")]
         Ligacao = 2
     }

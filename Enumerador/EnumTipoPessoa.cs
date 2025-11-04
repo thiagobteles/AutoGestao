@@ -5,15 +5,15 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumTipoPessoa
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("👤")]
+        [Icone("fas fa-user")]
         [Description("Pessoa física")]
         PessoaFisica = 1,
 
-        [Icone("🏢")]
+        [Icone("fas fa-building")]
         [Description("Pessoa Jurídica")]
         PessoaJuridica = 2
     }

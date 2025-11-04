@@ -5,115 +5,115 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumEstado
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("🌳")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("AC")]
         Acre = 1,
 
-        [Icone("🌴")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("AL")]
         Alagoas = 2,
 
-        [Icone("🌊")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("AP")]
         Amapa = 3,
 
-        [Icone("🌲")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("AM")]
         Amazonas = 4,
 
-        [Icone("🏖️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("BA")]
         Bahia = 5,
 
-        [Icone("☀️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("CE")]
         Ceara = 6,
 
-        [Icone("🏛️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("DF")]
         DistritoFederal = 7,
 
-        [Icone("🏔️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("ES")]
         EspiritoSanto = 8,
 
-        [Icone("🌾")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("GO")]
         Goias = 9,
 
-        [Icone("🌴")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("MA")]
         Maranhao = 10,
 
-        [Icone("🐂")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("MT")]
         MatoGrosso = 11,
 
-        [Icone("🌿")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("MS")]
         MatoGrossoDoSul = 12,
 
-        [Icone("⛰️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("MG")]
         MinasGerais = 13,
 
-        [Icone("🌲")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("PA")]
         Para = 14,
 
-        [Icone("🏜️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("PB")]
         Paraiba = 15,
 
-        [Icone("🌲")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("PR")]
         Parana = 16,
 
-        [Icone("🏖️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("PE")]
         Pernambuco = 17,
 
-        [Icone("🌵")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("PI")]
         Piaui = 18,
 
-        [Icone("🏖️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("RJ")]
         RioDeJaneiro = 19,
 
-        [Icone("🏖️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("RN")]
         RioGrandeDoNorte = 20,
 
-        [Icone("🍇")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("RS")]
         RioGrandeDoSul = 21,
 
-        [Icone("🌲")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("RO")]
         Rondonia = 22,
 
-        [Icone("🌴")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("RR")]
         Roraima = 23,
 
-        [Icone("🌊")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("SC")]
         SantaCatarina = 24,
 
-        [Icone("🏙️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("SP")]
         SaoPaulo = 25,
 
-        [Icone("🏖️")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("SE")]
         Sergipe = 26,
 
-        [Icone("🌾")]
+        [Icone("fas fa-map-marker-alt")]
         [Description("TO")]
         Tocantins = 27
     }
