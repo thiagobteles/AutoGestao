@@ -5,47 +5,47 @@ namespace AutoGestao.Enumerador.Gerais
 {
     public enum EnumTipoOperacaoAuditoria
     {
-        [Icone("➕")]
+        [Icone("fas fa-plus-circle")]
         [Description("Criação")]
         Create = 1,
 
-        [Icone("✏️")]
+        [Icone("fas fa-edit")]
         [Description("Alteração")]
         Update = 2,
 
-        [Icone("🗑️")]
+        [Icone("fas fa-trash-alt")]
         [Description("Exclusão")]
         Delete = 3,
 
-        [Icone("🔓")]
+        [Icone("fas fa-sign-in-alt")]
         [Description("Login")]
         Login = 4,
 
-        [Icone("🔒")]
+        [Icone("fas fa-sign-out-alt")]
         [Description("Logout")]
         Logout = 5,
 
-        [Icone("⚠️")]
+        [Icone("fas fa-exclamation-triangle")]
         [Description("Falha de Login")]
         LoginFailed = 6,
 
-        [Icone("🔑")]
+        [Icone("fas fa-key")]
         [Description("Alteração de Senha")]
         PasswordChange = 7,
 
-        [Icone("👁️")]
+        [Icone("fas fa-eye")]
         [Description("Visualização")]
         View = 8,
 
-        [Icone("📤")]
+        [Icone("fas fa-file-export")]
         [Description("Exportação")]
         Export = 9,
 
-        [Icone("📥")]
+        [Icone("fas fa-file-import")]
         [Description("Importação")]
         Import = 10,
 
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Unknown")]
         Unknown = 11
     }

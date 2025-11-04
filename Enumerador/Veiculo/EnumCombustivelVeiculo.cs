@@ -5,47 +5,47 @@ namespace AutoGestao.Enumerador.Veiculo
 {
     public enum EnumCombustivelVeiculo
     {
-        [Icone("❓")]
-        [Description("Nenhum")] 
+        [Icone("fas fa-question-circle")]
+        [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("🌱")]
+        [Icone("fas fa-leaf")]
         [Description("Etanol")]
         Etanol = 1,
 
-        [Icone("💨")]
+        [Icone("fas fa-plane")]
         [Description("AVGAS")]
         Avgas = 2,
 
-        [Icone("🚛")]
+        [Icone("fas fa-truck")]
         [Description("Diesel")]
         Diesel = 3,
 
-        [Icone("🔋")]
+        [Icone("fas fa-battery-full")]
         [Description("Elétrico")]
         Eletrico = 4,
 
-        [Icone("🔀")]
+        [Icone("fas fa-random")]
         [Description("Flex")]
         Flex = 5,
 
-        [Icone("⛽")]
+        [Icone("fas fa-gas-pump")]
         [Description("Gasolina")]
         Gasolina = 6,
 
-        [Icone("💨")]
+        [Icone("fas fa-wind")]
         [Description("GNV")]
         Gnv = 7,
 
-        [Icone("🔋⛽")]
+        [Icone("fas fa-charging-station")]
         [Description("Híbrido")]
         Hibrido = 8,
 
-        [Icone("🌽")]
+        [Icone("fas fa-plane")]
         [Description("JET A-1")]
         JET_A1 = 9,
 
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Outros")]
         Outros = 10
     }

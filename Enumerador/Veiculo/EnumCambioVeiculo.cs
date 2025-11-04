@@ -5,27 +5,27 @@ namespace AutoGestao.Enumerador.Veiculo
 {
     public enum EnumCambioVeiculo
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
-     
-        [Icone("⚙️")]
+
+        [Icone("fas fa-cog")]
         [Description("Automático")]
         Automatico = 1,
-        
-        [Icone("🤖")]
+
+        [Icone("fas fa-robot")]
         [Description("Automático sequencial")]
         Automatico_Sequencial = 2,
-        
-        [Icone("🔄")]
+
+        [Icone("fas fa-sync-alt")]
         [Description("CVT")]
         CVT = 3,
-        
-        [Icone("🎛️")]
+
+        [Icone("fas fa-sliders-h")]
         [Description("Manual")]
         Manual = 4,
-        
-        [Icone("")]
+
+        [Icone("fas fa-cogs")]
         [Description("Semi-Automático")]
         Semi_Automatico = 5
     }

@@ -5,19 +5,19 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumStatusAvaliacao
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("⏳")]
+        [Icone("fas fa-hourglass-half")]
         [Description("Pendente")]
         Pendente = 1,
 
-        [Icone("✅")]
+        [Icone("fas fa-check-circle")]
         [Description("Aprovada")]
         Aprovada = 2,
 
-        [Icone("❌")]
+        [Icone("fas fa-times-circle")]
         [Description("Rejeitada")]
         Rejeitada = 3
     }

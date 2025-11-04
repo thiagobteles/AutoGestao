@@ -5,19 +5,19 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumStatusParcela
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("⏳")]
+        [Icone("fas fa-hourglass-half")]
         [Description("Pendente")]
         Pendente = 1,
 
-        [Icone("✅")]
+        [Icone("fas fa-check-circle")]
         [Description("Paga")]
         Paga = 2,
 
-        [Icone("⚠️")]
+        [Icone("fas fa-exclamation-triangle")]
         [Description("Vencida")]
         Vencida = 3
     }

@@ -5,15 +5,15 @@ namespace AutoGestao.Enumerador.Veiculo
 {
     public enum EnumOrigemVeiculo
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("🇧🇷")]
+        [Icone("fas fa-flag")]
         [Description("Nacional")]
         Nacional = 1,
 
-        [Icone("🌎")]
+        [Icone("fas fa-globe-americas")]
         [Description("Importado")]
         Importado = 2
     }

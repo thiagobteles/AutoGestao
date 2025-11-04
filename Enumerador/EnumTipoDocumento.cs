@@ -5,19 +5,19 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumTipoDocumento
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("📄")]
+        [Icone("fas fa-file-alt")]
         [Description("CRV")]
         CRV = 1,
 
-        [Icone("📋")]
+        [Icone("fas fa-clipboard")]
         [Description("CRLV")]
         CRLV = 2,
 
-        [Icone("🧾")]
+        [Icone("fas fa-receipt")]
         [Description("Nota fiscal")]
         NotaFiscal = 3
     }

@@ -5,23 +5,23 @@ namespace AutoGestao.Enumerador
 {
     public enum EnumStatusLead
     {
-        [Icone("❓")]
+        [Icone("fas fa-question-circle")]
         [Description("Nenhum")]
         Nenhum = 0,
 
-        [Icone("⏳")]
+        [Icone("fas fa-hourglass-half")]
         [Description("Pendente")]
         Pendente = 1,
 
-        [Icone("✅")]
+        [Icone("fas fa-check-circle")]
         [Description("Executado")]
         Executado = 2,
 
-        [Icone("❌")]
+        [Icone("fas fa-times-circle")]
         [Description("Cancelado")]
         Cancelado = 3,
 
-        [Icone("💰")]
+        [Icone("fas fa-money-bill-wave")]
         [Description("Encaminhado financeiro")]
         EncaminhadoParaFinanceiro = 4
     }
