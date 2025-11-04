@@ -18,8 +18,8 @@ using System.Text.Json;
 
 namespace AutoGestao.Controllers.Veiculos
 {
-    public class VeiculoController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Veiculo>> logger, IReportService reportService) 
-        : StandardGridController<Veiculo>(context, fileStorageService, reportService, logger)
+    public class VeiculoController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Veiculo>> logger) 
+        : StandardGridController<Veiculo>(context, fileStorageService, logger)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
@@ -180,59 +180,6 @@ namespace AutoGestao.Controllers.Veiculos
         }
 
         #region Endpoints Específicos
-
-        [HttpGet]
-        public override async Task<IActionResult> GerarRelatorio(long id)
-        {
-            var item = await _context.Veiculos
-                .Include(v => v.Cliente)
-                .Include(v => v.VeiculoMarca)
-                .Include(v => v.VeiculoMarcaModelo)
-                .Include(v => v.VeiculoCor)
-                .FirstOrDefaultAsync(v => v.Id == id);
-
-            if (item == null)
-            {
-                return NotFound();
-            }
-
-            // Preparar dados para o relatório
-            var lancamento = new ReportVeiculo
-            {
-                Modelo = item.VeiculoMarcaModelo.Descricao,
-                Placa = item.Placa,
-                Ano = item.AnoComposto?.ToString(),
-                Chassi = item.Chassi,
-                Km = item.KmEntrada?.ToString(),
-                Cor = item.VeiculoCor.Descricao,
-                Combustivel = item.Combustivel.GetDescription(),
-                Cambio = item.Cambio.GetDescription(),
-                Receitas = [],
-                Lancamentos =
-                [
-                    new()
-                    {
-                        DataCriacao = "25/08/2025",
-                        Descricao = $"LAUDO CAUTELAR - {item.VeiculoMarcaModelo.Descricao}",
-                        Status = "Pago pela loja",
-                        Valor = 160.00m
-                    },
-                    new()
-                    {
-                        DataCriacao = "25/08/2025",
-                        Descricao = $"Lavagem detalhada",
-                        Status = "Pago pela loja",
-                        Valor = 300.00m
-                    }
-                ]
-            };
-
-            // Obter template padrão e gerar HTML
-            var template = _reportService.GetDefaultTemplate<ReportVeiculo>();
-            var html = _reportService.GenerateReportHtml(lancamento, template);
-
-            return Content(html, "text/html");
-        }
 
         [HttpPost]
         public async Task<IActionResult> AdicionarDocumento(long id, IFormFile arquivo, string descricao)

@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers.Base
 {
-    public class ReportTemplateController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<ReportTemplateEntity>> logger, IReportService reportService)
-        : StandardGridController<ReportTemplateEntity>(context, fileStorageService, reportService, logger)
+    public class ReportTemplateController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<ReportTemplateEntity>> logger)
+        : StandardGridController<ReportTemplateEntity>(context, fileStorageService, logger)
     {
         // Sobrescrever para customizar query base
         protected override IQueryable<ReportTemplateEntity> GetBaseQuery()
@@ -26,6 +26,9 @@ namespace AutoGestao.Controllers.Base
         /// </summary>
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel gridViewModel)
         {
+            var itemNovo = gridViewModel.HeaderActions.FirstOrDefault(x => x.Name == "Create");
+            gridViewModel.HeaderActions.Remove(itemNovo);
+
             // Adicionar botão customizado no header para criar novo template
             gridViewModel.HeaderActions.Add(new GridAction
             {

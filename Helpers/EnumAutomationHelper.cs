@@ -297,10 +297,7 @@ namespace AutoGestao.Helpers
             }
 
             // Buscar atributo de cor se existir
-            var corAttr = fieldInfo.GetCustomAttributes(typeof(CorAttribute), false)
-                .FirstOrDefault() as CorAttribute;
-
-            if (corAttr != null)
+            if (fieldInfo.GetCustomAttributes(typeof(CorAttribute), false).FirstOrDefault() is CorAttribute corAttr)
             {
                 return corAttr.Cor;
             }

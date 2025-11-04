@@ -14,8 +14,8 @@ using Microsoft.EntityFrameworkCore;
 namespace AutoGestao.Controllers.Base
 {
     [Authorize(Roles = "Admin,Gerente")]
-    public class AuditLogController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService, IReportService reportService) 
-        : StandardGridController<AuditLog>(context, fileStorageService, reportService)
+    public class AuditLogController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService) 
+        : StandardGridController<AuditLog>(context, fileStorageService)
     {
         private readonly IAuditService _auditService = auditService;
 

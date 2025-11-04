@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoGestao.Controllers
 {
-    public class LeadController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Lead>> logger, IReportService reportService) 
-        : StandardGridController<Lead>(context, fileStorageService, reportService, logger)
+    public class LeadController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Lead>> logger) 
+        : StandardGridController<Lead>(context, fileStorageService, logger)
     {
 
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)

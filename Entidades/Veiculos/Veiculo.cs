@@ -5,15 +5,13 @@ using AutoGestao.Enumerador.Veiculo;
 namespace AutoGestao.Entidades.Veiculos
 {
    
-    [ReportConfig("Detalhes do veículo", Icon = "fas fa-car", ShowLogo = true, ShowDate = true)]  // Anotação para geração de Relatório
     [FormConfig(Title = "Veículo", Subtitle = "Gerencie todas as informações do veículo", Icon = "fas fa-car", EnableAjaxSubmit = true)] // Anotação para geração da GRID
     [FormTabs(EnableTabs = true, DefaultTab = "principal")] // Anotações para geração de TABS
     [FormTab("arquivos", "Arquivos", TabIcon = "fas fa-folder", Order = 1, Controller = "VeiculoDocumento", LazyLoad = true)]
     [FormTab("midias", "Mídias", TabIcon = "fas fa-images", Order = 3, Controller = "VeiculoFoto", LazyLoad = true)]
-    //[FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 6, Controller = "Despesa", RequiredRoles = new[] { "Admin", "Financeiro" })]
+    [FormTab("financeiro", "Financeiro", TabIcon = "fas fa-dollar-sign", Order = 6, Controller = "Despesa", RequiredRoles = new[] { "Admin", "Financeiro" })]
     public class Veiculo : BaseEntidade
     {
-        [ReportField("Codigo", Section = "AUTOMÓVEL", Order = 1)] // Cammpo aparece no RPT
         [GridId()] // Campo aparece na GRID
         [FormField(Order = 1, Name = "Código", Section = "Identificação", Icon = "fas fa-barcode", Type = EnumFieldType.Text, ReadOnly = true, Required = false, GridColumns = 2)] // Campo aparece no CADASTRO/EDIÇÃO
         public string Codigo { get; set; } = string.Empty;

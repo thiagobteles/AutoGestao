@@ -18,15 +18,14 @@ using System.Reflection;
 
 namespace AutoGestao.Controllers.Base
 {
-    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, IReportService reportService, ILogger<StandardGridController<T>>? logger = null)
+    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null)
         : Controller where T : BaseEntidade, new()
     {
         protected readonly ApplicationDbContext _context = context;
         protected readonly IFileStorageService _fileStorageService = fileStorageService;
         protected readonly ILogger<StandardGridController<T>>? _logger = logger;
-        protected readonly IReportService _reportService = reportService;
 
-        protected StandardGridController(ApplicationDbContext context, IFileStorageService fileStorageService, IReportService reportService) : this(context, fileStorageService, reportService, null)
+        protected StandardGridController(ApplicationDbContext context, IFileStorageService fileStorageService) : this(context, fileStorageService, null)
         {
         }
 
@@ -589,7 +588,6 @@ namespace AutoGestao.Controllers.Base
                     await _context.SaveChangesAsync();
                     await AfterUpdate(existingEntity);
 
-                    // ✅ ✅ ✅ CORREÇÃO PRINCIPAL - USAR REDIRECT EM VEZ DE RELOAD ✅ ✅ ✅
                     if (Request.IsAjaxRequest())
                     {
                         return Json(new
@@ -702,39 +700,6 @@ namespace AutoGestao.Controllers.Base
             }
         }
 
-        [HttpGet]
-        public virtual async Task<IActionResult> GerarRelatorio(long id)
-        {
-            var entity = await GetBaseQuery().FirstOrDefaultAsync(e => e.Id == id);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-
-            var entityTypeName = typeof(T).Name;
-
-            // Buscar template padrão salvo no banco
-            var templateEntity = await _context.ReportTemplates
-                .Where(t => t.TipoEntidade == entityTypeName && t.IsPadrao && t.Ativo)
-                .FirstOrDefaultAsync();
-
-            // Se tem template customizado no banco, usar ele
-            if (templateEntity != null)
-            {
-                var template = System.Text.Json.JsonSerializer.Deserialize<ReportTemplate>(templateEntity.TemplateJson);
-                if (template != null)
-                {
-                    var html = Base.ReportController.GenerateReportHtmlDynamic(entity, template);
-                    return Content(html, "text/html");
-                }
-            }
-
-            // Fallback: usar template padrão antigo do ReportService
-            var defaultTemplate = _reportService.GetDefaultTemplate<T>();
-            var fallbackHtml = _reportService.GenerateReportHtml(entity, defaultTemplate);
-            return Content(fallbackHtml, "text/html");
-        }
-
         /// <summary>
         /// POST: Delete - Excluir entidade
         /// </summary>
@@ -773,7 +738,6 @@ namespace AutoGestao.Controllers.Base
                 await _context.SaveChangesAsync();
                 await AfterDelete(entity);
 
-                // ✅ CORREÇÃO TAMBÉM AQUI
                 if (Request.IsAjaxRequest())
                 {
                     return Json(new
@@ -1722,7 +1686,7 @@ namespace AutoGestao.Controllers.Base
                 {
                     if (rawValue != null)
                     {
-                        formattedValue = FormatFieldValueToString(rawValue, formFieldAttr.Type, property);
+                        formattedValue = StandardGridController<T>.FormatFieldValueToString(rawValue, formFieldAttr.Type, property);
                     }
                 }
                 catch (Exception ex)
@@ -1800,8 +1764,7 @@ namespace AutoGestao.Controllers.Base
             return null;
         }
 
-        // NOVO MÉTODO: Converter valor para string formatada
-        private string? FormatFieldValueToString(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
+        private static string? FormatFieldValueToString(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
         {
             if (rawValue == null)
             {
@@ -1948,7 +1911,7 @@ namespace AutoGestao.Controllers.Base
             }
         }
 
-        private object? FormatFieldValue(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
+        private static object? FormatFieldValue(object? rawValue, EnumFieldType fieldType, PropertyInfo property)
         {
             if (rawValue == null)
             {
