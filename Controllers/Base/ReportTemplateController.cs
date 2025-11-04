@@ -1,21 +1,71 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades.Relatorio;
+using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Models;
+using AutoGestao.Models.Grid;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers.Base
 {
-    public class ReportTemplateController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<ReportTemplateEntity>> logger, IReportService reportService) 
+    public class ReportTemplateController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<ReportTemplateEntity>> logger, IReportService reportService)
         : StandardGridController<ReportTemplateEntity>(context, fileStorageService, reportService, logger)
     {
-        // Sobrescrever para customizar se necessário
+        // Sobrescrever para customizar query base
         protected override IQueryable<ReportTemplateEntity> GetBaseQuery()
         {
             return base.GetBaseQuery()
                 .Where(t => t.Ativo)
                 .OrderByDescending(t => t.IsPadrao)
                 .ThenBy(t => t.Nome);
+        }
+
+        /// <summary>
+        /// Customizar grid para adicionar botões e ações especiais
+        /// </summary>
+        protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel gridViewModel)
+        {
+            // Adicionar botão customizado no header para criar novo template
+            gridViewModel.HeaderActions.Add(new GridAction
+            {
+                Name = "create_template",
+                DisplayName = "Criar Novo Template",
+                Icon = "fas fa-magic",
+                CssClass = "btn btn-primary",
+                Url = "/ReportBuilder/Create",
+                Type = EnumTypeRequest.Get
+            });
+
+            // Desabilitar botão Create padrão
+            gridViewModel.ShowCreateButton = false;
+
+            // Desabilitar botão Edit padrão
+            gridViewModel.ShowEditButton = false;
+
+            // Adicionar ação customizada para editar no builder
+            gridViewModel.RowActions.Add(new GridAction
+            {
+                Name = "edit_builder",
+                DisplayName = "Editar",
+                Icon = "fas fa-edit",
+                CssClass = "btn btn-sm btn-outline-primary",
+                Url = "/ReportBuilder/Edit/{id}",
+                Type = EnumTypeRequest.Get
+            });
+
+            // Adicionar ação para clonar template
+            gridViewModel.RowActions.Add(new GridAction
+            {
+                Name = "clone_template",
+                DisplayName = "Clonar",
+                Icon = "fas fa-copy",
+                CssClass = "btn btn-sm btn-outline-info",
+                OnClick = "cloneTemplate({id})",
+                Type = EnumTypeRequest.Post
+            });
+
+            return base.ConfigureCustomGrid(gridViewModel);
         }
 
         /// <summary>
