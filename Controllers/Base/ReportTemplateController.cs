@@ -37,11 +37,13 @@ namespace AutoGestao.Controllers.Base
                 Type = EnumTypeRequest.Get
             });
 
-            // Desabilitar botão Create padrão
+            // Desabilitar botões padrão
             gridViewModel.ShowCreateButton = false;
-
-            // Desabilitar botão Edit padrão
             gridViewModel.ShowEditButton = false;
+            gridViewModel.ShowDetailsButton = false;  // Não faz sentido "Details" para templates
+
+            // Limpar RowActions padrão e adicionar apenas os que fazem sentido
+            gridViewModel.RowActions.Clear();
 
             // Adicionar ação customizada para editar no builder
             gridViewModel.RowActions.Add(new GridAction
@@ -63,6 +65,17 @@ namespace AutoGestao.Controllers.Base
                 CssClass = "btn btn-sm btn-outline-info",
                 OnClick = "cloneTemplate({id})",
                 Type = EnumTypeRequest.Post
+            });
+
+            // Manter ação de excluir
+            gridViewModel.RowActions.Add(new GridAction
+            {
+                Name = "Delete",
+                DisplayName = "Excluir",
+                Icon = "fas fa-trash",
+                Url = "/ReportTemplate/Delete/{id}",
+                Type = EnumTypeRequest.Post,
+                CssClass = "btn btn-sm btn-outline-danger"
             });
 
             return base.ConfigureCustomGrid(gridViewModel);

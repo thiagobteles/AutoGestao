@@ -711,11 +711,28 @@ namespace AutoGestao.Controllers.Base
                 return NotFound();
             }
 
-            // Obter template padrão e gerar HTML
-            var template = _reportService.GetDefaultTemplate<T>();
-            var html = _reportService.GenerateReportHtml(entity, template);
+            var entityTypeName = typeof(T).Name;
 
-            return Content(html, "text/html");
+            // Buscar template padrão salvo no banco
+            var templateEntity = await _context.ReportTemplates
+                .Where(t => t.TipoEntidade == entityTypeName && t.IsPadrao && t.Ativo)
+                .FirstOrDefaultAsync();
+
+            // Se tem template customizado no banco, usar ele
+            if (templateEntity != null)
+            {
+                var template = System.Text.Json.JsonSerializer.Deserialize<ReportTemplate>(templateEntity.TemplateJson);
+                if (template != null)
+                {
+                    var html = Base.ReportController.GenerateReportHtmlDynamic(entity, template);
+                    return Content(html, "text/html");
+                }
+            }
+
+            // Fallback: usar template padrão antigo do ReportService
+            var defaultTemplate = _reportService.GetDefaultTemplate<T>();
+            var fallbackHtml = _reportService.GenerateReportHtml(entity, defaultTemplate);
+            return Content(fallbackHtml, "text/html");
         }
 
         /// <summary>
