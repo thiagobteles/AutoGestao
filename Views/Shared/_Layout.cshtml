@@ -385,7 +385,14 @@
             });
 
             // Expandir automaticamente o submenu se houver um item ativo dentro dele
+            // SOMENTE se o sidebar não estiver colapsado
             function expandActiveSubmenu() {
+                const sidebar = document.getElementById('sidebar');
+                // Não expandir se o sidebar estiver colapsado
+                if (sidebar && sidebar.classList.contains('collapsed')) {
+                    return;
+                }
+
                 const activeLinks = document.querySelectorAll('.submenu-link.active');
                 activeLinks.forEach(link => {
                     const menuItem = link.closest('.menu-item.has-submenu');
@@ -437,7 +444,14 @@
             }
 
             // Restaurar estado dos submenus do localStorage
+            // SOMENTE se o sidebar não estiver colapsado
             function restoreSubmenuState() {
+                const sidebar = document.getElementById('sidebar');
+                // Não restaurar se o sidebar estiver colapsado
+                if (sidebar && sidebar.classList.contains('collapsed')) {
+                    return;
+                }
+
                 try {
                     const savedMenus = JSON.parse(localStorage.getItem('expandedMenus') || '[]');
                     savedMenus.forEach(menuText => {
