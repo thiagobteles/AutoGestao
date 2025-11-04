@@ -209,11 +209,9 @@
                                     break;
 
                                 case EnumFieldType.Select:
-                                    @{
-                                        var selectedValue = field.Value?.ToString() ?? "";
-                                        var hasIcons = field.Options.Any(o => o.Text.Contains("[ICON:"));
-                                        var selectClass = hasIcons ? "form-control enum-select" : "form-control";
-                                    }
+                                    var selectedValue = field.Value?.ToString() ?? "";
+                                    var hasIcons = field.Options.Any(o => o.Text.Contains("[ICON:"));
+                                    var selectClass = hasIcons ? "form-control enum-select" : "form-control";
                                     <select id="@field.PropertyName"
                                             class="@selectClass @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
                                             name="@field.PropertyName"
