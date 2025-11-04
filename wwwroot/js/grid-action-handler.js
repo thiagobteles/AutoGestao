@@ -92,7 +92,14 @@ window.addEventListener('beforeunload', () => {
  */
 async function executeGetAction(url, action) {
     console.log(`📄 Executando GET para: ${url}`);
-    window.location.href = url;
+
+    // Verificar se deve abrir em nova aba
+    if (action.target === '_blank') {
+        window.open(url, '_blank');
+        isExecutingAction = false;
+    } else {
+        window.location.href = url;
+    }
 }
 
 /**
@@ -383,7 +390,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: dropdownItem.getAttribute('data-action-name') || '',
                 displayName: dropdownItem.textContent.trim(),
                 url: dropdownItem.getAttribute('href'),
-                type: actionType
+                type: actionType,
+                target: dropdownItem.getAttribute('data-action-target') || ''
             };
 
             // Executar a ação

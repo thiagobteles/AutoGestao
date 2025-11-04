@@ -42,13 +42,15 @@
                                 {
                                         var actionUrl = action.Url?.Replace("{id}", itemId);
                                         var requestTypeValue = (int)action.Type;
+                                        var targetValue = action.Target ?? "";
                                         <text>{
                                             "name": "@action.Name",
                                             "displayName": "@action.DisplayName",
                                             "icon": "@action.Icon",
                                             "url": "@actionUrl",
                                             "type": @requestTypeValue,
-                                            "cssClass": "@(action.Name.ToLower().Contains("delete") || action.Name.ToLower().Contains("excluir") ? "text-danger" : "")"
+                                            "cssClass": "@(action.Name.ToLower().Contains("delete") || action.Name.ToLower().Contains("excluir") ? "text-danger" : "")",
+                                            "target": "@targetValue"
                                         }</text>
                                         @if (action != visibleActions.Last())
                                         {

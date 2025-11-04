@@ -49,5 +49,10 @@ namespace AutoGestao.Models.Grid
         /// Padrão: GET
         /// </summary>
         public EnumTypeRequest Type { get; set; } = EnumTypeRequest.Get;
+
+        /// <summary>
+        /// Target do link (ex: "_blank" para abrir em nova aba)
+        /// </summary>
+        public string? Target { get; set; }
     }
 }

@@ -1255,6 +1255,7 @@ class DropdownPortalSystem {
                 // Adicionar atributos de dados
                 item.setAttribute('data-action-name', action.name);
                 item.setAttribute('data-action-type', action.type !== undefined ? action.type : 0);
+                item.setAttribute('data-action-target', action.target || '');
                 item.setAttribute('data-has-handler', 'true'); // Marcar para não ser processado por AjustarTypeRequest
 
                 // Event listener para ações usando executeGridAction

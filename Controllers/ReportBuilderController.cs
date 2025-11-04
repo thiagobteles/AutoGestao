@@ -329,7 +329,6 @@ namespace AutoGestao.Controllers
             // Botões
             html.AppendLine("<div class='no-print action-buttons'>");
             html.AppendLine("<button onclick='window.print()' class='btn-print'>Imprimir / Salvar PDF</button>");
-            html.AppendLine("<button onclick='window.close()' class='btn-close'>Fechar</button>");
             html.AppendLine("</div>");
 
             html.AppendLine("</body></html>");
@@ -669,19 +668,9 @@ namespace AutoGestao.Controllers
                     color: white;
                 }
 
-                .btn-close {
-                    background: #6c757d;
-                    color: white;
-                }
-
                 .btn-print:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-                }
-
-                .btn-close:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
                 }
 
                 /* ===== IMPRESSÃO ===== */
