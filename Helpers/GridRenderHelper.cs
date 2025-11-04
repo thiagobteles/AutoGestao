@@ -129,10 +129,17 @@ namespace AutoGestao.Helpers
                 var enumInfo = EnumAutomationHelper.GetEnumValueInfo(enumValue);
                 var enumColor = EnumAutomationHelper.GetEnumColor(enumValue);
 
+                // Se não tiver ícone definido, retorna apenas a descrição
+                if (string.IsNullOrEmpty(enumInfo.Icon))
+                {
+                    return enumInfo.Description;
+                }
+
                 return renderType switch
                 {
-                    EnumRenderType.Icon => $"<i class='{enumInfo.Icon}' style='color:{enumColor}'></i>",
+                    EnumRenderType.Icon => $"<i class='{enumInfo.Icon}' style='color:{enumColor}' title='{enumInfo.Description}'></i>",
                     EnumRenderType.IconDescription => $"<i class='{enumInfo.Icon}' style='color:{enumColor}'></i> {enumInfo.Description}",
+                    EnumRenderType.DescriptionIcon => $"{enumInfo.Description} <i class='{enumInfo.Icon}' style='color:{enumColor}'></i>",
                     EnumRenderType.Description => enumInfo.Description,
                     _ => enumInfo.Description
                 };

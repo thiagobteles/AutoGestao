@@ -78,25 +78,15 @@ namespace AutoGestao.Extensions
             foreach (var item in enumDictionary.Where(x => x.Key != 0))
             {
                 var enumValue = (TEnum)Enum.ToObject(typeof(TEnum), item.Key);
-                var icone = enumValue.GetIcone();
                 var descricao = enumValue.GetDescription();
 
-                if (obterIcone && !string.IsNullOrEmpty(icone))
+                // Sempre usar apenas a descrição nos selects
+                // Os ícones serão renderizados apenas nos grids e views de detalhes
+                options.Add(new SelectListItem
                 {
-                    options.Add(new SelectListItem
-                    {
-                        Value = item.Key.ToString(),
-                        Text = $"{icone} {descricao}".Trim()
-                    });
-                }
-                else
-                {
-                    options.Add(new SelectListItem
-                    {
-                        Value = item.Key.ToString(),
-                        Text = descricao.Trim()
-                    });
-                }
+                    Value = item.Key.ToString(),
+                    Text = descricao.Trim()
+                });
             }
 
             return options;
