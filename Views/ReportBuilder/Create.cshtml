@@ -435,6 +435,87 @@
         margin: 10px 0;
     }
 
+    /* ===== EDITOR DE CONSULTA SQL ===== */
+    .external-query-container {
+        padding: 15px;
+        background: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    .query-editor-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 6px 6px 0 0;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .query-editor-header i {
+        font-size: 16px;
+    }
+
+    .query-editor {
+        width: 100%;
+        min-height: 200px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        background: #2c3e50;
+        color: #ecf0f1;
+        border: none;
+        border-radius: 0 0 6px 6px;
+        resize: vertical;
+        outline: none;
+        line-height: 1.6;
+    }
+
+    .query-editor::placeholder {
+        color: #95a5a6;
+    }
+
+    .query-editor:focus {
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+
+    .query-help {
+        margin-top: 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+    }
+
+    .query-help-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: #495057;
+    }
+
+    .query-help-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .query-help-item i {
+        color: var(--primary);
+        margin-top: 2px;
+    }
+
+    .query-help-item code {
+        background: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: var(--primary);
+        font-weight: 600;
+    }
+
     /* Responsivo */
     @@media (max-width: 1400px) {
         .builder-container {

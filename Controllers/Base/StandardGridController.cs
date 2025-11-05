@@ -927,7 +927,7 @@ namespace AutoGestao.Controllers.Base
                 }
 
                 // Gerar HTML do relatório
-                var html = ReportBuilderController.GenerateReportHtmlDynamic(entity, reportTemplate);
+                var html = new ReportBuilderController(_context).GenerateReportHtmlDynamic(entity, reportTemplate);
 
                 // Retornar HTML para impressão/PDF
                 return Content(html, "text/html");

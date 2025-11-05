@@ -203,6 +203,7 @@ const TemplateBuilder = {
                             <option value="row" ${section.type === 'row' ? 'selected' : ''}>Linha</option>
                             <option value="table" ${section.type === 'table' ? 'selected' : ''}>Tabela</option>
                             <option value="richtext" ${section.type === 'richtext' ? 'selected' : ''}>Texto Livre</option>
+                            <option value="external_query" ${section.type === 'external_query' ? 'selected' : ''}>Consulta Externa</option>
                         </select>
                         ${section.type === 'grid' ? `
                             <select class="section-control-btn" onchange="TemplateBuilder.changeSectionColumns('${section.id}', this.value)">
@@ -292,6 +293,35 @@ const TemplateBuilder = {
                              onblur="TemplateBuilder.saveRichTextContent('${section.id}')"
                              style="min-height: 200px; padding: 15px; background: white; border: 2px solid #dee2e6; border-radius: 8px; outline: none;">
                             ${section.richTextContent || '<p>Digite seu texto aqui...</p>'}
+                        </div>
+                    </div>
+                ` : section.type === 'external_query' ? `
+                    <div class="external-query-container" data-section-id="${section.id}">
+                        <div class="query-editor-header">
+                            <i class="fas fa-database"></i>
+                            <span>Consulta SQL Personalizada</span>
+                            <small style="color: #6c757d; margin-left: auto;">Use @Id para referenciar o ID da entidade</small>
+                        </div>
+                        <textarea
+                            class="query-editor"
+                            id="query-${section.id}"
+                            data-section-id="${section.id}"
+                            onblur="TemplateBuilder.saveQueryContent('${section.id}')"
+                            placeholder="Digite sua consulta SQL aqui...&#10;Exemplo:&#10;SELECT Nome, Email, Telefone &#10;FROM Clientes &#10;WHERE Id = @Id"
+                            rows="10">${section.sqlQuery || ''}</textarea>
+                        <div class="query-help">
+                            <div class="query-help-item">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Dica:</strong> Use <code>@Id</code> na sua consulta para referenciar o ID do registro atual
+                            </div>
+                            <div class="query-help-item">
+                                <i class="fas fa-table"></i>
+                                <strong>Resultado:</strong> Os dados retornados serão exibidos em formato de tabela
+                            </div>
+                            <div class="query-help-item">
+                                <i class="fas fa-columns"></i>
+                                <strong>Colunas:</strong> As colunas da consulta serão usadas como títulos da tabela
+                            </div>
                         </div>
                     </div>
                 ` : `
@@ -488,12 +518,17 @@ const TemplateBuilder = {
             throw new Error('Adicione pelo menos uma seção ao relatório');
         }
 
-        // Salvar conteúdo dos editores de texto rico antes de gerar o template
+        // Salvar conteúdo dos editores de texto rico e queries antes de gerar o template
         this.sections.forEach(section => {
             if (section.type === 'richtext') {
                 const editor = document.getElementById(`richtext-${section.id}`);
                 if (editor) {
                     section.richTextContent = editor.innerHTML;
+                }
+            } else if (section.type === 'external_query') {
+                const queryEditor = document.getElementById(`query-${section.id}`);
+                if (queryEditor) {
+                    section.sqlQuery = queryEditor.value;
                 }
             }
         });
@@ -519,7 +554,8 @@ const TemplateBuilder = {
                 showTotal: section.showTotal || false,
                 totalField: section.totalField || null,
                 icon: section.icon,
-                richTextContent: section.richTextContent || ''
+                richTextContent: section.richTextContent || '',
+                sqlQuery: section.sqlQuery || ''
             }))
         };
     },
@@ -662,6 +698,19 @@ const TemplateBuilder = {
     },
 
     /**
+     * Salvar conteúdo da consulta SQL
+     */
+    saveQueryContent(sectionId) {
+        const section = this.sections.find(s => s.id === sectionId);
+        if (section) {
+            const queryEditor = document.getElementById(`query-${sectionId}`);
+            if (queryEditor) {
+                section.sqlQuery = queryEditor.value;
+            }
+        }
+    },
+
+    /**
      * Carregar template existente
      */
     loadTemplate(templateJson) {
@@ -698,7 +747,8 @@ const TemplateBuilder = {
                 listColumns: section.listColumns || section.ListColumns || [],
                 showTotal: section.showTotal || section.ShowTotal,
                 totalField: section.totalField || section.TotalField,
-                richTextContent: section.richTextContent || section.RichTextContent || ''
+                richTextContent: section.richTextContent || section.RichTextContent || '',
+                sqlQuery: section.sqlQuery || section.SqlQuery || ''
             }));
 
             console.log('Seções carregadas:', this.sections);

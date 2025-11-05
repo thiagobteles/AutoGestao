@@ -183,7 +183,7 @@ namespace AutoGestao.Controllers
             }
         }
 
-        public static string GenerateReportHtmlDynamic(object entity, ReportTemplate template)
+        public string GenerateReportHtmlDynamic(object entity, ReportTemplate template)
         {
             var html = new System.Text.StringBuilder();
 
@@ -330,6 +330,22 @@ namespace AutoGestao.Controllers
                         html.AppendLine("<div class='richtext-content'>");
                         html.AppendLine(section.RichTextContent);
                         html.AppendLine("</div>");
+                    }
+                }
+                else if (section.Type == "external_query")
+                {
+                    // Executar consulta SQL externa
+                    if (!string.IsNullOrEmpty(section.SqlQuery))
+                    {
+                        try
+                        {
+                            var queryResults = ExecuteExternalQuery(section.SqlQuery, entity);
+                            html.AppendLine(RenderQueryResults(queryResults));
+                        }
+                        catch (Exception ex)
+                        {
+                            html.AppendLine($"<div class='alert alert-danger'>Erro ao executar consulta: {ex.Message}</div>");
+                        }
                     }
                 }
 
@@ -709,6 +725,27 @@ namespace AutoGestao.Controllers
                     margin-bottom: 10px;
                 }
 
+                /* ===== MENSAGENS DE ALERTA ===== */
+                .alert {
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    margin: 15px 0;
+                    font-size: 14px;
+                    font-weight: 500;
+                }
+
+                .alert-danger {
+                    background: #fee;
+                    color: #c33;
+                    border: 2px solid #fcc;
+                }
+
+                .alert-info {
+                    background: #e7f3ff;
+                    color: #0066cc;
+                    border: 2px solid #99ccff;
+                }
+
                 /* ===== IMPRESSÃO ===== */
                 @media print {
                     body {
@@ -755,6 +792,100 @@ namespace AutoGestao.Controllers
                     animation: fadeIn 0.4s ease-out;
                 }
             ";
+        }
+
+        /// <summary>
+        /// Executar consulta SQL externa com substituição do parâmetro @Id
+        /// </summary>
+        private List<Dictionary<string, object>> ExecuteExternalQuery(string sqlQuery, object entity)
+        {
+            // Obter o ID da entidade
+            var idProperty = entity.GetType().GetProperty("Id");
+            if (idProperty == null)
+            {
+                throw new InvalidOperationException("A entidade não possui propriedade 'Id'");
+            }
+
+            var entityId = idProperty.GetValue(entity);
+            if (entityId == null)
+            {
+                throw new InvalidOperationException("O ID da entidade não pode ser nulo");
+            }
+
+            // Substituir @Id pelo valor real
+            var query = sqlQuery.Replace("@Id", entityId.ToString());
+
+            // Executar a consulta
+            var results = new List<Dictionary<string, object>>();
+
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = query;
+                command.CommandType = System.Data.CommandType.Text;
+
+                _context.Database.OpenConnection();
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    var row = new Dictionary<string, object>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        var columnName = reader.GetName(i);
+                        var value = reader.IsDBNull(i) ? null : reader.GetValue(i);
+                        row[columnName] = value;
+                    }
+                    results.Add(row);
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Renderizar resultados da consulta SQL em HTML
+        /// </summary>
+        private static string RenderQueryResults(List<Dictionary<string, object>> results)
+        {
+            var html = new System.Text.StringBuilder();
+
+            if (results == null || results.Count == 0)
+            {
+                html.AppendLine("<div class='alert alert-info'>Nenhum resultado encontrado</div>");
+                return html.ToString();
+            }
+
+            // Obter nomes das colunas do primeiro resultado
+            var columns = results[0].Keys.ToList();
+
+            // Iniciar tabela
+            html.AppendLine("<table class='report-table'>");
+            html.AppendLine("<thead><tr>");
+
+            // Cabeçalhos das colunas
+            foreach (var column in columns)
+            {
+                html.AppendLine($"<th>{column}</th>");
+            }
+
+            html.AppendLine("</tr></thead><tbody>");
+
+            // Linhas de dados
+            foreach (var row in results)
+            {
+                html.AppendLine("<tr>");
+                foreach (var column in columns)
+                {
+                    var value = row[column];
+                    var formattedValue = FormatValue(value, null);
+                    html.AppendLine($"<td>{formattedValue}</td>");
+                }
+                html.AppendLine("</tr>");
+            }
+
+            html.AppendLine("</tbody></table>");
+
+            return html.ToString();
         }
     }
 }
