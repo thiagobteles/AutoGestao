@@ -31,8 +31,12 @@ var cliente = builder.Configuration.GetValue<string>("Cliente");
 Globais.Cliente = cliente;
 
 // Add Entity Framework com PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection").Replace("#cliente#", cliente.ToLower())));
+builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+{
+    var auditInterceptor = serviceProvider.GetRequiredService<AutoGestao.Data.AuditInterceptor>();
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection").Replace("#cliente#", cliente.ToLower()))
+           .AddInterceptors(auditInterceptor); // Adicionar interceptor de auditoria para CREATE, UPDATE, DELETE
+});
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -77,6 +81,9 @@ builder.Services.AddScoped<IFileStorageService, MinioFileStorageService>();
 builder.Services.AddScoped<EntityInspectorService>();
 builder.Services.AddScoped<GenericReferenceService>();
 builder.Services.AddHttpContextAccessor();
+
+// Registrar AuditInterceptor para auditoria automática de entidades (CREATE, UPDATE, DELETE)
+builder.Services.AddScoped<AutoGestao.Data.AuditInterceptor>();
 
 // Criar um background service para executar limpeza:
 builder.Services.AddHostedService<AuditCleanupBackgroundService>();

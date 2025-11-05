@@ -11,9 +11,10 @@ namespace AutoGestao.Data
     /// <summary>
     /// Interceptor para auditoria automática de operações CRUD no banco de dados
     /// </summary>
-    public class AuditInterceptor(IAuditService auditService) : SaveChangesInterceptor
+    public class AuditInterceptor(IServiceProvider serviceProvider, IHttpContextAccessor httpContextAccessor) : SaveChangesInterceptor
     {
-        private readonly IAuditService _auditService = auditService;
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private bool _isProcessingAudit = false; // Flag para evitar recursão
 
         public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -27,6 +28,12 @@ namespace AutoGestao.Data
                 return await base.SavingChangesAsync(eventData, result, cancellationToken);
             }
 
+            // Se não houver HttpContext (durante inicialização), pular auditoria
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                return await base.SavingChangesAsync(eventData, result, cancellationToken);
+            }
+
             try
             {
                 _isProcessingAudit = true;
@@ -36,6 +43,12 @@ namespace AutoGestao.Data
                                e.State != EntityState.Unchanged &&
                                e.State != EntityState.Detached)
                     .ToList();
+
+                // Se não houver mudanças para auditar, retornar
+                if (!entries.Any())
+                {
+                    return await base.SavingChangesAsync(eventData, result, cancellationToken);
+                }
 
                 // Processar auditoria após salvar as mudanças (para ter IDs gerados)
                 var auditTasks = entries.Select(entry => new
@@ -55,45 +68,61 @@ namespace AutoGestao.Data
                 // Salvar as mudanças primeiro
                 var saveResult = await base.SavingChangesAsync(eventData, result, cancellationToken);
 
-                // Agora processar auditoria de forma assíncrona
+                // Agora processar auditoria de forma assíncrona usando um novo scope
                 _ = Task.Run(async () =>
                 {
-                    foreach (var audit in auditTasks)
+                    try
                     {
-                        try
+                        // Criar um novo scope para resolver o AuditService
+                        using var scope = _serviceProvider.CreateScope();
+                        var auditService = scope.ServiceProvider.GetService<IAuditService>();
+
+                        if (auditService == null)
                         {
-                            // Para DELETE, salvar entidade completa em campos_alterados
-                            if (audit.State == EntityState.Deleted)
+                            return; // Se não conseguir resolver o serviço, pular auditoria
+                        }
+
+                        foreach (var audit in auditTasks)
+                        {
+                            try
                             {
-                                await _auditService.LogAsync(
-                                    audit.EntityName,
-                                    audit.EntityId,
-                                    GetActionType(audit.State),
-                                    valoresAntigos: null,
-                                    valoresNovos: null,
-                                    camposAlterados: string.IsNullOrEmpty(audit.OldValues) ? null : new[] { audit.OldValues },
-                                    mensagemErro: null,
-                                    tabelaNome: audit.TableName
-                                );
+                                // Para DELETE, salvar entidade completa em campos_alterados
+                                if (audit.State == EntityState.Deleted)
+                                {
+                                    await auditService.LogAsync(
+                                        audit.EntityName,
+                                        audit.EntityId,
+                                        GetActionType(audit.State),
+                                        valoresAntigos: null,
+                                        valoresNovos: null,
+                                        camposAlterados: string.IsNullOrEmpty(audit.OldValues) ? null : new[] { audit.OldValues },
+                                        mensagemErro: null,
+                                        tabelaNome: audit.TableName
+                                    );
+                                }
+                                else
+                                {
+                                    await auditService.LogAsync(
+                                        audit.EntityName,
+                                        audit.EntityId,
+                                        GetActionType(audit.State),
+                                        valoresAntigos: string.IsNullOrEmpty(audit.OldValues) ? null : JsonSerializer.Deserialize<object>(audit.OldValues),
+                                        valoresNovos: string.IsNullOrEmpty(audit.NewValues) ? null : JsonSerializer.Deserialize<object>(audit.NewValues),
+                                        camposAlterados: audit.ModifiedProperties,
+                                        mensagemErro: null,
+                                        tabelaNome: audit.TableName
+                                    );
+                                }
                             }
-                            else
+                            catch
                             {
-                                await _auditService.LogAsync(
-                                    audit.EntityName,
-                                    audit.EntityId,
-                                    GetActionType(audit.State),
-                                    valoresAntigos: string.IsNullOrEmpty(audit.OldValues) ? null : JsonSerializer.Deserialize<object>(audit.OldValues),
-                                    valoresNovos: string.IsNullOrEmpty(audit.NewValues) ? null : JsonSerializer.Deserialize<object>(audit.NewValues),
-                                    camposAlterados: audit.ModifiedProperties,
-                                    mensagemErro: null,
-                                    tabelaNome: audit.TableName
-                                );
+                                // Ignorar erros de auditoria para não afetar a operação principal
                             }
                         }
-                        catch
-                        {
-                            // Ignorar erros de auditoria para não afetar a operação principal
-                        }
+                    }
+                    catch
+                    {
+                        // Ignorar erros de auditoria para não afetar a operação principal
                     }
                 }, cancellationToken);
 
