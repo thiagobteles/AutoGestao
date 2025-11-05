@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Entidades
 {
-    [FormConfig(Title = "Lead´s", Subtitle = "Gerencie os leads", Icon = "fas fa-book", EnableAjaxSubmit = true)]
+    [FormConfig(Title = "Lead´s", Subtitle = "Gerencie os leads", Icon = "fas fa-book")]
     public class Lead : BaseEntidade
     {
         [ReferenceSearchable]
