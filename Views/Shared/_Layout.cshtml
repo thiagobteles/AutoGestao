@@ -783,7 +783,13 @@
 
                 if (id && controller) {
                     showLoading(true);
-                    window.location.href = `/${controller}/Details/${id}`;
+
+                    // Para ReportTemplate, redirecionar para ReportBuilder/Edit
+                    if (controller === 'ReportTemplate') {
+                        window.location.href = `/ReportBuilder/Edit/${id}`;
+                    } else {
+                        window.location.href = `/${controller}/Details/${id}`;
+                    }
                 }
             }
 

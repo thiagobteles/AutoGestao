@@ -1425,44 +1425,50 @@ namespace AutoGestao.Controllers.Base
 
         private static List<GridAction> ObterRowActionsPadrao(string controllerNome)
         {
+            var controllerEdicao = controllerNome;
+            if (controllerNome == "ReportTemplate")
+            {
+                controllerEdicao = "ReportBuilder";
+            }
+
             return
-                [
+            [
                     new()
-                    {
-                        Name = "Details",
-                        DisplayName = "Visualizar",
-                        Icon = "fas fa-eye",
-                        Url =  $"/{controllerNome}/Details/{{id}}",
-                        Type = EnumTypeRequest.Get
-                    },
-                    new()
-                    {
-                        Name = "Edit",
-                        DisplayName = "Editar",
-                        Icon = "fas fa-edit",
-                        Url =  $"/{controllerNome}/Edit/{{id}}",
-                        Type = EnumTypeRequest.Get
-                    },
-                    new()
-                    {
-                        Name = "QuickReport",
-                        DisplayName = "PDF",
-                        Icon = "fas fa-file-pdf",
-                        CssClass = "btn btn-sm btn-outline-success",
-                        Url = $"/{controllerNome}/GerarRelatorio/{{id}}",
-                        Type = EnumTypeRequest.Get,
-                        Target = "_blank"
-                    },
-                    new()
-                    {
-                        Name = "Delete",
-                        DisplayName = "Excluir",
-                        Icon = "fas fa-trash",
-                        Url = $"/{controllerNome}/Delete/{{id}}",
-                        Type = EnumTypeRequest.Post,
-                        CssClass = "text-danger"
-                    }
-                ];
+                {
+                    Name = "Details",
+                    DisplayName = "Visualizar",
+                    Icon = "fas fa-eye",
+                    Url =  $"/{controllerNome}/Details/{{id}}",
+                    Type = EnumTypeRequest.Get
+                },
+                new()
+                {
+                    Name = "Edit",
+                    DisplayName = "Editar",
+                    Icon = "fas fa-edit",
+                    Url =  $"/{controllerEdicao}/Edit/{{id}}",
+                    Type = EnumTypeRequest.Get
+                },
+                new()
+                {
+                    Name = "QuickReport",
+                    DisplayName = "PDF",
+                    Icon = "fas fa-file-pdf",
+                    CssClass = "btn btn-sm btn-outline-success",
+                    Url = $"/{controllerNome}/GerarRelatorio/{{id}}",
+                    Type = EnumTypeRequest.Get,
+                    Target = "_blank"
+                },
+                new()
+                {
+                    Name = "Delete",
+                    DisplayName = "Excluir",
+                    Icon = "fas fa-trash",
+                    Url = $"/{controllerNome}/Delete/{{id}}",
+                    Type = EnumTypeRequest.Post,
+                    CssClass = "text-danger"
+                }
+            ];
         }
 
         private static List<PropertyInfo> GetFormProperties()

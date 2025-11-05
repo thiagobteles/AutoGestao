@@ -374,7 +374,13 @@ class StandardGrid {
 
         if (id && controller) {
             this.showLoading(true);
-            window.location.href = `/${controller}/Edit/${id}`;
+
+            // Para ReportTemplate, redirecionar para ReportBuilder/Edit
+            if (controller === 'ReportTemplate') {
+                window.location.href = `/ReportBuilder/Edit/${id}`;
+            } else {
+                window.location.href = `/${controller}/Edit/${id}`;
+            }
         }
     }
 
@@ -569,7 +575,11 @@ window.venderVeiculo = function (idVeiculo) {
 
 window.editarRegistro = function (controller, id) {
     window.showLoading(true);
-    window.location.href = `/${controller}/Edit/${id}`;
+    if (controller === 'ReportTemplate') {
+        window.location.href = `/ReportBuilder/Edit/${id}`;
+    } else {
+        window.location.href = `/${controller}/Edit/${id}`;
+    }
 };
 
 window.visualizarRegistro = function (controller, id) {

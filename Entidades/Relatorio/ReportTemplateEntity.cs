@@ -10,7 +10,7 @@ namespace AutoGestao.Entidades.Relatorio
     [FormConfig(Title = "Template de Relatório", Subtitle = "Gerencie templates de relatórios salvos", Icon = "fas fa-file-alt")]
     public class ReportTemplateEntity : BaseEntidade
     {
-        [GridMain("Nome do Template")]
+        [GridField("Nome do Template", IsText = true, IsSearchable = true, IsLink = false, Order = 10)]
         [FormField(Order = 1, Name = "Nome", Section = "Dados Básicos", Icon = "fas fa-signature", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]
         public string Nome { get; set; } = string.Empty;
 

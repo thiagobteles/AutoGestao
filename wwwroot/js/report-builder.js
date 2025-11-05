@@ -239,18 +239,25 @@ const TemplateBuilder = {
      * Renderizar campos de uma seção
      */
     renderFields(fields, sectionId) {
-        return fields.map(field => `
-            <div class="field-item" draggable="true">
-                <div>
-                    <i class="${field.icon}"></i>
-                    <strong>${field.label}</strong>
-                    <small style="color: #999; margin-left: 10px;">${field.propertyName}</small>
+        return fields.map(field => {
+            // Aceitar tanto camelCase quanto PascalCase
+            const icon = field.icon || field.Icon || 'fas fa-file';
+            const label = field.label || field.Label || '';
+            const propertyName = field.propertyName || field.PropertyName || '';
+
+            return `
+                <div class="field-item" draggable="true">
+                    <div>
+                        <i class="${icon}"></i>
+                        <strong>${label}</strong>
+                        <small style="color: #999; margin-left: 10px;">${propertyName}</small>
+                    </div>
+                    <button class="section-control-btn danger" onclick="TemplateBuilder.removeField('${sectionId}', '${propertyName}')">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <button class="section-control-btn danger" onclick="TemplateBuilder.removeField('${sectionId}', '${field.propertyName}')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     },
 
     /**
@@ -285,8 +292,11 @@ const TemplateBuilder = {
         const section = this.sections.find(s => s.id === sectionId);
         if (!section) return;
 
-        // Verificar se o campo já existe
-        if (section.fields.some(f => f.propertyName === property.propertyName)) {
+        // Verificar se o campo já existe (case-insensitive)
+        if (section.fields.some(f => {
+            const existingProp = f.propertyName || f.PropertyName;
+            return existingProp === property.propertyName;
+        })) {
             this.showInfo('Campo já adicionado a esta seção');
             return;
         }
@@ -379,7 +389,10 @@ const TemplateBuilder = {
     removeField(sectionId, propertyName) {
         const section = this.sections.find(s => s.id === sectionId);
         if (section) {
-            section.fields = section.fields.filter(f => f.propertyName !== propertyName);
+            section.fields = section.fields.filter(f => {
+                const fieldProp = f.propertyName || f.PropertyName;
+                return fieldProp !== propertyName;
+            });
             this.renderSections();
         }
     },
@@ -407,17 +420,17 @@ const TemplateBuilder = {
                 columns: section.columns,
                 order: index,
                 fields: section.fields.map((field, i) => ({
-                    label: field.label,
-                    propertyName: field.propertyName,
-                    format: field.format,
+                    label: field.label || field.Label,
+                    propertyName: field.propertyName || field.PropertyName,
+                    format: field.format || field.Format,
                     order: i,
-                    displayType: field.displayType || 'default',
-                    bold: field.bold || false
+                    displayType: field.displayType || field.DisplayType || 'default',
+                    bold: field.bold || field.Bold || false
                 })),
-                listColumns: [],
-                dataProperty: null,
-                showTotal: false,
-                totalField: null,
+                listColumns: section.listColumns || [],
+                dataProperty: section.dataProperty || null,
+                showTotal: section.showTotal || false,
+                totalField: section.totalField || null,
                 icon: section.icon
             }))
         };
@@ -518,20 +531,36 @@ const TemplateBuilder = {
                 ? JSON.parse(templateJson)
                 : templateJson;
 
-            if (!template || !template.sections) {
+            console.log('Template recebido:', template);
+
+            if (!template) {
+                throw new Error('Template inválido');
+            }
+
+            // Aceitar tanto 'sections' (minúsculo) quanto 'Sections' (maiúsculo)
+            const sections = template.sections || template.Sections;
+
+            if (!sections || !Array.isArray(sections)) {
+                console.error('Template sem seções válidas:', template);
                 throw new Error('Template inválido ou sem seções');
             }
 
-            this.sections = template.sections.map((section, index) => ({
+            this.sections = sections.map((section, index) => ({
                 id: 'section-' + index,
-                title: section.title,
-                type: section.type,
-                columns: section.columns,
-                order: section.order,
-                fields: section.fields,
-                icon: section.icon || 'fas fa-folder'
+                title: section.title || section.Title,
+                type: section.type || section.Type,
+                columns: section.columns || section.Columns,
+                order: section.order || section.Order,
+                fields: section.fields || section.Fields || [],
+                icon: section.icon || section.Icon || 'fas fa-folder',
+                subtitle: section.subtitle || section.Subtitle,
+                dataProperty: section.dataProperty || section.DataProperty,
+                listColumns: section.listColumns || section.ListColumns || [],
+                showTotal: section.showTotal || section.ShowTotal,
+                totalField: section.totalField || section.TotalField
             }));
 
+            console.log('Seções carregadas:', this.sections);
             this.renderSections();
         } catch (error) {
             console.error('Erro ao carregar template:', error);

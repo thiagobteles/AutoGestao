@@ -68,7 +68,11 @@ function restoreGridDoubleClick() {
 
                 // Abrir edição
                 if (controller && entityId) {
-                    window.location.href = `/${controller}/Details/${entityId}`;
+                    if (controller === 'ReportTemplate') {
+                        window.location.href = `/ReportBuilder/Edit/${entityId}`;
+                    } else {
+                        window.location.href = `/${controller}/Details/${entityId}`;
+                    }
                 }
             });
 
