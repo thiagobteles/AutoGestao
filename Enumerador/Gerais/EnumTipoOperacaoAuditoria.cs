@@ -45,8 +45,16 @@ namespace AutoGestao.Enumerador.Gerais
         [Description("Importação")]
         Import = 10,
 
+        [Icone("fas fa-file-pdf")]
+        [Description("Impressão de Relatório")]
+        PrintReport = 11,
+
+        [Icone("fas fa-bolt")]
+        [Description("Execução de Ação")]
+        Action = 12,
+
         [Icone("fas fa-question-circle")]
         [Description("Unknown")]
-        Unknown = 11
+        Unknown = 99
     }
 }

@@ -9,17 +9,8 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Usuário", Icon = "fas fa-user", Type = EnumFieldType.Text, ReadOnly = true, Order = 1, Section = "Identificação")]
         public long? UsuarioId { get; set; }
 
-        [FormField(Name = "Nome do Usuário", Icon = "fas fa-user", Type = EnumFieldType.Text, ReadOnly = true, Order = 2, Section = "Identificação")]
-        public string? UsuarioNome { get; set; }
-
-        [FormField(Name = "Email do Usuário", Icon = "fas fa-envelope", Type = EnumFieldType.Email, ReadOnly = true, Order = 3, Section = "Identificação")]
-        public string? UsuarioEmail { get; set; }
-
         [FormField(Name = "Entidade", Icon = "fas fa-database", Type = EnumFieldType.Text, ReadOnly = true, Order = 10, Section = "Operação")]
         public string EntidadeNome { get; set; } = "";
-
-        [FormField(Name = "Nome Amigável", Icon = "fas fa-tag", Type = EnumFieldType.Text, ReadOnly = true, Order = 11, Section = "Operação")]
-        public string? EntidadeDisplayName { get; set; }
 
         [FormField(Name = "ID da Entidade", Icon = "fas fa-key", Type = EnumFieldType.Text, ReadOnly = true, Order = 12, Section = "Operação")]
         public string EntidadeId { get; set; } = "";
@@ -41,9 +32,6 @@ namespace AutoGestao.Entidades
 
         [FormField(Name = "IP do Cliente", Icon = "fas fa-globe", Type = EnumFieldType.Text, ReadOnly = true, Order = 30, Section = "Requisição")]
         public string? IpCliente { get; set; }
-
-        [FormField(Name = "User Agent", Icon = "fas fa-desktop", Type = EnumFieldType.Text, ReadOnly = true, Order = 31, Section = "Requisição")]
-        public string? UserAgent { get; set; }
         
         [FormField(Name = "URL da Requisição", Icon = "fas fa-link", Type = EnumFieldType.Text, ReadOnly = true, Order = 32, Section = "Requisição")]
         public string? UrlRequisicao { get; set; }

@@ -51,8 +51,40 @@ namespace AutoGestao.Controllers
             ViewBag.EntityType = template.TipoEntidade;
             ViewBag.TemplateJson = template.TemplateJson;
             ViewBag.TemplateName = template.Nome;
+            ViewBag.TemplateDescription = template.Descricao;
+            ViewBag.IsDefaultTemplate = template.IsPadrao;
 
             return View("Create");
+        }
+
+        /// <summary>
+        /// Obter templates disponíveis para uma entidade
+        /// GET: /ReportBuilder/GetTemplatesByEntity?entityType=Veiculo
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetTemplatesByEntity(string entityType)
+        {
+            try
+            {
+                var templates = await _context.ReportTemplates
+                    .Where(t => t.TipoEntidade == entityType && t.Ativo)
+                    .OrderByDescending(t => t.IsPadrao)
+                    .ThenBy(t => t.Nome)
+                    .Select(t => new
+                    {
+                        t.Id,
+                        t.Nome,
+                        t.Descricao,
+                        t.IsPadrao
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, data = templates });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         /// <summary>

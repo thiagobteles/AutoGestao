@@ -46,10 +46,7 @@ namespace AutoGestao.Services
                 {
                     IdEmpresa = idEmpresaValido.Value,
                     UsuarioId = usuario.Id,
-                    UsuarioNome = usuario.Nome,
-                    UsuarioEmail = usuario.Email,
                     EntidadeNome = entidadeNome,
-                    EntidadeDisplayName = entidadeNome,
                     EntidadeId = entidadeId,
                     TipoOperacao = tipoOperacao,
                     TabelaNome = GetTableName(entidadeNome),
@@ -57,7 +54,6 @@ namespace AutoGestao.Services
                     ValoresNovos = valoresNovos != null ? JsonConvert.SerializeObject(valoresNovos, Formatting.Indented) : null,
                     CamposAlterados = camposAlterados != null ? string.Join(", ", camposAlterados) : null,
                     IpCliente = GetClientIpAddress(),
-                    UserAgent = httpContext?.Request.Headers["User-Agent"].ToString(),
                     UrlRequisicao = httpContext?.Request.Path + httpContext?.Request.QueryString,
                     MetodoHttp = httpContext?.Request.Method,
                     Sucesso = string.IsNullOrEmpty(mensagemErro),

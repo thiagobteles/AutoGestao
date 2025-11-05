@@ -4,6 +4,8 @@
     var templateId = ViewBag.TemplateId as long?;
     var templateJson = ViewBag.TemplateJson as string;
     var templateName = ViewBag.TemplateName as string;
+    var templateDescription = ViewBag.TemplateDescription as string;
+    var isDefaultTemplate = ViewBag.IsDefaultTemplate as bool? ?? false;
 }
 
 <style>
@@ -595,12 +597,12 @@
 
             <div class="config-group">
                 <label class="config-label">Descrição</label>
-                <textarea id="templateDescription" class="config-input" rows="3" placeholder="Descreva o propósito deste template..."></textarea>
+                <textarea id="templateDescription" class="config-input" rows="3" placeholder="Descreva o propósito deste template...">@templateDescription</textarea>
             </div>
 
             <div class="config-group">
                 <label class="config-label">
-                    <input type="checkbox" id="isDefaultTemplate" class="form-check-input me-2">
+                    <input type="checkbox" id="isDefaultTemplate" class="form-check-input me-2" @(isDefaultTemplate ? "checked" : "")>
                     Definir como template padrão
                 </label>
             </div>

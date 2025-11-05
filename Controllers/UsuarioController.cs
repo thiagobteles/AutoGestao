@@ -79,13 +79,13 @@ namespace AutoGestao.Controllers
 
         protected override Task AfterCreate(Usuario entity)
         {
-            TempData["Success"] = $"Usuário {entity.Nome} criado com sucesso!";
+            TempData["NotificationScript"] = $"showSuccess('Usuário {EscapeJavaScript(entity.Nome)} criado com sucesso!')";
             return base.AfterCreate(entity);
         }
 
         protected override Task AfterUpdate(Usuario entity)
         {
-            TempData["Success"] = $"Usuário {entity.Nome} atualizado com sucesso!";
+            TempData["NotificationScript"] = $"showSuccess('Usuário {EscapeJavaScript(entity.Nome)} atualizado com sucesso!')";
             return base.AfterUpdate(entity);
         }
 
@@ -190,7 +190,8 @@ namespace AutoGestao.Controllers
         }
 
         [HttpPost]
-        [Route("AlterarSenha")]
+        [Route("Usuario/AlterarSenha")]
+        [AllowAnonymous] // Permitir que usuários logados alterem sua própria senha
         public async Task<IActionResult> AlterarSenha([FromBody] AlterarSenhaRequest request)
         {
             if (request.NovaSenha != request.ConfirmarSenha)

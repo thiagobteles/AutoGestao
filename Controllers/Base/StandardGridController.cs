@@ -610,7 +610,7 @@ namespace AutoGestao.Controllers.Base
                         {
                             sucesso = false,
                             mensagem = $"Erro ao atualizar: {ex.Message}",
-                            script = $"showError('Erro ao atualizar: {ex.Message}')"
+                            script = $"showError('Erro ao atualizar: {EscapeJavaScript(ex.Message)}')"
                         });
                     }
 
@@ -760,11 +760,11 @@ namespace AutoGestao.Controllers.Base
                     {
                         success = false,
                         mensagem = $"Erro ao excluir registro: {ex.Message}",
-                        script = $"showError('Erro ao excluir registro: {ex.Message}')"
+                        script = $"showError('Erro ao excluir registro: {EscapeJavaScript(ex.Message)}')"
                     });
                 }
 
-                TempData["NotificationScript"] = $"showError('Erro ao excluir registro: {ex.Message}')";
+                TempData["NotificationScript"] = $"showError('Erro ao excluir registro: {EscapeJavaScript(ex.Message)}')";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -810,7 +810,58 @@ namespace AutoGestao.Controllers.Base
             }
             catch (Exception ex)
             {
-                TempData["NotificationScript"] = $"showError('Erro ao exportar dados: {ex.Message}')";
+                TempData["NotificationScript"] = $"showError('Erro ao exportar dados: {EscapeJavaScript(ex.Message)}')";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
+        /// GET: GerarRelatorioComTemplate - Gerar relatório PDF usando template específico
+        /// </summary>
+        [HttpGet]
+        public virtual async Task<IActionResult> GerarRelatorioComTemplate(long id, long templateId)
+        {
+            try
+            {
+                // Carregar a entidade com todas as navegações
+                var query = GetBaseQuery();
+                var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
+
+                if (entity == null)
+                {
+                    TempData["NotificationScript"] = "showError('Registro não encontrado.')";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Buscar template específico
+                var template = await _context.ReportTemplates
+                    .FirstOrDefaultAsync(t => t.Id == templateId && t.Ativo);
+
+                if (template == null)
+                {
+                    TempData["NotificationScript"] = "showError('Template não encontrado.')";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Desserializar o template JSON
+                var reportTemplate = System.Text.Json.JsonSerializer.Deserialize<ReportTemplate>(template.TemplateJson);
+
+                if (reportTemplate == null)
+                {
+                    TempData["NotificationScript"] = "showError('Erro ao processar template do relatório.')";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Gerar HTML do relatório
+                var html = new ReportBuilderController(_context).GenerateReportHtmlDynamic(entity, reportTemplate);
+
+                // Retornar HTML para impressão/PDF
+                return Content(html, "text/html");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao gerar relatório com template para {EntityType} ID {Id}", typeof(T).Name, id);
+                TempData["NotificationScript"] = $"showError('Erro ao gerar relatório: {EscapeJavaScript(ex.Message)}')";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -935,7 +986,7 @@ namespace AutoGestao.Controllers.Base
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Erro ao gerar relatório para {EntityType} ID {Id}", typeof(T).Name, id);
-                TempData["NotificationScript"] = $"showError('Erro ao gerar relatório: {ex.Message}')";
+                TempData["NotificationScript"] = $"showError('Erro ao gerar relatório: {EscapeJavaScript(ex.Message)}')";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -1455,9 +1506,9 @@ namespace AutoGestao.Controllers.Base
                     DisplayName = "PDF",
                     Icon = "fas fa-file-pdf",
                     CssClass = "btn btn-sm btn-outline-success",
-                    Url = $"/{controllerNome}/GerarRelatorio/{{id}}",
+                    Url = $"javascript:ReportTemplateSelector.gerarRelatorio('{controllerNome}', {{{{id}}}}, '{typeof(T).Name}')",
                     Type = EnumTypeRequest.Get,
-                    Target = "_blank"
+                    Target = ""
                 },
                 new()
                 {
@@ -1476,6 +1527,25 @@ namespace AutoGestao.Controllers.Base
             return [.. typeof(T).GetProperties()
                 .Where(p => p.GetCustomAttribute<FormFieldAttribute>() != null)
                 .OrderBy(p => p.GetCustomAttribute<FormFieldAttribute>()?.Order ?? 0)];
+        }
+
+        /// <summary>
+        /// Escapa string para uso seguro em JavaScript
+        /// </summary>
+        protected static string EscapeJavaScript(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            return text
+                .Replace("\\", "\\\\")  // Backslash deve ser primeiro
+                .Replace("'", "\\'")     // Aspas simples
+                .Replace("\"", "\\\"")   // Aspas duplas
+                .Replace("\n", "\\n")    // Nova linha
+                .Replace("\r", "\\r")    // Carriage return
+                .Replace("\t", "\\t")    // Tab
+                .Replace("<", "\\x3c")   // < (prevenir XSS)
+                .Replace(">", "\\x3e");  // > (prevenir XSS)
         }
 
         private static string GetContentType(string fileName)
