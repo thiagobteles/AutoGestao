@@ -9,6 +9,10 @@ namespace AutoGestao.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
+        // CRÍTICO: Propriedade usada pelo Query Filter Global para Multi-Tenancy
+        // Deve ser setada pelo serviço antes de qualquer query
+        public long CurrentEmpresaId { get; set; }
+
         #region DbSets
 
         public DbSet<Cliente> Clientes { get; set; }
@@ -33,6 +37,36 @@ namespace AutoGestao.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Ignore<BaseEntidade>();
+
+            // ===========================================
+            // CONFIGURAÇÃO CRÍTICA: QUERY FILTER GLOBAL PARA MULTI-TENANCY
+            // IMPORTANTE: Garante que TODAS as queries filtram por IdEmpresa automaticamente
+            // Evita vazamento de dados entre tenants (empresas)
+            // ===========================================
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // Aplicar filtro apenas para entidades que herdam de BaseEntidade
+                if (typeof(BaseEntidade).IsAssignableFrom(entityType.ClrType))
+                {
+                    // Entidades que NÃO devem ter filtro de tenant (são compartilhadas)
+                    var entitiesToExclude = new[] { typeof(Usuario), typeof(Empresa) };
+
+                    if (!entitiesToExclude.Contains(entityType.ClrType))
+                    {
+                        // Criar expressão lambda: e => e.IdEmpresa == CurrentEmpresaId
+                        var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
+                        var property = System.Linq.Expressions.Expression.Property(parameter, nameof(BaseEntidade.IdEmpresa));
+                        var empresaIdProperty = System.Linq.Expressions.Expression.Property(
+                            System.Linq.Expressions.Expression.Constant(this),
+                            nameof(CurrentEmpresaId));
+                        var comparison = System.Linq.Expressions.Expression.Equal(property, empresaIdProperty);
+                        var lambda = System.Linq.Expressions.Expression.Lambda(comparison, parameter);
+
+                        // Aplicar o filtro
+                        modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                    }
+                }
+            }
 
             // ===========================================
             // CONFIGURAÇÃO GLOBAL: IGNORAR PROPRIEDADES DE AUDITORIA
@@ -293,6 +327,9 @@ namespace AutoGestao.Data
             modelBuilder.Entity<AuditLog>().ToTable("audit_logs");
             modelBuilder.Entity<AuditLog>(entity =>
             {
+                // Ignorar DataAlteracao pois logs de auditoria não são alterados
+                entity.Ignore(e => e.DataAlteracao);
+
                 entity.Property(e => e.EntidadeNome).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.EntidadeId).HasMaxLength(50).IsRequired();
                 entity.Property(e => e.TipoOperacao).IsRequired();
@@ -304,7 +341,6 @@ namespace AutoGestao.Data
                 entity.Property(e => e.Sucesso).IsRequired();
                 entity.Property(e => e.DataHora).IsRequired();
                 entity.Property(e => e.DataCadastro).IsRequired();
-                entity.Property(e => e.DataAlteracao).IsRequired();
             });
 
 

@@ -39,6 +39,9 @@ namespace AutoGestao.Controllers.Base
 
         protected virtual IQueryable<T> GetBaseQuery()
         {
+            // CRÍTICO: Setar CurrentEmpresaId no contexto para Query Filter Global
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
             List<string> listaIgnorada = ["CriadoPorUsuario", "AlteradoPorUsuario", "Empresa"];
 
             var query = _context.Set<T>().AsQueryable();
@@ -195,20 +198,38 @@ namespace AutoGestao.Controllers.Base
         {
             ProcessFileFieldsFromRequest(entity);
 
+            var usuarioLogadoId = GetCurrentUsuarioId();
+            var now = DateTime.UtcNow;
+
             // Garantir que IdEmpresa seja preenchido se estiver em 0
             if (entity.IdEmpresa == 0)
             {
                 entity.IdEmpresa = GetCurrentEmpresaId();
             }
 
-            entity.DataCadastro = DateTime.UtcNow;
+            // CRÍTICO: Preencher TODOS os campos obrigatórios da BaseEntidade
+            entity.DataCadastro = now;
+            entity.DataAlteracao = now; // No create, DataAlteracao = DataCadastro
+            entity.CriadoPorUsuarioId = usuarioLogadoId;
+            entity.AlteradoPorUsuarioId = usuarioLogadoId;
+            entity.Ativo = true; // Garantir que começa ativo
+
             return Task.CompletedTask;
         }
 
         protected virtual Task BeforeUpdate(T entity)
         {
-            ProcessFileFieldsFromRequest(entity); // ADICIONE ESTA LINHA
+            ProcessFileFieldsFromRequest(entity);
+
+            var usuarioLogadoId = GetCurrentUsuarioId();
+
+            // CRÍTICO: Atualizar campos de auditoria
             entity.DataAlteracao = DateTime.UtcNow;
+            entity.AlteradoPorUsuarioId = usuarioLogadoId;
+
+            // IMPORTANTE: IdEmpresa e CriadoPorUsuarioId NÃO devem ser alterados no update
+            // Eles são preservados automaticamente pelo método Edit()
+
             return Task.CompletedTask;
         }
 
@@ -238,6 +259,14 @@ namespace AutoGestao.Controllers.Base
             return long.TryParse(empresaIdClaim, out var empresaId)
                 ? empresaId
                 : 1;
+        }
+
+        protected virtual long? GetCurrentUsuarioId()
+        {
+            var usuarioIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            return long.TryParse(usuarioIdClaim, out var usuarioId)
+                ? usuarioId
+                : null;
         }
 
         #endregion

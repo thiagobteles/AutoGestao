@@ -12,7 +12,8 @@ namespace AutoGestao.Services.Interface
             object? valoresAntigos = null,
             object? valoresNovos = null,
             string[]? camposAlterados = null,
-            string? mensagemErro = null);
+            string? mensagemErro = null,
+            string? tabelaNome = null);
 
         Task LogLoginAsync(long usuarioId, long? IdEmpresa, bool sucesso, string? mensagemErro = null);
 

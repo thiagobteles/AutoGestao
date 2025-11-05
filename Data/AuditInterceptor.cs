@@ -42,7 +42,8 @@ namespace AutoGestao.Data
                 {
                     Entry = entry,
                     State = entry.State,
-                    EntityName = entry.Entity.GetType().Name,
+                    EntityName = entry.Entity.GetType().Name.Replace("Proxy", "").Trim(), // Nome da classe sem "Proxy"
+                    TableName = GetTableName(entry), // Nome da tabela no banco
                     EntityId = GetEntityId(entry),
                     OldValues = GetOldValues(entry),
                     NewValues = GetNewValues(entry),
@@ -61,14 +62,33 @@ namespace AutoGestao.Data
                     {
                         try
                         {
-                            await _auditService.LogAsync(
-                                audit.EntityName,
-                                audit.EntityId,
-                                GetActionType(audit.State),
-                                valoresAntigos: string.IsNullOrEmpty(audit.OldValues) ? null : JsonSerializer.Deserialize<object>(audit.OldValues),
-                                valoresNovos: string.IsNullOrEmpty(audit.NewValues) ? null : JsonSerializer.Deserialize<object>(audit.NewValues),
-                                camposAlterados: audit.ModifiedProperties
-                            );
+                            // Para DELETE, salvar entidade completa em campos_alterados
+                            if (audit.State == EntityState.Deleted)
+                            {
+                                await _auditService.LogAsync(
+                                    audit.EntityName,
+                                    audit.EntityId,
+                                    GetActionType(audit.State),
+                                    valoresAntigos: null,
+                                    valoresNovos: null,
+                                    camposAlterados: string.IsNullOrEmpty(audit.OldValues) ? null : new[] { audit.OldValues },
+                                    mensagemErro: null,
+                                    tabelaNome: audit.TableName
+                                );
+                            }
+                            else
+                            {
+                                await _auditService.LogAsync(
+                                    audit.EntityName,
+                                    audit.EntityId,
+                                    GetActionType(audit.State),
+                                    valoresAntigos: string.IsNullOrEmpty(audit.OldValues) ? null : JsonSerializer.Deserialize<object>(audit.OldValues),
+                                    valoresNovos: string.IsNullOrEmpty(audit.NewValues) ? null : JsonSerializer.Deserialize<object>(audit.NewValues),
+                                    camposAlterados: audit.ModifiedProperties,
+                                    mensagemErro: null,
+                                    tabelaNome: audit.TableName
+                                );
+                            }
                         }
                         catch
                         {
@@ -89,6 +109,26 @@ namespace AutoGestao.Data
         {
             var idProperty = entry.Properties.FirstOrDefault(p => p.Metadata.Name.Equals("Id", StringComparison.OrdinalIgnoreCase));
             return idProperty?.CurrentValue?.ToString() ?? "0";
+        }
+
+        private static string GetTableName(EntityEntry entry)
+        {
+            // Obter nome da tabela do metadata do EF Core
+            var tableName = entry.Metadata.GetTableName();
+            if (!string.IsNullOrEmpty(tableName))
+            {
+                return tableName;
+            }
+
+            // Fallback: nome da entidade
+            var entityType = entry.Entity.GetType();
+            // Remover sufixo "Proxy" se for proxy do EF Core
+            var typeName = entityType.Name;
+            if (typeName.Contains("Proxy"))
+            {
+                typeName = entityType.BaseType?.Name ?? typeName;
+            }
+            return typeName;
         }
 
         private static EnumTipoOperacaoAuditoria GetActionType(EntityState state)

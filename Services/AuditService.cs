@@ -21,7 +21,8 @@ namespace AutoGestao.Services
             object? valoresAntigos = null,
             object? valoresNovos = null,
             string[]? camposAlterados = null,
-            string? mensagemErro = null)
+            string? mensagemErro = null,
+            string? tabelaNome = null)
         {
             try
             {
@@ -42,14 +43,22 @@ namespace AutoGestao.Services
                     return; // Não cria o log se não houver empresa válida
                 }
 
+                var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
+                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
+                    DataCadastro = now,
+                    CriadoPorUsuarioId = usuario.Id,
+                    AlteradoPorUsuarioId = usuario.Id,
+                    Ativo = true,
+
+                    // Campos específicos do AuditLog
                     UsuarioId = usuario.Id,
                     EntidadeNome = entidadeNome,
                     EntidadeId = entidadeId,
                     TipoOperacao = tipoOperacao,
-                    TabelaNome = GetTableName(entidadeNome),
+                    TabelaNome = tabelaNome ?? GetTableName(entidadeNome),
                     ValoresAntigos = valoresAntigos != null ? JsonConvert.SerializeObject(valoresAntigos, Formatting.Indented) : null,
                     ValoresNovos = valoresNovos != null ? JsonConvert.SerializeObject(valoresNovos, Formatting.Indented) : null,
                     CamposAlterados = camposAlterados != null ? string.Join(", ", camposAlterados) : null,
@@ -58,7 +67,7 @@ namespace AutoGestao.Services
                     MetodoHttp = httpContext?.Request.Method,
                     Sucesso = string.IsNullOrEmpty(mensagemErro),
                     MensagemErro = mensagemErro,
-                    DataHora = DateTime.UtcNow
+                    DataHora = now
                 };
 
                 _context.AuditLogs.Add(auditLog);
@@ -95,9 +104,17 @@ namespace AutoGestao.Services
                     return;
                 }
 
+                var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
+                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
+                    DataCadastro = now,
+                    CriadoPorUsuarioId = usuario.Id,
+                    AlteradoPorUsuarioId = usuario.Id,
+                    Ativo = true,
+
+                    // Campos específicos do AuditLog
                     UsuarioId = usuario.Id,
                     EntidadeNome = "HttpRequest",
                     EntidadeId = Guid.NewGuid().ToString(),
@@ -108,7 +125,7 @@ namespace AutoGestao.Services
                     Sucesso = sucesso,
                     MensagemErro = mensagemErro,
                     DuracaoMs = duracaoMs,
-                    DataHora = DateTime.UtcNow
+                    DataHora = now
                 };
 
                 _context.AuditLogs.Add(auditLog);
@@ -138,10 +155,18 @@ namespace AutoGestao.Services
                 }
 
                 var tipoOperacao = sucesso ? EnumTipoOperacaoAuditoria.Login : EnumTipoOperacaoAuditoria.LoginFailed;
+                var now = DateTime.UtcNow;
 
                 var auditLog = new AuditLog
                 {
+                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
+                    DataCadastro = now,
+                    CriadoPorUsuarioId = usuarioId,
+                    AlteradoPorUsuarioId = usuarioId,
+                    Ativo = true,
+
+                    // Campos específicos do AuditLog
                     UsuarioId = usuarioId,
                     EntidadeNome = "Usuario",
                     EntidadeId = usuarioId.ToString(),
@@ -152,7 +177,7 @@ namespace AutoGestao.Services
                     MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
                     Sucesso = sucesso,
                     MensagemErro = mensagemErro,
-                    DataHora = DateTime.UtcNow
+                    DataHora = now
                 };
 
                 _context.AuditLogs.Add(auditLog);
@@ -181,9 +206,17 @@ namespace AutoGestao.Services
                     return;
                 }
 
+                var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
+                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
+                    DataCadastro = now,
+                    CriadoPorUsuarioId = usuarioId,
+                    AlteradoPorUsuarioId = usuarioId,
+                    Ativo = true,
+
+                    // Campos específicos do AuditLog
                     UsuarioId = usuarioId,
                     EntidadeNome = "Usuario",
                     EntidadeId = usuarioId.ToString(),
@@ -193,7 +226,7 @@ namespace AutoGestao.Services
                     UrlRequisicao = _httpContextAccessor.HttpContext?.Request.Path,
                     MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
                     Sucesso = true,
-                    DataHora = DateTime.UtcNow
+                    DataHora = now
                 };
 
                 _context.AuditLogs.Add(auditLog);
@@ -231,9 +264,17 @@ namespace AutoGestao.Services
                     return;
                 }
 
+                var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
+                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
+                    DataCadastro = now,
+                    CriadoPorUsuarioId = usuario.Id,
+                    AlteradoPorUsuarioId = usuario.Id,
+                    Ativo = true,
+
+                    // Campos específicos do AuditLog
                     UsuarioId = usuario.Id,
                     EntidadeNome = "Relatorio",
                     EntidadeId = entidadeId ?? Guid.NewGuid().ToString(),
@@ -245,7 +286,7 @@ namespace AutoGestao.Services
                     MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
                     Sucesso = sucesso,
                     MensagemErro = mensagemErro,
-                    DataHora = DateTime.UtcNow
+                    DataHora = now
                 };
 
                 _context.AuditLogs.Add(auditLog);
@@ -273,9 +314,17 @@ namespace AutoGestao.Services
                     return;
                 }
 
+                var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
+                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
+                    DataCadastro = now,
+                    CriadoPorUsuarioId = usuario.Id,
+                    AlteradoPorUsuarioId = usuario.Id,
+                    Ativo = true,
+
+                    // Campos específicos do AuditLog
                     UsuarioId = usuario.Id,
                     EntidadeNome = entidadeNome,
                     EntidadeId = entidadeId,
@@ -287,7 +336,7 @@ namespace AutoGestao.Services
                     MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
                     Sucesso = sucesso,
                     MensagemErro = mensagemErro,
-                    DataHora = DateTime.UtcNow
+                    DataHora = now
                 };
 
                 _context.AuditLogs.Add(auditLog);
