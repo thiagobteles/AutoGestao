@@ -54,7 +54,7 @@ namespace AutoGestao.Enumerador.Gerais
         Action = 12,
 
         [Icone("fas fa-question-circle")]
-        [Description("Unknown")]
+        [Description("Não mapeado")]
         Unknown = 99
     }
 }
