@@ -3,10 +3,24 @@
  * Exibe modal para escolher template quando há múltiplas opções
  */
 
-console.log('📝 Carregando report-template-selector.js...');
+(function() {
+    'use strict';
 
-// Garantir que está disponível globalmente
-window.ReportTemplateSelector = {
+    console.log('📝 Carregando report-template-selector.js...');
+
+    // Helper para mostrar erros (com fallback se showError não existir)
+    const mostrarErro = (mensagem) => {
+        console.error('❌ ' + mensagem);
+        if (typeof window.showError === 'function') {
+            window.showError(mensagem);
+        } else {
+            alert(mensagem); // Fallback
+        }
+    };
+
+    try {
+        // Garantir que está disponível globalmente
+        window.ReportTemplateSelector = {
     /**
      * Gerar relatório - verifica templates disponíveis e abre modal se necessário
      */
@@ -17,11 +31,18 @@ window.ReportTemplateSelector = {
             const result = await response.json();
 
             if (!result.success) {
-                showError('Erro ao buscar templates: ' + result.message);
+                mostrarErro('Erro ao buscar templates: ' + result.message);
                 return;
             }
 
             const templates = result.data;
+
+            // Log para debug
+            console.log('📊 Templates recebidos:', templates);
+            if (templates && templates.length > 0) {
+                console.log('📋 Estrutura do primeiro template:', templates[0]);
+                console.log('🔑 Propriedades:', Object.keys(templates[0]));
+            }
 
             // Se não houver templates, abrir tela de configuração
             if (!templates || templates.length === 0) {
@@ -31,15 +52,18 @@ window.ReportTemplateSelector = {
 
             // Se houver apenas um template, gerar diretamente
             if (templates.length === 1) {
-                window.open(`/${controller}/GerarRelatorioComTemplate?id=${entityId}&templateId=${templates[0].Id}`, '_blank');
+                const templateId = templates[0].id || templates[0].Id;
+                console.log('📄 Gerando com template único. ID:', templateId);
+                window.open(`/${controller}/GerarRelatorioComTemplate?id=${entityId}&templateId=${templateId}`, '_blank');
                 return;
             }
 
             // Se houver múltiplos templates, mostrar modal de seleção
+            console.log('📋 Mostrando modal com', templates.length, 'templates');
             this.showTemplateSelectionModal(controller, entityId, templates);
         } catch (error) {
             console.error('Erro ao gerar relatório:', error);
-            showError('Erro ao processar solicitação de relatório');
+            mostrarErro('Erro ao processar solicitação de relatório');
         }
     },
 
@@ -47,6 +71,18 @@ window.ReportTemplateSelector = {
      * Exibir modal de seleção de templates
      */
     showTemplateSelectionModal(controller, entityId, templates) {
+        console.log('🎨 Criando modal de seleção com', templates.length, 'templates');
+
+        // Normalizar propriedades (suportar camelCase e PascalCase)
+        const normalizedTemplates = templates.map(t => ({
+            id: t.id || t.Id,
+            nome: t.nome || t.Nome,
+            descricao: t.descricao || t.Descricao,
+            isPadrao: t.isPadrao || t.IsPadrao
+        }));
+
+        console.log('✅ Templates normalizados:', normalizedTemplates);
+
         // Criar HTML do modal
         const modalHtml = `
             <div class="modal fade" id="templateSelectorModal" tabindex="-1">
@@ -62,20 +98,20 @@ window.ReportTemplateSelector = {
                         <div class="modal-body p-4">
                             <p class="text-muted mb-3">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Foram encontrados ${templates.length} templates para este tipo de registro. Selecione qual deseja utilizar:
+                                Foram encontrados ${normalizedTemplates.length} templates para este tipo de registro. Selecione qual deseja utilizar:
                             </p>
                             <div class="template-list">
-                                ${templates.map(t => `
-                                    <div class="template-item" onclick="ReportTemplateSelector.selectTemplate('${controller}', ${entityId}, ${t.Id})">
+                                ${normalizedTemplates.map(t => `
+                                    <div class="template-item" onclick="ReportTemplateSelector.selectTemplate('${controller}', ${entityId}, ${t.id})" data-template-id="${t.id}">
                                         <div class="template-icon">
                                             <i class="fas fa-file-alt"></i>
                                         </div>
                                         <div class="template-info">
                                             <div class="template-name">
-                                                ${t.Nome}
-                                                ${t.IsPadrao ? '<span class="badge bg-primary ms-2">Padrão</span>' : ''}
+                                                ${t.nome || 'Template sem nome'}
+                                                ${t.isPadrao ? '<span class="badge bg-primary ms-2">Padrão</span>' : ''}
                                             </div>
-                                            ${t.Descricao ? `<div class="template-description">${t.Descricao}</div>` : ''}
+                                            ${t.descricao ? `<div class="template-description">${t.descricao}</div>` : '<div class="template-description text-muted">Sem descrição</div>'}
                                         </div>
                                         <div class="template-arrow">
                                             <i class="fas fa-chevron-right"></i>
@@ -112,14 +148,29 @@ window.ReportTemplateSelector = {
      * Selecionar template e gerar relatório
      */
     selectTemplate(controller, entityId, templateId) {
+        console.log('🎯 Template selecionado:', {
+            controller,
+            entityId,
+            templateId
+        });
+
         // Fechar modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('templateSelectorModal'));
         if (modal) {
             modal.hide();
         }
 
+        // Validar parâmetros
+        if (!templateId) {
+            console.error('❌ TemplateId está undefined!');
+            mostrarErro('Erro: ID do template não foi identificado.');
+            return;
+        }
+
         // Abrir relatório em nova aba
-        window.open(`/${controller}/GerarRelatorioComTemplate?id=${entityId}&templateId=${templateId}`, '_blank');
+        const url = `/${controller}/GerarRelatorioComTemplate?id=${entityId}&templateId=${templateId}`;
+        console.log('🌐 Abrindo URL:', url);
+        window.open(url, '_blank');
     }
 };
 
@@ -200,7 +251,24 @@ style.textContent = `
         font-weight: 600;
     }
 `;
-document.head.appendChild(style);
+        document.head.appendChild(style);
 
-// Log para confirmar que o script foi carregado
-console.log('✅ ReportTemplateSelector carregado e disponível:', typeof ReportTemplateSelector !== 'undefined');
+        // Log de sucesso
+        console.log('✅ ReportTemplateSelector carregado com sucesso!');
+        console.log('✅ Disponível globalmente:', typeof window.ReportTemplateSelector !== 'undefined');
+
+    } catch (error) {
+        console.error('❌ ERRO CRÍTICO ao carregar report-template-selector.js:', error);
+        console.error('Stack trace:', error.stack);
+
+        // Garantir que o objeto existe mesmo com erro
+        if (!window.ReportTemplateSelector) {
+            window.ReportTemplateSelector = {
+                gerarRelatorio: function() {
+                    alert('Erro: Módulo de relatórios com falha. Detalhes no console.');
+                    console.error('ReportTemplateSelector não pôde ser inicializado corretamente.');
+                }
+            };
+        }
+    }
+})();

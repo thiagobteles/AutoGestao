@@ -565,11 +565,12 @@ namespace AutoGestao.Controllers.Base
                     entity.DataCadastro = existingEntity.DataCadastro;
                     entity.CriadoPorUsuarioId = existingEntity.CriadoPorUsuarioId;
 
-                    // Preservar campos de arquivo que não foram alterados
+                    // Preservar campos de arquivo e senha que não foram alterados
                     var fileProperties = typeof(T).GetProperties()
                         .Where(p => p.PropertyType == typeof(string) &&
                                    (p.Name.Contains("Foto") || p.Name.Contains("Documento") ||
-                                    p.Name.Contains("Arquivo") || p.Name.Contains("Imagem")));
+                                    p.Name.Contains("Arquivo") || p.Name.Contains("Imagem") ||
+                                    p.Name.Equals("SenhaHash", StringComparison.OrdinalIgnoreCase)));
 
                     foreach (var prop in fileProperties)
                     {
@@ -824,15 +825,20 @@ namespace AutoGestao.Controllers.Base
         {
             try
             {
+                _logger?.LogInformation("🔵 GerarRelatorioComTemplate - EntityType: {EntityType}, ID: {Id}, TemplateID: {TemplateId}", typeof(T).Name, id, templateId);
+
                 // Carregar a entidade com todas as navegações
                 var query = GetBaseQuery();
                 var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
 
                 if (entity == null)
                 {
+                    _logger?.LogWarning("❌ Entidade não encontrada - EntityType: {EntityType}, ID: {Id}", typeof(T).Name, id);
                     TempData["NotificationScript"] = "showError('Registro não encontrado.')";
                     return RedirectToAction(nameof(Index));
                 }
+
+                _logger?.LogInformation("✅ Entidade encontrada: {EntityType} ID {Id}", typeof(T).Name, id);
 
                 // Buscar template específico
                 var template = await _context.ReportTemplates
@@ -840,28 +846,36 @@ namespace AutoGestao.Controllers.Base
 
                 if (template == null)
                 {
+                    _logger?.LogWarning("❌ Template não encontrado - TemplateID: {TemplateId}", templateId);
                     TempData["NotificationScript"] = "showError('Template não encontrado.')";
                     return RedirectToAction(nameof(Index));
                 }
+
+                _logger?.LogInformation("✅ Template encontrado: {TemplateName} (ID: {TemplateId})", template.Nome, templateId);
 
                 // Desserializar o template JSON
                 var reportTemplate = System.Text.Json.JsonSerializer.Deserialize<ReportTemplate>(template.TemplateJson);
 
                 if (reportTemplate == null)
                 {
+                    _logger?.LogWarning("❌ Erro ao deserializar template JSON - TemplateID: {TemplateId}", templateId);
                     TempData["NotificationScript"] = "showError('Erro ao processar template do relatório.')";
                     return RedirectToAction(nameof(Index));
                 }
 
+                _logger?.LogInformation("✅ Template deserializado com sucesso. Gerando HTML...");
+
                 // Gerar HTML do relatório
                 var html = new ReportBuilderController(_context, _auditService).GenerateReportHtmlDynamic(entity, reportTemplate);
+
+                _logger?.LogInformation("✅ HTML gerado com sucesso. Retornando conteúdo...");
 
                 // Retornar HTML para impressão/PDF
                 return Content(html, "text/html");
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Erro ao gerar relatório com template para {EntityType} ID {Id}", typeof(T).Name, id);
+                _logger?.LogError(ex, "❌ ERRO ao gerar relatório - EntityType: {EntityType}, ID: {Id}, TemplateID: {TemplateId}", typeof(T).Name, id, templateId);
                 TempData["NotificationScript"] = $"showError('Erro ao gerar relatório: {EscapeJavaScript(ex.Message)}')";
                 return RedirectToAction(nameof(Index));
             }

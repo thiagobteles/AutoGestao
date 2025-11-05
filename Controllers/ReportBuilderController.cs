@@ -403,7 +403,18 @@ namespace AutoGestao.Controllers
             // Botões
             html.AppendLine("<div class='no-print action-buttons'>");
             html.AppendLine("<button onclick='window.print()' class='btn-print'>Imprimir / Salvar PDF</button>");
+            html.AppendLine("<button onclick='window.close()' class='btn-close'>Fechar</button>");
             html.AppendLine("</div>");
+
+            // Script para abrir diálogo de impressão automaticamente
+            html.AppendLine("<script>");
+            html.AppendLine("window.onload = function() {");
+            html.AppendLine("    console.log('✅ Relatório carregado. Abrindo diálogo de impressão...');");
+            html.AppendLine("    setTimeout(function() {");
+            html.AppendLine("        window.print();");
+            html.AppendLine("    }, 300);");
+            html.AppendLine("};");
+            html.AppendLine("</script>");
 
             html.AppendLine("</body></html>");
 
@@ -745,6 +756,17 @@ namespace AutoGestao.Controllers
                 .btn-print:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                }
+
+                .btn-close {
+                    background: #6c757d;
+                    color: white;
+                }
+
+                .btn-close:hover {
+                    background: #5a6268;
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
                 }
 
                 /* ===== CONTEÚDO DE TEXTO RICO ===== */

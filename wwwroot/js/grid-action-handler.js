@@ -104,20 +104,71 @@ async function executeGetAction(url, action) {
             if (jsCode.includes('ReportTemplateSelector')) {
                 // Aguardar o ReportTemplateSelector estar disponível
                 if (typeof window.ReportTemplateSelector === 'undefined') {
-                    console.warn('⏳ ReportTemplateSelector ainda não está disponível. Aguardando...');
+                    console.warn('⏳ ReportTemplateSelector ainda não está disponível. Tentando carregar...');
 
-                    // Tentar novamente após um pequeno delay
-                    setTimeout(() => {
-                        if (typeof window.ReportTemplateSelector !== 'undefined') {
-                            console.log('✅ ReportTemplateSelector agora disponível. Executando...');
-                            // eslint-disable-next-line no-eval
-                            eval(jsCode);
-                        } else {
-                            console.error('❌ ReportTemplateSelector não carregou após timeout');
-                            showError('Erro: Módulo de relatórios não carregado. Recarregue a página.');
-                        }
-                        isExecutingAction = false;
-                    }, 100);
+                    // Função para carregar o script dinamicamente se necessário
+                    const loadReportScript = () => {
+                        return new Promise((resolve, reject) => {
+                            // Verificar se já existe script carregado
+                            const existingScript = document.querySelector('script[src*="report-template-selector"]');
+                            if (existingScript) {
+                                console.log('📜 Script já existe no DOM, aguardando execução...');
+                            } else {
+                                console.warn('⚠️ Script não encontrado no DOM! Carregando dinamicamente...');
+                                const script = document.createElement('script');
+                                script.src = '/js/report-template-selector.js?v=' + Date.now();
+                                script.onload = () => {
+                                    console.log('✅ Script carregado dinamicamente');
+                                    resolve();
+                                };
+                                script.onerror = () => {
+                                    console.error('❌ Erro ao carregar script dinamicamente');
+                                    reject(new Error('Falha ao carregar script'));
+                                };
+                                document.head.appendChild(script);
+                            }
+
+                            // Sistema de polling
+                            let attempts = 0;
+                            const maxAttempts = 50;
+                            const pollInterval = 100;
+
+                            const poll = () => {
+                                attempts++;
+                                if (typeof window.ReportTemplateSelector !== 'undefined') {
+                                    console.log(`✅ ReportTemplateSelector disponível na tentativa ${attempts}`);
+                                    resolve();
+                                } else if (attempts >= maxAttempts) {
+                                    reject(new Error('Timeout ao aguardar ReportTemplateSelector'));
+                                } else {
+                                    setTimeout(poll, pollInterval);
+                                }
+                            };
+
+                            poll();
+                        });
+                    };
+
+                    // Tentar carregar e executar
+                    loadReportScript()
+                        .then(() => {
+                            console.log('🎯 Executando ação de relatório...');
+                            try {
+                                // eslint-disable-next-line no-eval
+                                eval(jsCode);
+                            } catch (evalError) {
+                                console.error('Erro ao executar:', evalError);
+                                showError('Erro ao executar ação de relatório');
+                            }
+                            isExecutingAction = false;
+                        })
+                        .catch((error) => {
+                            console.error('❌ Falha ao carregar módulo:', error);
+                            console.error('📋 Verifique a aba Network do DevTools por erros 404');
+                            showError('Erro: Módulo de relatórios não disponível. Recarregue a página (Ctrl+F5).');
+                            isExecutingAction = false;
+                        });
+
                     return;
                 }
             }
