@@ -30,6 +30,12 @@ CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
 var cliente = builder.Configuration.GetValue<string>("Cliente");
 Globais.Cliente = cliente;
 
+// Registrar HttpContextAccessor antes de tudo
+builder.Services.AddHttpContextAccessor();
+
+// Registrar AuditInterceptor ANTES do DbContext para auditoria automática de entidades (CREATE, UPDATE, DELETE)
+builder.Services.AddScoped<AutoGestao.Data.AuditInterceptor>();
+
 // Add Entity Framework com PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
 {
@@ -80,10 +86,6 @@ builder.Services.AddScoped<IAuditCleanupService, AuditCleanupService>();
 builder.Services.AddScoped<IFileStorageService, MinioFileStorageService>();
 builder.Services.AddScoped<EntityInspectorService>();
 builder.Services.AddScoped<GenericReferenceService>();
-builder.Services.AddHttpContextAccessor();
-
-// Registrar AuditInterceptor para auditoria automática de entidades (CREATE, UPDATE, DELETE)
-builder.Services.AddScoped<AutoGestao.Data.AuditInterceptor>();
 
 // Criar um background service para executar limpeza:
 builder.Services.AddHostedService<AuditCleanupBackgroundService>();
