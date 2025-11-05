@@ -18,12 +18,13 @@ using System.Reflection;
 
 namespace AutoGestao.Controllers.Base
 {
-    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null)
+    public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null, IAuditService? auditService = null)
         : Controller where T : BaseEntidade, new()
     {
         protected readonly ApplicationDbContext _context = context;
         protected readonly IFileStorageService _fileStorageService = fileStorageService;
         protected readonly ILogger<StandardGridController<T>>? _logger = logger;
+        protected readonly IAuditService? _auditService = auditService;
 
         protected StandardGridController(ApplicationDbContext context, IFileStorageService fileStorageService) : this(context, fileStorageService, null)
         {
@@ -853,7 +854,7 @@ namespace AutoGestao.Controllers.Base
                 }
 
                 // Gerar HTML do relatório
-                var html = new ReportBuilderController(_context).GenerateReportHtmlDynamic(entity, reportTemplate);
+                var html = new ReportBuilderController(_context, _auditService).GenerateReportHtmlDynamic(entity, reportTemplate);
 
                 // Retornar HTML para impressão/PDF
                 return Content(html, "text/html");
@@ -978,7 +979,7 @@ namespace AutoGestao.Controllers.Base
                 }
 
                 // Gerar HTML do relatório
-                var html = new ReportBuilderController(_context).GenerateReportHtmlDynamic(entity, reportTemplate);
+                var html = new ReportBuilderController(_context, _auditService).GenerateReportHtmlDynamic(entity, reportTemplate);
 
                 // Retornar HTML para impressão/PDF
                 return Content(html, "text/html");
@@ -1506,7 +1507,7 @@ namespace AutoGestao.Controllers.Base
                     DisplayName = "PDF",
                     Icon = "fas fa-file-pdf",
                     CssClass = "btn btn-sm btn-outline-success",
-                    Url = $"javascript:ReportTemplateSelector.gerarRelatorio('{controllerNome}', {{{{id}}}}, '{typeof(T).Name}')",
+                    Url = $"javascript:ReportTemplateSelector.gerarRelatorio('{controllerNome}', {{id}}, '{typeof(T).Name}')",
                     Type = EnumTypeRequest.Get,
                     Target = ""
                 },

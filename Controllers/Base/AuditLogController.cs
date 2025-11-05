@@ -14,10 +14,9 @@ using Microsoft.EntityFrameworkCore;
 namespace AutoGestao.Controllers.Base
 {
     [Authorize(Roles = "Admin,Gerente")]
-    public class AuditLogController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService) 
-        : StandardGridController<AuditLog>(context, fileStorageService)
+    public class AuditLogController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService)
+        : StandardGridController<AuditLog>(context, fileStorageService, null, auditService)
     {
-        private readonly IAuditService _auditService = auditService;
 
         protected override IQueryable<AuditLog> GetBaseQuery()
         {
@@ -279,16 +278,13 @@ namespace AutoGestao.Controllers.Base
             var csv = new System.Text.StringBuilder();
 
             // Header
-            csv.AppendLine("Data/Hora,Usuário,Email,Operação,Entidade,ID Entidade,Campos Alterados,IP Cliente,Sucesso,Erro");
+            csv.AppendLine("Data/Hora,Operação,ID Entidade,Campos Alterados,IP Cliente,Sucesso,Erro");
 
             // Dados
             foreach (var log in logs)
             {
                 csv.AppendLine($"{log.DataHora:yyyy-MM-dd HH:mm:ss}," +
-                              $"\"{log.UsuarioNome}\"," +
-                              $"\"{log.UsuarioEmail}\"," +
                               $"\"{log.TipoOperacao.GetDescription()}\"," +
-                              $"\"{log.EntidadeDisplayName ?? log.EntidadeNome}\"," +
                               $"\"{log.EntidadeId}\"," +
                               $"\"{log.CamposAlterados}\"," +
                               $"\"{log.IpCliente}\"," +

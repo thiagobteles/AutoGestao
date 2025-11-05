@@ -57,6 +57,7 @@ namespace AutoGestao.Data
             // ===========================================
             modelBuilder.Entity<Usuario>().Ignore(u => u.EntidadesCriadas);
             modelBuilder.Entity<Usuario>().Ignore(u => u.EntidadesAlteradas);
+            modelBuilder.Entity<Usuario>().Ignore(u => u.ConfirmarSenha);
 
             // Configuração global para snake_case
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
@@ -293,14 +294,10 @@ namespace AutoGestao.Data
             modelBuilder.Entity<AuditLog>(entity =>
             {
                 entity.Property(e => e.EntidadeNome).HasMaxLength(100).IsRequired();
-                entity.Property(e => e.EntidadeDisplayName).HasMaxLength(100);
                 entity.Property(e => e.EntidadeId).HasMaxLength(50).IsRequired();
                 entity.Property(e => e.TipoOperacao).IsRequired();
                 entity.Property(e => e.TabelaNome).HasMaxLength(100);
-                entity.Property(e => e.UsuarioNome).HasMaxLength(250);
-                entity.Property(e => e.UsuarioEmail).HasMaxLength(150);
                 entity.Property(e => e.IpCliente).HasMaxLength(45);
-                entity.Property(e => e.UserAgent).HasMaxLength(500);
                 entity.Property(e => e.UrlRequisicao).HasMaxLength(500);
                 entity.Property(e => e.MetodoHttp).HasMaxLength(10);
                 entity.Property(e => e.MensagemErro).HasMaxLength(2000);

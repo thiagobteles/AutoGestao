@@ -24,14 +24,35 @@ namespace AutoGestao.Services
             try
             {
                 var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower() && u.Ativo);
-                if (usuario == null || !VerifyPassword(request.Senha, usuario.SenhaHash))
+
+                if (usuario == null)
+                {
+                    return new LoginResponse
+                    {
+                        Sucesso = false,
+                        Mensagem = "Email ou senha inválidos"
+                    };
+                }
+
+                // Verificar se SenhaHash está definido
+                if (string.IsNullOrEmpty(usuario.SenhaHash))
+                {
+                    _logger.LogError("Usuário {Email} não possui senha configurada", usuario.Email);
+                    var auditService = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
+                    await auditService?.LogLoginAsync(usuario.Id, usuario.IdEmpresa, false, "Senha não configurada");
+
+                    return new LoginResponse
+                    {
+                        Sucesso = false,
+                        Mensagem = "Usuário sem senha configurada. Contate o administrador."
+                    };
+                }
+
+                if (!VerifyPassword(request.Senha, usuario.SenhaHash))
                 {
                     // Log de login falhado
-                    if (usuario != null)
-                    {
-                        var auditService = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
-                        await auditService?.LogLoginAsync(usuario.Id, usuario.IdEmpresa, false, "Senha incorreta");
-                    }
+                    var auditService = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
+                    await auditService?.LogLoginAsync(usuario.Id, usuario.IdEmpresa, false, "Senha incorreta");
 
                     return new LoginResponse
                     {
@@ -179,7 +200,7 @@ namespace AutoGestao.Services
         {
             return BCrypt.Net.BCrypt.Verify(password, hash);
         }
-
+            
         public static string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt(12));

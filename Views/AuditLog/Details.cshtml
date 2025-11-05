@@ -20,7 +20,7 @@
         {
             <button class="btn btn-info" onclick="verEntidadeAuditada()">
                 <i class="fas fa-external-link-alt me-1"></i>
-                Ver @(Model.EntidadeDisplayName ?? Model.EntidadeNome)
+                Ver @Model.EntidadeNome
             </button>
         }
     </div>
@@ -45,7 +45,7 @@
                 else
                 {
                     <p class="mb-0">
-                        @Model.TipoOperacao realizada em @Model.EntidadeDisplayName ?? @Model.EntidadeNome
+                        @Model.TipoOperacao realizada em @Model.EntidadeNome
                         em @Model.DataHora.ToString("dd/MM/yyyy às HH:mm:ss")
                     </p>
                 }
@@ -95,7 +95,7 @@
                     </tr>
                     <tr>
                         <td class="fw-bold">Entidade:</td>
-                        <td>@(Model.EntidadeDisplayName ?? Model.EntidadeNome)</td>
+                        <td>@Model.EntidadeNome</td>
                     </tr>
                     <tr>
                         <td class="fw-bold">ID:</td>
@@ -145,13 +145,13 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-user-circle me-2 text-primary"></i>
-                                @Model.UsuarioNome
+                                @(Model.Usuario?.Nome ?? "N/A")
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td class="fw-bold">Email:</td>
-                        <td>@Model.UsuarioEmail</td>
+                        <td>@(Model.Usuario?.Email ?? "N/A")</td>
                     </tr>
                     <tr>
                         <td class="fw-bold">IP Cliente:</td>
@@ -162,27 +162,6 @@
                                 <button class="btn btn-sm btn-outline-info ms-2" onclick="consultarIP('@Model.IpCliente')">
                                     <i class="fas fa-search"></i>
                                 </button>
-                            }
-                            else
-                            {
-                                <span class="text-muted">Não disponível</span>
-                            }
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold">User Agent:</td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(Model.UserAgent))
-                            {
-                                <small class="text-muted" title="@Model.UserAgent">
-                                    @(Model.UserAgent.Length > 50 ? Model.UserAgent.Substring(0, 50) + "..." : Model.UserAgent)
-                                </small>
-                                @if (Model.UserAgent.Length > 50)
-                                {
-                                    <button class="btn btn-sm btn-outline-secondary ms-1" onclick="mostrarUserAgent()">
-                                        <i class="fas fa-expand-alt"></i>
-                                    </button>
-                                }
                             }
                             else
                             {
@@ -343,21 +322,6 @@
     </div>
 </div>
 
-<!-- Modal para User Agent Completo -->
-<div class="modal fade" id="modalUserAgent" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">User Agent Completo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <pre class="small">@Model.UserAgent</pre>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
@@ -374,11 +338,6 @@
         } else {
             alert('Informações da entidade não disponíveis.');
         }
-    }
-
-    function mostrarUserAgent() {
-        const modal = new bootstrap.Modal(document.getElementById('modalUserAgent'));
-        modal.show();
     }
 
     function consultarIP(ip) {

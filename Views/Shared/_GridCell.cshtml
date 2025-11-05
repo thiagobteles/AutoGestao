@@ -47,7 +47,7 @@
                                             "name": "@action.Name",
                                             "displayName": "@action.DisplayName",
                                             "icon": "@action.Icon",
-                                            "url": "@actionUrl",
+                                            "url": "@Html.Raw(actionUrl)",
                                             "type": @requestTypeValue,
                                             "cssClass": "@(action.Name.ToLower().Contains("delete") || action.Name.ToLower().Contains("excluir") ? "text-danger" : "")",
                                             "target": "@targetValue"

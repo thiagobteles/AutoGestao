@@ -3,7 +3,10 @@
  * Exibe modal para escolher template quando há múltiplas opções
  */
 
-const ReportTemplateSelector = {
+console.log('📝 Carregando report-template-selector.js...');
+
+// Garantir que está disponível globalmente
+window.ReportTemplateSelector = {
     /**
      * Gerar relatório - verifica templates disponíveis e abre modal se necessário
      */
@@ -198,3 +201,6 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Log para confirmar que o script foi carregado
+console.log('✅ ReportTemplateSelector carregado e disponível:', typeof ReportTemplateSelector !== 'undefined');

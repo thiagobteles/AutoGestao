@@ -244,10 +244,10 @@
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-user-circle me-2 text-muted"></i>
                                     <div>
-                                        <div class="fw-bold">@log.UsuarioNome</div>
-                                        @if (!string.IsNullOrEmpty(log.UsuarioEmail))
+                                        <div class="fw-bold">@(log.Usuario?.Nome ?? "N/A")</div>
+                                        @if (!string.IsNullOrEmpty(log.Usuario?.Email))
                                         {
-                                            <small class="text-muted">@log.UsuarioEmail</small>
+                                            <small class="text-muted">@log.Usuario.Email</small>
                                         }
                                     </div>
                                 </div>
@@ -280,7 +280,7 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="fw-bold">@(log.EntidadeDisplayName ?? log.EntidadeNome)</div>
+                                <div class="fw-bold">@log.EntidadeNome</div>
                                 @if (!string.IsNullOrEmpty(log.TabelaNome))
                                 {
                                     <small class="text-muted">@log.TabelaNome</small>

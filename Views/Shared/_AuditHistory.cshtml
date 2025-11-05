@@ -47,7 +47,7 @@
                             <div class="mt-1">
                                 <small>
                                     <i class="fas fa-user me-1"></i>
-                                    @log.UsuarioNome
+                                    @(log.Usuario?.Nome ?? "N/A")
                                 </small>
                                 @if (log.IpCliente != null)
                                 {

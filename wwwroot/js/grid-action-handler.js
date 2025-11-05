@@ -93,6 +93,47 @@ window.addEventListener('beforeunload', () => {
 async function executeGetAction(url, action) {
     console.log(`📄 Executando GET para: ${url}`);
 
+    // Verificar se é uma URL javascript:
+    if (url.startsWith('javascript:')) {
+        try {
+            // Extrair o código JavaScript e executar
+            const jsCode = url.substring('javascript:'.length);
+            console.log(`🔧 Executando JavaScript: ${jsCode}`);
+
+            // Verificar se está tentando chamar ReportTemplateSelector
+            if (jsCode.includes('ReportTemplateSelector')) {
+                // Aguardar o ReportTemplateSelector estar disponível
+                if (typeof window.ReportTemplateSelector === 'undefined') {
+                    console.warn('⏳ ReportTemplateSelector ainda não está disponível. Aguardando...');
+
+                    // Tentar novamente após um pequeno delay
+                    setTimeout(() => {
+                        if (typeof window.ReportTemplateSelector !== 'undefined') {
+                            console.log('✅ ReportTemplateSelector agora disponível. Executando...');
+                            // eslint-disable-next-line no-eval
+                            eval(jsCode);
+                        } else {
+                            console.error('❌ ReportTemplateSelector não carregou após timeout');
+                            showError('Erro: Módulo de relatórios não carregado. Recarregue a página.');
+                        }
+                        isExecutingAction = false;
+                    }, 100);
+                    return;
+                }
+            }
+
+            // Executar no contexto global usando eval
+            // eslint-disable-next-line no-eval
+            eval(jsCode);
+            isExecutingAction = false;
+        } catch (error) {
+            console.error('Erro ao executar JavaScript:', error);
+            showError('Erro ao executar ação JavaScript');
+            isExecutingAction = false;
+        }
+        return;
+    }
+
     // Verificar se deve abrir em nova aba
     if (action.target === '_blank') {
         window.open(url, '_blank');
