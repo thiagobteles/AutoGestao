@@ -14,9 +14,17 @@ namespace AutoGestao.Services.Interface
             string[]? camposAlterados = null,
             string? mensagemErro = null);
 
-        Task LogLoginAsync(long usuarioId, string usuarioNome, string usuarioEmail, long? IdEmpresa, bool sucesso, string? mensagemErro = null);
+        Task LogLoginAsync(long usuarioId, long? IdEmpresa, bool sucesso, string? mensagemErro = null);
+
+        Task LogLogoutAsync(long usuarioId, long? IdEmpresa);
 
         Task LogHttpRequestAsync(string url, string metodo, bool sucesso, long? duracaoMs = null, string? mensagemErro = null);
+
+        Task LogViewAsync(string entidadeNome, string entidadeId, string? mensagemErro = null);
+
+        Task LogPrintReportAsync(string reportNome, string? entidadeId = null, bool sucesso = true, string? mensagemErro = null);
+
+        Task LogActionAsync(string actionNome, string entidadeNome, string entidadeId, bool sucesso = true, string? mensagemErro = null, object? dadosAcao = null);
 
         Task<List<AuditLog>> GetLogsAsync(
             long? usuarioId = null,
