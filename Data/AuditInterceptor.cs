@@ -1,13 +1,16 @@
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Services.Interface;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Text.Json;
 
 namespace AutoGestao.Data
 {
+    /// <summary>
+    /// Interceptor para auditoria automática de operações CRUD no banco de dados
+    /// </summary>
     public class AuditInterceptor(IAuditService auditService) : SaveChangesInterceptor
     {
         private readonly IAuditService _auditService = auditService;
@@ -21,7 +24,7 @@ namespace AutoGestao.Data
             // Evitar recursão quando estamos salvando logs de auditoria
             if (_isProcessingAudit || eventData.Context == null)
             {
-                return result;
+                return await base.SavingChangesAsync(eventData, result, cancellationToken);
             }
 
             try
@@ -30,15 +33,51 @@ namespace AutoGestao.Data
 
                 var entries = eventData.Context.ChangeTracker.Entries()
                     .Where(e => !(e.Entity is AuditLog) && // Não auditar os próprios logs
-                               e.State != EntityState.Unchanged)
+                               e.State != EntityState.Unchanged &&
+                               e.State != EntityState.Detached)
                     .ToList();
 
-                foreach (var entry in entries)
+                // Processar auditoria após salvar as mudanças (para ter IDs gerados)
+                var auditTasks = entries.Select(entry => new
                 {
-                    await ProcessEntityAsync(entry, eventData.Context as ApplicationDbContext, cancellationToken);
-                }
+                    Entry = entry,
+                    State = entry.State,
+                    EntityName = entry.Entity.GetType().Name,
+                    EntityId = GetEntityId(entry),
+                    OldValues = GetOldValues(entry),
+                    NewValues = GetNewValues(entry),
+                    ModifiedProperties = entry.State == EntityState.Modified
+                        ? entry.Properties.Where(p => p.IsModified).Select(p => p.Metadata.Name).ToArray()
+                        : null
+                }).ToList();
 
-                return await base.SavingChangesAsync(eventData, result, cancellationToken);
+                // Salvar as mudanças primeiro
+                var saveResult = await base.SavingChangesAsync(eventData, result, cancellationToken);
+
+                // Agora processar auditoria de forma assíncrona
+                _ = Task.Run(async () =>
+                {
+                    foreach (var audit in auditTasks)
+                    {
+                        try
+                        {
+                            await _auditService.LogAsync(
+                                audit.EntityName,
+                                audit.EntityId,
+                                GetActionType(audit.State),
+                                valoresAntigos: string.IsNullOrEmpty(audit.OldValues) ? null : JsonSerializer.Deserialize<object>(audit.OldValues),
+                                valoresNovos: string.IsNullOrEmpty(audit.NewValues) ? null : JsonSerializer.Deserialize<object>(audit.NewValues),
+                                camposAlterados: audit.ModifiedProperties
+                            );
+                        }
+                        catch
+                        {
+                            // Ignorar erros de auditoria para não afetar a operação principal
+                        }
+                    }
+                }, cancellationToken);
+
+                return saveResult;
             }
             finally
             {
@@ -46,50 +85,13 @@ namespace AutoGestao.Data
             }
         }
 
-        private async Task ProcessEntityAsync(EntityEntry entry, ApplicationDbContext context, CancellationToken cancellationToken)
-        {
-            try
-            {
-                // Criar uma nova instância do contexto para salvar auditoria
-                // Isso evita conflitos com o contexto principal
-                using var auditContext = CreateAuditContext(context);
-
-                var auditLog = new AuditLog
-                {
-                    EntidadeNome = entry.Entity.GetType().Name,
-                    EntidadeId = GetEntityId(entry),
-                    TipoOperacao = GetActionType(entry.State),
-                    Usuario = await GetCurrentUserAsync(auditContext),
-                    DataHora = DateTime.UtcNow,
-                    ValoresAntigos = GetOldValues(entry),
-                    ValoresNovos = GetNewValues(entry)
-                };
-
-                auditContext.AuditLogs.Add(auditLog);
-                await auditContext.SaveChangesAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                // Log do erro sem interromper o processo principal
-                Console.WriteLine($"Erro na auditoria: {ex.Message}");
-            }
-        }
-
-        private ApplicationDbContext CreateAuditContext(ApplicationDbContext originalContext)
-        {
-            // Criar uma nova instância do contexto apenas para auditoria
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            optionsBuilder.UseNpgsql(originalContext.Database.GetConnectionString());
-            return new ApplicationDbContext(optionsBuilder.Options);
-        }
-
-        private string GetEntityId(EntityEntry entry)
+        private static string GetEntityId(EntityEntry entry)
         {
             var idProperty = entry.Properties.FirstOrDefault(p => p.Metadata.Name.Equals("Id", StringComparison.OrdinalIgnoreCase));
-            return idProperty?.CurrentValue?.ToString() ?? "Unknown";
+            return idProperty?.CurrentValue?.ToString() ?? "0";
         }
 
-        private EnumTipoOperacaoAuditoria GetActionType(EntityState state)
+        private static EnumTipoOperacaoAuditoria GetActionType(EntityState state)
         {
             return state switch
             {
@@ -100,48 +102,36 @@ namespace AutoGestao.Data
             };
         }
 
-        private async Task<Usuario> GetCurrentUserAsync(ApplicationDbContext auditContext)
-        {
-            // Implementar lógica para obter usuário atual
-            return await auditContext.Usuarios.FirstOrDefaultAsync();
-        }
-
-        private string GetOldValues(EntityEntry entry)
+        private static string GetOldValues(EntityEntry entry)
         {
             if (entry.State == EntityState.Added)
             {
-                return "{}";
+                return string.Empty;
             }
 
-            var oldValues = new Dictionary<string, object>();
-            foreach (var property in entry.Properties)
+            var oldValues = new Dictionary<string, object?>();
+            foreach (var property in entry.Properties.Where(p => p.OriginalValue != null))
             {
-                if (property.OriginalValue != null)
-                {
-                    oldValues[property.Metadata.Name] = property.OriginalValue;
-                }
+                oldValues[property.Metadata.Name] = property.OriginalValue;
             }
 
-            return System.Text.Json.JsonSerializer.Serialize(oldValues);
+            return oldValues.Count > 0 ? JsonSerializer.Serialize(oldValues) : string.Empty;
         }
 
-        private string GetNewValues(EntityEntry entry)
+        private static string GetNewValues(EntityEntry entry)
         {
             if (entry.State == EntityState.Deleted)
             {
-                return "{}";
+                return string.Empty;
             }
 
-            var newValues = new Dictionary<string, object>();
-            foreach (var property in entry.Properties)
+            var newValues = new Dictionary<string, object?>();
+            foreach (var property in entry.Properties.Where(p => p.CurrentValue != null))
             {
-                if (property.CurrentValue != null)
-                {
-                    newValues[property.Metadata.Name] = property.CurrentValue;
-                }
+                newValues[property.Metadata.Name] = property.CurrentValue;
             }
 
-            return System.Text.Json.JsonSerializer.Serialize(newValues);
+            return newValues.Count > 0 ? JsonSerializer.Serialize(newValues) : string.Empty;
         }
     }
 }

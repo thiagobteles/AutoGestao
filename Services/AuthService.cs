@@ -30,7 +30,7 @@ namespace AutoGestao.Services
                     if (usuario != null)
                     {
                         var auditService = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
-                        await auditService?.LogLoginAsync(usuario.Id, usuario.Nome, usuario.Email, usuario.IdEmpresa, false, "Senha incorreta");
+                        await auditService?.LogLoginAsync(usuario.Id, usuario.IdEmpresa, false, "Senha incorreta");
                     }
 
                     return new LoginResponse
@@ -46,7 +46,7 @@ namespace AutoGestao.Services
 
                 // Log de login bem-sucedido
                 var auditServiceSuccess = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
-                await auditServiceSuccess?.LogLoginAsync(usuario.Id, usuario.Nome, usuario.Email, usuario.IdEmpresa, true);
+                await auditServiceSuccess?.LogLoginAsync(usuario.Id, usuario.IdEmpresa, true);
 
                 // Gerar token JWT
                 var token = GenerateJwtToken(usuario);
@@ -109,10 +109,24 @@ namespace AutoGestao.Services
 
         public async Task LogoutAsync(int usuarioId)
         {
-            // Implementar blacklist de tokens se necessário
-            // Por enquanto, apenas log
-            _logger.LogInformation("Usuário {UsuarioId} fez logout", usuarioId);
-            await Task.CompletedTask;
+            try
+            {
+                // Buscar usuário para obter IdEmpresa
+                var usuario = await _context.Usuarios.FindAsync((long)usuarioId);
+
+                // Registrar auditoria de logout
+                var auditService = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
+                if (auditService != null && usuario != null)
+                {
+                    await auditService.LogLogoutAsync(usuario.Id, usuario.IdEmpresa);
+                }
+
+                _logger.LogInformation("Usuário {UsuarioId} fez logout", usuarioId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao processar logout do usuário {UsuarioId}", usuarioId);
+            }
         }
 
         public string[] GetRolesByPerfil(string perfil)

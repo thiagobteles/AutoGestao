@@ -2,6 +2,7 @@ using AutoGestao.Data;
 using AutoGestao.Entidades.Relatorio;
 using AutoGestao.Models.Report;
 using AutoGestao.Services;
+using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -11,10 +12,11 @@ namespace AutoGestao.Controllers
     /// <summary>
     /// Controller para construção visual de templates de relatórios
     /// </summary>
-    public class ReportBuilderController(ApplicationDbContext context) : Controller
+    public class ReportBuilderController(ApplicationDbContext context, IAuditService auditService) : Controller
     {
         private readonly ApplicationDbContext _context = context;
         private readonly EntityInspectorService _entityInspector = new(context);
+        private readonly IAuditService _auditService = auditService;
 
         /// <summary>
         /// Página principal do builder
@@ -207,10 +209,24 @@ namespace AutoGestao.Controllers
 
                 // Gerar HTML usando o template
                 var html = GenerateReportHtmlDynamic(sampleEntity, request.Template);
+
+                // Registrar auditoria de impressão de relatório
+                await _auditService.LogPrintReportAsync(
+                    request.Template?.Name ?? "Preview",
+                    request.EntityType,
+                    true
+                );
+
                 return Json(new { success = true, html });
             }
             catch (Exception ex)
             {
+                await _auditService.LogPrintReportAsync(
+                    request.Template?.Name ?? "Preview",
+                    request.EntityType,
+                    false,
+                    ex.Message
+                );
                 return Json(new { success = false, message = $"Erro ao gerar preview: {ex.Message}" });
             }
         }

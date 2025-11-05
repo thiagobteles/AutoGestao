@@ -80,20 +80,29 @@ namespace AutoGestao.Services
         {
             try
             {
-                var (Id, Nome, Email, IdEmpresa) = GetCurrentUser();
+                var usuario = GetCurrentUser();
+
+                // ⚠️ CORREÇÃO: Validar IdEmpresa
+                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(usuario.IdEmpresa);
+
+                if (!idEmpresaValido.HasValue)
+                {
+                    _logger.LogWarning(
+                        "Tentativa de criar audit log HTTP sem empresa válida. Usuário: {UsuarioId}, Empresa: {IdEmpresa}",
+                        usuario.Id,
+                        usuario.IdEmpresa
+                    );
+                    return;
+                }
 
                 var auditLog = new AuditLog
                 {
-                    IdEmpresa = IdEmpresa.Value,
-                    UsuarioId = Id,
-                    UsuarioNome = Nome,
-                    UsuarioEmail = Email,
+                    IdEmpresa = idEmpresaValido.Value,
+                    UsuarioId = usuario.Id,
                     EntidadeNome = "HttpRequest",
-                    EntidadeDisplayName = "Requisição HTTP",
                     EntidadeId = Guid.NewGuid().ToString(),
                     TipoOperacao = EnumTipoOperacaoAuditoria.View,
                     IpCliente = GetClientIpAddress(),
-                    UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString(),
                     UrlRequisicao = url,
                     MetodoHttp = metodo,
                     Sucesso = sucesso,
@@ -111,25 +120,34 @@ namespace AutoGestao.Services
             }
         }
 
-        public async Task LogLoginAsync(long usuarioId, string usuarioNome, string usuarioEmail, long? IdEmpresa, bool sucesso, string? mensagemErro = null)
+        public async Task LogLoginAsync(long usuarioId, long? IdEmpresa, bool sucesso, string? mensagemErro = null)
         {
             try
             {
+                // Validar IdEmpresa
+                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(IdEmpresa);
+
+                if (!idEmpresaValido.HasValue)
+                {
+                    _logger.LogWarning(
+                        "Tentativa de criar audit log de login sem empresa válida. Usuário: {UsuarioId}, Empresa: {IdEmpresa}",
+                        usuarioId,
+                        IdEmpresa
+                    );
+                    return;
+                }
+
                 var tipoOperacao = sucesso ? EnumTipoOperacaoAuditoria.Login : EnumTipoOperacaoAuditoria.LoginFailed;
 
                 var auditLog = new AuditLog
                 {
-                    IdEmpresa = IdEmpresa.Value,
+                    IdEmpresa = idEmpresaValido.Value,
                     UsuarioId = usuarioId,
-                    UsuarioNome = usuarioNome,
-                    UsuarioEmail = usuarioEmail,
                     EntidadeNome = "Usuario",
-                    EntidadeDisplayName = "Usuário",
                     EntidadeId = usuarioId.ToString(),
                     TipoOperacao = tipoOperacao,
                     TabelaNome = nameof(Usuario),
                     IpCliente = GetClientIpAddress(),
-                    UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString(),
                     UrlRequisicao = _httpContextAccessor.HttpContext?.Request.Path,
                     MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
                     Sucesso = sucesso,
@@ -143,6 +161,141 @@ namespace AutoGestao.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao registrar log de login para usuário {UsuarioId}", usuarioId);
+            }
+        }
+
+        public async Task LogLogoutAsync(long usuarioId, long? IdEmpresa)
+        {
+            try
+            {
+                // Validar IdEmpresa
+                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(IdEmpresa);
+
+                if (!idEmpresaValido.HasValue)
+                {
+                    _logger.LogWarning(
+                        "Tentativa de criar audit log de logout sem empresa válida. Usuário: {UsuarioId}, Empresa: {IdEmpresa}",
+                        usuarioId,
+                        IdEmpresa
+                    );
+                    return;
+                }
+
+                var auditLog = new AuditLog
+                {
+                    IdEmpresa = idEmpresaValido.Value,
+                    UsuarioId = usuarioId,
+                    EntidadeNome = "Usuario",
+                    EntidadeId = usuarioId.ToString(),
+                    TipoOperacao = EnumTipoOperacaoAuditoria.Logout,
+                    TabelaNome = nameof(Usuario),
+                    IpCliente = GetClientIpAddress(),
+                    UrlRequisicao = _httpContextAccessor.HttpContext?.Request.Path,
+                    MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
+                    Sucesso = true,
+                    DataHora = DateTime.UtcNow
+                };
+
+                _context.AuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao registrar log de logout para usuário {UsuarioId}", usuarioId);
+            }
+        }
+
+        public async Task LogViewAsync(string entidadeNome, string entidadeId, string? mensagemErro = null)
+        {
+            await LogAsync(
+                entidadeNome,
+                entidadeId,
+                EnumTipoOperacaoAuditoria.View,
+                mensagemErro: mensagemErro
+            );
+        }
+
+        public async Task LogPrintReportAsync(string reportNome, string? entidadeId = null, bool sucesso = true, string? mensagemErro = null)
+        {
+            try
+            {
+                var usuario = GetCurrentUser();
+                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(usuario.IdEmpresa);
+
+                if (!idEmpresaValido.HasValue)
+                {
+                    _logger.LogWarning(
+                        "Tentativa de criar audit log de impressão sem empresa válida. Usuário: {UsuarioId}",
+                        usuario.Id
+                    );
+                    return;
+                }
+
+                var auditLog = new AuditLog
+                {
+                    IdEmpresa = idEmpresaValido.Value,
+                    UsuarioId = usuario.Id,
+                    EntidadeNome = "Relatorio",
+                    EntidadeId = entidadeId ?? Guid.NewGuid().ToString(),
+                    TipoOperacao = EnumTipoOperacaoAuditoria.PrintReport,
+                    TabelaNome = "Relatorio",
+                    ValoresNovos = reportNome,
+                    IpCliente = GetClientIpAddress(),
+                    UrlRequisicao = _httpContextAccessor.HttpContext?.Request.Path,
+                    MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
+                    Sucesso = sucesso,
+                    MensagemErro = mensagemErro,
+                    DataHora = DateTime.UtcNow
+                };
+
+                _context.AuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao registrar log de impressão de relatório: {ReportNome}", reportNome);
+            }
+        }
+
+        public async Task LogActionAsync(string actionNome, string entidadeNome, string entidadeId, bool sucesso = true, string? mensagemErro = null, object? dadosAcao = null)
+        {
+            try
+            {
+                var usuario = GetCurrentUser();
+                var idEmpresaValido = await ValidarEObterIdEmpresaAsync(usuario.IdEmpresa);
+
+                if (!idEmpresaValido.HasValue)
+                {
+                    _logger.LogWarning(
+                        "Tentativa de criar audit log de ação sem empresa válida. Usuário: {UsuarioId}",
+                        usuario.Id
+                    );
+                    return;
+                }
+
+                var auditLog = new AuditLog
+                {
+                    IdEmpresa = idEmpresaValido.Value,
+                    UsuarioId = usuario.Id,
+                    EntidadeNome = entidadeNome,
+                    EntidadeId = entidadeId,
+                    TipoOperacao = EnumTipoOperacaoAuditoria.Action,
+                    TabelaNome = entidadeNome.ToLower(),
+                    ValoresNovos = dadosAcao != null ? JsonConvert.SerializeObject(new { acao = actionNome, dados = dadosAcao }, Formatting.Indented) : actionNome,
+                    IpCliente = GetClientIpAddress(),
+                    UrlRequisicao = _httpContextAccessor.HttpContext?.Request.Path,
+                    MetodoHttp = _httpContextAccessor.HttpContext?.Request.Method,
+                    Sucesso = sucesso,
+                    MensagemErro = mensagemErro,
+                    DataHora = DateTime.UtcNow
+                };
+
+                _context.AuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao registrar log de ação: {ActionNome} para {EntidadeNome}:{EntidadeId}", actionNome, entidadeNome, entidadeId);
             }
         }
 
