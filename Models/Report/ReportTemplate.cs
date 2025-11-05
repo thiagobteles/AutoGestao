@@ -12,7 +12,7 @@ namespace AutoGestao.Models.Report
     {
         public string Title { get; set; } = string.Empty;
         public string? Subtitle { get; set; }
-        public string Type { get; set; } = "grid"; // grid, table ou row
+        public string Type { get; set; } = "grid"; // grid, table, row ou richtext
         public int Columns { get; set; } = 3;
         public int Order { get; set; }
         public List<ReportField> Fields { get; set; } = [];
@@ -22,6 +22,7 @@ namespace AutoGestao.Models.Report
         public string? TotalField { get; set; }
         public string? BackgroundColor { get; set; } // Para personalização de cores
         public string? Icon { get; set; } // Ícone FontAwesome para a seção
+        public string? RichTextContent { get; set; } // Conteúdo HTML para tipo richtext
     }
 
     public class ReportField

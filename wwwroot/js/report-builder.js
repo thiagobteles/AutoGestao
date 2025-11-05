@@ -202,6 +202,7 @@ const TemplateBuilder = {
                             <option value="grid" ${section.type === 'grid' ? 'selected' : ''}>Grid</option>
                             <option value="row" ${section.type === 'row' ? 'selected' : ''}>Linha</option>
                             <option value="table" ${section.type === 'table' ? 'selected' : ''}>Tabela</option>
+                            <option value="richtext" ${section.type === 'richtext' ? 'selected' : ''}>Texto Livre</option>
                         </select>
                         ${section.type === 'grid' ? `
                             <select class="section-control-btn" onchange="TemplateBuilder.changeSectionColumns('${section.id}', this.value)">
@@ -219,16 +220,92 @@ const TemplateBuilder = {
                         </button>
                     </div>
                 </div>
-                <div class="section-fields-area"
-                     data-section-id="${section.id}"
-                     ondrop="TemplateBuilder.handleDrop(event, '${section.id}')"
-                     ondragover="TemplateBuilder.handleDragOver(event)"
-                     ondragleave="TemplateBuilder.handleDragLeave(event)">
-                    ${section.fields.length === 0 ?
-                        '<div style="text-align: center; color: #999; padding: 20px;">Arraste campos aqui</div>' :
-                        this.renderFields(section.fields, section.id)
-                    }
-                </div>
+                ${section.type === 'richtext' ? `
+                    <div class="richtext-editor-container" data-section-id="${section.id}">
+                        <div class="richtext-toolbar">
+                            <button type="button" onclick="TemplateBuilder.execCommand('bold')" title="Negrito">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button type="button" onclick="TemplateBuilder.execCommand('italic')" title="Itálico">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button type="button" onclick="TemplateBuilder.execCommand('underline')" title="Sublinhado">
+                                <i class="fas fa-underline"></i>
+                            </button>
+                            <span class="toolbar-separator"></span>
+                            <button type="button" onclick="TemplateBuilder.execCommand('justifyLeft')" title="Alinhar à esquerda">
+                                <i class="fas fa-align-left"></i>
+                            </button>
+                            <button type="button" onclick="TemplateBuilder.execCommand('justifyCenter')" title="Centralizar">
+                                <i class="fas fa-align-center"></i>
+                            </button>
+                            <button type="button" onclick="TemplateBuilder.execCommand('justifyRight')" title="Alinhar à direita">
+                                <i class="fas fa-align-right"></i>
+                            </button>
+                            <button type="button" onclick="TemplateBuilder.execCommand('justifyFull')" title="Justificar">
+                                <i class="fas fa-align-justify"></i>
+                            </button>
+                            <span class="toolbar-separator"></span>
+                            <button type="button" onclick="TemplateBuilder.execCommand('insertUnorderedList')" title="Lista não ordenada">
+                                <i class="fas fa-list-ul"></i>
+                            </button>
+                            <button type="button" onclick="TemplateBuilder.execCommand('insertOrderedList')" title="Lista ordenada">
+                                <i class="fas fa-list-ol"></i>
+                            </button>
+                            <span class="toolbar-separator"></span>
+                            <button type="button" onclick="TemplateBuilder.execCommand('indent')" title="Aumentar recuo">
+                                <i class="fas fa-indent"></i>
+                            </button>
+                            <button type="button" onclick="TemplateBuilder.execCommand('outdent')" title="Diminuir recuo">
+                                <i class="fas fa-outdent"></i>
+                            </button>
+                            <span class="toolbar-separator"></span>
+                            <select onchange="TemplateBuilder.changeTextColor(this.value, '${section.id}')" title="Cor do texto">
+                                <option value="">Cor do texto</option>
+                                <option value="#000000">Preto</option>
+                                <option value="#FF0000">Vermelho</option>
+                                <option value="#00FF00">Verde</option>
+                                <option value="#0000FF">Azul</option>
+                                <option value="#FFFF00">Amarelo</option>
+                                <option value="#FF00FF">Magenta</option>
+                                <option value="#00FFFF">Ciano</option>
+                            </select>
+                            <select onchange="TemplateBuilder.changeFontSize(this.value, '${section.id}')" title="Tamanho da fonte">
+                                <option value="">Tamanho</option>
+                                <option value="1">Muito pequeno</option>
+                                <option value="2">Pequeno</option>
+                                <option value="3">Normal</option>
+                                <option value="4">Médio</option>
+                                <option value="5">Grande</option>
+                                <option value="6">Muito grande</option>
+                                <option value="7">Enorme</option>
+                            </select>
+                            <span class="toolbar-separator"></span>
+                            <button type="button" onclick="TemplateBuilder.insertImage('${section.id}')" title="Inserir imagem">
+                                <i class="fas fa-image"></i>
+                            </button>
+                        </div>
+                        <div class="richtext-editor"
+                             id="richtext-${section.id}"
+                             contenteditable="true"
+                             data-section-id="${section.id}"
+                             onblur="TemplateBuilder.saveRichTextContent('${section.id}')"
+                             style="min-height: 200px; padding: 15px; background: white; border: 2px solid #dee2e6; border-radius: 8px; outline: none;">
+                            ${section.richTextContent || '<p>Digite seu texto aqui...</p>'}
+                        </div>
+                    </div>
+                ` : `
+                    <div class="section-fields-area"
+                         data-section-id="${section.id}"
+                         ondrop="TemplateBuilder.handleDrop(event, '${section.id}')"
+                         ondragover="TemplateBuilder.handleDragOver(event)"
+                         ondragleave="TemplateBuilder.handleDragLeave(event)">
+                        ${section.fields.length === 0 ?
+                            '<div style="text-align: center; color: #999; padding: 20px;">Arraste campos aqui</div>' :
+                            this.renderFields(section.fields, section.id)
+                        }
+                    </div>
+                `}
             `;
 
             canvas.appendChild(sectionDiv);
@@ -411,6 +488,16 @@ const TemplateBuilder = {
             throw new Error('Adicione pelo menos uma seção ao relatório');
         }
 
+        // Salvar conteúdo dos editores de texto rico antes de gerar o template
+        this.sections.forEach(section => {
+            if (section.type === 'richtext') {
+                const editor = document.getElementById(`richtext-${section.id}`);
+                if (editor) {
+                    section.richTextContent = editor.innerHTML;
+                }
+            }
+        });
+
         return {
             name: document.getElementById('templateName').value || 'Template Sem Nome',
             sections: this.sections.map((section, index) => ({
@@ -431,7 +518,8 @@ const TemplateBuilder = {
                 dataProperty: section.dataProperty || null,
                 showTotal: section.showTotal || false,
                 totalField: section.totalField || null,
-                icon: section.icon
+                icon: section.icon,
+                richTextContent: section.richTextContent || ''
             }))
         };
     },
@@ -522,6 +610,58 @@ const TemplateBuilder = {
     },
 
     /**
+     * Executar comando de formatação no editor de texto rico
+     */
+    execCommand(command) {
+        document.execCommand(command, false, null);
+    },
+
+    /**
+     * Mudar cor do texto
+     */
+    changeTextColor(color, sectionId) {
+        if (!color) return;
+        document.execCommand('foreColor', false, color);
+        // Reset select
+        const select = event.target;
+        select.selectedIndex = 0;
+    },
+
+    /**
+     * Mudar tamanho da fonte
+     */
+    changeFontSize(size, sectionId) {
+        if (!size) return;
+        document.execCommand('fontSize', false, size);
+        // Reset select
+        const select = event.target;
+        select.selectedIndex = 0;
+    },
+
+    /**
+     * Inserir imagem no editor
+     */
+    insertImage(sectionId) {
+        const url = prompt('Digite a URL da imagem:');
+        if (url) {
+            document.execCommand('insertImage', false, url);
+        }
+    },
+
+    /**
+     * Salvar conteúdo do editor de texto rico
+     */
+    saveRichTextContent(sectionId) {
+        const section = this.sections.find(s => s.id === sectionId);
+        if (section) {
+            const editor = document.getElementById(`richtext-${sectionId}`);
+            if (editor) {
+                section.richTextContent = editor.innerHTML;
+            }
+        }
+    },
+
+    /**
      * Carregar template existente
      */
     loadTemplate(templateJson) {
@@ -557,7 +697,8 @@ const TemplateBuilder = {
                 dataProperty: section.dataProperty || section.DataProperty,
                 listColumns: section.listColumns || section.ListColumns || [],
                 showTotal: section.showTotal || section.ShowTotal,
-                totalField: section.totalField || section.TotalField
+                totalField: section.totalField || section.TotalField,
+                richTextContent: section.richTextContent || section.RichTextContent || ''
             }));
 
             console.log('Seções carregadas:', this.sections);

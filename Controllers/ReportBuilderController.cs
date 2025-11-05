@@ -322,6 +322,16 @@ namespace AutoGestao.Controllers
 
                     html.AppendLine("</table>");
                 }
+                else if (section.Type == "richtext")
+                {
+                    // Renderizar conteúdo HTML do editor de texto rico
+                    if (!string.IsNullOrEmpty(section.RichTextContent))
+                    {
+                        html.AppendLine("<div class='richtext-content'>");
+                        html.AppendLine(section.RichTextContent);
+                        html.AppendLine("</div>");
+                    }
+                }
 
                 html.AppendLine("</div>");
             }
@@ -671,6 +681,32 @@ namespace AutoGestao.Controllers
                 .btn-print:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                }
+
+                /* ===== CONTEÚDO DE TEXTO RICO ===== */
+                .richtext-content {
+                    padding: 15px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    line-height: 1.8;
+                    color: #2c3e50;
+                }
+
+                .richtext-content img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 4px;
+                    margin: 10px 0;
+                }
+
+                .richtext-content ul,
+                .richtext-content ol {
+                    margin-left: 25px;
+                    margin-bottom: 15px;
+                }
+
+                .richtext-content p {
+                    margin-bottom: 10px;
                 }
 
                 /* ===== IMPRESSÃO ===== */
