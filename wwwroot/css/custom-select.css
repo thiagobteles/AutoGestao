@@ -9,7 +9,7 @@
 }
 
 .custom-select-wrapper.active {
-    z-index: 9999; /* Z-index alto quando aberto para ficar acima de tudo */
+    z-index: 10001; /* Z-index alto quando aberto para ficar acima de tudo, incluindo sections */
 }
 
 .custom-select-trigger {
@@ -70,10 +70,7 @@
     }
 
 .custom-select-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+    position: fixed; /* Mudado de absolute para fixed para não ser cortado por overflow */
     background: white;
     border: 1px solid #ced4da;
     border-top: none;
@@ -81,9 +78,10 @@
     margin-top: -1px;
     max-height: 250px;
     overflow-y: auto;
-    z-index: 10000; /* Z-index muito alto para garantir que fique acima de sections */
+    z-index: 10002; /* Z-index muito alto para garantir que fique acima de sections */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: none;
+    min-width: 200px; /* Largura mínima para garantir legibilidade */
 }
 
     .custom-select-dropdown.active {
@@ -156,15 +154,43 @@
     outline: none;
 }
 
-/* Garantir que sections não cortem o dropdown */
+/* =============================================================================
+   CORREÇÃO CRÍTICA: Garantir que sections não cortem o dropdown
+   O custom.css força overflow:hidden nos cards, precisamos sobrescrever isso!
+   ============================================================================= */
+
+/* IMPORTANTE: Estas regras devem ter !important para sobrescrever custom.css */
 .form-section,
 .card-modern,
-.card-body {
+.card-body,
+.card-body-modern,
+.card-header-modern {
+    overflow: visible !important;
+    position: relative;
+    z-index: auto; /* Garantir que sections não criem novo stacking context */
+}
+
+/* Garantir que o wrapper e containers tenham overflow visible */
+.form-field-group:has(.custom-select-wrapper),
+.form-group-modern:has(.custom-select-wrapper),
+.grid-2, .grid-3, .grid-4, .grid-5 {
     overflow: visible !important;
 }
 
-/* Garantir que o wrapper tenha espaço para o dropdown */
-.form-field-group:has(.custom-select-wrapper) {
+/* Forçar overflow visible em cards que contenham selects customizados */
+.card-modern:has(.custom-select-wrapper),
+.card-body-modern:has(.custom-select-wrapper) {
+    overflow: visible !important;
+    max-width: none !important;
+}
+
+/* Quando dropdown está ativo, garantir que o card pai tenha overflow visible */
+.card-modern:has(.custom-select-wrapper.active) {
+    overflow: visible !important;
+    z-index: 1 !important;
+}
+
+.card-body-modern:has(.custom-select-wrapper.active) {
     overflow: visible !important;
 }
 

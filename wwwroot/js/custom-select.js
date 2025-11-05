@@ -182,6 +182,17 @@ function openDropdown(wrapper) {
     wrapper.classList.add('active'); // Adicionar active no wrapper para z-index alto
     trigger.classList.add('active');
     dropdown.classList.add('active');
+
+    // Calcular posição do dropdown usando position: fixed
+    positionDropdown(trigger, dropdown);
+
+    // Reposicionar ao fazer scroll ou resize
+    const repositionHandler = () => positionDropdown(trigger, dropdown);
+    window.addEventListener('scroll', repositionHandler, true);
+    window.addEventListener('resize', repositionHandler);
+
+    // Remover listeners quando fechar
+    dropdown.dataset.repositionHandler = 'attached';
 }
 
 function closeDropdown(wrapper) {
@@ -191,6 +202,50 @@ function closeDropdown(wrapper) {
     wrapper.classList.remove('active'); // Remover active do wrapper
     trigger.classList.remove('active');
     dropdown.classList.remove('active');
+
+    // Remover event listeners de scroll e resize
+    if (dropdown.dataset.repositionHandler === 'attached') {
+        window.removeEventListener('scroll', positionDropdown, true);
+        window.removeEventListener('resize', positionDropdown);
+        delete dropdown.dataset.repositionHandler;
+    }
+}
+
+/**
+ * Calcula e aplica a posição do dropdown usando position: fixed
+ */
+function positionDropdown(trigger, dropdown) {
+    const rect = trigger.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const dropdownHeight = dropdown.offsetHeight || 250; // altura max padrão
+
+    // Calcular posição
+    const spaceBelow = viewportHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    // Decidir se abre para cima ou para baixo
+    const openUpwards = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+    if (openUpwards) {
+        // Abrir para cima
+        dropdown.style.top = 'auto';
+        dropdown.style.bottom = (viewportHeight - rect.top + 1) + 'px';
+        dropdown.style.borderRadius = '6px 6px 0 0';
+        dropdown.style.borderTop = '1px solid #ced4da';
+        dropdown.style.borderBottom = 'none';
+    } else {
+        // Abrir para baixo (padrão)
+        dropdown.style.top = (rect.bottom - 1) + 'px';
+        dropdown.style.bottom = 'auto';
+        dropdown.style.borderRadius = '0 0 6px 6px';
+        dropdown.style.borderTop = 'none';
+        dropdown.style.borderBottom = '1px solid #ced4da';
+    }
+
+    // Posição horizontal
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.width = rect.width + 'px';
+    dropdown.style.minWidth = rect.width + 'px';
 }
 
 function selectOption(wrapper, option, optionElement) {
