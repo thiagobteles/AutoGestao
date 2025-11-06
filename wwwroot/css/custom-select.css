@@ -9,7 +9,7 @@
 }
 
 .custom-select-wrapper.active {
-    z-index: 10001; /* Z-index alto quando aberto para ficar acima de tudo, incluindo sections */
+    z-index: 100001; /* Z-index acima do alert-system para garantir visibilidade */
 }
 
 .custom-select-trigger {
@@ -78,7 +78,7 @@
     margin-top: -1px;
     max-height: 250px;
     overflow-y: auto;
-    z-index: 10002; /* Z-index muito alto para garantir que fique acima de sections */
+    z-index: 100002; /* Z-index acima do alert-system para garantir visibilidade */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: none;
     min-width: 200px; /* Largura mínima para garantir legibilidade */
