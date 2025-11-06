@@ -82,6 +82,8 @@
     --text-color: #495057;              /* Cor de texto padrão */
     --text-muted: #6C757D;              /* Texto secundário */
     --text-light: #666666;              /* Texto claro */
+    --text-dark: #333333;               /* Texto escuro */
+    --text-darker: #2C3E50;             /* Texto mais escuro */
 
     /* =========================================================================
        BORDAS E SEPARADORES
@@ -89,7 +91,10 @@
     --border-color: #E2E8F0;            /* Borda padrão */
     --border-light: #CED4DA;            /* Borda clara */
     --border-lighter: #E9ECEF;          /* Borda mais clara */
+    --border-lightest: #F0F0F0;         /* Borda super clara */
     --border-dark: #ADB5BD;             /* Borda escura */
+    --border-table: #E0E0E0;            /* Borda de tabelas */
+    --border-modal: #DEE2E6;            /* Borda de modais */
     --border-focus: rgba(102, 126, 234, 0.15); /* Borda focus (adaptável) */
 
     /* =========================================================================
@@ -118,10 +123,32 @@
     --bg-selected: #E8F4EA;             /* Background selecionado */
     --bg-gradient-light: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
     --bg-overlay: rgba(0, 0, 0, 0.5);   /* Overlay escuro */
+    --bg-overlay-dark: rgba(0, 0, 0, 0.4); /* Overlay menos escuro */
     --bg-modal-header-success: #F7FDF9; /* Header modal sucesso */
     --bg-modal-header-error: #FFFAFA;   /* Header modal erro */
     --bg-modal-header-warning: #FFFBF5; /* Header modal aviso */
     --bg-modal-header-info: #F8FBFF;    /* Header modal info */
+
+    /* Backgrounds adicionais para grids e tabelas */
+    --bg-table-hover: #F8F9FA;          /* Background de linha ao hover */
+    --bg-table-stripe: #FAFAFA;         /* Background alternado em tabelas */
+    --bg-card: #FFFFFF;                 /* Background de cards */
+    --bg-section: #F5F5F5;              /* Background de seções */
+
+    /* Backgrounds para modais */
+    --bg-modal: #FFFFFF;                /* Background principal de modais */
+    --bg-modal-footer: #FAFAFA;         /* Background do rodapé de modais */
+    --bg-modal-overlay: rgba(0, 0, 0, 0.4); /* Overlay de modais */
+
+    /* Dark Mode Colors (para prefers-color-scheme: dark) */
+    --dark-mode-bg: #1F2937;            /* Background escuro */
+    --dark-mode-bg-dark: #111827;       /* Background mais escuro */
+    --dark-mode-border: #374151;        /* Bordas escuras */
+    --dark-mode-text: #F3F4F6;          /* Texto claro */
+    --dark-mode-text-muted: #D1D5DB;    /* Texto secundário */
+    --dark-mode-element: #374151;       /* Elementos escuros */
+    --dark-mode-element-hover: #4B5563; /* Hover em elementos escuros */
+    --dark-mode-element-border: #6B7280; /* Borda de elementos escuros */
 
     /* =========================================================================
        OPACIDADES E TRANSPARÊNCIAS (para uso com cores sólidas)
