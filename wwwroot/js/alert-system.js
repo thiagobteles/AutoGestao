@@ -8,6 +8,7 @@ class AlertSystem {
     constructor() {
         this.container = null;
         this.alerts = new Map();
+        this.alertPromises = new Map(); // Armazenar promises para cada alerta
         this.defaultDuration = 5000;
         this.init();
     }
@@ -18,6 +19,7 @@ class AlertSystem {
             this.container = document.createElement('div');
             this.container.className = 'alert-container';
             document.body.appendChild(this.container);
+            console.log('✅ Alert container criado e adicionado ao body');
         }
     }
 
@@ -30,6 +32,7 @@ class AlertSystem {
      * @param {number} options.duration - Duração em ms (0 = não fecha automaticamente)
      * @param {Array} options.buttons - Array de botões [{text, onClick, primary}]
      * @param {Function} options.onClose - Callback ao fechar
+     * @returns {Promise} - Promise que resolve quando o alerta é fechado
      */
     show(options) {
         const {
@@ -41,9 +44,16 @@ class AlertSystem {
             onClose = null
         } = options;
 
+        console.log(`🎨 Mostrando alerta tipo: ${type}, mensagem: ${message}`);
+
         // Criar elemento do alerta
         const alertId = `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const alertEl = this.createAlertElement(alertId, type, title, message, buttons, onClose);
+
+        // Criar Promise que será resolvida quando o alerta fechar
+        const promise = new Promise((resolve) => {
+            this.alertPromises.set(alertId, resolve);
+        });
 
         // Adicionar ao container
         this.container.appendChild(alertEl);
@@ -60,14 +70,17 @@ class AlertSystem {
         if (duration > 0 && buttons.length === 0) {
             // Configurar animação da barra de progresso
             alertEl.style.setProperty('--duration', `${duration}ms`);
-            alertEl.querySelector('.alert-modern').style.setProperty('animation-duration', `${duration}ms`);
+            const alertModern = alertEl.querySelector('.alert-modern');
+            if (alertModern) {
+                alertModern.style.setProperty('animation-duration', `${duration}ms`);
+            }
 
             setTimeout(() => {
                 this.close(alertId);
             }, duration);
         }
 
-        return alertId;
+        return promise;
     }
 
     createAlertElement(id, type, title, message, buttons, onClose) {
@@ -177,14 +190,23 @@ class AlertSystem {
         if (!alertEl) return;
 
         const alertBox = alertEl.querySelector('.alert-modern');
-        alertBox.classList.remove('show');
-        alertBox.classList.add('hide');
+        if (alertBox) {
+            alertBox.classList.remove('show');
+            alertBox.classList.add('hide');
+        }
 
         setTimeout(() => {
             if (alertEl.parentNode) {
                 alertEl.parentNode.removeChild(alertEl);
             }
             this.alerts.delete(alertId);
+
+            // Resolver a Promise do alerta
+            const resolve = this.alertPromises.get(alertId);
+            if (resolve) {
+                resolve();
+                this.alertPromises.delete(alertId);
+            }
         }, 400);
     }
 
@@ -295,16 +317,66 @@ class AlertSystem {
 // INSTANCIAR E EXPORTAR GLOBALMENTE
 // ===================================================================
 
-window.alertSystem = new AlertSystem();
+// Inicializar quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAlertSystem);
+} else {
+    initAlertSystem();
+}
 
-// Criar funções globais para compatibilidade
-window.showSuccess = (message, title = '') => window.alertSystem.success(message, title);
-window.showError = (message, title = '') => window.alertSystem.error(message, title);
-window.showWarning = (message, title = '') => window.alertSystem.warning(message, title);
-window.showInfo = (message, title = '') => window.alertSystem.info(message, title);
+function initAlertSystem() {
+    console.log('🚀 Inicializando Alert System...');
 
-// Funções de confirmação (não sobrescrever window.confirm nativo)
-window.showConfirm = (message, options) => window.alertSystem.confirm(message, options);
-window.confirmDelete = (itemName) => window.alertSystem.confirmDelete(itemName);
+    window.alertSystem = new AlertSystem();
 
-console.log('✅ Sistema de Alertas inicializado');
+    // Criar funções globais para compatibilidade
+    window.showSuccess = (message, title = '') => {
+        console.log('📞 showSuccess chamado:', message);
+        return window.alertSystem.success(message, title);
+    };
+
+    window.showError = (message, title = '') => {
+        console.log('📞 showError chamado:', message);
+        return window.alertSystem.error(message, title);
+    };
+
+    window.showWarning = (message, title = '') => {
+        console.log('📞 showWarning chamado:', message);
+        return window.alertSystem.warning(message, title);
+    };
+
+    window.showInfo = (message, title = '') => {
+        console.log('📞 showInfo chamado:', message);
+        return window.alertSystem.info(message, title);
+    };
+
+    // Funções de confirmação (não sobrescrever window.confirm nativo)
+    window.showConfirm = (message, options) => {
+        console.log('📞 showConfirm chamado:', message);
+        return window.alertSystem.confirm(message, options);
+    };
+
+    window.confirmDelete = (itemName) => {
+        console.log('📞 confirmDelete chamado:', itemName);
+        return window.alertSystem.confirmDelete(itemName);
+    };
+
+    console.log('✅ Sistema de Alertas inicializado');
+
+    // Debug: verificar se o CSS foi carregado
+    const testElement = document.createElement('div');
+    testElement.className = 'alert-modern';
+    testElement.style.display = 'none';
+    document.body.appendChild(testElement);
+
+    const computedStyle = window.getComputedStyle(testElement);
+    const hasStyles = computedStyle.borderRadius !== '0px';
+
+    document.body.removeChild(testElement);
+
+    if (hasStyles) {
+        console.log('✅ CSS do Alert System carregado corretamente');
+    } else {
+        console.warn('⚠️ CSS do Alert System pode não estar carregado. Verifique se alert-system.css está incluído no _Layout.cshtml');
+    }
+}
