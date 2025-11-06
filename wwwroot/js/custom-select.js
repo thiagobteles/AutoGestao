@@ -111,7 +111,7 @@ function convertToCustomSelect(selectElement) {
         valueContainer.appendChild(text);
     } else {
         valueContainer.classList.add('placeholder');
-        valueContainer.textContent = 'Selecione...';
+        valueContainer.innerHTML = '&nbsp;'; // Deixa em branco ao invés de "Selecione..."
     }
 
     // Seta
@@ -291,9 +291,18 @@ function selectOption(wrapper, option, optionElement) {
     // Atualizar valor
     hiddenInput.value = option.value;
 
-    // Disparar evento change
+    // Disparar evento change no hiddenInput
     const changeEvent = new Event('change', { bubbles: true });
     hiddenInput.dispatchEvent(changeEvent);
+
+    // IMPORTANTE: Também disparar no select original para compatibilidade com comportamentos de tela
+    const selectId = wrapper.dataset.selectId;
+    const originalSelect = document.querySelector(`select[id="${selectId}"]`);
+    if (originalSelect) {
+        originalSelect.value = option.value;
+        const selectChangeEvent = new Event('change', { bubbles: true });
+        originalSelect.dispatchEvent(selectChangeEvent);
+    }
 
     // Atualizar visual
     valueContainer.innerHTML = '';
