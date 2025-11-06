@@ -2,6 +2,7 @@ using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Helpers;
+using AutoGestao.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoGestao.Extensions
@@ -11,7 +12,7 @@ namespace AutoGestao.Extensions
         /// <summary>
         /// Adiciona histórico de auditoria ao ViewBag para ser exibido na view de Details
         /// </summary>
-        public static async Task AddAuditHistoryToViewBag<T>(this StandardGridController<T> controller, ApplicationDbContext context, T entity) where T : BaseEntidade, new()
+        public static async Task AddAuditHistoryToViewBag<T>(this StandardGridController<T> controller, ApplicationDbContext context, T entity) where T : class, IEntity, new()
         {
             try
             {

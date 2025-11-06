@@ -6,7 +6,9 @@
       "Bash(dotnet ef database update:*)",
       "Bash(dotnet ef migrations script:*)",
       "Bash(node:*)",
-      "Bash(dotnet ef migrations:*)"
+      "Bash(dotnet ef migrations:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

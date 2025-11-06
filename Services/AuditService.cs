@@ -46,14 +46,7 @@ namespace AutoGestao.Services
                 var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
-                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
-                    DataCadastro = now,
-                    CriadoPorUsuarioId = usuario.Id,
-                    AlteradoPorUsuarioId = usuario.Id,
-                    Ativo = true,
-
-                    // Campos específicos do AuditLog
                     UsuarioId = usuario.Id,
                     EntidadeNome = entidadeNome,
                     EntidadeId = entidadeId,
@@ -107,14 +100,7 @@ namespace AutoGestao.Services
                 var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
-                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
-                    DataCadastro = now,
-                    CriadoPorUsuarioId = usuario.Id,
-                    AlteradoPorUsuarioId = usuario.Id,
-                    Ativo = true,
-
-                    // Campos específicos do AuditLog
                     UsuarioId = usuario.Id,
                     EntidadeNome = "HttpRequest",
                     EntidadeId = Guid.NewGuid().ToString(),
@@ -159,14 +145,7 @@ namespace AutoGestao.Services
 
                 var auditLog = new AuditLog
                 {
-                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
-                    DataCadastro = now,
-                    CriadoPorUsuarioId = usuarioId,
-                    AlteradoPorUsuarioId = usuarioId,
-                    Ativo = true,
-
-                    // Campos específicos do AuditLog
                     UsuarioId = usuarioId,
                     EntidadeNome = "Usuario",
                     EntidadeId = usuarioId.ToString(),
@@ -209,14 +188,7 @@ namespace AutoGestao.Services
                 var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
-                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
-                    DataCadastro = now,
-                    CriadoPorUsuarioId = usuarioId,
-                    AlteradoPorUsuarioId = usuarioId,
-                    Ativo = true,
-
-                    // Campos específicos do AuditLog
                     UsuarioId = usuarioId,
                     EntidadeNome = "Usuario",
                     EntidadeId = usuarioId.ToString(),
@@ -267,14 +239,7 @@ namespace AutoGestao.Services
                 var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
-                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
-                    DataCadastro = now,
-                    CriadoPorUsuarioId = usuario.Id,
-                    AlteradoPorUsuarioId = usuario.Id,
-                    Ativo = true,
-
-                    // Campos específicos do AuditLog
                     UsuarioId = usuario.Id,
                     EntidadeNome = "Relatorio",
                     EntidadeId = entidadeId ?? Guid.NewGuid().ToString(),
@@ -317,14 +282,7 @@ namespace AutoGestao.Services
                 var now = DateTime.UtcNow;
                 var auditLog = new AuditLog
                 {
-                    // Campos da BaseEntidade (OBRIGATÓRIOS)
                     IdEmpresa = idEmpresaValido.Value,
-                    DataCadastro = now,
-                    CriadoPorUsuarioId = usuario.Id,
-                    AlteradoPorUsuarioId = usuario.Id,
-                    Ativo = true,
-
-                    // Campos específicos do AuditLog
                     UsuarioId = usuario.Id,
                     EntidadeNome = entidadeNome,
                     EntidadeId = entidadeId,

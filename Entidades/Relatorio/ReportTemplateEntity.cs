@@ -24,8 +24,8 @@ namespace AutoGestao.Entidades.Relatorio
         public string TemplateJson { get; set; } = string.Empty;
 
         [GridField("Padrão", Order = 20, Width = "80px")]
-        [FormField(Order = 20, Name = "Padrão", Section = "Status", Icon = "fas fa-star", Type = EnumFieldType.Checkbox, GridColumns = 1)]
-        public bool IsPadrao { get; set; } = false;
+        [FormField(Order = 20, Name = "Padrão", Section = "Status", Icon = "fas fa-star", Type = EnumFieldType.Checkbox, GridColumns = 2)]
+        public bool Padrao { get; set; } = false;
 
         [FormField(Order = 21, Name = "Ativo", Section = "Status", Icon = "fas fa-toggle-on", Type = EnumFieldType.Checkbox)]
         public new bool Ativo { get; set; } = true;

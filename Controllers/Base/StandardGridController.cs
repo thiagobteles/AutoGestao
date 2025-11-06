@@ -4,6 +4,7 @@ using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Helpers;
+using AutoGestao.Interfaces;
 using AutoGestao.Models;
 using AutoGestao.Models.Grid;
 using AutoGestao.Models.Report;
@@ -19,7 +20,7 @@ using System.Reflection;
 namespace AutoGestao.Controllers.Base
 {
     public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null, IAuditService? auditService = null)
-        : Controller where T : BaseEntidade, new()
+        : Controller where T : class, IEntity, new()
     {
         protected readonly ApplicationDbContext _context = context;
         protected readonly IFileStorageService _fileStorageService = fileStorageService;
@@ -207,12 +208,15 @@ namespace AutoGestao.Controllers.Base
                 entity.IdEmpresa = GetCurrentEmpresaId();
             }
 
-            // CRÍTICO: Preencher TODOS os campos obrigatórios da BaseEntidade
-            entity.DataCadastro = now;
-            entity.DataAlteracao = now; // No create, DataAlteracao = DataCadastro
-            entity.CriadoPorUsuarioId = usuarioLogadoId;
-            entity.AlteradoPorUsuarioId = usuarioLogadoId;
-            entity.Ativo = true; // Garantir que começa ativo
+            // CRÍTICO: Preencher TODOS os campos obrigatórios da BaseEntidade (se aplicável)
+            if (entity is BaseEntidade baseEntity)
+            {
+                baseEntity.DataCadastro = now;
+                baseEntity.DataAlteracao = now; // No create, DataAlteracao = DataCadastro
+                baseEntity.CriadoPorUsuarioId = usuarioLogadoId;
+                baseEntity.AlteradoPorUsuarioId = usuarioLogadoId;
+                baseEntity.Ativo = true; // Garantir que começa ativo
+            }
 
             return Task.CompletedTask;
         }
@@ -223,9 +227,12 @@ namespace AutoGestao.Controllers.Base
 
             var usuarioLogadoId = GetCurrentUsuarioId();
 
-            // CRÍTICO: Atualizar campos de auditoria
-            entity.DataAlteracao = DateTime.UtcNow;
-            entity.AlteradoPorUsuarioId = usuarioLogadoId;
+            // CRÍTICO: Atualizar campos de auditoria (se aplicável)
+            if (entity is BaseEntidade baseEntity)
+            {
+                baseEntity.DataAlteracao = DateTime.UtcNow;
+                baseEntity.AlteradoPorUsuarioId = usuarioLogadoId;
+            }
 
             // IMPORTANTE: IdEmpresa e CriadoPorUsuarioId NÃO devem ser alterados no update
             // Eles são preservados automaticamente pelo método Edit()
@@ -591,8 +598,13 @@ namespace AutoGestao.Controllers.Base
                 {
                     // Preservar valores
                     entity.IdEmpresa = existingEntity.IdEmpresa;
-                    entity.DataCadastro = existingEntity.DataCadastro;
-                    entity.CriadoPorUsuarioId = existingEntity.CriadoPorUsuarioId;
+
+                    // Preservar campos de auditoria se for BaseEntidade
+                    if (entity is BaseEntidade baseEntity && existingEntity is BaseEntidade existingBaseEntity)
+                    {
+                        baseEntity.DataCadastro = existingBaseEntity.DataCadastro;
+                        baseEntity.CriadoPorUsuarioId = existingBaseEntity.CriadoPorUsuarioId;
+                    }
 
                     // Preservar campos de arquivo e senha que não foram alterados
                     var fileProperties = typeof(T).GetProperties()
@@ -895,7 +907,8 @@ namespace AutoGestao.Controllers.Base
                 _logger?.LogInformation("✅ Template deserializado com sucesso. Gerando HTML...");
 
                 // Gerar HTML do relatório
-                var html = new ReportBuilderController(_context, _auditService).GenerateReportHtmlDynamic(entity, reportTemplate);
+                var httpContextAccessor = HttpContext.RequestServices.GetRequiredService<IHttpContextAccessor>();
+                var html = new ReportBuilderController(_context, _auditService, httpContextAccessor).GenerateReportHtmlDynamic(entity, reportTemplate);
 
                 _logger?.LogInformation("✅ HTML gerado com sucesso. Retornando conteúdo...");
 
@@ -931,7 +944,7 @@ namespace AutoGestao.Controllers.Base
                 // Buscar template padrão para este tipo de entidade
                 var entityType = typeof(T).Name;
                 var template = await _context.ReportTemplates
-                    .Where(t => t.TipoEntidade == entityType && t.IsPadrao && t.Ativo)
+                    .Where(t => t.TipoEntidade == entityType && t.Padrao && t.Ativo)
                     .FirstOrDefaultAsync();
 
                 if (template == null)
@@ -1022,7 +1035,8 @@ namespace AutoGestao.Controllers.Base
                 }
 
                 // Gerar HTML do relatório
-                var html = new ReportBuilderController(_context, _auditService).GenerateReportHtmlDynamic(entity, reportTemplate);
+                var httpContextAccessor = HttpContext.RequestServices.GetRequiredService<IHttpContextAccessor>();
+                var html = new ReportBuilderController(_context, _auditService, httpContextAccessor).GenerateReportHtmlDynamic(entity, reportTemplate);
 
                 // Retornar HTML para impressão/PDF
                 return Content(html, "text/html");

@@ -327,9 +327,7 @@ namespace AutoGestao.Data
             modelBuilder.Entity<AuditLog>().ToTable("audit_logs");
             modelBuilder.Entity<AuditLog>(entity =>
             {
-                // Ignorar DataAlteracao pois logs de auditoria não são alterados
-                entity.Ignore(e => e.DataAlteracao);
-
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.EntidadeNome).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.EntidadeId).HasMaxLength(50).IsRequired();
                 entity.Property(e => e.TipoOperacao).IsRequired();
@@ -340,7 +338,6 @@ namespace AutoGestao.Data
                 entity.Property(e => e.MensagemErro).HasMaxLength(2000);
                 entity.Property(e => e.Sucesso).IsRequired();
                 entity.Property(e => e.DataHora).IsRequired();
-                entity.Property(e => e.DataCadastro).IsRequired();
             });
 
 
@@ -354,12 +351,12 @@ namespace AutoGestao.Data
                 entity.Property(e => e.TipoEntidade).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.Descricao).HasMaxLength(500);
                 entity.Property(e => e.TemplateJson).IsRequired();
-                entity.Property(e => e.IsPadrao).HasDefaultValue(false);
+                entity.Property(e => e.Padrao).HasDefaultValue(false);
                 entity.Property(e => e.Ativo).HasDefaultValue(true);
 
                 // Índices
                 entity.HasIndex(e => e.TipoEntidade);
-                entity.HasIndex(e => new { e.TipoEntidade, e.IsPadrao });
+                entity.HasIndex(e => new { e.TipoEntidade, e.Padrao });
             });
 
             #endregion CONFIGURAÇÕES DAS ENTIDADES

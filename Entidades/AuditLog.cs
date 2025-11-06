@@ -1,11 +1,16 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Interfaces;
 
 namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Log de Auditoria", Subtitle = "Histórico completo de operações do sistema", Icon = "fas fa-history")]
-    public class AuditLog : BaseEntidade
+    public class AuditLog : IEntity
     {
+        public long Id { get; set; }
+
+        public long IdEmpresa { get; set; }
+
         [FormField(Name = "Usuário", Icon = "fas fa-user", Type = EnumFieldType.Text, ReadOnly = true, Order = 1, Section = "Identificação")]
         public long? UsuarioId { get; set; }
 
@@ -53,5 +58,6 @@ namespace AutoGestao.Entidades
 
         // Navigation properties
         public virtual Usuario? Usuario { get; set; }
+        public virtual Empresa? Empresa { get; set; }
     }
 }

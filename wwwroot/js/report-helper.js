@@ -97,7 +97,7 @@ const ReportHelper = {
                                                 onclick="ReportHelper.fromTemplate(${t.Id}, ${entityId}); bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();">
                                             <i class="fas fa-file-alt me-2 text-success"></i>
                                             <strong>${t.Nome}</strong>
-                                            ${t.IsPadrao ? '<span class="badge bg-primary ms-2">Padrão</span>' : ''}
+                                            ${t.Padrao ? '<span class="badge bg-primary ms-2">Padrão</span>' : ''}
                                             ${t.Descricao ? `<small class="d-block text-muted">${t.Descricao}</small>` : ''}
                                         </button>
                                     `).join('')}

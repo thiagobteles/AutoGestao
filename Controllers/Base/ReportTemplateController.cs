@@ -17,7 +17,7 @@ namespace AutoGestao.Controllers.Base
         {
             return base.GetBaseQuery()
                 .Where(t => t.Ativo)
-                .OrderByDescending(t => t.IsPadrao)
+                .OrderByDescending(t => t.Padrao)
                 .ThenBy(t => t.Nome);
         }
 
@@ -90,16 +90,19 @@ namespace AutoGestao.Controllers.Base
         [HttpGet]
         public async Task<IActionResult> GetByEntityType(string entityType)
         {
+            // CRÍTICO: Setar CurrentEmpresaId para filtro global
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
             var templates = await _context.ReportTemplates
                 .Where(t => t.TipoEntidade == entityType && t.Ativo)
-                .OrderByDescending(t => t.IsPadrao)
+                .OrderByDescending(t => t.Padrao)
                 .ThenBy(t => t.Nome)
                 .Select(t => new
                     {
                         t.Id,
                         t.Nome,
                         t.Descricao,
-                        t.IsPadrao,
+                        t.Padrao,
                         t.TemplateJson
                     })
                 .ToListAsync();
@@ -113,8 +116,11 @@ namespace AutoGestao.Controllers.Base
         [HttpGet]
         public async Task<IActionResult> GetDefault(string entityType)
         {
+            // CRÍTICO: Setar CurrentEmpresaId para filtro global
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
             var template = await _context.ReportTemplates
-                .Where(t => t.TipoEntidade == entityType && t.IsPadrao && t.Ativo)
+                .Where(t => t.TipoEntidade == entityType && t.Padrao && t.Ativo)
                 .FirstOrDefaultAsync();
 
             if (template == null)
@@ -137,7 +143,13 @@ namespace AutoGestao.Controllers.Base
         [HttpPost]
         public async Task<IActionResult> Clone(long id)
         {
-            var original = await _context.ReportTemplates.FindAsync(id);
+            // CRÍTICO: Setar CurrentEmpresaId para filtro global
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
+            // Usar Where ao invés de FindAsync para aplicar query filters
+            var original = await _context.ReportTemplates
+                .Where(t => t.Id == id)
+                .FirstOrDefaultAsync();
 
             if (original == null)
             {
@@ -150,7 +162,7 @@ namespace AutoGestao.Controllers.Base
                 TipoEntidade = original.TipoEntidade,
                 Descricao = original.Descricao,
                 TemplateJson = original.TemplateJson,
-                IsPadrao = false,
+                Padrao = false,
                 Ativo = true,
                 IdEmpresa = original.IdEmpresa
             };

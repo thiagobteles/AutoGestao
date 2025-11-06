@@ -78,7 +78,7 @@
             id: t.id || t.Id,
             nome: t.nome || t.Nome,
             descricao: t.descricao || t.Descricao,
-            isPadrao: t.isPadrao || t.IsPadrao
+            Padrao: t.padrao || t.Padrao
         }));
 
         console.log('✅ Templates normalizados:', normalizedTemplates);
@@ -91,14 +91,13 @@
                         <div class="modal-header bg-gradient-primary text-white">
                             <h5 class="modal-title">
                                 <i class="fas fa-file-pdf me-2"></i>
-                                Selecione o Template de Relatório
+                                Selecione o Relatório
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body p-4">
                             <p class="text-muted mb-3">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Foram encontrados ${normalizedTemplates.length} templates para este tipo de registro. Selecione qual deseja utilizar:
+                                Foram encontrados ${normalizedTemplates.length} templates.<br>Selecione o relatório desejado:
                             </p>
                             <div class="template-list">
                                 ${normalizedTemplates.map(t => `
@@ -109,7 +108,7 @@
                                         <div class="template-info">
                                             <div class="template-name">
                                                 ${t.nome || 'Template sem nome'}
-                                                ${t.isPadrao ? '<span class="badge bg-primary ms-2">Padrão</span>' : ''}
+                                                ${t.Padrao ? '<span class="badge bg-primary ms-2">Padrão</span>' : ''}
                                             </div>
                                             ${t.descricao ? `<div class="template-description">${t.descricao}</div>` : '<div class="template-description text-muted">Sem descrição</div>'}
                                         </div>

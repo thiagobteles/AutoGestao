@@ -3,6 +3,7 @@ using System;
 using AutoGestao.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoGestao.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251105223454_RemoveAuditLogBaseEntidadeColumns")]
+    partial class RemoveAuditLogBaseEntidadeColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -502,17 +505,17 @@ namespace AutoGestao.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id_empresa");
 
+                    b.Property<bool>("IsPadrao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_padrao");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("nome");
-
-                    b.Property<bool>("Padrao")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("padrao");
 
                     b.Property<string>("TemplateJson")
                         .IsRequired()
@@ -532,7 +535,7 @@ namespace AutoGestao.Migrations
 
                     b.HasIndex("TipoEntidade");
 
-                    b.HasIndex("TipoEntidade", "Padrao");
+                    b.HasIndex("TipoEntidade", "IsPadrao");
 
                     b.ToTable("report_templates", (string)null);
                 });

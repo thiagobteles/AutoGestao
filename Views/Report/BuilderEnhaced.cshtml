@@ -242,7 +242,7 @@
                         Nome: templateName,
                         TipoEntidade: entityType,
                         TemplateJson: JSON.stringify(template),
-                        IsPadrao: isDefault,
+                        Padrao: isDefault,
                         Ativo: true
                     })
                 });
@@ -270,7 +270,7 @@
                 templates.forEach(t => {
                     const option = document.createElement('option');
                     option.value = t.Id;
-                    option.textContent = t.Nome + (t.IsPadrao ? ' (Padrão)' : '');
+                    option.textContent = t.Nome + (t.Padrao ? ' (Padrão)' : '');
                     select.appendChild(option);
                 });
 

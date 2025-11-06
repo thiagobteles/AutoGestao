@@ -4,7 +4,7 @@ using AutoGestao.Interfaces;
 namespace AutoGestao.Entidades
 {
     [Auditable(AuditCreate = true, AuditUpdate = true, AuditDelete = true)]
-    public class BaseEntidade : IAuditable
+    public class BaseEntidade : IEntity, IAuditable
     {
         public long Id { get; set; }
 

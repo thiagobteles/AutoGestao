@@ -34,12 +34,12 @@ Globais.Cliente = cliente;
 builder.Services.AddHttpContextAccessor();
 
 // Registrar AuditInterceptor ANTES do DbContext para auditoria automática de entidades (CREATE, UPDATE, DELETE)
-builder.Services.AddScoped<AutoGestao.Data.AuditInterceptor>();
+builder.Services.AddScoped<AuditInterceptor>();
 
 // Add Entity Framework com PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
 {
-    var auditInterceptor = serviceProvider.GetRequiredService<AutoGestao.Data.AuditInterceptor>();
+    var auditInterceptor = serviceProvider.GetRequiredService<AuditInterceptor>();
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection").Replace("#cliente#", cliente.ToLower()))
            .AddInterceptors(auditInterceptor); // Adicionar interceptor de auditoria para CREATE, UPDATE, DELETE
 });

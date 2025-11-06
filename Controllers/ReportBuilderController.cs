@@ -12,11 +12,21 @@ namespace AutoGestao.Controllers
     /// <summary>
     /// Controller para construção visual de templates de relatórios
     /// </summary>
-    public class ReportBuilderController(ApplicationDbContext context, IAuditService auditService) : Controller
+    public class ReportBuilderController(ApplicationDbContext context, IAuditService auditService, IHttpContextAccessor httpContextAccessor) : Controller
     {
         private readonly ApplicationDbContext _context = context;
         private readonly EntityInspectorService _entityInspector = new(context);
         private readonly IAuditService _auditService = auditService;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
+        /// <summary>
+        /// Obter ID da empresa do usuário logado
+        /// </summary>
+        private long GetCurrentEmpresaId()
+        {
+            var empresaIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst("IdEmpresa")?.Value;
+            return long.TryParse(empresaIdClaim, out var empresaId) ? empresaId : 1;
+        }
 
         /// <summary>
         /// Página principal do builder
@@ -43,7 +53,14 @@ namespace AutoGestao.Controllers
         /// </summary>
         public async Task<IActionResult> Edit(long id)
         {
-            var template = await _context.ReportTemplates.FindAsync(id);
+            // CRÍTICO: Setar CurrentEmpresaId para filtro global de multi-tenancy
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
+            // Usar Where + FirstOrDefaultAsync ao invés de FindAsync para aplicar query filters
+            var template = await _context.ReportTemplates
+                .Where(t => t.Id == id)
+                .FirstOrDefaultAsync();
+
             if (template == null)
             {
                 return NotFound();
@@ -54,7 +71,7 @@ namespace AutoGestao.Controllers
             ViewBag.TemplateJson = template.TemplateJson;
             ViewBag.TemplateName = template.Nome;
             ViewBag.TemplateDescription = template.Descricao;
-            ViewBag.IsDefaultTemplate = template.IsPadrao;
+            ViewBag.IsDefaultTemplate = template.Padrao;
 
             return View("Create");
         }
@@ -68,16 +85,19 @@ namespace AutoGestao.Controllers
         {
             try
             {
+                // CRÍTICO: Setar CurrentEmpresaId para filtro global
+                _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
                 var templates = await _context.ReportTemplates
                     .Where(t => t.TipoEntidade == entityType && t.Ativo)
-                    .OrderByDescending(t => t.IsPadrao)
+                    .OrderByDescending(t => t.Padrao)
                     .ThenBy(t => t.Nome)
                     .Select(t => new
                     {
                         t.Id,
                         t.Nome,
                         t.Descricao,
-                        t.IsPadrao
+                        t.Padrao
                     })
                     .ToListAsync();
 
@@ -134,12 +154,18 @@ namespace AutoGestao.Controllers
         {
             try
             {
+                // CRÍTICO: Setar CurrentEmpresaId para filtro global
+                _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
                 var templateJson = JsonSerializer.Serialize(request.Template);
 
                 if (request.TemplateId.HasValue && request.TemplateId.Value > 0)
                 {
-                    // Atualizar template existente
-                    var existing = await _context.ReportTemplates.FindAsync(request.TemplateId.Value);
+                    // Atualizar template existente - usar Where ao invés de FindAsync
+                    var existing = await _context.ReportTemplates
+                        .Where(t => t.Id == request.TemplateId.Value)
+                        .FirstOrDefaultAsync();
+
                     if (existing == null)
                     {
                         return Json(new { success = false, message = "Template não encontrado" });
@@ -148,7 +174,7 @@ namespace AutoGestao.Controllers
                     existing.Nome = request.Name;
                     existing.Descricao = request.Description;
                     existing.TemplateJson = templateJson;
-                    existing.IsPadrao = request.IsDefault;
+                    existing.Padrao = request.IsDefault;
                 }
                 else
                 {
@@ -159,7 +185,7 @@ namespace AutoGestao.Controllers
                         TipoEntidade = request.EntityType,
                         Descricao = request.Description,
                         TemplateJson = templateJson,
-                        IsPadrao = request.IsDefault,
+                        Padrao = request.IsDefault,
                         Ativo = true
                     };
 
@@ -185,6 +211,9 @@ namespace AutoGestao.Controllers
         {
             try
             {
+                // CRÍTICO: Setar CurrentEmpresaId para filtro global
+                _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
                 // Buscar um registro de exemplo da entidade
                 object? sampleEntity = request.EntityType switch
                 {
@@ -492,7 +521,7 @@ namespace AutoGestao.Controllers
             return @"
                 /* ===== RESET E BASE ===== */
                 * {
-                    margin: 0;
+                    margin: 3px;
                     padding: 0;
                     box-sizing: border-box;
                 }
@@ -511,8 +540,8 @@ namespace AutoGestao.Controllers
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 30px;
-                    padding: 25px 30px;
+                    margin-bottom: 5px;
+                    padding: 5px 20px;
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     color: white;
                     border-radius: 12px;
@@ -536,7 +565,7 @@ namespace AutoGestao.Controllers
                 .report-info {
                     font-size: 12px;
                     color: #7f8c8d;
-                    margin-bottom: 30px;
+                    margin-bottom: 15px;
                     padding: 12px 20px;
                     background: white;
                     border-left: 4px solid #667eea;
@@ -546,10 +575,10 @@ namespace AutoGestao.Controllers
 
                 /* ===== SEÇÕES DO RELATÓRIO ===== */
                 .report-section {
-                    margin-bottom: 35px;
+                    margin-bottom: 15px;
                     page-break-inside: avoid;
                     background: white;
-                    padding: 25px;
+                    padding: 15px;
                     border-radius: 10px;
                     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
                     transition: box-shadow 0.3s ease;
@@ -562,10 +591,10 @@ namespace AutoGestao.Controllers
                 .section-title {
                     font-size: 20px;
                     font-weight: 700;
-                    margin-bottom: 15px;
+                    margin-bottom: 10px;
                     color: #2c3e50;
-                    padding-bottom: 12px;
-                    border-bottom: 3px solid #667eea;
+                    padding-bottom: 1px;
+                    border-bottom: 2px solid #667eea;
                     display: flex;
                     align-items: center;
                     gap: 10px;
@@ -594,7 +623,7 @@ namespace AutoGestao.Controllers
                 .grid-item {
                     display: flex;
                     flex-direction: column;
-                    gap: 6px;
+                    gap: 1px;
                     padding: 12px 15px;
                     background: #f8f9fa;
                     border-radius: 8px;
@@ -844,22 +873,6 @@ namespace AutoGestao.Controllers
                         -webkit-print-color-adjust: exact;
                         print-color-adjust: exact;
                     }
-                }
-
-                /* ===== ANIMAÇÕES ===== */
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-
-                .report-section {
-                    animation: fadeIn 0.4s ease-out;
                 }
             ";
         }
