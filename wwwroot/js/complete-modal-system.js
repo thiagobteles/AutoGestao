@@ -355,15 +355,21 @@ window.showAlert = function(message, type = 'info') {
 // que são mais apropriados para ações que requerem atenção do usuário
 // ===================================================================
 
-// Função de confirmação genérica
-window.showConfirm = function(message, options = {}) {
-    return window.modalSystem.confirm(message, options);
-};
+// Função de confirmação genérica - SOMENTE se alert-system.js não definiu
+if (typeof window.showConfirm === 'undefined') {
+    window.showConfirm = function(message, options = {}) {
+        return window.modalSystem.confirm(message, options);
+    };
+    console.log('⚠️ showConfirm definido por complete-modal-system.js (fallback)');
+}
 
-// Função específica para confirmação de exclusão
-window.confirmDelete = function(itemName) {
-    return window.modalSystem.confirmDelete(itemName);
-};
+// Função específica para confirmação de exclusão - SOMENTE se alert-system.js não definiu
+if (typeof window.confirmDelete === 'undefined') {
+    window.confirmDelete = function(itemName) {
+        return window.modalSystem.confirmDelete(itemName);
+    };
+    console.log('⚠️ confirmDelete definido por complete-modal-system.js (fallback)');
+}
 
 // ===================================================================
 // INTEGRAÇÃO COM SISTEMA DE GRID EXISTENTE
