@@ -3,7 +3,7 @@ using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Entidades.Veiculos
 {
-    [FormConfig(Title = "Modelo de Veículo", Subtitle = "Gerencie os modelos de veículos", Icon = "fas fa-car-side", EnableAjaxSubmit = true)]
+    [FormConfig(Title = "Modelo de Veículo", Subtitle = "Gerencie os modelos de veículos", Icon = "fas fa-car-side")]
     public class VeiculoMarcaModelo : BaseEntidade
     {
         [ReferenceText] // Campo que será utilizado como referencia.
