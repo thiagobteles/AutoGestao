@@ -69,7 +69,7 @@
 }
 
     .custom-select-value.placeholder {
-        color: var(--text-muted);
+        color: var(--white);
         cursor: pointer !important;
     }
 
