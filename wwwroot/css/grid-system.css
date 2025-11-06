@@ -1,10 +1,11 @@
 /* ========================================
    SISTEMA DE GRID PADRONIZADO
+   Todas as cores são gerenciadas pelo theme-colors.css
    ======================================== */
 .data-grid {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: var(--bg-card);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow);
     overflow: hidden;
 }
 
@@ -15,7 +16,7 @@
 
     .base-grid-table thead {
         background: var(--gradient-primary);
-        color: #fff;
+        color: var(--white);
         position: sticky;
         top: 0;
         z-index: 5;
@@ -31,11 +32,11 @@
         }
 
     .base-grid-table tbody tr {
-        border-bottom: 1px solid #e9ecef;
+        border-bottom: 1px solid var(--border-lighter);
     }
 
         .base-grid-table tbody tr:hover {
-            background-color: #f8f9fa;
+            background-color: var(--bg-table-hover);
         }
 
     .base-grid-table tbody td {
@@ -48,10 +49,10 @@
    ======================================== */
 
 .tab-navigation {
-    background: #fff;
-    border-radius: 8px;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-md);
     padding: 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-sm);
 }
 
 .nav-tabs-modern {
@@ -62,35 +63,35 @@
 
 .nav-link-modern {
     border: none;
-    border-radius: 6px;
+    border-radius: var(--border-radius);
     padding: 10px 20px;
-    color: #6c757d;
-    transition: all 0.3s ease;
+    color: var(--text-muted);
+    transition: var(--transition-medium);
     display: flex;
     align-items: center;
     font-weight: 500;
 }
 
     .nav-link-modern:hover {
-        background: #f8f9fa;
-        color: #495057;
+        background: var(--bg-hover);
+        color: var(--text-color);
     }
 
     .nav-link-modern.active {
         background: var(--gradient-primary);
-        color: #fff;
-        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+        color: var(--white);
+        box-shadow: var(--shadow-md);
     }
 
 .tab-content-container {
-    background: #fff;
-    border-radius: 8px;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-md);
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-sm);
 }
 
 .tab-header {
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 2px solid var(--border-lighter);
     padding-bottom: 15px;
 }
 
@@ -112,7 +113,7 @@
 }
 
     .empty-state i {
-        opacity: 0.3;
+        opacity: var(--opacity-30);
     }
 
 /* ========================================
@@ -176,7 +177,7 @@
 
     .modal-fullscreen-custom .modal-content {
         height: 95vh;
-        border-radius: 12px;
+        border-radius: var(--border-radius-lg);
         overflow: hidden;
     }
 
@@ -195,7 +196,7 @@
 .modal.fade .modal-dialog {
     transform: scale(0.8);
     opacity: 0;
-    transition: all 0.3s ease-out;
+    transition: var(--transition-medium);
 }
 
 .modal.show .modal-dialog {
@@ -209,17 +210,17 @@
 }
 
 #tabItemModal .modal-body::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--scrollbar-track);
     border-radius: 10px;
 }
 
 #tabItemModal .modal-body::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--scrollbar-dark);
     border-radius: 10px;
 }
 
     #tabItemModal .modal-body::-webkit-scrollbar-thumb:hover {
-        background: #555;
+        background: var(--scrollbar-dark-hover);
     }
 
 /* Responsividade do modal */
@@ -250,21 +251,21 @@
 
 #tabItemModal .form-label {
     font-weight: 600;
-    color: #495057;
+    color: var(--text-color);
     margin-bottom: 0.5rem;
 }
 
 #tabItemModal .form-control,
 #tabItemModal .form-select {
-    border-radius: 6px;
-    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
     padding: 0.625rem 0.875rem;
 }
 
     #tabItemModal .form-control:focus,
     #tabItemModal .form-select:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        box-shadow: 0 0 0 0.2rem var(--primary-shadow);
     }
 
 /* Grid dentro do modal */

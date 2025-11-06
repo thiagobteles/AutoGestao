@@ -28,10 +28,10 @@
 .reference-search-input {
     flex: 1;
     padding: 0.5rem 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius);
     font-size: 0.95rem;
-    transition: all 0.2s ease;
+    transition: var(--transition-all);
 }
 
 /* Sobrescrever min-width do Bootstrap para input-group - permite que o campo use 100% do espaço */
@@ -42,22 +42,22 @@
     .reference-search-input:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        box-shadow: 0 0 0 0.2rem var(--primary-shadow);
     }
 
     .reference-search-input.selected {
-        background-color: #e8f4ea;
-        border-color: #28a745;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2328a745' viewBox='0 0 16 16'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
+        background-color: var(--bg-selected);
+        border-color: var(--success-color);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2381C995' viewBox='0 0 16 16'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 45px center;
         background-size: 16px;
     }
 
     .reference-search-input:disabled {
-        background-color: #e9ecef;
+        background-color: var(--bg-disabled);
         cursor: not-allowed;
-        opacity: 0.6;
+        opacity: var(--opacity-60);
     }
 
 /* Botões de ação */
@@ -106,33 +106,33 @@
 }
 
 .reference-clear-btn {
-    color: #dc3545;
-    border-color: #dc3545;
+    color: var(--danger-color);
+    border-color: var(--danger-color);
 }
 
     .reference-clear-btn:hover {
-        background: #dc3545;
-        color: white;
+        background: var(--danger-color);
+        color: var(--white);
     }
 
 .reference-create-btn {
-    color: #28a745;
-    border-color: #28a745;
+    color: var(--success-color);
+    border-color: var(--success-color);
 }
 
     .reference-create-btn:hover {
-        background: #28a745;
-        color: white;
+        background: var(--success-color);
+        color: var(--white);
     }
 
 .reference-search-btn {
-    color: #007bff;
-    border-color: #007bff;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
     .reference-search-btn:hover {
-        background: #007bff;
-        color: white;
+        background: var(--primary-color);
+        color: var(--white);
     }
 
 /* Botões desabilitados - Estado readonly/disabled */
@@ -165,14 +165,14 @@
     top: 100%;
     left: 0;
     right: 40px;
-    background: white;
-    border: 1px solid #ced4da;
-    border-radius: 0 0 6px 6px;
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
     border-top: none;
     max-height: 300px;
     overflow-y: auto;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: var(--z-dropdown);
+    box-shadow: var(--shadow-dropdown);
     display: none;
     margin-top: -1px;
 }
@@ -180,8 +180,8 @@
 .reference-dropdown-item {
     padding: 0.75rem 1rem;
     cursor: pointer;
-    transition: all 0.15s ease;
-    border-bottom: 1px solid #f1f1f1;
+    transition: var(--transition-fast);
+    border-bottom: 1px solid var(--gray-lightest);
 }
 
     .reference-dropdown-item:last-child {
@@ -191,24 +191,24 @@
     .reference-dropdown-item:hover,
     .reference-dropdown-item.active {
         background: var(--gradient-primary);
-        color: white;
+        color: var(--white);
     }
 
         .reference-dropdown-item:hover small,
         .reference-dropdown-item.active small {
-            color: rgba(255, 255, 255, 0.9) !important;
+            color: var(--white-90) !important;
         }
 
     .reference-dropdown-item.disabled {
-        color: #6c757d;
+        color: var(--text-muted);
         cursor: default;
         font-style: italic;
         background: transparent !important;
     }
 
         .reference-dropdown-item.disabled:hover {
-            background: white !important;
-            color: #6c757d !important;
+            background: var(--white) !important;
+            color: var(--text-muted) !important;
         }
 
     .reference-dropdown-item small {
@@ -222,16 +222,16 @@
 }
 
 .reference-dropdown::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--scrollbar-track);
 }
 
 .reference-dropdown::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
+    background: var(--scrollbar-thumb);
+    border-radius: var(--border-radius-sm);
 }
 
     .reference-dropdown::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
+        background: var(--scrollbar-thumb-hover);
     }
 
 /* =============================================================================
@@ -245,8 +245,8 @@
 }
 
 .modal-xl .modal-content {
-    border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-modal);
     border: none;
     overflow: hidden;
     min-height: 80vh;
@@ -296,10 +296,10 @@
     .modal-body .section-title {
         font-size: 1rem;
         font-weight: 600;
-        color: #495057;
+        color: var(--text-color);
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e9ecef;
+        border-bottom: 2px solid var(--border-lighter);
     }
 
     .modal-body .form-group {
@@ -309,8 +309,8 @@
 /* Modal Footer */
 .modal-footer {
     flex-shrink: 0;
-    background: #f8f9fa;
-    border-top: 1px solid #dee2e6;
+    background: var(--bg-modal-footer);
+    border-top: 1px solid var(--border-modal);
     padding: 1rem 1.5rem;
     display: flex;
     justify-content: space-between;
@@ -425,7 +425,7 @@
    ============================================================================= */
 
 .is-invalid {
-    border-color: #dc3545 !important;
+    border-color: var(--danger-color) !important;
 }
 
 /* Container de validação - aparece abaixo do campo */
@@ -435,7 +435,7 @@
 
 .reference-validation-container .invalid-feedback {
     display: block;
-    color: #dc3545;
+    color: var(--danger-color);
     font-size: 0.875rem;
     margin-top: 0.25rem;
 }
@@ -473,18 +473,18 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.4rem 0.6rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 3px;
-    background: #ffffff;
-    transition: all 0.15s ease;
+    border: 1px solid var(--border-table);
+    border-radius: var(--border-radius-sm);
+    background: var(--white);
+    transition: var(--transition-fast);
     cursor: pointer;
     min-height: 36px;
 }
 
 .search-result-item:hover {
     border-color: var(--primary-color);
-    background: #f8f9ff;
-    box-shadow: 0 1px 4px rgba(102, 126, 234, 0.15);
+    background: var(--bg-hover);
+    box-shadow: 0 1px 4px var(--primary-shadow);
 }
 
 .search-result-content {
@@ -495,7 +495,7 @@
 .search-result-title {
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #2c3e50;
+    color: var(--text-darker);
     margin-bottom: 0.1rem;
     line-height: 1.2;
     overflow: hidden;
@@ -505,7 +505,7 @@
 
 .search-result-subtitle {
     font-size: 0.6875rem;
-    color: #6c757d;
+    color: var(--text-muted);
     line-height: 1.1;
     overflow: hidden;
     text-overflow: ellipsis;
