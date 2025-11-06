@@ -7,6 +7,11 @@
     position: relative;
     width: 100%;
     z-index: 1; /* Base z-index para o wrapper */
+    cursor: pointer !important; /* Garantir cursor pointer em todo o componente */
+}
+
+.custom-select-wrapper * {
+    cursor: pointer !important; /* Forçar cursor pointer em todos os elementos internos */
 }
 
 .custom-select-wrapper.active {
@@ -16,13 +21,13 @@
 .custom-select-trigger {
     display: flex;
     align-items: center;
-    padding: 0.5rem 2.5rem 0.5rem 1rem;
+    padding: 0.375rem 2.5rem 0.375rem 0.75rem;
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius);
     background-color: var(--white);
-    cursor: pointer;
+    cursor: pointer !important;
     transition: var(--transition-all);
-    min-height: 38px;
+    min-height: 34px;
 }
 
     .custom-select-trigger:hover {
@@ -60,14 +65,17 @@
     gap: 0.5rem;
     flex: 1;
     color: var(--text-color);
+    cursor: pointer !important;
 }
 
     .custom-select-value.placeholder {
         color: var(--text-muted);
+        cursor: pointer !important;
     }
 
     .custom-select-value i {
         font-size: 0.9rem;
+        cursor: pointer !important;
     }
 
 .custom-select-dropdown {
@@ -93,8 +101,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.625rem 1rem;
-    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer !important;
     transition: background-color var(--transition-fast);
 }
 
