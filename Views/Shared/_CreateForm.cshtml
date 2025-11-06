@@ -93,13 +93,15 @@
             background: #a8a8a8;
         }
 
-    @@media (max-width: 768px) {
-        .modal-form-container
-
-    {
-        min-height: 300px;
-        max-height: calc(90vh - 140px);
+    .form-control-modern, .form-select-modern, .form-select, input[type="text"], input[type="search"], select {
+        height: 37px !important;
     }
 
+    @@media (max-width: 768px) {
+        .modal-form-container
+        {
+            min-height: 300px;
+            max-height: calc(90vh - 140px);
+        }
     }
 </style>

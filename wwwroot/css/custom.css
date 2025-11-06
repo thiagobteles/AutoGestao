@@ -2427,6 +2427,7 @@ input[name="search"],
 #searchInput,
 #searchCliente {
     min-width: 200px !important;
+    height: 37px !important;
 }
 
 /* Selects de filtro */
@@ -2820,6 +2821,7 @@ input[name="search"],
 #searchInput,
 #searchCliente {
     min-width: 160px !important;
+    height: 37px !important;
 }
 
 select[name="situacao"],
