@@ -2,27 +2,7 @@
    SISTEMA DE ALERTAS MODERNO E ELEGANTE
    ============================================================================= */
 
-/* Backdrop para alertas centralizados */
-.alert-container::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: all;
-}
-
-.alert-container.has-alerts::before {
-    opacity: 1;
-}
-
-/* Container de Alertas - Centralizado */
+/* Container de Alertas - Centralizado (SEM backdrop) */
 .alert-container {
     position: fixed !important;
     top: 50% !important;

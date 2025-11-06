@@ -58,6 +58,19 @@ class AlertSystem {
             onClose = null
         } = options;
 
+        // Verificar se já existe um alerta com a mesma mensagem e tipo
+        const isDuplicate = Array.from(this.alerts.values()).some(alertEl => {
+            const existingType = alertEl.querySelector('.alert-modern')?.className.match(/alert-(success|error|warning|info|confirm)/)?.[1];
+            const existingMessage = alertEl.querySelector('.alert-message')?.textContent;
+            return existingType === type && existingMessage === message;
+        });
+
+        if (isDuplicate) {
+            console.log(`⚠️ Alerta duplicado ignorado: ${type} - ${message}`);
+            // Retornar uma Promise resolvida imediatamente
+            return Promise.resolve();
+        }
+
         console.log(`🎨 Mostrando alerta tipo: ${type}, mensagem: ${message}`);
 
         // Criar elemento do alerta
@@ -79,9 +92,6 @@ class AlertSystem {
         // Adicionar ao container
         this.container.appendChild(alertEl);
         this.alerts.set(alertId, alertEl);
-
-        // Adicionar classe para ativar backdrop
-        this.container.classList.add('has-alerts');
 
         console.log('✅ Elemento adicionado ao container. Total de alertas:', this.alerts.size);
         console.log('📊 Container info:', {
@@ -249,11 +259,6 @@ class AlertSystem {
                 alertEl.parentNode.removeChild(alertEl);
             }
             this.alerts.delete(alertId);
-
-            // Remover classe backdrop se não houver mais alertas
-            if (this.alerts.size === 0) {
-                this.container.classList.remove('has-alerts');
-            }
 
             // Resolver a Promise do alerta
             const resolve = this.alertPromises.get(alertId);
