@@ -91,12 +91,13 @@ class AlertSystem {
         // Animar entrada
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                alertEl.classList.add('show');
-                console.log('🎬 Classe "show" adicionada ao alerta');
-
-                // Debug do elemento após animação
+                // IMPORTANTE: Adicionar classe 'show' ao .alert-modern, não ao wrapper
                 const alertModern = alertEl.querySelector('.alert-modern');
                 if (alertModern) {
+                    alertModern.classList.add('show');
+                    console.log('🎬 Classe "show" adicionada ao .alert-modern');
+
+                    // Debug do elemento após animação
                     const computedStyle = getComputedStyle(alertModern);
                     console.log('🎨 Estilos do alerta:', {
                         display: computedStyle.display,
@@ -105,6 +106,8 @@ class AlertSystem {
                         transform: computedStyle.transform,
                         position: computedStyle.position
                     });
+                } else {
+                    console.error('❌ .alert-modern não encontrado dentro do alertEl!');
                 }
             });
         });
