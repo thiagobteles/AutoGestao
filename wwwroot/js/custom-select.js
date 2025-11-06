@@ -7,6 +7,28 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCustomSelects();
 });
 
+/**
+ * Processa texto no formato "[ICON:fas fa-box]Descrição" e extrai ícone e texto
+ * @param {string} text - Texto que pode conter o formato [ICON:...]
+ * @returns {Object} - {icon: 'fas fa-box', text: 'Descrição'}
+ */
+function parseIconText(text) {
+    const iconPattern = /^\[ICON:(.*?)\](.*)$/;
+    const match = text.match(iconPattern);
+
+    if (match) {
+        return {
+            icon: match[1].trim(),
+            text: match[2].trim()
+        };
+    }
+
+    return {
+        icon: null,
+        text: text
+    };
+}
+
 function initializeCustomSelects() {
     // Selecionar todos os selects que devem ser customizados
     const enumSelects = document.querySelectorAll('select.enum-select');
@@ -30,12 +52,25 @@ function convertToCustomSelect(selectElement) {
     const currentValue = selectElement.value;
 
     // Obter as opções
-    const options = Array.from(selectElement.options).map(option => ({
-        value: option.value,
-        text: option.text,
-        icon: option.dataset.icon || null,
-        selected: option.selected
-    }));
+    const options = Array.from(selectElement.options).map(option => {
+        // Primeiro verificar se tem data-icon
+        let icon = option.dataset.icon || null;
+        let text = option.text;
+
+        // Se não tiver data-icon, tentar extrair do formato [ICON:...]
+        if (!icon) {
+            const parsed = parseIconText(option.text);
+            icon = parsed.icon;
+            text = parsed.text;
+        }
+
+        return {
+            value: option.value,
+            text: text,
+            icon: icon,
+            selected: option.selected
+        };
+    });
 
     // Criar estrutura do custom select
     const wrapper = document.createElement('div');
