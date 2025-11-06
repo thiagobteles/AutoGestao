@@ -10,6 +10,7 @@
     --primary-dark: #5A89C7;            /* Azul pastel escuro - hover/active */
     --primary-light: #95C4E8;           /* Azul pastel claro - backgrounds leves */
     --primary-lighter: #B8D9F2;         /* Azul muito claro - backgrounds sutis */
+    --primary-shadow: rgba(123, 163, 217, 0.15); /* Sombra da cor primária */
 
     /* =========================================================================
        GRADIENTES (Usados em headers, botões principais, etc)
@@ -23,6 +24,8 @@
        ========================================================================= */
     --secondary-color: #B0BEC5;         /* Cinza azulado pastel */
     --accent-color: #95C4E8;            /* Acento - mesma cor que primary-light */
+    --accent-hover: #7BA3D9;            /* Acento hover */
+    --accent-dark: #6A99D1;             /* Acento escuro */
 
     /* =========================================================================
        CORES DE FEEDBACK (Sucesso, Aviso, Erro, Info)
@@ -30,29 +33,73 @@
     --success-color: #81C995;           /* Verde pastel */
     --success-dark: #66B37F;            /* Verde pastel escuro */
     --success-light: #A5DCAF;           /* Verde pastel claro */
+    --success-lighter: #D1FAE5;         /* Verde muito claro */
+    --success-bg: #ECFDF5;              /* Background verde suave */
+    --success-text: #065F46;            /* Texto verde escuro */
+    --success-shadow: rgba(129, 201, 149, 0.3); /* Sombra verde */
 
     --warning-color: #F4C17D;           /* Amarelo/laranja pastel */
     --warning-dark: #E5A95C;            /* Amarelo/laranja pastel escuro */
     --warning-light: #F9D89F;           /* Amarelo/laranja pastel claro */
+    --warning-lighter: #FEF3C7;         /* Amarelo muito claro */
+    --warning-bg: #FFF8ED;              /* Background amarelo suave */
+    --warning-text: #92400E;            /* Texto amarelo escuro */
+    --warning-shadow: rgba(244, 193, 125, 0.3); /* Sombra amarela */
 
     --danger-color: #E89B9B;            /* Vermelho/rosa pastel */
     --danger-dark: #DA7A7A;             /* Vermelho/rosa pastel escuro */
     --danger-light: #F2BDBD;            /* Vermelho/rosa pastel claro */
+    --danger-lighter: #FEE2E2;          /* Vermelho muito claro */
+    --danger-bg: #FEF2F2;               /* Background vermelho suave */
+    --danger-text: #991B1B;             /* Texto vermelho escuro */
+    --danger-shadow: rgba(232, 155, 155, 0.3); /* Sombra vermelha */
 
     --info-color: #87CEEB;              /* Azul céu pastel */
     --info-dark: #6BB6D4;               /* Azul céu pastel escuro */
     --info-light: #A8DDED;              /* Azul céu pastel claro */
+    --info-lighter: #DBEAFE;            /* Azul muito claro */
+    --info-bg: #EFF6FF;                 /* Background azul suave */
+    --info-text: #3730A3;               /* Texto azul escuro */
+    --info-shadow: rgba(135, 206, 235, 0.3); /* Sombra azul */
 
     /* =========================================================================
        CORES NEUTRAS (Textos, bordas, backgrounds)
        ========================================================================= */
     --dark-color: #2D3748;              /* Texto principal */
+    --dark-rgb: 45, 55, 72;             /* RGB para transparências */
+    --gray-darkest: #1A1A1A;            /* Cinza muito escuro */
+    --gray-darker: #333333;             /* Cinza mais escuro */
     --gray-dark: #4A5568;               /* Texto secundário */
     --gray-medium: #718096;             /* Texto desabilitado */
+    --gray: #6C757D;                    /* Cinza padrão */
     --gray-light: #CBD5E0;              /* Bordas */
     --gray-lighter: #E2E8F0;            /* Bordas claras */
+    --gray-lightest: #F1F1F1;           /* Background muito claro */
     --light-color: #F7FAFC;             /* Background claro */
+    --light-bg: #F8F9FA;                /* Background alternativo */
+    --lighter-bg: #FAFAFA;              /* Background mais claro */
     --white: #FFFFFF;                   /* Branco puro */
+    --text-color: #495057;              /* Cor de texto padrão */
+    --text-muted: #6C757D;              /* Texto secundário */
+    --text-light: #666666;              /* Texto claro */
+
+    /* =========================================================================
+       BORDAS E SEPARADORES
+       ========================================================================= */
+    --border-color: #E2E8F0;            /* Borda padrão */
+    --border-light: #CED4DA;            /* Borda clara */
+    --border-lighter: #E9ECEF;          /* Borda mais clara */
+    --border-dark: #ADB5BD;             /* Borda escura */
+    --border-focus: rgba(102, 126, 234, 0.15); /* Borda focus (adaptável) */
+
+    /* =========================================================================
+       SCROLLBAR
+       ========================================================================= */
+    --scrollbar-track: #F1F1F1;         /* Fundo da scrollbar */
+    --scrollbar-thumb: #C1C1C1;         /* Thumb da scrollbar */
+    --scrollbar-thumb-hover: #A8A8A8;   /* Thumb hover */
+    --scrollbar-dark: #888888;          /* Scrollbar escura */
+    --scrollbar-dark-hover: #555555;    /* Scrollbar escura hover */
 
     /* =========================================================================
        SIDEBAR (Menu lateral)
@@ -61,6 +108,58 @@
     --sidebar-text: #A0AEC0;            /* Cor do texto no sidebar */
     --sidebar-active: #7BA3D9;          /* Cor do item ativo (usa primary-color) */
     --sidebar-hover: rgba(123, 163, 217, 0.1); /* Background ao passar o mouse */
+    --sidebar-overlay: rgba(0, 0, 0, 0.8); /* Overlay do sidebar mobile */
+
+    /* =========================================================================
+       BACKGROUNDS ESPECIAIS
+       ========================================================================= */
+    --bg-disabled: #E9ECEF;             /* Background desabilitado */
+    --bg-hover: #F8F9FA;                /* Background hover */
+    --bg-selected: #E8F4EA;             /* Background selecionado */
+    --bg-gradient-light: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+    --bg-overlay: rgba(0, 0, 0, 0.5);   /* Overlay escuro */
+    --bg-modal-header-success: #F7FDF9; /* Header modal sucesso */
+    --bg-modal-header-error: #FFFAFA;   /* Header modal erro */
+    --bg-modal-header-warning: #FFFBF5; /* Header modal aviso */
+    --bg-modal-header-info: #F8FBFF;    /* Header modal info */
+
+    /* =========================================================================
+       OPACIDADES E TRANSPARÊNCIAS (para uso com cores sólidas)
+       ========================================================================= */
+    --opacity-5: 0.05;
+    --opacity-10: 0.1;
+    --opacity-15: 0.15;
+    --opacity-20: 0.2;
+    --opacity-30: 0.3;
+    --opacity-40: 0.4;
+    --opacity-50: 0.5;
+    --opacity-60: 0.6;
+    --opacity-70: 0.7;
+    --opacity-80: 0.8;
+    --opacity-90: 0.9;
+
+    /* =========================================================================
+       CORES DE OVERLAY E TRANSPARÊNCIAS PRONTAS
+       ========================================================================= */
+    --white-10: rgba(255, 255, 255, 0.1);
+    --white-20: rgba(255, 255, 255, 0.2);
+    --white-30: rgba(255, 255, 255, 0.3);
+    --white-40: rgba(255, 255, 255, 0.4);
+    --white-50: rgba(255, 255, 255, 0.5);
+    --white-60: rgba(255, 255, 255, 0.6);
+    --white-80: rgba(255, 255, 255, 0.8);
+    --white-90: rgba(255, 255, 255, 0.9);
+
+    --black-5: rgba(0, 0, 0, 0.05);
+    --black-6: rgba(0, 0, 0, 0.06);
+    --black-8: rgba(0, 0, 0, 0.08);
+    --black-10: rgba(0, 0, 0, 0.1);
+    --black-12: rgba(0, 0, 0, 0.12);
+    --black-15: rgba(0, 0, 0, 0.15);
+    --black-20: rgba(0, 0, 0, 0.2);
+    --black-25: rgba(0, 0, 0, 0.25);
+    --black-40: rgba(0, 0, 0, 0.4);
+    --black-50: rgba(0, 0, 0, 0.5);
 
     /* =========================================================================
        DIMENSÕES DO LAYOUT
@@ -72,27 +171,55 @@
     /* =========================================================================
        SOMBRAS
        ========================================================================= */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    --shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-modal: 0 20px 40px rgba(0, 0, 0, 0.25);
+    --shadow-alert: 0 20px 50px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.15);
 
     /* =========================================================================
-       BORDAS
+       BORDAS - RAIOS
        ========================================================================= */
-    --border-color: #E2E8F0;
-    --border-radius-sm: 0.25rem;
-    --border-radius: 0.5rem;
-    --border-radius-lg: 0.75rem;
-    --border-radius-xl: 1rem;
+    --border-radius-xs: 0.125rem;       /* 2px */
+    --border-radius-sm: 0.25rem;        /* 4px */
+    --border-radius: 0.375rem;          /* 6px */
+    --border-radius-md: 0.5rem;         /* 8px */
+    --border-radius-lg: 0.75rem;        /* 12px */
+    --border-radius-xl: 1rem;           /* 16px */
+    --border-radius-2xl: 1.5rem;        /* 24px */
+    --border-radius-full: 9999px;       /* Circle */
 
     /* =========================================================================
        TRANSIÇÕES
        ========================================================================= */
     --transition-fast: 150ms ease;
-    --transition-normal: 300ms ease;
+    --transition-normal: 200ms ease;
+    --transition-medium: 300ms ease;
     --transition-slow: 500ms ease;
+    --transition-all: all 0.2s ease;
+    --transition-colors: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+
+    /* =========================================================================
+       Z-INDEX (Controle de camadas)
+       ========================================================================= */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    --z-notification: 9998;
+    --z-notification-modal: 9999;
+    --z-alert: 100000;
+    --z-alert-active: 100001;
+    --z-alert-dropdown: 100002;
 }
 
 /* =============================================================================
@@ -102,24 +229,37 @@
 /* Backgrounds */
 .bg-primary { background-color: var(--primary-color) !important; }
 .bg-primary-light { background-color: var(--primary-light) !important; }
+.bg-primary-lighter { background-color: var(--primary-lighter) !important; }
+.bg-secondary { background-color: var(--secondary-color) !important; }
 .bg-success { background-color: var(--success-color) !important; }
 .bg-warning { background-color: var(--warning-color) !important; }
 .bg-danger { background-color: var(--danger-color) !important; }
 .bg-info { background-color: var(--info-color) !important; }
+.bg-light { background-color: var(--light-color) !important; }
+.bg-dark { background-color: var(--dark-color) !important; }
+.bg-white { background-color: var(--white) !important; }
 
 /* Textos */
 .text-primary { color: var(--primary-color) !important; }
+.text-secondary { color: var(--secondary-color) !important; }
 .text-success { color: var(--success-color) !important; }
 .text-warning { color: var(--warning-color) !important; }
 .text-danger { color: var(--danger-color) !important; }
 .text-info { color: var(--info-color) !important; }
+.text-dark { color: var(--dark-color) !important; }
+.text-muted { color: var(--text-muted) !important; }
+.text-light { color: var(--text-light) !important; }
+.text-white { color: var(--white) !important; }
 
 /* Bordas */
 .border-primary { border-color: var(--primary-color) !important; }
+.border-secondary { border-color: var(--secondary-color) !important; }
 .border-success { border-color: var(--success-color) !important; }
 .border-warning { border-color: var(--warning-color) !important; }
 .border-danger { border-color: var(--danger-color) !important; }
 .border-info { border-color: var(--info-color) !important; }
+.border { border-color: var(--border-color) !important; }
+.border-light { border-color: var(--border-light) !important; }
 
 /* =============================================================================
    NOTAS PARA CUSTOMIZAÇÃO
@@ -138,5 +278,13 @@
  * --primary-dark: #DA7A7A;
  * --primary-light: #F2BDBD;
  *
+ * Exemplo - Para mudar para um tema escuro profissional:
+ * --primary-color: #374151;
+ * --primary-dark: #1F2937;
+ * --primary-light: #6B7280;
+ *
  * Todas as cores do sistema serão atualizadas automaticamente!
+ *
+ * IMPORTANTE: Após editar este arquivo, todos os componentes do sistema
+ * (botões, alerts, modais, combos, grids, etc) usarão as novas cores.
  */
