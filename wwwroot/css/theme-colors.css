@@ -104,9 +104,9 @@
     /* =========================================================================
        SIDEBAR (Menu lateral)
        ========================================================================= */
-    --sidebar-bg: #2D3748;              /* Background do sidebar */
-    --sidebar-text: #A0AEC0;            /* Cor do texto no sidebar */
-    --sidebar-active: #7BA3D9;          /* Cor do item ativo (usa primary-color) */
+    --sidebar-bg: #2D3748; /* Background do sidebar */
+    --sidebar-text: #A0AEC0; /* Cor do texto no sidebar */
+    --sidebar-active: #7BA3D9; /* Cor do item ativo (usa primary-color) */
     --sidebar-hover: rgba(123, 163, 217, 0.1); /* Background ao passar o mouse */
     --sidebar-overlay: rgba(0, 0, 0, 0.8); /* Overlay do sidebar mobile */
 
