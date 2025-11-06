@@ -36,7 +36,7 @@ class StandardGrid {
         const overlay = document.querySelector(this.options.loadingSelector);
 
         if (!overlay) {
-            console.warn('Loading overlay não encontrado');
+            // Loading overlay é opcional - ignorar silenciosamente se não existir
             return;
         }
 
@@ -250,7 +250,8 @@ class StandardGrid {
                     this.updateUrl(params);
                     this.reinitializeEvents();
                 } else {
-                    console.error('Grid container não encontrado');
+                    // Se não houver gridContainer, fazer reload da página (modo tradicional)
+                    window.location.href = `${window.location.pathname}?${params.toString()}`;
                 }
             })
             .catch(error => {
