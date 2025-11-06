@@ -137,6 +137,9 @@ class StandardGrid {
         const form = document.querySelector(this.options.filtersFormSelector);
         if (!form) return;
 
+        // Preencher filtros com valores da URL
+        this.populateFiltersFromUrl(form);
+
         // 🔧 FIX: Interceptar submit do formulário para fazer AJAX ao invés de reload
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -201,6 +204,34 @@ class StandardGrid {
         this.searchTimeouts.set(filterId, timeout);
     }
 
+    populateFiltersFromUrl(form) {
+        // Obter parâmetros da URL
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Preencher cada campo do formulário com o valor correspondente da URL
+        const inputs = form.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            const paramName = input.name;
+            if (paramName && urlParams.has(paramName)) {
+                const value = urlParams.get(paramName);
+
+                if (input.type === 'checkbox') {
+                    input.checked = value === 'true' || value === '1';
+                } else if (input.type === 'radio') {
+                    input.checked = input.value === value;
+                } else {
+                    input.value = value;
+                }
+            }
+        });
+
+        // Preencher seletor de tamanho de página
+        const pageSizeSelector = document.querySelector(this.options.pageSizeSelector);
+        if (pageSizeSelector && urlParams.has('pageSize')) {
+            pageSizeSelector.value = urlParams.get('pageSize');
+        }
+    }
+
     aplicarFiltros(page = 1) {
         if (this.isLoading) {
             console.log('Já carregando, ignorando nova requisição');
@@ -231,11 +262,16 @@ class StandardGrid {
 
         // Determinar URL baseado na página atual
         const ajaxUrl = this.getAjaxUrl();
-        if (!ajaxUrl) {
+        const gridContainer = document.querySelector(this.options.gridContainerSelector);
+
+        // Se não houver URL AJAX ou gridContainer, fazer reload tradicional
+        if (!ajaxUrl || !gridContainer) {
             this.forceHideLoading();
+            window.location.href = `${window.location.pathname}?${params.toString()}`;
             return;
         }
 
+        // Tentar carregar via AJAX
         fetch(`${ajaxUrl}?${params.toString()}`)
             .then(response => {
                 if (!response.ok) {
@@ -244,18 +280,14 @@ class StandardGrid {
                 return response.text();
             })
             .then(html => {
-                const gridContainer = document.querySelector(this.options.gridContainerSelector);
-                if (gridContainer) {
-                    gridContainer.innerHTML = html;
-                    this.updateUrl(params);
-                    this.reinitializeEvents();
-                } else {
-                    // Se não houver gridContainer, fazer reload da página (modo tradicional)
-                    window.location.href = `${window.location.pathname}?${params.toString()}`;
-                }
+                gridContainer.innerHTML = html;
+                this.updateUrl(params);
+                this.reinitializeEvents();
             })
             .catch(error => {
-                showError('Erro ao carregar dados: ' + error.message);
+                // Se AJAX falhar, fazer reload tradicional
+                console.log('AJAX falhou, usando reload tradicional');
+                window.location.href = `${window.location.pathname}?${params.toString()}`;
             })
             .finally(() => {
                 setTimeout(() => {
