@@ -1,0 +1,126 @@
+/* ============================================================================
+   wwwroot/css/image.css - ADICIONAR ESTILOS PARA PREVIEW DE IMAGEM
+   ============================================================================ */
+
+/* Preview de imagem */
+.image-preview-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.image-preview {
+    display: block;
+    box-shadow: 0 2px 8px var(--black-10);
+    transition: transform 0.2s ease;
+}
+
+    .image-preview:hover {
+        transform: scale(1.02);
+    }
+
+.image-preview-wrapper .btn-delete-file {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    box-shadow: 0 2px 4px var(--black-20);
+}
+
+.image-preview-wrapper:hover .btn-delete-file {
+    opacity: 1;
+}
+
+/* Preview de arquivo */
+.file-info {
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+    .file-info:hover {
+        background: #e9ecef;
+        box-shadow: 0 2px 4px var(--black-10);
+    }
+
+    .file-info .btn {
+        flex-shrink: 0;
+    }
+
+/* Container de upload */
+.image-upload-container,
+.file-upload-container {
+    min-height: 60px;
+}
+
+/* File upload wrapper */
+.file-upload-wrapper {
+    position: relative;
+}
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+}
+
+    .file-upload-label:hover {
+        border-color: #0d6efd;
+        background: #e7f1ff;
+    }
+
+.file-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #0d6efd;
+    color: white;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.file-upload-label:hover .file-upload-btn {
+    background: #0b5ed7;
+    transform: scale(1.05);
+}
+
+.file-upload-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.file-input {
+    display: none;
+}
+
+/* Loading state */
+.image-upload-container.loading,
+.file-upload-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Success/Error messages */
+.upload-message {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+    .upload-message.success {
+        background: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+
+    .upload-message.error {
+        background: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }

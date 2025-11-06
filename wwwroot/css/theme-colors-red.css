@@ -1,0 +1,305 @@
+/* =============================================================================
+   SISTEMA DE CORES DO TEMA - VERSÃO VERMELHA PARA TESTE
+   ============================================================================= */
+
+:root {
+    /* =========================================================================
+       CORES PRIMÁRIAS (Principal identidade visual do sistema)
+       ========================================================================= */
+    --primary-color: #DC2626;           /* Vermelho - cor principal */
+    --primary-dark: #991B1B;            /* Vermelho escuro - hover/active */
+    --primary-light: #F87171;           /* Vermelho claro - backgrounds leves */
+    --primary-lighter: #FCA5A5;         /* Vermelho muito claro - backgrounds sutis */
+    --primary-shadow: rgba(220, 38, 38, 0.15); /* Sombra da cor primária */
+
+    /* =========================================================================
+       GRADIENTES (Usados em headers, botões principais, etc)
+       ========================================================================= */
+    --gradient-primary: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+    --gradient-primary-vertical: linear-gradient(180deg, #DC2626 0%, #991B1B 100%);
+    --gradient-primary-hover: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+
+    /* =========================================================================
+       CORES SECUNDÁRIAS E DE SUPORTE
+       ========================================================================= */
+    --secondary-color: #F87171;         /* Vermelho claro */
+    --accent-color: #F87171;            /* Acento - vermelho claro */
+    --accent-hover: #DC2626;            /* Acento hover - vermelho */
+    --accent-dark: #B91C1C;             /* Acento escuro - vermelho escuro */
+
+    /* =========================================================================
+       CORES DE FEEDBACK (Sucesso, Aviso, Erro, Info)
+       ========================================================================= */
+    --success-color: #DC2626;           /* Vermelho */
+    --success-dark: #991B1B;            /* Vermelho escuro */
+    --success-light: #F87171;           /* Vermelho claro */
+    --success-lighter: #FEE2E2;         /* Vermelho muito claro */
+    --success-bg: #FEF2F2;              /* Background vermelho suave */
+    --success-text: #7F1D1D;            /* Texto vermelho escuro */
+    --success-shadow: rgba(220, 38, 38, 0.3); /* Sombra vermelha */
+
+    --warning-color: #DC2626;           /* Vermelho */
+    --warning-dark: #991B1B;            /* Vermelho escuro */
+    --warning-light: #F87171;           /* Vermelho claro */
+    --warning-lighter: #FEE2E2;         /* Vermelho muito claro */
+    --warning-bg: #FEF2F2;              /* Background vermelho suave */
+    --warning-text: #7F1D1D;            /* Texto vermelho escuro */
+    --warning-shadow: rgba(220, 38, 38, 0.3); /* Sombra vermelha */
+
+    --danger-color: #DC2626;            /* Vermelho */
+    --danger-dark: #991B1B;             /* Vermelho escuro */
+    --danger-light: #F87171;            /* Vermelho claro */
+    --danger-lighter: #FEE2E2;          /* Vermelho muito claro */
+    --danger-bg: #FEF2F2;               /* Background vermelho suave */
+    --danger-text: #7F1D1D;             /* Texto vermelho escuro */
+    --danger-shadow: rgba(220, 38, 38, 0.3); /* Sombra vermelha */
+
+    --info-color: #DC2626;              /* Vermelho */
+    --info-dark: #991B1B;               /* Vermelho escuro */
+    --info-light: #F87171;              /* Vermelho claro */
+    --info-lighter: #FEE2E2;            /* Vermelho muito claro */
+    --info-bg: #FEF2F2;                 /* Background vermelho suave */
+    --info-text: #7F1D1D;               /* Texto vermelho escuro */
+    --info-shadow: rgba(220, 38, 38, 0.3); /* Sombra vermelha */
+
+    /* =========================================================================
+       CORES NEUTRAS (Textos, bordas, backgrounds)
+       ========================================================================= */
+    --dark-color: #2D3748;              /* Texto principal */
+    --dark-rgb: 45, 55, 72;             /* RGB para transparências */
+    --gray-darkest: #1A1A1A;            /* Cinza muito escuro */
+    --gray-darker: #333333;             /* Cinza mais escuro */
+    --gray-dark: #4A5568;               /* Texto secundário */
+    --gray-medium: #718096;             /* Texto desabilitado */
+    --gray: #6C757D;                    /* Cinza padrão */
+    --gray-light: #CBD5E0;              /* Bordas */
+    --gray-lighter: #E2E8F0;            /* Bordas claras */
+    --gray-lightest: #F1F1F1;           /* Background muito claro */
+    --light-color: #F7FAFC;             /* Background claro */
+    --light-bg: #F8F9FA;                /* Background alternativo */
+    --lighter-bg: #FAFAFA;              /* Background mais claro */
+    --white: #FFFFFF;                   /* Branco puro */
+    --text-color: #495057;              /* Cor de texto padrão */
+    --text-muted: #6C757D;              /* Texto secundário */
+    --text-light: #666666;              /* Texto claro */
+    --text-dark: #333333;               /* Texto escuro */
+    --text-darker: #2C3E50;             /* Texto mais escuro */
+
+    /* =========================================================================
+       BORDAS E SEPARADORES
+       ========================================================================= */
+    --border-color: #E2E8F0;            /* Borda padrão */
+    --border-light: #CED4DA;            /* Borda clara */
+    --border-lighter: #E9ECEF;          /* Borda mais clara */
+    --border-lightest: #F0F0F0;         /* Borda super clara */
+    --border-dark: #ADB5BD;             /* Borda escura */
+    --border-table: #E0E0E0;            /* Borda de tabelas */
+    --border-modal: #DEE2E6;            /* Borda de modais */
+    --border-focus: rgba(220, 38, 38, 0.15); /* Borda focus (vermelha) */
+
+    /* =========================================================================
+       SCROLLBAR
+       ========================================================================= */
+    --scrollbar-track: #F1F1F1;         /* Fundo da scrollbar */
+    --scrollbar-thumb: #F87171;         /* Thumb da scrollbar - vermelho claro */
+    --scrollbar-thumb-hover: #DC2626;   /* Thumb hover - vermelho */
+    --scrollbar-dark: #DC2626;          /* Scrollbar escura - vermelho */
+    --scrollbar-dark-hover: #991B1B;    /* Scrollbar escura hover - vermelho escuro */
+
+    /* =========================================================================
+       SIDEBAR (Menu lateral)
+       ========================================================================= */
+    --sidebar-bg: #2D3748; /* Background do sidebar */
+    --sidebar-text: #FCA5A5; /* Cor do texto no sidebar - vermelho claro */
+    --sidebar-active: #DC2626; /* Cor do item ativo - vermelho */
+    --sidebar-hover: rgba(220, 38, 38, 0.1); /* Background ao passar o mouse - vermelho */
+    --sidebar-overlay: rgba(0, 0, 0, 0.8); /* Overlay do sidebar mobile */
+
+    /* =========================================================================
+       BACKGROUNDS ESPECIAIS
+       ========================================================================= */
+    --bg-disabled: #E9ECEF;             /* Background desabilitado */
+    --bg-hover: #F8F9FA;                /* Background hover */
+    --bg-selected: #FEE2E2;             /* Background selecionado - vermelho claro */
+    --bg-gradient-light: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+    --bg-overlay: rgba(0, 0, 0, 0.5);   /* Overlay escuro */
+    --bg-overlay-dark: rgba(0, 0, 0, 0.4); /* Overlay menos escuro */
+    --bg-modal-header-success: #FEF2F2; /* Header modal sucesso - vermelho */
+    --bg-modal-header-error: #FEF2F2;   /* Header modal erro - vermelho */
+    --bg-modal-header-warning: #FEF2F2; /* Header modal aviso - vermelho */
+    --bg-modal-header-info: #FEF2F2;    /* Header modal info - vermelho */
+
+    /* Backgrounds adicionais para grids e tabelas */
+    --bg-table-hover: #FEF2F2;          /* Background de linha ao hover - vermelho claro */
+    --bg-table-stripe: #FAFAFA;         /* Background alternado em tabelas */
+    --bg-card: #FFFFFF;                 /* Background de cards */
+    --bg-section: #F5F5F5;              /* Background de seções */
+
+    /* Backgrounds para modais */
+    --bg-modal: #FFFFFF;                /* Background principal de modais */
+    --bg-modal-footer: #FAFAFA;         /* Background do rodapé de modais */
+    --bg-modal-overlay: rgba(0, 0, 0, 0.4); /* Overlay de modais */
+
+    /* Dark Mode Colors (para prefers-color-scheme: dark) */
+    --dark-mode-bg: #1F2937;            /* Background escuro */
+    --dark-mode-bg-dark: #111827;       /* Background mais escuro */
+    --dark-mode-border: #374151;        /* Bordas escuras */
+    --dark-mode-text: #F3F4F6;          /* Texto claro */
+    --dark-mode-text-muted: #D1D5DB;    /* Texto secundário */
+    --dark-mode-element: #374151;       /* Elementos escuros */
+    --dark-mode-element-hover: #4B5563; /* Hover em elementos escuros */
+    --dark-mode-element-border: #6B7280; /* Borda de elementos escuros */
+
+    /* =========================================================================
+       OPACIDADES E TRANSPARÊNCIAS (para uso com cores sólidas)
+       ========================================================================= */
+    --opacity-5: 0.05;
+    --opacity-10: 0.1;
+    --opacity-15: 0.15;
+    --opacity-20: 0.2;
+    --opacity-30: 0.3;
+    --opacity-40: 0.4;
+    --opacity-50: 0.5;
+    --opacity-60: 0.6;
+    --opacity-70: 0.7;
+    --opacity-80: 0.8;
+    --opacity-90: 0.9;
+
+    /* =========================================================================
+       CORES DE OVERLAY E TRANSPARÊNCIAS PRONTAS
+       ========================================================================= */
+    --white-10: rgba(255, 255, 255, 0.1);
+    --white-20: rgba(255, 255, 255, 0.2);
+    --white-30: rgba(255, 255, 255, 0.3);
+    --white-40: rgba(255, 255, 255, 0.4);
+    --white-50: rgba(255, 255, 255, 0.5);
+    --white-60: rgba(255, 255, 255, 0.6);
+    --white-80: rgba(255, 255, 255, 0.8);
+    --white-90: rgba(255, 255, 255, 0.9);
+
+    --black-5: rgba(0, 0, 0, 0.05);
+    --black-6: rgba(0, 0, 0, 0.06);
+    --black-8: rgba(0, 0, 0, 0.08);
+    --black-10: rgba(0, 0, 0, 0.1);
+    --black-12: rgba(0, 0, 0, 0.12);
+    --black-15: rgba(0, 0, 0, 0.15);
+    --black-20: rgba(0, 0, 0, 0.2);
+    --black-25: rgba(0, 0, 0, 0.25);
+    --black-40: rgba(0, 0, 0, 0.4);
+    --black-50: rgba(0, 0, 0, 0.5);
+
+    /* =========================================================================
+       DIMENSÕES DO LAYOUT
+       ========================================================================= */
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 70px;
+    --topbar-height: 60px;
+
+    /* =========================================================================
+       SOMBRAS
+       ========================================================================= */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    --shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-modal: 0 20px 40px rgba(0, 0, 0, 0.25);
+    --shadow-alert: 0 20px 50px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.15);
+
+    /* =========================================================================
+       BORDAS - RAIOS
+       ========================================================================= */
+    --border-radius-xs: 0.125rem;       /* 2px */
+    --border-radius-sm: 0.25rem;        /* 4px */
+    --border-radius: 0.375rem;          /* 6px */
+    --border-radius-md: 0.5rem;         /* 8px */
+    --border-radius-lg: 0.75rem;        /* 12px */
+    --border-radius-xl: 1rem;           /* 16px */
+    --border-radius-2xl: 1.5rem;        /* 24px */
+    --border-radius-full: 9999px;       /* Circle */
+
+    /* =========================================================================
+       TRANSIÇÕES
+       ========================================================================= */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
+    --transition-medium: 300ms ease;
+    --transition-slow: 500ms ease;
+    --transition-all: all 0.2s ease;
+    --transition-colors: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+
+    /* =========================================================================
+       Z-INDEX (Controle de camadas)
+       ========================================================================= */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    --z-notification: 9998;
+    --z-notification-modal: 9999;
+    --z-alert: 100000;
+    --z-alert-active: 100001;
+    --z-alert-dropdown: 100002;
+}
+
+/* =============================================================================
+   CLASSES UTILITÁRIAS DE CORES
+   ============================================================================= */
+
+/* Backgrounds */
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-primary-light { background-color: var(--primary-light) !important; }
+.bg-primary-lighter { background-color: var(--primary-lighter) !important; }
+.bg-secondary { background-color: var(--secondary-color) !important; }
+.bg-success { background-color: var(--success-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+.bg-light { background-color: var(--light-color) !important; }
+.bg-dark { background-color: var(--dark-color) !important; }
+.bg-white { background-color: var(--white) !important; }
+
+/* Textos */
+.text-primary { color: var(--primary-color) !important; }
+.text-secondary { color: var(--secondary-color) !important; }
+.text-success { color: var(--success-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-danger { color: var(--danger-color) !important; }
+.text-info { color: var(--info-color) !important; }
+.text-dark { color: var(--dark-color) !important; }
+.text-muted { color: var(--text-muted) !important; }
+.text-light { color: var(--text-light) !important; }
+.text-white { color: var(--white) !important; }
+
+/* Bordas */
+.border-primary { border-color: var(--primary-color) !important; }
+.border-secondary { border-color: var(--secondary-color) !important; }
+.border-success { border-color: var(--success-color) !important; }
+.border-warning { border-color: var(--warning-color) !important; }
+.border-danger { border-color: var(--danger-color) !important; }
+.border-info { border-color: var(--info-color) !important; }
+.border { border-color: var(--border-color) !important; }
+.border-light { border-color: var(--border-light) !important; }
+
+/* =============================================================================
+   TESTE - TEMA VERMELHO
+   ============================================================================= */
+
+/*
+ * Este arquivo é uma cópia do theme-colors.css com TODAS as cores mudadas
+ * para tons de vermelho. Ele serve para testar se a centralização de cores
+ * está funcionando corretamente em TODO o sistema.
+ *
+ * COMO USAR:
+ * 1. Substitua a referência do theme-colors.css por theme-colors-red.css no _Layout.cshtml
+ * 2. Recarregue a aplicação
+ * 3. TODO o sistema deve ficar vermelho se a centralização estiver 100% funcional
+ * 4. Após o teste, volte para o theme-colors.css original
+ */

@@ -1,8 +1,13 @@
+using AutoGestao.Enumerador.Gerais;
+
 namespace AutoGestao
 {
     public static class Globais
     {
         public static string Cliente { get; set; }
+
+        public static EnumCorSistema CorSistema { get; set; }
+
 
         public static string NomeApresentacao 
         {

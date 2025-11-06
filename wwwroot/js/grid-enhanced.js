@@ -137,6 +137,12 @@ class StandardGrid {
         const form = document.querySelector(this.options.filtersFormSelector);
         if (!form) return;
 
+        // 🔧 FIX: Interceptar submit do formulário para fazer AJAX ao invés de reload
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.aplicarFiltros(1);
+        });
+
         // Filtros de texto com debounce
         const textInputs = form.querySelectorAll('input[type="text"], input[type="search"]');
         textInputs.forEach(input => {
@@ -364,7 +370,10 @@ class StandardGrid {
     }
 
     handleRowDoubleClick(e) {
-        if (e.target.closest('.dropdown') || e.target.closest('.actions-btn')) {
+        // 🔧 FIX: Impedir duplo clique em elementos de dropdown, ações e empty-state
+        if (e.target.closest('.dropdown') ||
+            e.target.closest('.actions-btn') ||
+            e.target.closest('.empty-state')) {
             return;
         }
 
@@ -372,6 +381,7 @@ class StandardGrid {
         const id = row.getAttribute('data-id');
         const controller = row.getAttribute('data-controller');
 
+        // 🔧 FIX: Só redirecionar se houver id e controller válidos
         if (id && controller) {
             this.showLoading(true);
 

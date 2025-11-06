@@ -199,15 +199,15 @@
                 .validation-error-item {
                     padding: 8px 12px;
                     margin-bottom: 6px;
-                    background: #fff5f5;
-                    border-left: 3px solid #dc3545;
+                    background: var(--danger-bg);
+                    border-left: 3px solid var(--danger-color);
                     border-radius: 4px;
-                    color: #721c24;
+                    color: var(--danger-text);
                     font-size: 0.9rem;
                 }
 
                 .validation-error-item i {
-                    color: #dc3545;
+                    color: var(--danger-color);
                 }
 
                 .has-error {
@@ -221,8 +221,8 @@
                 }
 
                 .is-invalid {
-                    border-color: #dc3545 !important;
-                    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+                    border-color: var(--danger-color) !important;
+                    box-shadow: 0 0 0 0.2rem var(--danger-shadow) !important;
                 }
             `;
             document.head.appendChild(style);

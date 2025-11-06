@@ -8,10 +8,26 @@
     <title>@ViewData["Title"] - @Globais.NomeApresentacao</title>
 
     <!-- TEMA: Cores centralizadas do sistema (edite aqui para mudar cores) -->
-    <link rel="stylesheet" href="~/css/theme-colors.css" asp-append-version="true" />
+    @if (Globais.CorSistema == EnumCorSistema.Amarelo)
+    {
+        <link rel="stylesheet" href="~/css/theme-colors-yellow.css" asp-append-version="true" />
+    }
+    else if (Globais.CorSistema == EnumCorSistema.Vermelho)
+    {
+        <link rel="stylesheet" href="~/css/theme-colors-red.css" asp-append-version="true" />
+    }
+    else if (Globais.CorSistema == EnumCorSistema.Verde)
+    {
+        <link rel="stylesheet" href="~/css/theme-colors-green.css" asp-append-version="true" />
+    }
+    else
+    {
+        <link rel="stylesheet" href="~/css/theme-colors-blue.css" asp-append-version="true" />
+    }
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/image.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/collapsible-menu.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/reference-field.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/file-upload.css" asp-append-version="true" />
@@ -222,13 +238,6 @@
     <!-- Esse script da aplicação vem sempre no final -->
     <script src="~/js/reference-field.js" asp-append-version="true"></script>
     <script src="~/js/custom-select.js" asp-append-version="true"></script>
-
-    <script>
-        window.loadReactDashboard = function() {
-            const root = ReactDOM.createRoot(document.getElementById('react-root'));
-            root.render(React.createElement(DashboardBI));
-        }
-    </script>
 
     <!-- SISTEMA DE SIDEBAR E LAYOUT -->
     <script>
@@ -798,14 +807,17 @@
             // HANDLERS DE EVENTOS
             // ===================================================================
             function handleRowDoubleClick(e) {
-                // Evitar conflito com dropdown de ações
-                if (e.target.closest('.dropdown') || e.target.closest('.actions-btn')) {
+                // 🔧 FIX: Impedir duplo clique em elementos de dropdown, ações e empty-state
+                if (e.target.closest('.dropdown') ||
+                    e.target.closest('.actions-btn') ||
+                    e.target.closest('.empty-state')) {
                     return;
                 }
 
                 const id = this.getAttribute('data-id');
                 const controller = this.getAttribute('data-controller');
 
+                // 🔧 FIX: Só redirecionar se houver id e controller válidos
                 if (id && controller) {
                     showLoading(true);
 

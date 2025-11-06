@@ -29,6 +29,7 @@ CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
 // Obtem o nome do cliente
 var cliente = builder.Configuration.GetValue<string>("Cliente");
 Globais.Cliente = cliente;
+Globais.CorSistema = (EnumCorSistema)builder.Configuration.GetValue<int>("CorSistema");
 
 // Registrar HttpContextAccessor antes de tudo
 builder.Services.AddHttpContextAccessor();

@@ -263,18 +263,20 @@ function positionDropdown(trigger, dropdown) {
 
     if (openUpwards) {
         // Abrir para cima
+        const borderLight = getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim();
         dropdown.style.top = 'auto';
         dropdown.style.bottom = (viewportHeight - rect.top + 1) + 'px';
         dropdown.style.borderRadius = '6px 6px 0 0';
-        dropdown.style.borderTop = '1px solid #ced4da';
+        dropdown.style.borderTop = `1px solid ${borderLight}`;
         dropdown.style.borderBottom = 'none';
     } else {
         // Abrir para baixo (padrão)
+        const borderLight = getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim();
         dropdown.style.top = (rect.bottom - 1) + 'px';
         dropdown.style.bottom = 'auto';
         dropdown.style.borderRadius = '0 0 6px 6px';
         dropdown.style.borderTop = 'none';
-        dropdown.style.borderBottom = '1px solid #ced4da';
+        dropdown.style.borderBottom = `1px solid ${borderLight}`;
     }
 
     // Posição horizontal

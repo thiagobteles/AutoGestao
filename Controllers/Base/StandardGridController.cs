@@ -354,6 +354,7 @@ namespace AutoGestao.Controllers.Base
             int page = 1)
         {
             var gridConfig = ConfigureGrid(ControllerContext.ActionDescriptor.ControllerName);
+            ConfigureCustomGrid(gridConfig); // 🔧 FIX: Configurar filtros customizados para preservar valores
             var query = GetBaseQuery();
 
             // Aplicar filtros

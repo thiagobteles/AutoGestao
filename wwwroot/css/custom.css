@@ -1,22 +1,10 @@
-:root {
-    --primary-color: #374151;
-    --primary-dark: #1f2937;
-    --primary-light: #6b7280;
-    --secondary-color: #9ca3af;
-    --accent-color: #f59e0b;
-    --accent-hover: #d97706;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
-    --dark-color: #111827;
-    --light-color: #f9fafb;
-    --border-color: #e5e7eb;
-    --sidebar-width: 280px;
-    --sidebar-collapsed-width: 80px;
-    --topbar-height: 70px;
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
+/* ===================================================================
+   CUSTOM.CSS - ESTILOS PERSONALIZADOS DO SISTEMA
+
+   IMPORTANTE: Todas as cores e variáveis do sistema estão definidas
+   em theme-colors.css. Use sempre as variáveis CSS do theme-colors.css
+   ao invés de cores hardcoded.
+   =================================================================== */
 
 /* ===================================================================
    RESET E BASE
@@ -30,7 +18,7 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #f3f4f6;
+    background-color: var(--light-bg);
     color: var(--dark-color);
     line-height: 1.6;
     overflow-x: hidden;
@@ -77,16 +65,16 @@ body {
     }
 
     .sidebar::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--white-10);
     }
 
     .sidebar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
+        background: var(--white-20);
         border-radius: 3px;
     }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--white-30);
         }
 
 /* ===================================================================
@@ -95,7 +83,7 @@ body {
 
 .sidebar-brand {
     padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--white-10);
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -164,7 +152,7 @@ body {
     position: absolute;
     top: 1.75rem;
     right: 1rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--white-10);
     border: none;
     color: var(--sidebar-text);
     width: 32px;
@@ -207,7 +195,7 @@ body {
     bottom: -25px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--bg-overlay);
     color: white;
     padding: 2px 6px;
     border-radius: 4px;
@@ -263,7 +251,7 @@ body {
     display: flex;
     align-items: center;
     padding: 0.875rem 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--white-80);
     text-decoration: none;
     transition: all 0.3s ease;
     border-right: 3px solid transparent;
@@ -278,7 +266,7 @@ body {
 }
 
 .menu-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--white-10);
     color: white;
     border-right-color: var(--accent-color);
     text-decoration: none;
@@ -482,7 +470,7 @@ body {
     padding: 2rem;
     width: 100%;
     max-width: none;
-    background-color: #f3f4f6;
+    background-color: var(--light-bg);
     overflow-x: auto;
     transition: all 0.3s ease;
 }
@@ -679,7 +667,7 @@ body {
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        background: linear-gradient(90deg, transparent, var(--white-20), transparent);
         transition: left 0.5s;
     }
 
@@ -1067,7 +1055,7 @@ body {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--black-50);
         z-index: 999;
         display: none;
     }
@@ -1265,7 +1253,7 @@ th[style*="cursor: pointer"] {
 }
 
     th[style*="cursor: pointer"]:hover {
-        background-color: rgba(255, 255, 255, 0.1) !important;
+        background-color: var(--white-10) !important;
     }
 
 /* Ícones de ordenação */
@@ -1862,7 +1850,7 @@ th:hover .fa-sort {
     justify-content: center !important;
     position: relative !important;
     text-decoration: none !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: var(--white-80) !important;
     border-right: 3px solid transparent;
     transition: all 0.3s ease;
 }
@@ -1898,7 +1886,7 @@ th:hover .fa-sort {
 
 /* Estados de hover */
 .sidebar.collapsed .menu-link:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--white-10) !important;
     color: white !important;
     border-right-color: var(--accent-color) !important;
 }
@@ -2013,7 +2001,7 @@ body .sidebar.collapsed .menu-link {
 }
 
     .sidebar.collapsed .menu-link:hover {
-        background-color: rgba(255, 255, 255, 0.1) !important;
+        background-color: var(--white-10) !important;
     }
 
 /* ===================================================================
@@ -2688,7 +2676,7 @@ select {
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: var(--white-90) !important;
     backdrop-filter: blur(2px) !important;
     z-index: 1000 !important;
     display: none !important;
@@ -3300,13 +3288,13 @@ body .table-responsive {
 .sidebar .menu-link {
     background-color: transparent !important;
     border-right: 3px solid transparent !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: var(--white-80) !important;
     transition: all 0.3s ease !important;
 }
 
     /* Estado hover */
     .sidebar .menu-link:hover {
-        background-color: rgba(255, 255, 255, 0.1) !important;
+        background-color: var(--white-10) !important;
         color: white !important;
         border-right-color: var(--accent-color) !important;
     }
@@ -3449,17 +3437,7 @@ body .table-responsive {
 }
 
 /* ===================================================================
-   CORREÇÃO 6: VARIÁVEIS CSS CORRETAS
-   =================================================================== */
-
-:root {
-    --sidebar-width: 280px;
-    --sidebar-collapsed-width: 80px;
-    --topbar-height: 70px;
-}
-
-/* ===================================================================
-   CORREÇÃO 7: RESPONSIVIDADE CORRETA
+   CORREÇÃO 6: RESPONSIVIDADE CORRETA
    =================================================================== */
 
 /* Desktop */
@@ -3757,7 +3735,7 @@ html body .sidebar.collapsed::before {
 
     .badge-compact:hover {
         transform: scale(1.2);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 8px var(--black-20);
     }
 
 .actions-btn {
@@ -3878,7 +3856,7 @@ html body .sidebar.collapsed::before {
 
     .btn-modern:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 12px var(--black-20);
     }
 
     .btn-modern:active {
@@ -4219,7 +4197,7 @@ html body .sidebar.collapsed::before {
 
         .base-grid-table tbody tr.grid-row:hover {
             background-color: rgba(55, 65, 81, 0.08);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px var(--black-10);
         }
 
 /* ===================================================================
@@ -4585,7 +4563,7 @@ html body .sidebar.collapsed::before {
     background-color: #ffffff !important;
     border: 1px solid rgba(0,0,0,.15) !important;
     border-radius: 0.375rem !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 4px 6px -1px var(--black-10), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
     transform: translateY(0) !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -4905,10 +4883,10 @@ body .dropdown-menu {
     min-width: 160px;
     padding: 0.5rem 0;
     margin: 0;
-    background-color: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.15);
+    background-color: var(--white);
+    border: 1px solid var(--black-15);
     border-radius: 0.375rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0.5rem 1rem var(--black-15);
     display: none;
     opacity: 0;
     transform: scale(0.95);
@@ -5115,7 +5093,7 @@ body .dropdown-menu {
 }
 
     .sortable:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: var(--white-10);
     }
 
 .sort-icon {
@@ -5181,9 +5159,9 @@ body .dropdown-menu {
     width: auto !important;
     margin-top: 0 !important;
     background-color: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid var(--black-15) !important;
     border-radius: 0.375rem !important;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 0.5rem 1rem var(--black-15) !important;
 }
 
     /* QUANDO DROPDOWN ESTÁ ATIVO (SHOW) - MUDANÇA CRÍTICA */
@@ -5418,7 +5396,7 @@ body .dropdown-menu {
     opacity: 0.7;
     transition: all 0.2s ease;
     border: 1px solid rgba(108, 117, 125, 0.3);
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--white-80);
 }
 
     .actions-btn:hover,
@@ -5434,7 +5412,7 @@ body .dropdown-menu {
     opacity: 0.7;
     transition: all 0.2s ease;
     border: 1px solid rgba(108, 117, 125, 0.3);
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--white-80);
 }
 
     .mobile-action-trigger:hover {
@@ -5484,7 +5462,7 @@ body .dropdown-menu {
 
 .mobile-modal-only .modal-content {
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 25px var(--black-20);
 }
 
 .mobile-modal-only .modal-header {
@@ -5658,7 +5636,7 @@ body .dropdown-menu {
 }
 
 .status-secondary {
-    background: #f3f4f6;
+    background: var(--light-bg);
     color: #6b7280;
 }
 
@@ -5714,7 +5692,7 @@ body .dropdown-menu {
     margin-top: 0 !important;
     background: white !important;
     border-radius: 0.75rem !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 1px 3px var(--black-10) !important;
     overflow: hidden !important;
 }
 
@@ -5775,7 +5753,7 @@ body .dropdown-menu {
     background: white !important;
     padding: 0.5rem 1rem !important; /* Reduzir padding */
     border-radius: 1rem !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 1px 3px var(--black-10) !important;
     margin-bottom: 0.75rem !important; /* Reduzir margem */
     position: relative !important;
     z-index: 100 !important;
@@ -5797,7 +5775,7 @@ body .dropdown-menu {
     background: white !important;
     padding: 0.75rem 1rem !important; /* Reduzir padding */
     border-radius: 1rem !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 1px 3px var(--black-10) !important;
     margin-bottom: 0.75rem !important; /* Reduzir margem */
     position: relative !important;
     z-index: 10 !important;
@@ -5812,9 +5790,9 @@ body .dropdown-menu {
     position: absolute !important;
     z-index: 1050 !important; /* Z-index alto mas menor que o header */
     background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid var(--black-15) !important;
     border-radius: 0.375rem !important;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 0.5rem 1rem var(--black-15) !important;
 }
 
 .dropdown.show .dropdown-menu {
@@ -6127,7 +6105,7 @@ body .dropdown-menu {
         background-color: #f3f4f6 !important;
         border-color: #9ca3af !important;
         color: #374151 !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 1px 3px var(--black-10) !important;
     }
 
     .btn-actions-enhanced:active,
@@ -6157,9 +6135,9 @@ body .dropdown-menu {
     padding: 0.5rem 0 !important;
     margin: 0 !important;
     background-color: #ffffff !important;
-    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid var(--black-15) !important;
     border-radius: 0.5rem !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 20px 25px -5px var(--black-10), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
     opacity: 0 !important;
     visibility: hidden !important;
     transform: translateY(-10px) scale(0.95) !important;
@@ -6730,7 +6708,7 @@ body .dropdown-menu {
 .table {
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--black-10);
 }
 
     .table thead th {
@@ -6753,7 +6731,7 @@ body .dropdown-menu {
 }
 
     .card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 12px var(--black-15);
         transform: translateY(-1px);
     }
 
@@ -6830,7 +6808,7 @@ body .dropdown-menu {
 .modal-content {
     border-radius: 12px;
     border: none;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 40px var(--black-15);
 }
 
 .modal-header {
@@ -6886,7 +6864,7 @@ body .dropdown-menu {
 /* Melhorias para dropdowns */
 .dropdown-menu {
     border: none;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 25px var(--black-15);
     border-radius: 8px;
     padding: 0.5rem 0;
     margin-top: 0.5rem;
@@ -7007,25 +6985,11 @@ body .dropdown-menu {
     margin-right: 0.5rem;
 }
 
-/* Dark mode toggle (se implementar) */
-.dark-mode-toggle {
-    background: none;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 0.5rem 0.75rem;
-    transition: all 0.2s ease;
-}
-
-    .dark-mode-toggle:hover {
-        background: #f8fafc;
-        border-color: var(--primary-color);
-    }
-
 /* Melhorias para alertas */
 .alert {
     border: none;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--black-10);
     position: relative;
     overflow: hidden;
 }
@@ -7075,7 +7039,6 @@ body .dropdown-menu {
 }
 
 /* Variáveis CSS foram movidas para theme-colors.css */
-
 * {
     margin: 0;
     padding: 0;
@@ -7134,7 +7097,7 @@ body {
     .brand-logo i {
         font-size: 1.5rem;
         margin-right: 0.75rem;
-        color: var(--primary-color);
+        color: var(--accent-color);
     }
 
 .sidebar.collapsed .brand-text-content {
@@ -7225,7 +7188,7 @@ body {
     visibility: hidden;
     transition: all 0.2s ease;
     z-index: 1001;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px var(--black-10);
 }
 
 .sidebar.collapsed .menu-item:hover .menu-tooltip {
@@ -7279,7 +7242,7 @@ body {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--black-50);
         z-index: 999;
         opacity: 0;
         visibility: hidden;
@@ -7312,7 +7275,7 @@ body {
 /* Dropdown customizado */
 .dropdown-menu {
     border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px var(--black-10);
     border-radius: 8px;
 }
 
@@ -7375,7 +7338,7 @@ body {
 .card {
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--black-10);
 }
 
 .card-header {
@@ -7434,7 +7397,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--black-10);
     position: sticky;
     top: 0;
     z-index: 999;
@@ -7480,132 +7443,4 @@ body {
 
     .sidebar-toggle:hover {
         background: #f7fafc;
-    }
-
-
-/* ============================================================================
-   wwwroot/css/custom.css - ADICIONAR ESTILOS PARA PREVIEW DE IMAGEM
-   ============================================================================ */
-
-/* Preview de imagem */
-.image-preview-wrapper {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 1rem;
-}
-
-.image-preview {
-    display: block;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-}
-
-    .image-preview:hover {
-        transform: scale(1.02);
-    }
-
-.image-preview-wrapper .btn-delete-file {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.image-preview-wrapper:hover .btn-delete-file {
-    opacity: 1;
-}
-
-/* Preview de arquivo */
-.file-info {
-    background: #f8f9fa;
-    transition: all 0.2s ease;
-}
-
-    .file-info:hover {
-        background: #e9ecef;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .file-info .btn {
-        flex-shrink: 0;
-    }
-
-/* Container de upload */
-.image-upload-container,
-.file-upload-container {
-    min-height: 60px;
-}
-
-/* File upload wrapper */
-.file-upload-wrapper {
-    position: relative;
-}
-
-.file-upload-label {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border: 2px dashed #dee2e6;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: #f8f9fa;
-}
-
-    .file-upload-label:hover {
-        border-color: #0d6efd;
-        background: #e7f1ff;
-    }
-
-.file-upload-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #0d6efd;
-    color: white;
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.file-upload-label:hover .file-upload-btn {
-    background: #0b5ed7;
-    transform: scale(1.05);
-}
-
-.file-upload-text {
-    color: #6c757d;
-    font-size: 0.9rem;
-}
-
-.file-input {
-    display: none;
-}
-
-/* Loading state */
-.image-upload-container.loading,
-.file-upload-container.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-/* Success/Error messages */
-.upload-message {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-}
-
-    .upload-message.success {
-        background: #d1e7dd;
-        color: #0f5132;
-        border: 1px solid #badbcc;
-    }
-
-    .upload-message.error {
-        background: #f8d7da;
-        color: #842029;
-        border: 1px solid #f5c2c7;
     }

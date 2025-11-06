@@ -194,17 +194,56 @@ namespace AutoGestao.Services
 
             foreach (var searchProp in metadata.SearchableProperties)
             {
-                var property = Expression.Property(parameter, searchProp.Property);
+                // 🔧 FIX: Construir expressão considerando NavigationPath
+                Expression property = parameter;
+
+                // Se tem NavigationPath (ex: "Empresa.Nome"), navegar pelas propriedades
+                if (!string.IsNullOrEmpty(searchProp.NavigationPath))
+                {
+                    var parts = searchProp.NavigationPath.Split('.');
+                    foreach (var part in parts)
+                    {
+                        property = Expression.Property(property, part);
+                    }
+                }
+                else
+                {
+                    // Propriedade direta na entidade
+                    property = Expression.Property(parameter, searchProp.Property);
+                }
+
                 var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
                 var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
 
                 if (toLowerMethod != null && containsMethod != null)
                 {
+                    // 🔧 FIX: Adicionar null check para propriedades de navegação
+                    Expression? nullCheckExpression = null;
+
+                    // Verificar null em toda a cadeia de navegação
+                    if (!string.IsNullOrEmpty(searchProp.NavigationPath))
+                    {
+                        var navProperty = (Expression)parameter;
+                        var parts = searchProp.NavigationPath.Split('.');
+
+                        foreach (var part in parts.Take(parts.Length))
+                        {
+                            navProperty = Expression.Property(navProperty, part);
+                            var navNullCheck = Expression.NotEqual(navProperty, Expression.Constant(null));
+                            nullCheckExpression = nullCheckExpression == null
+                                ? navNullCheck
+                                : Expression.AndAlso(nullCheckExpression, navNullCheck);
+                        }
+                    }
+                    else
+                    {
+                        nullCheckExpression = Expression.NotEqual(property, Expression.Constant(null));
+                    }
+
                     var toLower = Expression.Call(property, toLowerMethod);
                     var constant = Expression.Constant(termLower);
                     var contains = Expression.Call(toLower, containsMethod, constant);
-                    var nullCheck = Expression.NotEqual(property, Expression.Constant(null));
-                    var condition = Expression.AndAlso(nullCheck, contains);
+                    var condition = Expression.AndAlso(nullCheckExpression, contains);
 
                     filterExpression = filterExpression == null ? condition : Expression.OrElse(filterExpression, condition);
                 }

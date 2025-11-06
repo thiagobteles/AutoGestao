@@ -379,11 +379,17 @@ class ReferenceFieldManager {
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Erro na busca: ${response.status}`);
+                    const errorText = await response.text();
+                    console.error('❌ Erro na requisição:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        body: errorText
+                    });
+                    throw new Error(`Erro na busca: ${response.status} - ${errorText}`);
                 }
 
                 results = await response.json();
-                console.log(`✅ Busca concluída: ${results.length} resultados`);
+                console.log(`✅ Busca concluída: ${results.length} resultados`, results);
 
                 this.cache.set(cacheKey, results);
                 this.activeRequests.delete(targetField);
@@ -1434,11 +1440,11 @@ referenceModalStyles.textContent = `
     .modal-reference-create .modal-footer {
         position: sticky;
         bottom: 0;
-        background: #f8f9fa;
-        border-top: 2px solid #dee2e6;
+        background: var(--light-bg);
+        border-top: 2px solid var(--border-light);
         padding: 1rem 1.5rem;
         z-index: 1000;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        box-shadow: 0 -2px 10px var(--black-5);
     }
 
     .modal-reference-create .modal-footer .btn {
@@ -1490,10 +1496,10 @@ referenceModalStyles.textContent = `
     #referenceCreateModal .form-actions {
         position: sticky;
         bottom: 0;
-        background: white;
+        background: var(--white);
         padding: 1rem 0;
         margin-top: 2rem;
-        border-top: 1px solid #dee2e6;
+        border-top: 1px solid var(--border-light);
         z-index: 10;
     }
 `;

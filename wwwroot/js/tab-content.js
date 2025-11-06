@@ -216,7 +216,8 @@ class TabContentManager {
 
                 searchInput.setAttribute('readonly', 'readonly');
                 searchInput.setAttribute('disabled', 'disabled');
-                searchInput.style.backgroundColor = '#e9ecef';
+                const bgDisabled = getComputedStyle(document.documentElement).getPropertyValue('--bg-disabled').trim();
+                searchInput.style.backgroundColor = bgDisabled;
                 searchInput.style.cursor = 'not-allowed';
                 searchInput.title = 'Este campo não pode ser alterado pois o registro pertence a este contexto';
             }
@@ -237,7 +238,8 @@ class TabContentManager {
             if (searchInput && searchInput.parentElement) {
                 const lockIcon = document.createElement('span');
                 lockIcon.className = 'position-absolute';
-                lockIcon.style.cssText = 'right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #6c757d;';
+                const textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
+                lockIcon.style.cssText = `right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: ${textMuted};`;
                 lockIcon.innerHTML = '<i class="fas fa-lock"></i>';
 
                 const parent = searchInput.parentElement;
@@ -299,7 +301,7 @@ class TabContentManager {
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer" style="flex-shrink: 0; background: #f8f9fa; border-top: 1px solid #dee2e6;">
+                    <div class="modal-footer" style="flex-shrink: 0; background: var(--light-bg); border-top: 1px solid var(--border-light);">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             <i class="fas fa-times me-2"></i>
                             Cancelar

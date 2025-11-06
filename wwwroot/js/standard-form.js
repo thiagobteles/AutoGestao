@@ -522,7 +522,8 @@ async function buscarCep(cep) {
                 field.dispatchEvent(new Event('change'));
 
                 // Animação visual
-                field.style.backgroundColor = '#d4edda';
+                const successLighter = getComputedStyle(document.documentElement).getPropertyValue('--success-lighter').trim();
+                field.style.backgroundColor = successLighter;
                 setTimeout(() => {
                     field.style.backgroundColor = '';
                 }, 1000);

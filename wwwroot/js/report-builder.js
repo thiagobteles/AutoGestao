@@ -291,7 +291,7 @@ const TemplateBuilder = {
                              contenteditable="true"
                              data-section-id="${section.id}"
                              onblur="TemplateBuilder.saveRichTextContent('${section.id}')"
-                             style="min-height: 200px; padding: 15px; background: white; border: 2px solid #dee2e6; border-radius: 8px; outline: none;">
+                             style="min-height: 200px; padding: 15px; background: var(--white); border: 2px solid var(--border-light); border-radius: 8px; outline: none;">
                             ${section.richTextContent || '<p>Digite seu texto aqui...</p>'}
                         </div>
                     </div>
@@ -300,7 +300,7 @@ const TemplateBuilder = {
                         <div class="query-editor-header">
                             <i class="fas fa-database"></i>
                             <span>Consulta SQL Personalizada</span>
-                            <small style="color: #6c757d; margin-left: auto;">Use @Id para referenciar o ID da entidade</small>
+                            <small style="color: var(--text-muted); margin-left: auto;">Use @Id para referenciar o ID da entidade</small>
                         </div>
                         <textarea
                             class="query-editor"
