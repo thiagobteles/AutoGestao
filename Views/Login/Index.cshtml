@@ -121,18 +121,8 @@
             <div class="col-lg-5 col-md-7 col-sm-9">
                 <div class="login-container">
                     <div class="login-header">
-                        @if (Globais.EhAutoGestao)
-                        {
-                            <i class="fas fa-car fa-3x text-primary mb-3"></i>
-                            <h1>AutoGestão</h1>
-                            
-                        }
-                        else
-                        {
-                            <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
-                            <h1>Instituto Fazendo a Diferença</h1>
-                        }
-                        
+                        <i class="@Globais.Icone fa-3x text-primary mb-3"></i>
+                        <h1>@Globais.NomeApresentacao</h1>
                         <p>Faça login para acessar o sistema</p>
                     </div>
 

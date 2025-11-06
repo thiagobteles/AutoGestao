@@ -8,8 +8,16 @@ namespace AutoGestao
         {
             get
             {
-                return EhAutoGestao ? "Auto Gestão" : "Instituto FD";
+                return EhAutoGestao ? "Auto Gestão" : "Contabilidade";
             } 
+        }
+
+        public static string Icone
+        {
+            get
+            {
+                return EhAutoGestao ? "fas fa-car" : "fas fa-graduation-cap";
+            }
         }
 
         public static bool EhAutoGestao

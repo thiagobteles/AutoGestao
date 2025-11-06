@@ -6,209 +6,155 @@
     ViewData["Title"] = "Dashboard";
 }
 
-@if (Globais.EhAutoGestao)
-{
-    <div class="dashboard-container fade-in">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="page-title">
-                    <i class="fas fa-tachometer-alt"></i>
-                    Dashboard
-                </h1>
-                <p class="page-subtitle mb-0">Visão geral do sistema de gestão</p>
-            </div>
-            <div>
-                <button class="btn-modern btn-outline-modern">
-                    <i class="fas fa-download"></i>
-                    Exportar Relatório
-                </button>
+<div class="dashboard-container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </h1>
+            <p class="page-subtitle mb-0">Visão geral do sistema de gestão</p>
+        </div>
+        @* <div>
+            <button class="btn-modern btn-outline-modern">
+                <i class="fas fa-download"></i>
+                Exportar Relatório
+            </button>
+        </div> *@
+    </div>
+
+    <!-- Cards de Estatísticas - Full Width -->
+    <div class="grid-4 mb-4">
+        <div class="stats-card">
+            <div class="stats-content">
+                <div class="stats-info">
+                    <h3>@Model.TotalVeiculos</h3>
+                    <p>Total de Veículos</p>
+                </div>
+                <div class="stats-icon primary">
+                    <i class="fas fa-car"></i>
+                </div>
             </div>
         </div>
 
-        <!-- Cards de Estatísticas - Full Width -->
-        <div class="grid-4 mb-4">
-            <div class="stats-card">
-                <div class="stats-content">
-                    <div class="stats-info">
-                        <h3>@Model.TotalVeiculos</h3>
-                        <p>Total de Veículos</p>
-                    </div>
-                    <div class="stats-icon primary">
-                        <i class="fas fa-car"></i>
-                    </div>
+        <div class="stats-card">
+            <div class="stats-content">
+                <div class="stats-info">
+                    <h3>@Model.VeiculosEstoque</h3>
+                    <p>Em Estoque</p>
+                </div>
+                <div class="stats-icon success">
+                    <i class="fas fa-warehouse"></i>
                 </div>
             </div>
+        </div>
 
-            <div class="stats-card">
-                <div class="stats-content">
-                    <div class="stats-info">
-                        <h3>@Model.VeiculosEstoque</h3>
-                        <p>Em Estoque</p>
-                    </div>
-                    <div class="stats-icon success">
-                        <i class="fas fa-warehouse"></i>
-                    </div>
+        <div class="stats-card">
+            <div class="stats-content">
+                <div class="stats-info">
+                    <h3>@Model.TotalClientes</h3>
+                    <p>Total de Clientes</p>
+                </div>
+                <div class="stats-icon info">
+                    <i class="fas fa-users"></i>
                 </div>
             </div>
+        </div>
 
-            <div class="stats-card">
-                <div class="stats-content">
-                    <div class="stats-info">
-                        <h3>@Model.TotalClientes</h3>
-                        <p>Total de Clientes</p>
-                    </div>
-                    <div class="stats-icon info">
-                        <i class="fas fa-users"></i>
-                    </div>
+        <div class="stats-card">
+            <div class="stats-content">
+                <div class="stats-info">
+                    <h3>@Model.VendasMes</h3>
+                    <p>Vendas do Mês</p>
+                </div>
+                <div class="stats-icon warning">
+                    <i class="fas fa-handshake"></i>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="stats-card">
-                <div class="stats-content">
-                    <div class="stats-info">
-                        <h3>@Model.VendasMes</h3>
-                        <p>Vendas do Mês</p>
-                    </div>
-                    <div class="stats-icon warning">
+    <!-- Segunda linha - Full Width -->
+    <div class="grid-3 mb-4">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="fas fa-chart-line"></i>
+                Receita do Mês
+            </div>
+            <div class="card-body-modern">
+                <h2 class="text-success mb-3">@Model.ValorVendasMes.ToString("C")</h2>
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar" style="width: @(Model.ValorVendasMes * 100 / Model.MetaMensal)%; background: var(--accent-color);"></div>
+                </div>
+                <small class="text-muted">@(Model.ValorVendasMes * 100 / Model.MetaMensal)% da meta mensal atingida</small>
+
+                <div class="mt-3 d-flex justify-content-between">
+                    <span class="text-muted">Meta: @Model.MetaMensal.ToString("C")</span>
+                    @{
+                        if (Model.ComparativoComMesAnterior > 0)
+                        {
+                            <span class="text-success fw-bold">↗ @(Model.ComparativoComMesAnterior.ToString("C"))</span>
+                        }
+                        else if (Model.ComparativoComMesAnterior == 0)
+                        {
+                            <span class="text-muted">@(Model.ComparativoComMesAnterior.ToString("C"))</span>
+                        }
+                        else
+                        {
+                            Model.ComparativoComMesAnterior = Model.ComparativoComMesAnterior * -1;
+                            <span class="text-danger fw-bold">↙ @(Model.ComparativoComMesAnterior.ToString("C"))</span>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="fas fa-rocket"></i>
+                Ações Rápidas
+            </div>
+            <div class="card-body-modern">
+                <div class="d-grid gap-3">
+                    <a asp-controller="Veiculo" asp-action="Create" class="btn-modern btn-primary-modern">
+                        <i class="fas fa-plus"></i>
+                        Cadastrar Veículo
+                    </a>
+                    <a asp-controller="Cliente" asp-action="Create" class="btn-modern btn-accent-modern">
+                        <i class="fas fa-user-plus"></i>
+                        Novo Cliente
+                    </a>
+                    <a asp-controller="Venda" asp-action="Create" class="btn-modern btn-success-modern">
                         <i class="fas fa-handshake"></i>
-                    </div>
+                        Registrar Venda
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Segunda linha - Full Width -->
-        <div class="grid-3 mb-4">
-            <div class="card-modern">
-                <div class="card-header-modern">
-                    <i class="fas fa-chart-line"></i>
-                    Receita do Mês
-                </div>
-                <div class="card-body-modern">
-                    <h2 class="text-success mb-3">@Model.ValorVendasMes.ToString("C")</h2>
-                    <div class="progress mb-2" style="height: 10px;">
-                        <div class="progress-bar" style="width: @(Model.ValorVendasMes * 100 / Model.MetaMensal)%; background: var(--accent-color);"></div>
-                    </div>
-                    <small class="text-muted">@(Model.ValorVendasMes * 100 / Model.MetaMensal)% da meta mensal atingida</small>
-
-                    <div class="mt-3 d-flex justify-content-between">
-                        <span class="text-muted">Meta: @Model.MetaMensal.ToString("C")</span>
-                        @{
-                            if (Model.ComparativoComMesAnterior > 0)
-                            {
-                                <span class="text-success fw-bold">↗ @(Model.ComparativoComMesAnterior.ToString("C"))</span>
-                            }
-                            else if (Model.ComparativoComMesAnterior == 0)
-                            {
-                                <span class="text-muted">@(Model.ComparativoComMesAnterior.ToString("C"))</span>
-                            }
-                            else
-                            {
-                                Model.ComparativoComMesAnterior = Model.ComparativoComMesAnterior * -1;
-                                <span class="text-danger fw-bold">↙ @(Model.ComparativoComMesAnterior.ToString("C"))</span>
-                            }
-                        }
-                    </div>
-                </div>
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="fas fa-clock"></i>
+                Vendas recentes
             </div>
-
-            <div class="card-modern">
-                <div class="card-header-modern">
-                    <i class="fas fa-rocket"></i>
-                    Ações Rápidas
-                </div>
-                <div class="card-body-modern">
-                    <div class="d-grid gap-3">
-                        <a asp-controller="Veiculo" asp-action="Create" class="btn-modern btn-primary-modern">
-                            <i class="fas fa-plus"></i>
-                            Cadastrar Veículo
-                        </a>
-                        <a asp-controller="Cliente" asp-action="Create" class="btn-modern btn-accent-modern">
-                            <i class="fas fa-user-plus"></i>
-                            Novo Cliente
-                        </a>
-                        <a asp-controller="Venda" asp-action="Create" class="btn-modern btn-success-modern">
-                            <i class="fas fa-handshake"></i>
-                            Registrar Venda
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-modern">
-                <div class="card-header-modern">
-                    <i class="fas fa-clock"></i>
-                    Vendas recentes
-                </div>
-                <div class="card-body-modern">
-                    <div class="activity-list">
-                        @{
-                            foreach (var vendaAtual in Model.UltimasVendas)
-                            {
-                                <div class="activity-item d-flex align-items-center mb-3">
-                                    <div class="activity-icon bg-success text-white rounded-circle me-3" style="width: 25px; height: 25px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-plus fa-sm"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-semibold">vendaAtual.Vendedor.Nome</div>
-                                        <small class="text-muted">vendaAtual.Veiculo.MarcaModelo vendaAtual.Veiculo.AnoComposto - vendaAtual.ValorVenda.ToString("C")</small>
-                                    </div>
+            <div class="card-body-modern">
+                <div class="activity-list">
+                    @{
+                        foreach (var vendaAtual in Model.UltimasVendas)
+                        {
+                            <div class="activity-item d-flex align-items-center mb-3">
+                                <div class="activity-icon bg-success text-white rounded-circle me-3" style="width: 25px; height: 25px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-plus fa-sm"></i>
                                 </div>
-                            }
+                                <div>
+                                    <div class="fw-semibold">vendaAtual.Vendedor.Nome</div>
+                                    <small class="text-muted">vendaAtual.Veiculo.MarcaModelo vendaAtual.Veiculo.AnoComposto - vendaAtual.ValorVenda.ToString("C")</small>
+                                </div>
+                            </div>
                         }
-                    </div>
+                    }
                 </div>
             </div>
         </div>
     </div>
-}
-else
-{
-
-    <style>
-        .dashboard-container {
-            position: relative;
-            width: 100%;
-            height: calc(100vh - 60px);
-            overflow: hidden;
-        }
-
-        .dashboard-iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-    }
-    </style>
-
-    <div class="dashboard-container">
-        <iframe id="dashboardIframe"
-                src="/react-dashboard/index.html"
-                class="dashboard-iframe">
-        </iframe>
-    </div>
-
-    <script>
-        // Ajusta o iframe quando o menu muda
-        function ajustarIframe() {
-            const iframe = document.getElementById('dashboardIframe');
-            const sidebar = document.querySelector('.sidebar'); // Ajuste para o seletor do seu menu
-
-            if (sidebar) {
-                const sidebarWidth = sidebar.offsetWidth;
-                iframe.style.marginLeft = '0px';
-            }
-        }
-
-        // Executa quando a página carrega
-        window.addEventListener('load', ajustarIframe);
-
-        // Observa mudanças no menu (quando abre/fecha)
-        const observer = new MutationObserver(ajustarIframe);
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar) {
-            observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-        }
-    </script>
-}
+</div>

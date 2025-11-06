@@ -166,7 +166,7 @@ using (var scope = app.Services.CreateScope())
     }
     else
     {
-        await InicializarDadosPadraoInstituto(context, usuarioService, empresaService);
+        await InicializarDadosPadraoContabilidade(context, usuarioService, empresaService);
     }
 }
 
@@ -213,7 +213,7 @@ static async Task InicializarDadosPadraoAutoGestao(ApplicationDbContext context,
     }
 }
 
-static async Task InicializarDadosPadraoInstituto(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
+static async Task InicializarDadosPadraoContabilidade(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
 {
     await context.Database.MigrateAsync();
 
@@ -221,35 +221,35 @@ static async Task InicializarDadosPadraoInstituto(ApplicationDbContext context, 
     {
         var empresa = new Empresa
         {
-            RazaoSocial = "Instituto Fazendo a Diferença",
+            RazaoSocial = "Contabilidade",
             CEP = "74125200",
             Telefone = "62981483753",
-            Email = "admin@institutofd.com",
+            Email = "admin@contabilidade.com",
             Estado = EnumEstado.Goias,
             Cidade = "Goiânia",
             Endereco = "Rua T46",
             Numero = "305",
             Bairro = "Setor Oeste",
             Complemento = "Apartamento 401",
-            Observacoes = "Empresa e dados teste",
+            Observacoes = "Empresa teste",
             Ativo = true
         };
 
-        await empresaService.CriarEmpresaAsync(empresa);
+        var retorno = await empresaService.CriarEmpresaAsync(empresa);
 
         var adminUser = new Usuario
         {
             Nome = "Thiago",
-            Email = "admin@institutofd.com",
+            Email = "admin@contabilidade.com",
             Perfil = EnumPerfilUsuario.Admin,
-            IdEmpresa = 1,
+            IdEmpresa = retorno.Id,
             Ativo = true
         };
 
         await usuarioService.CriarUsuarioAsync(adminUser, "admin123");
 
-        Console.WriteLine("Usuário Thiago criado:");
-        Console.WriteLine("Email: admin@institutofd.com");
+        Console.WriteLine("Usuário criado");
+        Console.WriteLine("Email: admin@contabilidade.com");
         Console.WriteLine("Senha: admin123");
     }
 }
