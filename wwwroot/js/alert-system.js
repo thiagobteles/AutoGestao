@@ -19,7 +19,21 @@ class AlertSystem {
             this.container = document.createElement('div');
             this.container.className = 'alert-container';
             document.body.appendChild(this.container);
+
+            // Debug detalhado
             console.log('✅ Alert container criado e adicionado ao body');
+            console.log('📍 Container position:', {
+                parent: this.container.parentElement?.tagName,
+                className: this.container.className,
+                style: this.container.style.cssText,
+                computedStyle: {
+                    position: getComputedStyle(this.container).position,
+                    zIndex: getComputedStyle(this.container).zIndex,
+                    display: getComputedStyle(this.container).display,
+                    top: getComputedStyle(this.container).top,
+                    right: getComputedStyle(this.container).right
+                }
+            });
         }
     }
 
@@ -55,14 +69,43 @@ class AlertSystem {
             this.alertPromises.set(alertId, resolve);
         });
 
+        console.log('📦 Elemento criado:', {
+            id: alertId,
+            innerHTML: alertEl.innerHTML.substring(0, 100) + '...',
+            className: alertEl.className,
+            childElementCount: alertEl.childElementCount
+        });
+
         // Adicionar ao container
         this.container.appendChild(alertEl);
         this.alerts.set(alertId, alertEl);
+
+        console.log('✅ Elemento adicionado ao container. Total de alertas:', this.alerts.size);
+        console.log('📊 Container info:', {
+            childCount: this.container.children.length,
+            isConnected: this.container.isConnected,
+            offsetHeight: this.container.offsetHeight,
+            offsetWidth: this.container.offsetWidth
+        });
 
         // Animar entrada
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 alertEl.classList.add('show');
+                console.log('🎬 Classe "show" adicionada ao alerta');
+
+                // Debug do elemento após animação
+                const alertModern = alertEl.querySelector('.alert-modern');
+                if (alertModern) {
+                    const computedStyle = getComputedStyle(alertModern);
+                    console.log('🎨 Estilos do alerta:', {
+                        display: computedStyle.display,
+                        visibility: computedStyle.visibility,
+                        opacity: computedStyle.opacity,
+                        transform: computedStyle.transform,
+                        position: computedStyle.position
+                    });
+                }
             });
         });
 
@@ -376,7 +419,27 @@ function initAlertSystem() {
 
     if (hasStyles) {
         console.log('✅ CSS do Alert System carregado corretamente');
+        console.log('📐 Estilos CSS encontrados:', {
+            borderRadius: computedStyle.borderRadius,
+            boxShadow: computedStyle.boxShadow,
+            background: computedStyle.background
+        });
     } else {
         console.warn('⚠️ CSS do Alert System pode não estar carregado. Verifique se alert-system.css está incluído no _Layout.cshtml');
     }
+
+    // Função de teste rápido disponível no console
+    window.testAlertSystem = function() {
+        console.log('🧪 Executando teste do Alert System...');
+
+        // Testar cada tipo de alerta
+        setTimeout(() => window.showSuccess('Teste de sucesso!', 'Sucesso'), 100);
+        setTimeout(() => window.showError('Teste de erro!', 'Erro'), 1500);
+        setTimeout(() => window.showWarning('Teste de aviso!', 'Aviso'), 3000);
+        setTimeout(() => window.showInfo('Teste de informação!', 'Info'), 4500);
+
+        console.log('✅ Teste agendado. Observe os alertas no canto superior direito.');
+    };
+
+    console.log('💡 Para testar o sistema, execute: testAlertSystem()');
 }
