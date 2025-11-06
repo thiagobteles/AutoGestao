@@ -80,6 +80,9 @@ class AlertSystem {
         this.container.appendChild(alertEl);
         this.alerts.set(alertId, alertEl);
 
+        // Adicionar classe para ativar backdrop
+        this.container.classList.add('has-alerts');
+
         console.log('✅ Elemento adicionado ao container. Total de alertas:', this.alerts.size);
         console.log('📊 Container info:', {
             childCount: this.container.children.length,
@@ -246,6 +249,11 @@ class AlertSystem {
                 alertEl.parentNode.removeChild(alertEl);
             }
             this.alerts.delete(alertId);
+
+            // Remover classe backdrop se não houver mais alertas
+            if (this.alerts.size === 0) {
+                this.container.classList.remove('has-alerts');
+            }
 
             // Resolver a Promise do alerta
             const resolve = this.alertPromises.get(alertId);
