@@ -302,7 +302,9 @@ window.showSuccess = (message, title = '') => window.alertSystem.success(message
 window.showError = (message, title = '') => window.alertSystem.error(message, title);
 window.showWarning = (message, title = '') => window.alertSystem.warning(message, title);
 window.showInfo = (message, title = '') => window.alertSystem.info(message, title);
-window.confirm = (message, options) => window.alertSystem.confirm(message, options);
+
+// Funções de confirmação (não sobrescrever window.confirm nativo)
+window.showConfirm = (message, options) => window.alertSystem.confirm(message, options);
 window.confirmDelete = (itemName) => window.alertSystem.confirmDelete(itemName);
 
 console.log('✅ Sistema de Alertas inicializado');

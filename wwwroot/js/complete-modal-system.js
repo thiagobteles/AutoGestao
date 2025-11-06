@@ -345,21 +345,19 @@ window.showAlert = function(message, type = 'info') {
     return window.modalSystem.notify(message, type);
 };
 
-// Funções de notificação
-window.showSuccess = function(message, options = {}) {
-    return window.modalSystem.success(message, options);
-};
+// ===================================================================
+// FUNÇÕES REMOVIDAS - Agora usando alert-system.js
+// ===================================================================
+// As funções showSuccess, showError, showWarning, showInfo foram movidas
+// para alert-system.js para usar o sistema moderno de toast notifications
+//
+// Mantemos apenas as funções de confirmação aqui pois usam modais centrais,
+// que são mais apropriados para ações que requerem atenção do usuário
+// ===================================================================
 
-window.showError = function(message, options = {}) {
-    return window.modalSystem.error(message, options);
-};
-
-window.showWarning = function(message, options = {}) {
-    return window.modalSystem.warning(message, options);
-};
-
-window.showInfo = function(message, options = {}) {
-    return window.modalSystem.info(message, options);
+// Função de confirmação genérica
+window.showConfirm = function(message, options = {}) {
+    return window.modalSystem.confirm(message, options);
 };
 
 // Função específica para confirmação de exclusão
