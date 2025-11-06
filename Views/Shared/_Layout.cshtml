@@ -238,6 +238,27 @@
 
     <!-- SISTEMA DE SIDEBAR E LAYOUT -->
     <script>
+        // CRÍTICO: Aplicar estado collapsed IMEDIATAMENTE antes de qualquer outra coisa
+        (function() {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+
+            // Adicionar classe no-transition para evitar flash visual
+            sidebar.classList.add('no-transition');
+
+            const savedCollapsedState = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (savedCollapsedState) {
+                sidebar.classList.add('collapsed');
+            }
+
+            // Remover no-transition após um frame para permitir transições futuras
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    sidebar.classList.remove('no-transition');
+                });
+            });
+        })();
+
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
@@ -247,12 +268,14 @@
             // Variável para controlar se estamos processando um clique
             let isProcessingClick = false;
 
-            // Recuperar estado salvo do localStorage
-            const savedCollapsedState = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (savedCollapsedState) {
-                sidebar.classList.add('collapsed');
-                updateCollapseIcon(true);
-            }
+            // Atualizar ícone baseado no estado já aplicado
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            updateCollapseIcon(isCollapsed);
+
+            // Garantir que no-transition seja removida após inicialização completa
+            setTimeout(() => {
+                sidebar.classList.remove('no-transition');
+            }, 100);
 
             // Botão de colapsar/expandir
             sidebarCollapseBtn?.addEventListener('click', function(e) {
@@ -338,12 +361,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🔧 Inicializando menu colapsável...');
 
-            // IMPORTANTE: Aguardar um ciclo para garantir que o sidebar foi inicializado
-            setTimeout(function() {
-                const sidebar = document.getElementById('sidebar');
-                const isSidebarCollapsed = sidebar && sidebar.classList.contains('collapsed');
+            const sidebar = document.getElementById('sidebar');
+            const isSidebarCollapsed = sidebar && sidebar.classList.contains('collapsed');
 
-                console.log('🔧 Estado do sidebar ao inicializar menu:', isSidebarCollapsed ? 'COLLAPSED' : 'EXPANDED');
+            console.log('🔧 Estado do sidebar ao inicializar menu:', isSidebarCollapsed ? 'COLLAPSED' : 'EXPANDED');
 
                 // Selecionar todos os itens de menu que têm submenu
                 const menuToggles = document.querySelectorAll('.menu-toggle');
@@ -374,10 +395,8 @@
                         // Toggle do item atual
                         if (isExpanded) {
                             menuItem.classList.remove('expanded');
-                            console.log('📂 Submenu fechado');
                         } else {
                             menuItem.classList.add('expanded');
-                            console.log('📂 Submenu aberto');
                         }
                     });
                 });
@@ -397,17 +416,23 @@
                     const activeLinks = document.querySelectorAll('.submenu-link.active');
                     activeLinks.forEach(link => {
                         const menuItem = link.closest('.menu-item.has-submenu');
-                        if (menuItem) {
-                            menuItem.classList.add('expanded');
-                            menuItem.classList.add('has-active-child');
-                            console.log('📂 Submenu expandido automaticamente (contém item ativo)');
+                        if (menuItem && !menuItem.classList.contains('expanded')) {
+                            // Usar requestAnimationFrame para evitar flash visual
+                            requestAnimationFrame(() => {
+                                menuItem.classList.add('expanded');
+                                menuItem.classList.add('has-active-child');
+                                console.log('📂 Submenu expandido automaticamente (contém item ativo)');
+                            });
                         }
                     });
                 }
 
                 // Executar ao carregar SOMENTE se não estiver collapsed
                 if (!isSidebarCollapsed) {
-                    expandActiveSubmenu();
+                    // Aguardar um frame para garantir que o DOM está completamente renderizado
+                    requestAnimationFrame(() => {
+                        expandActiveSubmenu();
+                    });
                 }
 
                 // Fechar todos os submenus quando o sidebar for colapsado
@@ -473,9 +498,12 @@
                                 const linkText = link.querySelector('.menu-link-text')?.textContent;
                                 if (linkText === menuText) {
                                     const menuItem = link.closest('.menu-item.has-submenu');
-                                    if (menuItem) {
-                                        menuItem.classList.add('expanded');
-                                        console.log('📂 Submenu restaurado:', menuText);
+                                    if (menuItem && !menuItem.classList.contains('expanded')) {
+                                        // Usar requestAnimationFrame para evitar flash visual
+                                        requestAnimationFrame(() => {
+                                            menuItem.classList.add('expanded');
+                                            console.log('📂 Submenu restaurado:', menuText);
+                                        });
                                     }
                                 }
                             });
@@ -487,7 +515,10 @@
 
                 // Restaurar estado salvo SOMENTE se não estiver collapsed
                 if (!isSidebarCollapsed) {
-                    restoreSubmenuState();
+                    // Aguardar um frame para garantir que o DOM está completamente renderizado
+                    requestAnimationFrame(() => {
+                        restoreSubmenuState();
+                    });
                 }
 
                 // Salvar estado quando um submenu for expandido/colapsado
@@ -497,8 +528,7 @@
                     });
                 });
 
-                console.log('✅ Menu colapsável inicializado com sucesso');
-            }, 50); // Aguardar sidebar ser inicializado primeiro
+            console.log('✅ Menu colapsável inicializado com sucesso');
         });
     </script>
 

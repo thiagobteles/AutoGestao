@@ -2,6 +2,12 @@
    MENU LATERAL COLAPSÁVEL COM SUBMENUS
    ============================================================================= */
 
+/* CRÍTICO: Desabilitar transições durante carregamento inicial para evitar flash */
+.sidebar.no-transition,
+.sidebar.no-transition * {
+    transition: none !important;
+}
+
 /* Menu Item com Submenu */
 .menu-item.has-submenu {
     position: relative;
