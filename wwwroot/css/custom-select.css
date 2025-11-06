@@ -1,5 +1,6 @@
 /* =============================================================================
    CUSTOM SELECT COM SUPORTE A ÍCONES FONT AWESOME
+   Todas as cores são gerenciadas pelo theme-colors.css
    ============================================================================= */
 
 .custom-select-wrapper {
@@ -9,34 +10,34 @@
 }
 
 .custom-select-wrapper.active {
-    z-index: 100001; /* Z-index acima do alert-system para garantir visibilidade */
+    z-index: var(--z-alert-active); /* Z-index acima do alert-system para garantir visibilidade */
 }
 
 .custom-select-trigger {
     display: flex;
     align-items: center;
     padding: 0.5rem 2.5rem 0.5rem 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    background-color: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius);
+    background-color: var(--white);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition-all);
     min-height: 38px;
 }
 
     .custom-select-trigger:hover {
-        border-color: #adb5bd;
+        border-color: var(--border-dark);
     }
 
     .custom-select-trigger.active {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        box-shadow: 0 0 0 0.2rem var(--primary-shadow);
     }
 
     .custom-select-trigger.disabled {
-        background-color: #e9ecef;
+        background-color: var(--bg-disabled);
         cursor: not-allowed;
-        opacity: 0.6;
+        opacity: var(--opacity-60);
     }
 
 .custom-select-arrow {
@@ -45,8 +46,8 @@
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
-    transition: transform 0.2s ease;
-    color: #6c757d;
+    transition: transform var(--transition-normal);
+    color: var(--text-muted);
 }
 
 .custom-select-trigger.active .custom-select-arrow {
@@ -58,11 +59,11 @@
     align-items: center;
     gap: 0.5rem;
     flex: 1;
-    color: #495057;
+    color: var(--text-color);
 }
 
     .custom-select-value.placeholder {
-        color: white;
+        color: var(--text-muted);
     }
 
     .custom-select-value i {
@@ -71,15 +72,15 @@
 
 .custom-select-dropdown {
     position: fixed; /* Mudado de absolute para fixed para não ser cortado por overflow */
-    background: white;
-    border: 1px solid #ced4da;
+    background: var(--white);
+    border: 1px solid var(--border-light);
     border-top: none;
-    border-radius: 0 0 6px 6px;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
     margin-top: -1px;
     max-height: 250px;
     overflow-y: auto;
-    z-index: 100002; /* Z-index acima do alert-system para garantir visibilidade */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: var(--z-alert-dropdown); /* Z-index acima do alert-system para garantir visibilidade */
+    box-shadow: var(--shadow-dropdown);
     display: none;
     min-width: 200px; /* Largura mínima para garantir legibilidade */
 }
@@ -94,21 +95,21 @@
     gap: 0.5rem;
     padding: 0.625rem 1rem;
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: background-color var(--transition-fast);
 }
 
     .custom-select-option:hover {
-        background-color: #f8f9fa;
+        background-color: var(--bg-hover);
     }
 
     .custom-select-option.selected {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white !important;
+        background: var(--gradient-primary);
+        color: var(--white) !important;
         font-weight: 500;
     }
 
     .custom-select-option.selected span {
-        color: white !important;
+        color: var(--white) !important;
     }
 
     .custom-select-option i {
@@ -118,7 +119,7 @@
     }
 
     .custom-select-option.selected i {
-        color: white !important;
+        color: var(--white) !important;
     }
 
 /* Scrollbar customizada */
@@ -127,16 +128,16 @@
 }
 
 .custom-select-dropdown::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--scrollbar-track);
 }
 
 .custom-select-dropdown::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
+    background: var(--scrollbar-thumb);
+    border-radius: var(--border-radius-sm);
 }
 
     .custom-select-dropdown::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
+        background: var(--scrollbar-thumb-hover);
     }
 
 /* Campo hidden para compatibilidade com formulários */
@@ -146,7 +147,7 @@
 
 /* Estados de validação */
 .custom-select-trigger.is-invalid {
-    border-color: #dc3545;
+    border-color: var(--danger-color);
 }
 
 .custom-select-trigger:focus,

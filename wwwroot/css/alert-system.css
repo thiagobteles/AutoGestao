@@ -1,5 +1,6 @@
 /* =============================================================================
    SISTEMA DE ALERTAS MODERNO E ELEGANTE
+   Todas as cores são gerenciadas pelo theme-colors.css
    ============================================================================= */
 
 /* Container de Alertas - Centralizado (SEM backdrop) */
@@ -8,7 +9,7 @@
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    z-index: 100000 !important; /* Maior que modais e outros overlays */
+    z-index: var(--z-alert) !important;
     pointer-events: none;
     max-width: 500px;
     width: auto;
@@ -20,10 +21,9 @@
 
 /* Alert Individual */
 .alert-modern {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2),
-                0 10px 30px rgba(0, 0, 0, 0.15);
+    background: var(--white);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-alert);
     padding: 24px 28px;
     display: flex;
     align-items: flex-start;
@@ -57,7 +57,7 @@
     height: 4px;
     width: 100%;
     background: currentColor;
-    opacity: 0.3;
+    opacity: var(--opacity-30);
     transform-origin: left;
     animation: progress linear;
 }
@@ -76,7 +76,7 @@
     flex-shrink: 0;
     width: 48px;
     height: 48px;
-    border-radius: 50%;
+    border-radius: var(--border-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -88,20 +88,20 @@
     content: '';
     position: absolute;
     inset: -8px;
-    border-radius: 50%;
+    border-radius: var(--border-radius-full);
     background: currentColor;
-    opacity: 0.1;
+    opacity: var(--opacity-10);
     animation: pulse-icon 2s ease-in-out infinite;
 }
 
 @keyframes pulse-icon {
     0%, 100% {
         transform: scale(0.95);
-        opacity: 0.1;
+        opacity: var(--opacity-10);
     }
     50% {
         transform: scale(1.05);
-        opacity: 0.15;
+        opacity: var(--opacity-15);
     }
 }
 
@@ -120,13 +120,13 @@
     font-size: 16px;
     font-weight: 600;
     margin: 0 0 6px 0;
-    color: #1a1a1a;
+    color: var(--gray-darkest);
     line-height: 1.4;
 }
 
 .alert-message {
     font-size: 14px;
-    color: #666;
+    color: var(--text-light);
     margin: 0;
     line-height: 1.5;
     word-wrap: break-word;
@@ -137,22 +137,22 @@
     flex-shrink: 0;
     width: 28px;
     height: 28px;
-    border-radius: 6px;
+    border-radius: var(--border-radius);
     border: none;
-    background: rgba(0, 0, 0, 0.05);
-    color: #666;
+    background: var(--black-5);
+    color: var(--text-light);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: var(--transition-all);
     font-size: 16px;
     padding: 0;
 }
 
 .alert-close:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: #333;
+    background: var(--black-10);
+    color: var(--gray-darker);
     transform: rotate(90deg);
 }
 
@@ -162,18 +162,18 @@
     gap: 8px;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid var(--black-6);
 }
 
 .alert-btn {
     flex: 1;
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: var(--border-radius-md);
     border: none;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition-all);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -182,7 +182,7 @@
 
 .alert-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-md);
 }
 
 .alert-btn:active {
@@ -190,79 +190,79 @@
 }
 
 .alert-btn-primary {
-    background: var(--accent-color, #667eea);
-    color: white;
+    background: var(--accent-color);
+    color: var(--white);
 }
 
 .alert-btn-primary:hover {
-    background: var(--accent-color-dark, #5568d3);
+    background: var(--accent-dark);
 }
 
 .alert-btn-secondary {
-    background: #f5f5f5;
-    color: #666;
+    background: var(--light-bg);
+    color: var(--text-light);
 }
 
 .alert-btn-secondary:hover {
-    background: #e8e8e8;
-    color: #333;
+    background: var(--bg-disabled);
+    color: var(--gray-darker);
 }
 
 /* Tipos de Alert */
 
 /* Success */
 .alert-success {
-    color: #10b981;
-    border-left: 4px solid #10b981;
+    color: var(--success-color);
+    border-left: 4px solid var(--success-color);
 }
 
 .alert-success .alert-icon {
-    color: #10b981;
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: var(--success-color);
+    background: linear-gradient(135deg, var(--success-lighter) 0%, var(--success-light) 100%);
 }
 
 /* Error */
 .alert-error {
-    color: #ef4444;
-    border-left: 4px solid #ef4444;
+    color: var(--danger-color);
+    border-left: 4px solid var(--danger-color);
 }
 
 .alert-error .alert-icon {
-    color: #ef4444;
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: var(--danger-color);
+    background: linear-gradient(135deg, var(--danger-lighter) 0%, var(--danger-light) 100%);
 }
 
 /* Warning */
 .alert-warning {
-    color: #f59e0b;
-    border-left: 4px solid #f59e0b;
+    color: var(--warning-color);
+    border-left: 4px solid var(--warning-color);
 }
 
 .alert-warning .alert-icon {
-    color: #f59e0b;
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: var(--warning-color);
+    background: linear-gradient(135deg, var(--warning-lighter) 0%, var(--warning-light) 100%);
 }
 
 /* Info */
 .alert-info {
-    color: #3b82f6;
-    border-left: 4px solid #3b82f6;
+    color: var(--info-color);
+    border-left: 4px solid var(--info-color);
 }
 
 .alert-info .alert-icon {
-    color: #3b82f6;
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: var(--info-color);
+    background: linear-gradient(135deg, var(--info-lighter) 0%, var(--info-light) 100%);
 }
 
 /* Confirm Dialog */
 .alert-confirm {
-    color: #8b5cf6;
-    border-left: 4px solid #8b5cf6;
+    color: var(--primary-color);
+    border-left: 4px solid var(--primary-color);
 }
 
 .alert-confirm .alert-icon {
-    color: #8b5cf6;
-    background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+    color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--primary-light) 100%);
 }
 
 /* Responsividade */
@@ -296,8 +296,7 @@
 /* Hover Effect */
 .alert-modern:hover {
     transform: scale(1.02);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25),
-                0 15px 35px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 25px 60px var(--black-25), 0 15px 35px var(--black-15);
 }
 
 .alert-modern:hover::before {
@@ -317,7 +316,7 @@
     width: 16px;
     height: 16px;
     border: 2px solid currentColor;
-    border-radius: 50%;
+    border-radius: var(--border-radius-full);
     border-right-color: transparent;
     animation: spin 0.6s linear infinite;
 }
