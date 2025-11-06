@@ -135,10 +135,28 @@
         color: white;
     }
 
-/* Botão de busca desabilitado */
-.reference-search-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+/* Botões desabilitados - Estado readonly/disabled */
+.reference-clear-btn:disabled,
+.reference-create-btn:disabled,
+.reference-search-btn:disabled,
+.reference-clear-btn[disabled],
+.reference-create-btn[disabled],
+.reference-search-btn[disabled] {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important; /* Previne cliques completamente */
+    filter: grayscale(50%);
+}
+
+/* Garantir que botões desabilitados não mudem cor no hover */
+.reference-clear-btn:disabled:hover,
+.reference-create-btn:disabled:hover,
+.reference-search-btn:disabled:hover,
+.reference-clear-btn[disabled]:hover,
+.reference-create-btn[disabled]:hover,
+.reference-search-btn[disabled]:hover {
+    background: transparent !important;
+    color: inherit !important;
 }
 
 /* Dropdown de resultados */

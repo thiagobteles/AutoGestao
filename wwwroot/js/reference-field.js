@@ -225,6 +225,13 @@ class ReferenceFieldManager {
 
     handleSearch(event) {
         const input = event.target;
+
+        // IMPORTANTE: Verificar se o input está readonly ou disabled
+        if (input.readOnly || input.disabled) {
+            console.log('🚫 Input está readonly/disabled, ignorando busca');
+            return;
+        }
+
         const searchTerm = input.value.trim();
         const targetField = input.dataset.targetField;
 
@@ -259,6 +266,13 @@ class ReferenceFieldManager {
 
     handleFocus(event) {
         const input = event.target;
+
+        // IMPORTANTE: Verificar se o input está readonly ou disabled
+        if (input.readOnly || input.disabled) {
+            console.log('🚫 Input está readonly/disabled, ignorando foco');
+            return;
+        }
+
         if (input.value.trim().length >= 2) {
             console.log('👁️ Campo focado com valor, mostrando resultados');
             this.performSearch(input, input.value.trim());
@@ -478,15 +492,28 @@ class ReferenceFieldManager {
         event.preventDefault();
         event.stopPropagation();
 
+        const btn = event.target.closest('.reference-clear-btn');
+
+        // IMPORTANTE: Verificar se o botão está desabilitado ou readonly
+        if (!btn || btn.disabled) {
+            console.log('🚫 Botão de limpar está desabilitado, ignorando clique');
+            return;
+        }
+
         console.log('🗑️ Limpando seleção...');
 
-        const btn = event.target.closest('.reference-clear-btn');
         const targetField = btn.id.replace('_clear', '');
 
         // Obter contexto do botão
         const context = btn.closest('.modal') || document;
         const searchInput = this.getFieldInContext(context, `${targetField}_search`, 'id');
         const hiddenInput = this.getFieldInContext(context, targetField, 'name');
+
+        // Verificar se o input está readonly ou disabled
+        if (searchInput && (searchInput.readOnly || searchInput.disabled)) {
+            console.log('🚫 Campo está readonly/disabled, ignorando ação de limpar');
+            return;
+        }
 
         if (hiddenInput && searchInput) {
             searchInput.value = '';
@@ -532,11 +559,27 @@ class ReferenceFieldManager {
         event.preventDefault();
         event.stopPropagation();
 
+        const btn = event.target.closest('.reference-create-btn');
+
+        // IMPORTANTE: Verificar se o botão está desabilitado ou readonly
+        if (!btn || btn.disabled) {
+            console.log('🚫 Botão de criar está desabilitado, ignorando clique');
+            return;
+        }
+
+        // Verificar se o campo associado está readonly ou disabled
+        const targetField = btn.dataset.targetField;
+        const context = btn.closest('.modal') || document;
+        const searchInput = this.getFieldInContext(context, `${targetField}_search`, 'id');
+
+        if (searchInput && (searchInput.readOnly || searchInput.disabled)) {
+            console.log('🚫 Campo está readonly/disabled, ignorando ação de criar');
+            return;
+        }
+
         console.log('➕ Abrindo modal de criação...');
 
-        const btn = event.target.closest('.reference-create-btn');
         const referenceType = btn.dataset.referenceType;
-        const targetField = btn.dataset.targetField;
 
         try {
             const controller = referenceType;
@@ -567,11 +610,27 @@ class ReferenceFieldManager {
         event.preventDefault();
         event.stopPropagation();
 
+        const btn = event.target.closest('.reference-search-btn');
+
+        // IMPORTANTE: Verificar se o botão está desabilitado ou readonly
+        if (!btn || btn.disabled) {
+            console.log('🚫 Botão de busca está desabilitado, ignorando clique');
+            return;
+        }
+
+        // Verificar se o campo associado está readonly ou disabled
+        const targetField = btn.dataset.targetField;
+        const context = btn.closest('.modal') || document;
+        const searchInput = this.getFieldInContext(context, `${targetField}_search`, 'id');
+
+        if (searchInput && (searchInput.readOnly || searchInput.disabled)) {
+            console.log('🚫 Campo está readonly/disabled, ignorando ação de busca');
+            return;
+        }
+
         console.log('🔍 Abrindo modal de busca...');
 
-        const btn = event.target.closest('.reference-search-btn');
         const referenceType = btn.dataset.referenceType;
-        const targetField = btn.dataset.targetField;
 
         try {
             const controller = referenceType;
