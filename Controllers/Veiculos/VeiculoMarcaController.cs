@@ -8,5 +8,6 @@ namespace AutoGestao.Controllers.Veiculos
     public class VeiculoMarcaController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<VeiculoMarca>> logger) 
         : StandardGridController<VeiculoMarca>(context, fileStorageService, logger)
     {
+
     }
 }

@@ -63,7 +63,7 @@
 }
 
     .custom-select-value.placeholder {
-        color: var(--text-muted);
+        color: var(--white);
     }
 
     .custom-select-value i {
