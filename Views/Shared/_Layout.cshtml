@@ -531,8 +531,11 @@
                                             }
 
                                             // 4. Reinicializar dropdown portal system
-                                            if (typeof DropdownPortalSystem !== 'undefined') {
-                                                console.log('🔄 Reinicializando dropdown portal...');
+                                            // 🔧 FIX: NÃO reinicializar DropdownPortalSystem
+                                            // Motivo: Usa event delegation no document, já funciona globalmente
+                                            // Reinicializar cria event listeners duplicados causando posicionamento incorreto
+                                            if (typeof DropdownPortalSystem !== 'undefined' && !window.dropdownPortalSystem) {
+                                                console.log('🔄 Inicializando dropdown portal...');
                                                 window.dropdownPortalSystem = new DropdownPortalSystem();
                                             }
 
