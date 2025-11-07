@@ -17,15 +17,11 @@ class StandardGrid {
     }
 
     init() {
-        console.log('🚀 Inicializando Sistema de Grid Unificado...');
-
         this.setupLoadingProtection();
         this.setupFilters();
         this.setupEventListeners();
         this.setupAccessibility();
         this.forceHideLoading();
-
-        console.log('✅ Sistema de Grid inicializado com sucesso');
     }
 
     // ===================================================================
@@ -33,11 +29,9 @@ class StandardGrid {
     // ===================================================================
 
     showLoading(show = true) {
-        console.log(`🔄 showLoading(${show}) chamado`);
         const overlay = document.querySelector(this.options.loadingSelector);
 
         if (!overlay) {
-            console.log('⚠️ Loading overlay não encontrado');
             // Loading overlay é opcional - ignorar silenciosamente se não existir
             return;
         }
@@ -48,7 +42,6 @@ class StandardGrid {
         }
 
         if (show) {
-            console.log('👁️ Mostrando loading overlay');
             this.isLoading = true;
             overlay.classList.remove('d-none');
             overlay.style.display = 'flex';
@@ -62,12 +55,10 @@ class StandardGrid {
 
             // Timeout de segurança
             this.loadingTimeout = setTimeout(() => {
-                console.warn('⏰ Loading forçado a esconder após timeout');
                 this.showLoading(false);
             }, 15000);
 
         } else {
-            console.log('🙈 Escondendo loading overlay');
             this.isLoading = false;
             overlay.style.opacity = '0';
 
@@ -147,8 +138,15 @@ class StandardGrid {
         // 🔧 FIX: NÃO adicionar listener aqui - será adicionado em setupEventListeners()
         // para evitar duplicação após AJAX
 
-        // REMOVIDO: Event listeners automáticos de input/change que executavam filtro durante digitação
-        // Agora o filtro só é aplicado ao clicar no botão "Buscar"
+        // 🔧 FIX: Adicionar debounce APENAS no campo de busca de texto
+        const searchInput = form.querySelector('input[name="search"]');
+        if (searchInput) {
+            // Criar função e salvar referência para poder remover depois
+            this.handleSearchInput = () => {
+                this.handleTextFilterWithDebounce(searchInput);
+            };
+            searchInput.addEventListener('input', this.handleSearchInput);
+        }
 
         // Seletor de tamanho de página - mantido pois faz sentido aplicar imediatamente
         const pageSizeSelector = document.querySelector(this.options.pageSizeSelector);
@@ -159,8 +157,22 @@ class StandardGrid {
         }
     }
 
-    // REMOVIDO: handleTextFilterWithDebounce - não é mais necessário
-    // pois o filtro só é aplicado ao clicar no botão "Buscar"
+    handleTextFilterWithDebounce(input) {
+        const key = input.name || 'default';
+
+        // Limpar timeout anterior se existir
+        if (this.searchTimeouts.has(key)) {
+            clearTimeout(this.searchTimeouts.get(key));
+        }
+
+        // Criar novo timeout
+        const timeout = setTimeout(() => {
+            this.aplicarFiltros(1);
+            this.searchTimeouts.delete(key);
+        }, this.options.searchDebounceTime);
+
+        this.searchTimeouts.set(key, timeout);
+    }
 
     populateFiltersFromUrl(form) {
         // Obter parâmetros da URL
@@ -191,15 +203,10 @@ class StandardGrid {
     }
 
     aplicarFiltros(page = 1) {
-        console.log('🚀 aplicarFiltros() chamado, page:', page);
-        console.trace('🔍 Stack trace para ver quem chamou aplicarFiltros');
-
         if (this.isLoading) {
-            console.log('⏸️ Já carregando, ignorando nova requisição');
             return;
         }
 
-        console.log('▶️ Iniciando aplicação de filtros...');
         this.showLoading(true);
 
         const form = document.querySelector(this.options.filtersFormSelector);
@@ -217,22 +224,15 @@ class StandardGrid {
         params.append('pageSize', pageSize);
 
         // Adicionar filtros
-        console.log('📋 Filtros do formulário:');
         for (let [key, value] of formData.entries()) {
-            console.log(`  - ${key}: "${value}"`);
             if (value && value.trim() !== '') {
                 params.append(key, value);
             }
         }
 
-        console.log('📤 Parâmetros finais da requisição:', params.toString());
-
         // Determinar URL baseado na página atual
         const ajaxUrl = this.getAjaxUrl();
         const gridContainer = document.querySelector(this.options.gridContainerSelector);
-
-        console.log('🌐 URL AJAX:', ajaxUrl);
-        console.log('📦 Grid Container:', gridContainer ? 'Encontrado' : 'NÃO ENCONTRADO');
 
         // Validar se AJAX está configurado corretamente
         if (!ajaxUrl) {
@@ -258,53 +258,12 @@ class StandardGrid {
                 return response.text();
             })
             .then(html => {
-                console.log('📦 HTML recebido do servidor, tamanho:', html.length);
-                console.log('📦 Primeiros 500 caracteres:', html.substring(0, 500));
-
-                // Verificar se gridContainer existe e está visível
-                console.log('📍 gridContainer:', gridContainer);
-                console.log('📍 gridContainer display:', window.getComputedStyle(gridContainer).display);
-                console.log('📍 gridContainer visibility:', window.getComputedStyle(gridContainer).visibility);
-                console.log('📍 gridContainer offsetHeight:', gridContainer.offsetHeight);
-                console.log('📍 gridContainer offsetWidth:', gridContainer.offsetWidth);
-
                 gridContainer.innerHTML = html;
-                console.log('✅ HTML inserido no gridContainer');
-
-                // Verificar após inserção
-                console.log('📍 Após inserção - offsetHeight:', gridContainer.offsetHeight);
-                console.log('📍 Após inserção - innerHTML length:', gridContainer.innerHTML.length);
-                console.log('📍 Após inserção - childNodes:', gridContainer.childNodes.length);
-
-                // Verificar se há elementos dentro do gridContainer
-                const searchFilters = gridContainer.querySelector('.search-filters');
-                const dataGrid = gridContainer.querySelector('.data-grid');
-                const table = gridContainer.querySelector('table');
-                const tbody = gridContainer.querySelector('tbody');
-
-                console.log('📍 Elementos encontrados:');
-                console.log('  - .search-filters:', searchFilters ? 'SIM' : 'NÃO');
-                console.log('  - .data-grid:', dataGrid ? 'SIM' : 'NÃO');
-                console.log('  - table:', table ? 'SIM' : 'NÃO');
-                console.log('  - tbody:', tbody ? 'SIM' : 'NÃO');
-
-                if (tbody) {
-                    console.log('  - tbody rows:', tbody.querySelectorAll('tr').length);
-                }
 
                 // Forçar reflow para garantir renderização
-                console.log('🔄 Forçando reflow...');
                 gridContainer.style.display = 'none';
                 gridContainer.offsetHeight; // trigger reflow
                 gridContainer.style.display = '';
-                console.log('✅ Reflow forçado, nova altura:', gridContainer.offsetHeight);
-
-                // Log estado ANTES de reinicializar eventos
-                console.log('📸 Estado ANTES de reinitializeEvents():');
-                console.log('  - gridContainer visível:', gridContainer.offsetHeight > 0);
-                console.log('  - searchFilters visível:', searchFilters?.offsetHeight > 0);
-                console.log('  - dataGrid visível:', dataGrid?.offsetHeight > 0);
-                console.log('  - table visível:', table?.offsetHeight > 0);
 
                 this.updateUrl(params);
                 this.reinitializeEvents();
@@ -314,104 +273,14 @@ class StandardGrid {
                 dataGridElements.forEach(grid => {
                     grid.classList.add('loaded');
                 });
-                console.log('✅ Classe "loaded" adicionada aos data-grids:', dataGridElements.length);
-
-                // Log estado DEPOIS de reinicializar eventos
-                console.log('📸 Estado DEPOIS de reinitializeEvents():');
-                console.log('  - gridContainer visível:', gridContainer.offsetHeight > 0);
-                console.log('  - gridContainer display:', window.getComputedStyle(gridContainer).display);
-                console.log('  - searchFilters visível:', searchFilters?.offsetHeight > 0);
-                console.log('  - dataGrid visível:', dataGrid?.offsetHeight > 0);
-                console.log('  - table visível:', table?.offsetHeight > 0);
-
-                // Verificar se form ainda existe
-                const formAfter = document.querySelector(this.options.filtersFormSelector);
-                console.log('  - Formulário ainda existe:', !!formAfter);
-                if (formAfter) {
-                    console.log('  - Formulário parentNode:', formAfter.parentNode?.className);
-                }
-
-                // 🔍 VERIFICAÇÃO DETALHADA DE CSS
-                console.log('🎨 CSS Computado dos elementos principais:');
-
-                // GridContainer
-                const gridStyle = window.getComputedStyle(gridContainer);
-                console.log('  gridContainer:', {
-                    display: gridStyle.display,
-                    visibility: gridStyle.visibility,
-                    opacity: gridStyle.opacity,
-                    position: gridStyle.position,
-                    height: gridStyle.height,
-                    overflow: gridStyle.overflow,
-                    zIndex: gridStyle.zIndex
-                });
-
-                // SearchFilters
-                if (searchFilters) {
-                    const filtersStyle = window.getComputedStyle(searchFilters);
-                    console.log('  searchFilters:', {
-                        display: filtersStyle.display,
-                        visibility: filtersStyle.visibility,
-                        opacity: filtersStyle.opacity,
-                        height: filtersStyle.height,
-                        offsetHeight: searchFilters.offsetHeight
-                    });
-                }
-
-                // DataGrid
-                if (dataGrid) {
-                    const dataGridStyle = window.getComputedStyle(dataGrid);
-                    console.log('  dataGrid:', {
-                        display: dataGridStyle.display,
-                        visibility: dataGridStyle.visibility,
-                        opacity: dataGridStyle.opacity,
-                        height: dataGridStyle.height,
-                        offsetHeight: dataGrid.offsetHeight
-                    });
-                }
-
-                // Table
-                if (table) {
-                    const tableStyle = window.getComputedStyle(table);
-                    console.log('  table:', {
-                        display: tableStyle.display,
-                        visibility: tableStyle.visibility,
-                        opacity: tableStyle.opacity,
-                        height: tableStyle.height,
-                        offsetHeight: table.offsetHeight
-                    });
-                }
-
-                // Verificar hierarquia de pais
-                console.log('🏗️ Hierarquia de elementos pais:');
-                let parent = gridContainer.parentElement;
-                let level = 1;
-                while (parent && level <= 5) {
-                    const parentStyle = window.getComputedStyle(parent);
-                    console.log(`  Nível ${level} (${parent.tagName}.${parent.className}):`, {
-                        display: parentStyle.display,
-                        visibility: parentStyle.visibility,
-                        opacity: parentStyle.opacity,
-                        height: parentStyle.height,
-                        overflow: parentStyle.overflow,
-                        offsetHeight: parent.offsetHeight
-                    });
-                    parent = parent.parentElement;
-                    level++;
-                }
-
-                console.log('✅ Eventos reinicializados');
             })
             .catch(error => {
                 console.error('Erro ao aplicar filtros via AJAX:', error);
                 this.showErrorMessage('Erro ao aplicar filtros. Por favor, tente novamente.');
             })
             .finally(() => {
-                console.log('🔚 Finally executado, escondendo loading...');
                 setTimeout(() => {
-                    console.log('🔚 Chamando showLoading(false) após 300ms...');
                     this.showLoading(false);
-                    console.log('✅ Loading escondido');
                 }, 300);
             });
     }
@@ -504,13 +373,9 @@ class StandardGrid {
     }
 
     reinitializeEvents() {
-        console.log('🔄 Reinicializando eventos da grid...');
-
         // Primeiro: Reinicializar event listeners dos filtros
         const form = document.querySelector(this.options.filtersFormSelector);
         if (form) {
-            console.log('📝 Configurando submit do formulário de filtros...');
-
             // 🔧 FIX: Remover listener antigo se existir (usando referência salva)
             if (this.handleFormSubmit) {
                 form.removeEventListener('submit', this.handleFormSubmit);
@@ -523,27 +388,37 @@ class StandardGrid {
 
                 // 🔧 FIX: Prevenir múltiplas chamadas
                 if (this.isLoading) {
-                    console.log('⏸️ Já processando submit, ignorando...');
                     return;
                 }
 
-                console.log('📝 Submit do formulário disparado');
                 this.aplicarFiltros(1);
             };
 
             // Adicionar novo listener
             form.addEventListener('submit', this.handleFormSubmit);
+
+            // 🔧 FIX: Reinicializar debounce no campo de busca de texto
+            const searchInput = form.querySelector('input[name="search"]');
+            if (searchInput) {
+                // Remover listener antigo se existir
+                if (this.handleSearchInput) {
+                    searchInput.removeEventListener('input', this.handleSearchInput);
+                }
+
+                // Criar nova função e salvar referência
+                this.handleSearchInput = () => {
+                    this.handleTextFilterWithDebounce(searchInput);
+                };
+
+                searchInput.addEventListener('input', this.handleSearchInput);
+            }
         }
 
         // Segundo: Reinicializar custom-selects (combos com ícones)
         if (typeof initializeCustomSelects === 'function') {
-            console.log('🎨 Reinicializando custom-selects...');
             initializeCustomSelects();
         } else if (typeof window.initializeCustomSelects === 'function') {
-            console.log('🎨 Reinicializando custom-selects (via window)...');
             window.initializeCustomSelects();
-        } else {
-            console.warn('⚠️ Função initializeCustomSelects não encontrada');
         }
 
         // Duplo clique nas linhas
@@ -572,8 +447,6 @@ class StandardGrid {
 
         // Disparar evento customizado
         document.dispatchEvent(new CustomEvent('gridUpdated'));
-
-        console.log('✅ Eventos reinicializados com sucesso');
     }
 
     handleRowDoubleClick(e) {
@@ -1177,8 +1050,6 @@ document.addEventListener('DOMContentLoaded', function () {
         optimizeTableScroll();
         adjustColumnWidths();
     };
-
-    console.log('Grid layout fixes initialized successfully');
 });
 
 // ===================================================================
@@ -1402,8 +1273,6 @@ class DropdownPortalSystem {
             if (tableContainer) tableContainer.classList.add('dropdown-active');
             if (actionsCell) actionsCell.classList.add('dropdown-active');
 
-            console.log(`✅ Dropdown aberto para item ${itemId}`);
-
         } catch (error) {
             console.error('Erro ao abrir dropdown:', error);
         }
@@ -1590,8 +1459,6 @@ class DropdownPortalSystem {
 
             this.activeDropdown = null;
 
-            console.log('✅ Dropdown fechado');
-
         } catch (error) {
             console.error('Erro ao fechar dropdown:', error);
         }
@@ -1604,8 +1471,6 @@ class DropdownPortalSystem {
 
     AjustarTypeRequest() {
         (function () {
-            console.log('🔧 Aplicando patch para actions com Type...');
-
             // Interceptar todos os cliques em itens do dropdown
             document.addEventListener('click', async function (e) {
                 const dropdownItem = e.target.closest('.dropdown-item-portal, .dropdown-item');
@@ -1614,7 +1479,6 @@ class DropdownPortalSystem {
 
                 // Se já tem handler do createDropdownElement, não processar aqui
                 if (dropdownItem.hasAttribute('data-has-handler')) {
-                    console.log('Item já tem handler, ignorando AjustarTypeRequest');
                     return;
                 }
 
@@ -1640,8 +1504,6 @@ class DropdownPortalSystem {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    console.log(`🎯 Action detectada via AjustarTypeRequest: ${action.name} (type: ${action.type})`);
-
                     // Fechar dropdown
                     if (window.dropdownPortalSystem) {
                         window.dropdownPortalSystem.forceClose();
@@ -1662,8 +1524,6 @@ class DropdownPortalSystem {
             });
 
             async function executeActionFallback(action) {
-                console.log(`Executando fallback para ${action.name}`);
-
                 // Verificar tipo de requisição
                 let requestType = 'get';
                 if (typeof action.type === 'number') {
@@ -1676,8 +1536,6 @@ class DropdownPortalSystem {
                 } else if (typeof action.type === 'string') {
                     requestType = action.type.toLowerCase();
                 }
-
-                console.log(`Tipo de requisição normalizado: ${requestType}`);
 
                 if (requestType === 'get') {
                     window.location.href = action.url;
@@ -1754,8 +1612,6 @@ class DropdownPortalSystem {
                     }
                 }
             }
-
-            console.log('✅ Patch para actions com Type aplicado!');
         })();
     }
 

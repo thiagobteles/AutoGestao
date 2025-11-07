@@ -6,9 +6,10 @@ using System.Linq.Expressions;
 
 namespace AutoGestao.Services
 {
-    public class GenericReferenceService(ApplicationDbContext context, ILogger<GenericReferenceService> logger)
+    public class GenericReferenceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<GenericReferenceService> logger)
     {
         private readonly ApplicationDbContext _context = context;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly ILogger<GenericReferenceService> _logger = logger;
         private static readonly Dictionary<Type, ReferenceMetadata> _metadataCache = [];
 
@@ -18,6 +19,9 @@ namespace AutoGestao.Services
             {
                 return null;
             }
+
+            // 🔧 FIX: Setar CurrentEmpresaId no contexto para Query Filter Global
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
 
             var metadata = GetMetadata<T>();
             var query = _context.Set<T>().AsQueryable();
@@ -41,17 +45,18 @@ namespace AutoGestao.Services
 
         public async Task<List<ReferenceItem>> SearchAsync<T>(string searchTerm, int pageSize, Dictionary<string, string>? filters = null) where T : class
         {
+            // 🔧 FIX: Setar CurrentEmpresaId no contexto para Query Filter Global
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
             var metadata = GetMetadata<T>();
             var query = _context.Set<T>().AsQueryable();
-
             query = ApplyIncludes(query, metadata);
-
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 query = ApplySearchFilter(query, searchTerm, metadata);
             }
 
-            if (filters != null && filters.Any())
+            if (filters != null && filters.Count != 0)
             {
                 query = ApplyDynamicFilters(query, filters);
             }
@@ -357,6 +362,28 @@ namespace AutoGestao.Services
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Obtém o ID da empresa do usuário logado
+        /// </summary>
+        private long GetCurrentEmpresaId()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext?.User == null)
+            {
+                _logger.LogWarning("HttpContext ou User não disponível, retornando empresaId = 1");
+                return 1;
+            }
+
+            var empresaIdClaim = httpContext.User.FindFirst("EmpresaId")?.Value;
+            if (long.TryParse(empresaIdClaim, out var empresaId))
+            {
+                return empresaId;
+            }
+
+            _logger.LogWarning("Claim 'EmpresaId' não encontrado ou inválido, retornando empresaId = 1");
+            return 1;
         }
     }
 }

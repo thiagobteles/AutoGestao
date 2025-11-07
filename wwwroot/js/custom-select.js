@@ -30,12 +30,9 @@ function parseIconText(text) {
 }
 
 function initializeCustomSelects() {
-    console.log('🔍 initializeCustomSelects() chamado');
-
     // 🔧 FIX: Primeiro, limpar TODOS os custom-select-wrappers existentes
     // e restaurar os selects originais
     const existingWrappers = document.querySelectorAll('.custom-select-wrapper');
-    console.log('🧹 Limpando', existingWrappers.length, 'custom-select-wrappers existentes');
 
     existingWrappers.forEach(wrapper => {
         // Encontrar o select original que está logo após o wrapper
@@ -57,25 +54,18 @@ function initializeCustomSelects() {
 
     // Selecionar todos os selects que devem ser customizados
     const enumSelects = document.querySelectorAll('select.enum-select');
-    console.log('🔍 Encontrados', enumSelects.length, 'selects com classe enum-select');
 
-    enumSelects.forEach((select, index) => {
-        console.log(`🔍 Processando select ${index + 1}:`, select.name, 'customized:', select.dataset.customized);
+    enumSelects.forEach((select) => {
         convertToCustomSelect(select);
     });
-
-    console.log('✅ initializeCustomSelects() concluído');
 }
 
 // Expor função globalmente para permitir reinicialização após AJAX
 window.initializeCustomSelects = initializeCustomSelects;
 
 function convertToCustomSelect(selectElement) {
-    console.log(`  🔧 convertToCustomSelect() - name: ${selectElement.name}, customized: ${selectElement.dataset.customized}`);
-
     // Verificar se já foi convertido
     if (selectElement.dataset.customized === 'true') {
-        console.log(`  ⏭️ Select ${selectElement.name} já foi customizado, pulando...`);
         return;
     }
 
@@ -85,8 +75,6 @@ function convertToCustomSelect(selectElement) {
     const isRequired = selectElement.hasAttribute('required');
     const isDisabled = selectElement.disabled;
     const currentValue = selectElement.value;
-
-    console.log(`  📋 Select info - id: ${selectId}, name: ${selectName}, value: ${currentValue}, options: ${selectElement.options.length}`);
 
     // Obter as opções
     const options = Array.from(selectElement.options).map(option => {
@@ -203,9 +191,6 @@ function convertToCustomSelect(selectElement) {
     wrapper.appendChild(dropdown);
 
     // Substituir select original
-    console.log(`  📍 ANTES de inserir wrapper - parentNode:`, selectElement.parentNode?.className);
-    console.log(`  📍 ANTES de inserir wrapper - parentNode offsetHeight:`, selectElement.parentNode?.offsetHeight);
-
     selectElement.style.display = 'none';
     selectElement.dataset.customized = 'true';
     // 🔧 FIX: Desabilitar select original para não ser incluído no FormData
@@ -213,9 +198,6 @@ function convertToCustomSelect(selectElement) {
     // Remover o atributo name para garantir que não seja enviado
     selectElement.removeAttribute('name');
     selectElement.parentNode.insertBefore(wrapper, selectElement);
-
-    console.log(`  ✅ Select ${selectName} convertido com sucesso! Wrapper inserido no DOM.`);
-    console.log(`  📍 DEPOIS de inserir wrapper - parentNode offsetHeight:`, selectElement.parentNode?.offsetHeight);
 
     // Event listeners
     if (!isDisabled) {
@@ -272,12 +254,51 @@ function openDropdown(wrapper) {
     dropdown.classList.add('active');
 
     // Calcular posição do dropdown usando position: fixed
-    positionDropdown(trigger, dropdown);
+    // Usar setTimeout para garantir que animações CSS terminaram
+    setTimeout(() => positionDropdown(trigger, dropdown), 10);
 
     // Reposicionar ao fazer scroll ou resize
     const repositionHandler = () => positionDropdown(trigger, dropdown);
     window.addEventListener('scroll', repositionHandler, true);
     window.addEventListener('resize', repositionHandler);
+
+    // 🔧 FIX: Observar mudanças no menu lateral (transições CSS)
+    const observer = new MutationObserver((mutations) => {
+        // Recalcular imediatamente e após animação
+        positionDropdown(trigger, dropdown);
+        setTimeout(() => positionDropdown(trigger, dropdown), 50);
+        setTimeout(() => positionDropdown(trigger, dropdown), 150);
+        setTimeout(() => positionDropdown(trigger, dropdown), 300);
+    });
+
+    // Observar mudanças na sidebar e no body
+    const possibleSidebars = document.querySelectorAll('.sidebar, .side-menu, nav, aside, [class*="side"], [id*="side"]');
+    possibleSidebars.forEach(sidebar => {
+        observer.observe(sidebar, {
+            attributes: true,
+            attributeFilter: ['class', 'style'],
+            subtree: false
+        });
+    });
+
+    // Observar o body e html para mudanças de classe
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    // 🔧 FIX: Listener para transitionend no documento inteiro
+    const transitionEndHandler = (e) => {
+        // Verificar se a transição é relacionada ao layout (width, transform, etc)
+        if (e.propertyName === 'width' || e.propertyName === 'transform' ||
+            e.propertyName === 'margin-left' || e.propertyName === 'left') {
+            positionDropdown(trigger, dropdown);
+        }
+    };
+
+    document.addEventListener('transitionend', transitionEndHandler, true);
+    dropdown._transitionHandler = transitionEndHandler;
+
+    dropdown.dataset.sidebarObserver = 'attached';
+    dropdown._observer = observer;
 
     // Remover listeners quando fechar
     dropdown.dataset.repositionHandler = 'attached';
@@ -296,6 +317,19 @@ function closeDropdown(wrapper) {
         window.removeEventListener('scroll', positionDropdown, true);
         window.removeEventListener('resize', positionDropdown);
         delete dropdown.dataset.repositionHandler;
+    }
+
+    // 🔧 FIX: Remover observer do menu lateral
+    if (dropdown.dataset.sidebarObserver === 'attached' && dropdown._observer) {
+        dropdown._observer.disconnect();
+        delete dropdown._observer;
+        delete dropdown.dataset.sidebarObserver;
+    }
+
+    // 🔧 FIX: Remover listener de transitionend
+    if (dropdown._transitionHandler) {
+        document.removeEventListener('transitionend', dropdown._transitionHandler, true);
+        delete dropdown._transitionHandler;
     }
 }
 
@@ -318,14 +352,14 @@ function positionDropdown(trigger, dropdown) {
         // Abrir para cima
         const borderLight = getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim();
         dropdown.style.top = 'auto';
-        dropdown.style.bottom = (viewportHeight - rect.top + 1) + 'px';
+        dropdown.style.bottom = 'auto';
         dropdown.style.borderRadius = '6px 6px 0 0';
         dropdown.style.borderTop = `1px solid ${borderLight}`;
         dropdown.style.borderBottom = 'none';
     } else {
         // Abrir para baixo (padrão)
         const borderLight = getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim();
-        dropdown.style.top = (rect.bottom - 1) + 'px';
+        dropdown.style.top = 'auto';
         dropdown.style.bottom = 'auto';
         dropdown.style.borderRadius = '0 0 6px 6px';
         dropdown.style.borderTop = 'none';
@@ -333,7 +367,7 @@ function positionDropdown(trigger, dropdown) {
     }
 
     // Posição horizontal
-    dropdown.style.left = rect.left + 'px';
+    dropdown.style.left = 'auto';
     dropdown.style.width = rect.width + 'px';
     dropdown.style.minWidth = rect.width + 'px';
 }
