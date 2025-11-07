@@ -541,6 +541,25 @@
                                             // 6. Disparar evento customizado para outros scripts
                                             document.dispatchEvent(new CustomEvent('ajaxContentLoaded'));
 
+                                            // 7. Carregar dados iniciais da grid se gridContainer existir
+                                            const gridContainer = document.querySelector('#gridContainer');
+                                            const filtrosForm = document.querySelector('#filtrosForm');
+                                            if (gridContainer && filtrosForm) {
+                                                console.log('🔄 Carregando dados iniciais da grid...');
+                                                // Aguardar um pouco para garantir que todos os scripts foram inicializados
+                                                setTimeout(() => {
+                                                    if (typeof window.aplicarFiltros === 'function') {
+                                                        window.aplicarFiltros(1);
+                                                    } else if (typeof aplicarFiltros === 'function') {
+                                                        aplicarFiltros(1);
+                                                    } else if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                                                        window.gridInstance.aplicarFiltros(1);
+                                                    } else {
+                                                        console.warn('⚠️ Função aplicarFiltros não encontrada');
+                                                    }
+                                                }, 100);
+                                            }
+
                                             // Restaurar opacidade
                                             mainContent.style.opacity = '1';
                                             mainContent.style.pointerEvents = 'auto';
