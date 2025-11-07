@@ -7,10 +7,12 @@ namespace AutoGestao.Entidades
     [FormConfig(Title = "Empresa", Subtitle = "Gerencie as informações das empresas", Icon = "fas fa-user")]
     public class Empresa : BaseEntidade
     {
+        [ReferenceText]
         [GridMain("Razão Social")]
         [FormField(Order = 1, Name = "Razão Social", Section = "Dados Básicos", Icon = "fas fa-signature", Type = EnumFieldType.Text, Required = true, Placeholder = "Digite a razão social", GridColumns = 2)]
         public string RazaoSocial { get; set; } = "";
 
+        [ReferenceSubtitle(Order = 0, Prefix = "CNPJ: ", Format = "##.###.###/####-##")]
         [GridDocument("CNPJ", DocumentType.CNPJ)]
         [FormField(Order = 1, Name = "CNPJ", Section = "Dados Básicos", Icon = "fas fa-building", Type = EnumFieldType.Cnpj, Required = true)]
         public string? Cnpj { get; set; }
@@ -19,6 +21,7 @@ namespace AutoGestao.Entidades
         [FormField(Order = 10, Name = "Telefone", Section = "Contato", Icon = "fas fa-phone", Type = EnumFieldType.Telefone, GridColumns = 3)]
         public string? Telefone { get; set; }
 
+        [ReferenceSubtitle(Order = 1, Prefix = "Cel: ")]
         [GridField("Celular", IsSubtitle = true, SubtitleOrder = 2, Order = 65)]
         [FormField(Order = 10, Name = "Celular", Section = "Contato", Icon = "fas fa-mobile", Type = EnumFieldType.Telefone)]
         public string? Celular { get; set; }

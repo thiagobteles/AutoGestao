@@ -44,18 +44,6 @@ namespace AutoGestao.Controllers
                         new() { Value = "true", Text = "✅ Conciliado" },
                         new() { Value = "false", Text = "⏳ Pendente" }
                     ]
-                },
-                new()
-                {
-                    Name = "datainicio",
-                    DisplayName = "Data Inicial",
-                    Type = EnumGridFilterType.Date
-                },
-                new()
-                {
-                    Name = "datafim",
-                    DisplayName = "Data Final",
-                    Type = EnumGridFilterType.Date
                 }
             ];
 

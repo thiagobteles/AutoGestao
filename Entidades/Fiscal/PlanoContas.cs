@@ -10,18 +10,21 @@ namespace AutoGestao.Entidades.Fiscal
     [FormConfig(Title = "Plano de Contas", Subtitle = "Estrutura contábil para classificação de receitas e despesas", Icon = "fas fa-sitemap")]
     public class PlanoContas : BaseEntidade
     {
+        [ReferenceText]
         [GridField("Código", Order = 10, Width = "120px")]
         [FormField(Name = "Código da Conta", Order = 10, Section = "Identificação", Icon = "fas fa-hashtag", Type = EnumFieldType.Text, Required = true, Placeholder = "Ex: 1.1.01.001", GridColumns = 4)]
         [Required]
         [MaxLength(20)]
         public string Codigo { get; set; } = string.Empty;
 
+        [ReferenceSubtitle(Order = 0)]
         [GridField("Descrição", Order = 15)]
         [FormField(Name = "Descrição", Order = 15, Section = "Identificação", Icon = "fas fa-align-left", Type = EnumFieldType.Text, Required = true)]
         [Required]
         [MaxLength(200)]
         public string Descricao { get; set; } = string.Empty;
 
+        [ReferenceSubtitle(Order = 1, Prefix = "Tipo: ")]
         [GridField("Tipo", Order = 20, Width = "120px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Tipo de Conta", Order = 20, Section = "Classificação", Icon = "fas fa-tags", Type = EnumFieldType.Select, Required = true)]
         [Required]

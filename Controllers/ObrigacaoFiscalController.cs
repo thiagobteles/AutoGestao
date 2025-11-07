@@ -27,27 +27,11 @@ namespace AutoGestao.Controllers
                 },
                 new()
                 {
-                    Name = "tipoobrigacao",
-                    DisplayName = "Tipo de Obrigação",
-                    Type = EnumGridFilterType.Select,
-                    Placeholder = "Todos os tipos...",
-                    Options = EnumExtension.GetSelectListItems<Enumerador.Fiscal.EnumTipoObrigacaoFiscal>(true)
-                },
-                new()
-                {
                     Name = "status",
                     DisplayName = "Status",
                     Type = EnumGridFilterType.Select,
                     Placeholder = "Todos os status...",
                     Options = EnumExtension.GetSelectListItems<Enumerador.Fiscal.EnumStatusObrigacao>(true)
-                },
-                new()
-                {
-                    Name = "periodicidade",
-                    DisplayName = "Periodicidade",
-                    Type = EnumGridFilterType.Select,
-                    Placeholder = "Todas...",
-                    Options = EnumExtension.GetSelectListItems<Enumerador.Fiscal.EnumPeriodicidade>(true)
                 },
                 new()
                 {

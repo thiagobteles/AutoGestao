@@ -27,14 +27,6 @@ namespace AutoGestao.Controllers
                 },
                 new()
                 {
-                    Name = "tipoconta",
-                    DisplayName = "Tipo de Conta",
-                    Type = EnumGridFilterType.Select,
-                    Placeholder = "Todos os tipos...",
-                    Options = EnumExtension.GetSelectListItems<Enumerador.Fiscal.EnumTipoContaContabil>(true)
-                },
-                new()
-                {
                     Name = "natureza",
                     DisplayName = "Natureza",
                     Type = EnumGridFilterType.Select,

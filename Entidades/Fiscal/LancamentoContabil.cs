@@ -10,11 +10,13 @@ namespace AutoGestao.Entidades.Fiscal
     [FormConfig(Title = "Lançamento Contábil", Subtitle = "Registre lançamentos contábeis de débito e crédito", Icon = "fas fa-file-invoice-dollar")]
     public class LancamentoContabil : BaseEntidade
     {
+        [ReferenceSubtitle(Order = 0, Prefix = "Data: ", Format = "dd/MM/yyyy")]
         [GridField("Data", Order = 10, Width = "120px", Format = "dd/MM/yyyy")]
         [FormField(Name = "Data do Lançamento", Order = 10, Section = "Dados Principais", Icon = "fas fa-calendar", Type = EnumFieldType.Date, Required = true, GridColumns = 3)]
         [Required]
         public DateTime DataLancamento { get; set; } = DateTime.Now;
 
+        [ReferenceSubtitle(Order = 2, Prefix = "Tipo: ")]
         [GridField("Tipo", Order = 15, Width = "100px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Tipo de Lançamento", Order = 15, Section = "Dados Principais", Icon = "fas fa-exchange-alt", Type = EnumFieldType.Select, Required = true, GridColumns = 3)]
         [Required]
@@ -38,12 +40,14 @@ namespace AutoGestao.Entidades.Fiscal
         [Required]
         public long ContaCreditoId { get; set; }
 
+        [ReferenceSubtitle(Order = 1, Prefix = "Valor: R$ ")]
         [GridField("Valor", Order = 35, Width = "150px", Format = "C")]
         [FormField(Name = "Valor do Lançamento", Order = 35, Section = "Valores", Icon = "fas fa-dollar-sign", Type = EnumFieldType.Decimal, Required = true)]
         [Column(TypeName = "decimal(18,2)")]
         [Required]
         public decimal Valor { get; set; }
 
+        [ReferenceText]
         [GridField("Histórico", Order = 40)]
         [FormField(Name = "Histórico", Order = 40, Section = "Descrição", Icon = "fas fa-align-left", Type = EnumFieldType.Text, Required = true, Placeholder = "Descrição do lançamento...")]
         [Required]

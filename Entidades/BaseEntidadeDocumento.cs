@@ -15,6 +15,7 @@ namespace AutoGestao.Entidades
         [FormField(Order = 1, Name = "Tipo de Cliente", Section = "Tipo Registro", Icon = "fas fa-user-tag", Type = EnumFieldType.Select, Required = true, GridColumns = 1)]
         public EnumTipoPessoa TipoPessoa { get; set; }
 
+        [ReferenceText]
         [GridMain("Nome/Razão Social")]
         [FormField(Order = 10, Name = "Nome Completo", Section = "Dados Básicos", Icon = "fas fa-signature", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]
         public string Nome { get; set; } = string.Empty;
