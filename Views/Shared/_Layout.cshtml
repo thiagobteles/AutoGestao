@@ -471,11 +471,18 @@
                             fetch(url)
                                 .then(response => response.text())
                                 .then(html => {
-                                    // 🔧 FIX: View retornada (_StandardGridContent) não tem wrapper .main-content
-                                    // Usar todo o HTML retornado diretamente para substituir o conteúdo
+                                    // Criar elemento temporário para parsear o HTML
+                                    const tempDiv = document.createElement('div');
+                                    tempDiv.innerHTML = html;
+
+                                    // Tentar extrair o conteúdo de .main-content da resposta
+                                    // (quando servidor retorna página completa com layout)
+                                    const newMainContent = tempDiv.querySelector('.main-content');
+
                                     if (mainContent) {
-                                        // Substituir conteúdo
-                                        mainContent.innerHTML = html;
+                                        // Se encontrou .main-content na resposta, usar apenas esse conteúdo
+                                        // Caso contrário, usar todo o HTML (partial view sem layout)
+                                        mainContent.innerHTML = newMainContent ? newMainContent.innerHTML : html;
 
                                         // Atualizar URL sem reload
                                         window.history.pushState({}, '', url);
