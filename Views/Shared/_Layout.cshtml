@@ -489,23 +489,11 @@
                                         requestAnimationFrame(() => {
                                             // Reinicializar scripts necessários
 
-                                            // 1. Executar scripts inline PRIMEIRO (podem conter inicializações importantes)
-                                            const scripts = newMainContent.querySelectorAll('script');
-                                            scripts.forEach(script => {
-                                                if (script.textContent) {
-                                                    try {
-                                                        // Criar novo elemento script para garantir execução
-                                                        const newScript = document.createElement('script');
-                                                        newScript.textContent = script.textContent;
-                                                        document.body.appendChild(newScript);
-                                                        document.body.removeChild(newScript);
-                                                    } catch (e) {
-                                                        console.error('Erro ao executar script:', e);
-                                                    }
-                                                }
-                                            });
+                                            // 🔧 REMOVIDO: Não executar scripts inline da resposta AJAX
+                                            // Motivo: Podem conter código Razor ou sintaxe inválida fora do contexto do servidor
+                                            // Os componentes necessários são reinicializados manualmente abaixo
 
-                                            // 2. Reinicializar grid system
+                                            // 1. Reinicializar grid system
                                             if (typeof StandardGrid !== 'undefined') {
                                                 const gridContainer = document.querySelector('#gridContainer');
                                                 if (gridContainer) {
@@ -514,7 +502,7 @@
                                                 }
                                             }
 
-                                            // 3. Reinicializar custom selects
+                                            // 2. Reinicializar custom selects
                                             if (typeof window.initializeCustomSelects === 'function') {
                                                 console.log('🔄 Reinicializando custom selects...');
                                                 window.initializeCustomSelects();
@@ -523,7 +511,7 @@
                                                 initializeCustomSelects();
                                             }
 
-                                            // 4. Reinicializar reference fields
+                                            // 3. Reinicializar reference fields
                                             if (typeof window.initializeReferenceFields === 'function') {
                                                 console.log('🔄 Reinicializando reference fields...');
                                                 window.initializeReferenceFields();
@@ -532,13 +520,13 @@
                                                 initializeReferenceFields();
                                             }
 
-                                            // 5. Reinicializar dropdown portal system
+                                            // 4. Reinicializar dropdown portal system
                                             if (typeof DropdownPortalSystem !== 'undefined') {
                                                 console.log('🔄 Reinicializando dropdown portal...');
                                                 window.dropdownPortalSystem = new DropdownPortalSystem();
                                             }
 
-                                            // 6. Disparar evento customizado para outros scripts
+                                            // 5. Disparar evento customizado para outros scripts
                                             document.dispatchEvent(new CustomEvent('ajaxContentLoaded'));
 
                                             // Restaurar opacidade
