@@ -501,6 +501,14 @@
                                                 if (gridContainer) {
                                                     console.log('🔄 Reinicializando StandardGrid...');
                                                     window.gridInstance = new StandardGrid();
+
+                                                    // 🔧 FIX: Carregar dados iniciais da grid após reinicialização
+                                                    setTimeout(() => {
+                                                        if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                                                            console.log('🔄 Carregando dados iniciais da grid...');
+                                                            window.gridInstance.aplicarFiltros(1);
+                                                        }
+                                                    }, 150);
                                                 }
                                             }
 
