@@ -73,73 +73,61 @@
                 <div class="menu-section">
                     <div class="menu-section-title">Cadastros</div>
 
-                    <!-- Menu Item Expansível: Cadastros Básicos -->
+                    <!-- Menu Item Expansível: Empresas Clientes -->
                     <div class="menu-item has-submenu">
                         <a href="javascript:void(0)" class="menu-link menu-toggle">
-                            <i class="fas fa-database"></i>
-                            <span class="menu-link-text">Cadastros Básicos</span>
+                            <i class="fas fa-building"></i>
+                            <span class="menu-link-text">Empresas</span>
                             <i class="fas fa-chevron-down submenu-arrow"></i>
-                            <div class="menu-tooltip">Cadastros Básicos</div>
+                            <div class="menu-tooltip">Empresas</div>
                         </a>
                         <div class="submenu">
                             <div class="menu-item">
-                                <a href="@Url.Action("Index", nameof(Cliente))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Cliente) ? "active" : "")">
-                                    <i class="fas fa-users"></i>
-                                    <span class="menu-link-text">Clientes</span>
+                                <a href="/EmpresaCliente/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "EmpresaCliente" ? "active" : "")">
+                                    <i class="fas fa-building"></i>
+                                    <span class="menu-link-text">Empresas Clientes</span>
                                 </a>
                             </div>
                             <div class="menu-item">
-                                <a href="@Url.Action("Index", nameof(Lead))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Lead) ? "active" : "")">
-                                    <i class="fas fa-newspaper"></i>
-                                    <span class="menu-link-text">Leads</span>
+                                <a href="/CertificadoDigital/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CertificadoDigital" ? "active" : "")">
+                                    <i class="fas fa-certificate"></i>
+                                    <span class="menu-link-text">Certificados Digitais</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/CNAE/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CNAE" ? "active" : "")">
+                                    <i class="fas fa-industry"></i>
+                                    <span class="menu-link-text">CNAEs</span>
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Menu Item Expansível: Veículos -->
+                    <!-- Menu Item Expansível: Fiscal -->
                     <div class="menu-item has-submenu">
                         <a href="javascript:void(0)" class="menu-link menu-toggle">
-                            <i class="fas fa-car"></i>
-                            <span class="menu-link-text">Veículos</span>
+                            <i class="fas fa-file-invoice"></i>
+                            <span class="menu-link-text">Fiscal</span>
                             <i class="fas fa-chevron-down submenu-arrow"></i>
-                            <div class="menu-tooltip">Veículos</div>
+                            <div class="menu-tooltip">Fiscal</div>
                         </a>
                         <div class="submenu">
                             <div class="menu-item">
-                                <a href="@Url.Action("Index", nameof(Veiculo))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(Veiculo) ? "active" : "")">
-                                    <i class="fas fa-car-side"></i>
-                                    <span class="menu-link-text">Veículos</span>
+                                <a href="/NotaFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NotaFiscal" ? "active" : "")">
+                                    <i class="fas fa-file-invoice"></i>
+                                    <span class="menu-link-text">Notas Fiscais</span>
                                 </a>
                             </div>
                             <div class="menu-item">
-                                <a href="@Url.Action("Index", nameof(VeiculoMarca))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoMarca) ? "active" : "")">
-                                    <i class="fas fa-copyright"></i>
-                                    <span class="menu-link-text">Marcas</span>
+                                <a href="/NotaFiscal/Create" class="menu-link submenu-link">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span class="menu-link-text">Emitir Nota</span>
                                 </a>
                             </div>
                             <div class="menu-item">
-                                <a href="@Url.Action("Index", nameof(VeiculoMarcaModelo))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoMarcaModelo) ? "active" : "")">
-                                    <i class="fas fa-copyright"></i>
-                                    <span class="menu-link-text">Modelo</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a href="@Url.Action("Index", nameof(VeiculoCor))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoCor) ? "active" : "")">
-                                    <i class="fas fa-palette"></i>
-                                    <span class="menu-link-text">Cores</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a href="@Url.Action("Index", nameof(VeiculoFilial))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoFilial) ? "active" : "")">
-                                    <i class="fas fa-palette"></i>
-                                    <span class="menu-link-text">Filial</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a href="@Url.Action("Index", nameof(VeiculoLocalizacao))" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == nameof(VeiculoLocalizacao) ? "active" : "")">
-                                    <i class="fas fa-palette"></i>
-                                    <span class="menu-link-text">Localização</span>
+                                <a href="/NotaFiscal/ImportarXML" class="menu-link submenu-link">
+                                    <i class="fas fa-file-import"></i>
+                                    <span class="menu-link-text">Importar XML</span>
                                 </a>
                             </div>
                         </div>

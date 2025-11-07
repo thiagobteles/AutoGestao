@@ -1,4 +1,5 @@
 using AutoGestao.Entidades;
+using AutoGestao.Entidades.Fiscal;
 using AutoGestao.Entidades.Relatorio;
 using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
@@ -29,6 +30,13 @@ namespace AutoGestao.Data
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<ReportTemplateEntity> ReportTemplates { get; set; }
         public DbSet<Lead> Leads { get; set; }
+
+        // 📊 Entidades Fiscais/Contabilidade
+        public DbSet<EmpresaCliente> EmpresasClientes { get; set; }
+        public DbSet<NotaFiscal> NotasFiscais { get; set; }
+        public DbSet<NotaFiscalItem> NotasFiscaisItens { get; set; }
+        public DbSet<CertificadoDigital> CertificadosDigitais { get; set; }
+        public DbSet<CNAE> CNAEs { get; set; }
 
         #endregion
 

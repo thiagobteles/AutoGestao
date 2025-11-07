@@ -1,0 +1,82 @@
+using AutoGestao.Atributes;
+using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Fiscal;
+using AutoGestao.Enumerador.Gerais;
+using System.ComponentModel.DataAnnotations;
+
+namespace AutoGestao.Entidades.Fiscal
+{
+    [FormConfig(Title = "Empresa Cliente", Subtitle = "Gerencie as empresas dos seus clientes contábeis", Icon = "fas fa-building")]
+    public class EmpresaCliente : BaseEntidade
+    {
+        [GridField("Razão Social", Order = 10)]
+        [FormField(Name = "Razão Social", Order = 10, Section = "Dados Principais", Icon = "fas fa-building", Type = EnumFieldType.Text, Required = true, Placeholder = "Razão social da empresa...")]
+        [Required(ErrorMessage = "Razão social é obrigatória")]
+        [MaxLength(200)]
+        public string RazaoSocial { get; set; } = string.Empty;
+
+        [GridField("Nome Fantasia", Order = 15)]
+        [FormField(Name = "Nome Fantasia", Order = 15, Section = "Dados Principais", Icon = "fas fa-store", Type = EnumFieldType.Text, Placeholder = "Nome fantasia...")]
+        [MaxLength(200)]
+        public string? NomeFantasia { get; set; }
+
+        [GridField("CNPJ", Order = 20, Width = "150px")]
+        [FormField(Name = "CNPJ", Order = 20, Section = "Dados Principais", Icon = "fas fa-id-card", Type = EnumFieldType.Cnpj, Required = true)]
+        [Required(ErrorMessage = "CNPJ é obrigatório")]
+        [MaxLength(18)]
+        public string CNPJ { get; set; } = string.Empty;
+
+        [GridField("Inscrição Estadual", Order = 25, ShowInGrid = false)]
+        [FormField(Name = "Inscrição Estadual", Order = 25, Section = "Dados Principais", Icon = "fas fa-file-contract", Type = EnumFieldType.Text)]
+        [MaxLength(20)]
+        public string? InscricaoEstadual { get; set; }
+
+        [GridField("Regime", Order = 30, EnumRender = EnumRenderType.Badge)]
+        [FormField(Name = "Regime Tributário", Order = 30, Section = "Dados Fiscais", Icon = "fas fa-balance-scale", Type = EnumFieldType.Select, Required = true)]
+        [Required(ErrorMessage = "Regime tributário é obrigatório")]
+        public EnumRegimeTributario RegimeTributario { get; set; }
+
+        [FormField(Name = "Email", Order = 40, Section = "Contato", Icon = "fas fa-envelope", Type = EnumFieldType.Email)]
+        [MaxLength(100)]
+        public string? Email { get; set; }
+
+        [FormField(Name = "Telefone", Order = 45, Section = "Contato", Icon = "fas fa-phone", Type = EnumFieldType.Phone)]
+        [MaxLength(20)]
+        public string? Telefone { get; set; }
+
+        [FormField(Name = "CEP", Order = 50, Section = "Endereço", Icon = "fas fa-mail-bulk", Type = EnumFieldType.Cep, GridColumns = 3)]
+        [MaxLength(9)]
+        public string? CEP { get; set; }
+
+        [FormField(Name = "Estado", Order = 55, Section = "Endereço", Icon = "fas fa-flag", Type = EnumFieldType.Select, Required = true)]
+        public EnumEstado Estado { get; set; }
+
+        [FormField(Name = "Cidade", Order = 60, Section = "Endereço", Icon = "fas fa-city", Type = EnumFieldType.Text)]
+        [MaxLength(100)]
+        public string? Cidade { get; set; }
+
+        [FormField(Name = "Endereço", Order = 65, Section = "Endereço", Icon = "fas fa-road", Type = EnumFieldType.Text)]
+        [MaxLength(200)]
+        public string? Endereco { get; set; }
+
+        [FormField(Name = "Número", Order = 70, Section = "Endereço", Icon = "fas fa-hashtag", Type = EnumFieldType.Text, GridColumns = 3)]
+        [MaxLength(10)]
+        public string? Numero { get; set; }
+
+        [FormField(Name = "Complemento", Order = 75, Section = "Endereço", Icon = "fas fa-info-circle", Type = EnumFieldType.Text)]
+        [MaxLength(100)]
+        public string? Complemento { get; set; }
+
+        [GridField("Ativo", Order = 100, Width = "80px", EnumRender = EnumRenderType.Badge)]
+        [FormField(Name = "Ativo", Order = 100, Section = "Status", Icon = "fas fa-toggle-on", Type = EnumFieldType.Boolean)]
+        public bool Ativo { get; set; } = true;
+
+        [FormField(Name = "Observações", Order = 110, Section = "Informações Adicionais", Icon = "fas fa-sticky-note", Type = EnumFieldType.TextArea, Placeholder = "Observações gerais sobre a empresa...", GridColumns = 1)]
+        [MaxLength(1000)]
+        public string? Observacoes { get; set; }
+
+        // Navigation properties
+        public virtual ICollection<NotaFiscal> NotasFiscais { get; set; } = [];
+        public virtual ICollection<CertificadoDigital> Certificados { get; set; } = [];
+    }
+}
