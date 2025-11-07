@@ -761,17 +761,22 @@
 
                 showLoading(true);
 
-                const formData = new FormData(document.getElementById('filtrosForm'));
+                // 🔧 FIX: Formulário de filtros é OPCIONAL
+                // Se não houver filtros definidos, ainda assim carrega os dados
+                const filtrosForm = document.getElementById('filtrosForm');
                 const pageSize = document.getElementById('pageSizeSelector')?.value || 50;
 
                 const params = new URLSearchParams();
                 params.append('page', page);
                 params.append('pageSize', pageSize);
 
-                // Adicionar filtros
-                for (let [key, value] of formData.entries()) {
-                    if (value && value.trim() !== '') {
-                        params.append(key, value);
+                // Adicionar filtros (se formulário existir)
+                if (filtrosForm) {
+                    const formData = new FormData(filtrosForm);
+                    for (let [key, value] of formData.entries()) {
+                        if (value && value.trim() !== '') {
+                            params.append(key, value);
+                        }
                     }
                 }
 

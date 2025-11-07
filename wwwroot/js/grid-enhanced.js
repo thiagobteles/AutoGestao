@@ -210,24 +210,22 @@ class StandardGrid {
 
         this.showLoading(true);
 
+        // 🔧 FIX: Formulário de filtros é OPCIONAL
+        // Se não houver filtros definidos, ainda assim carrega os dados
         const form = document.querySelector(this.options.filtersFormSelector);
-        if (!form) {
-            console.error('Formulário de filtros não encontrado');
-            this.showLoading(false);
-            return;
-        }
-
-        const formData = new FormData(form);
         const pageSize = document.querySelector(this.options.pageSizeSelector)?.value || 50;
 
         const params = new URLSearchParams();
         params.append('page', page);
         params.append('pageSize', pageSize);
 
-        // Adicionar filtros
-        for (let [key, value] of formData.entries()) {
-            if (value && value.trim() !== '') {
-                params.append(key, value);
+        // Adicionar filtros (se formulário existir)
+        if (form) {
+            const formData = new FormData(form);
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    params.append(key, value);
+                }
             }
         }
 
