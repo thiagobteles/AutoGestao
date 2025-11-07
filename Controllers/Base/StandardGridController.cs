@@ -12,7 +12,6 @@ using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
@@ -378,7 +377,6 @@ namespace AutoGestao.Controllers.Base
 
             // IMPORTANTE: IdEmpresa e CriadoPorUsuarioId NÃO devem ser alterados no update
             // Eles são preservados automaticamente pelo método Edit()
-
             return Task.CompletedTask;
         }
 
@@ -2717,7 +2715,6 @@ namespace AutoGestao.Controllers.Base
             }
             catch (Exception ex)
             {
-                //controller.Logger?.LogError(ex, "Erro ao criar {EntityType}", typeof(T).Name);
                 controller.ModelState.AddModelError("", $"Erro ao salvar: {ex.Message}");
             }
 

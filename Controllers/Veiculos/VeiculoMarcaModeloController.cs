@@ -48,15 +48,19 @@ namespace AutoGestao.Controllers.Veiculos
             return query;
         }
 
-        protected override async Task AfterCreate(VeiculoMarcaModelo entity)
+        protected override async Task<bool> CanCreate(VeiculoMarcaModelo? entity)
         {
-            if (await _context.VeiculoMarcaModelos.AnyAsync(x => x.Descricao == entity.Descricao && x.IdEmpresa == entity.IdEmpresa && x.IdVeiculoMarca == entity.IdVeiculoMarca))
+            // 🔧 FIX: Setar CurrentEmpresaId no contexto para Query Filter Global
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
+            // Verificar se já existe um modelo com a mesma descrição para a mesma marca
+            var exists = await _context.VeiculoMarcaModelos.AnyAsync(x => x.Descricao == entity.Descricao && x.IdVeiculoMarca == entity.IdVeiculoMarca);
+            if (exists)
             {
-                ModelState.AddModelError(nameof(entity.Descricao), "Modelo já cadastrado para essa marca!");
-                TempData["NotificationScript"] = "showError('Modelo já cadastrado para essa marca!')";
+                ModelState.AddModelError(nameof(entity.Descricao), "Este modelo já está cadastrado para a marca selecionada!");
             }
 
-            await base.AfterCreate(entity);
+            return await base.CanCreate(entity);
         }
     }
 }
