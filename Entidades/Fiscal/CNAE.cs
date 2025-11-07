@@ -1,5 +1,6 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoGestao.Entidades.Fiscal
@@ -21,9 +22,5 @@ namespace AutoGestao.Entidades.Fiscal
 
         [FormField(Name = "Alíquota ISS (%)", Order = 20, Section = "Tributação", Icon = "fas fa-percentage", Type = EnumFieldType.Decimal)]
         public decimal? AliquotaISS { get; set; }
-
-        [GridField("Ativo", Order = 30, Width = "80px", EnumRender = EnumRenderType.Badge)]
-        [FormField(Name = "Ativo", Order = 30, Section = "Status", Icon = "fas fa-toggle-on", Type = EnumFieldType.Boolean)]
-        public bool Ativo { get; set; } = true;
     }
 }

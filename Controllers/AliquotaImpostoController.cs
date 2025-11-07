@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoGestao.Controllers
 {
-    public class EmpresaClienteController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<EmpresaCliente>> logger)
-        : StandardGridController<EmpresaCliente>(context, fileStorageService, logger)
+    public class AliquotaImpostoController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<AliquotaImposto>> logger)
+        : StandardGridController<AliquotaImposto>(context, fileStorageService, logger)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
@@ -22,7 +22,15 @@ namespace AutoGestao.Controllers
                     Name = "search",
                     DisplayName = "Busca Geral",
                     Type = EnumGridFilterType.Text,
-                    Placeholder = "Razão Social, CNPJ, Nome Fantasia..."
+                    Placeholder = "Buscar alíquotas..."
+                },
+                new()
+                {
+                    Name = "tipoimposto",
+                    DisplayName = "Tipo de Imposto",
+                    Type = EnumGridFilterType.Select,
+                    Placeholder = "Todos os impostos...",
+                    Options = EnumExtension.GetSelectListItems<Enumerador.Fiscal.EnumTipoImposto>(true)
                 },
                 new()
                 {
@@ -34,22 +42,18 @@ namespace AutoGestao.Controllers
                 },
                 new()
                 {
-                    Name = "status",
-                    DisplayName = "Status",
+                    Name = "estado",
+                    DisplayName = "Estado",
                     Type = EnumGridFilterType.Select,
-                    Placeholder = "Status...",
-                    Options =
-                    [
-                        new() { Value = "true", Text = "✅ Ativo" },
-                        new() { Value = "false", Text = "❌ Inativo" }
-                    ]
+                    Placeholder = "Todos os estados...",
+                    Options = EnumExtension.GetSelectListItems<Enumerador.EnumEstado>(true)
                 }
             ];
 
             return standardGridViewModel;
         }
 
-        protected override IQueryable<EmpresaCliente> ApplyFilters(IQueryable<EmpresaCliente> query, Dictionary<string, object> filters)
+        protected override IQueryable<AliquotaImposto> ApplyFilters(IQueryable<AliquotaImposto> query, Dictionary<string, object> filters)
         {
             foreach (var filter in filters)
             {
@@ -60,21 +64,26 @@ namespace AutoGestao.Controllers
                         if (!string.IsNullOrEmpty(searchTerm))
                         {
                             query = ApplyTextFilter(query, searchTerm,
-                                e => e.RazaoSocial,
-                                e => e.NomeFantasia,
-                                e => e.CNPJ);
+                                e => e.Observacoes);
                         }
                         break;
 
-                    case "status":
-                        if (bool.TryParse(filter.Value.ToString(), out bool status))
-                        {
-                            query = query.Where(e => e.Ativo == status);
-                        }
+                    case "tipoimposto":
+                        query = ApplyEnumFilter(query, filters, filter.Key, e => e.TipoImposto);
                         break;
 
                     case "regimetributario":
-                        query = ApplyEnumFilter(query, filters, filter.Key, e => e.RegimeTributario);
+                        if (Enum.TryParse<Enumerador.Fiscal.EnumRegimeTributario>(filter.Value.ToString(), out var regimeTributario))
+                        {
+                            query = query.Where(e => e.RegimeTributario == regimeTributario);
+                        }
+                        break;
+
+                    case "estado":
+                        if (Enum.TryParse<Enumerador.EnumEstado>(filter.Value.ToString(), out var estado))
+                        {
+                            query = query.Where(e => e.Estado == estado);
+                        }
                         break;
                 }
             }

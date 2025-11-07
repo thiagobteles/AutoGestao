@@ -1,5 +1,5 @@
 using AutoGestao.Data;
-using AutoGestao.Enumerador.Veiculo;
+using AutoGestao.Enumerador.Fiscal;
 using AutoGestao.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,41 +14,84 @@ namespace AutoGestao.Controllers.Base
 
         public async Task<IActionResult> Index()
         {
-            //var vendasMesAnterior = await _context.Vendas.Where(x => x.DataVenda.Month == DateTime.UtcNow.Month - 1).SumAsync(x => x.ValorVenda);
-            //var vendasMesAtual = await _context.Vendas.Where(x => x.DataVenda.Month == DateTime.UtcNow.Month).SumAsync(x => x.ValorVenda);
+            var mesAtual = DateTime.Now.Month;
+            var anoAtual = DateTime.Now.Year;
+            var dataInicioMes = new DateTime(anoAtual, mesAtual, 1);
+            var dataFimMes = dataInicioMes.AddMonths(1).AddDays(-1);
+            var dataLimiteVencimento = DateTime.Now.AddDays(30);
 
             var dashboard = new DashboardViewModel
             {
-                TotalVeiculos = await _context.Veiculos.CountAsync(),
+                // Primeira linha de cards
+                TotalEmpresasClientes = await _context.EmpresasClientes.CountAsync(e => e.Ativo),
+
+                NotasFiscaisEmitidas = await _context.NotasFiscais
+                    .CountAsync(n => n.DataEmissao >= dataInicioMes && n.DataEmissao <= dataFimMes),
+
+                ObrigacoesPendentes = await _context.ObrigacoesFiscais
+                    .CountAsync(o => o.Status == EnumStatusObrigacao.Pendente || o.Status == EnumStatusObrigacao.EmAndamento),
+
+                CertificadosVencendo = await _context.CertificadosDigitais
+                    .CountAsync(c => c.DataValidade <= dataLimiteVencimento && c.DataValidade >= DateTime.Now),
+
+                // Segunda linha - Faturamento
+                FaturamentoMes = await _context.NotasFiscais
+                    .Where(n => n.DataEmissao >= dataInicioMes && n.DataEmissao <= dataFimMes)
+                    .SumAsync(n => (decimal?)n.ValorTotal) ?? 0,
+
+                FaturamentoNFe = await _context.NotasFiscais
+                    .Where(n => n.DataEmissao >= dataInicioMes && n.DataEmissao <= dataFimMes)
+                    .SumAsync(n => (decimal?)n.ValorTotal) ?? 0,
+
+                FaturamentoNFSe = 0, // Separar quando houver campo de tipo na NotaFiscal
+
+                ObrigacoesProximas = await _context.ObrigacoesFiscais
+                    .Where(o => o.DataVencimento >= DateTime.Now && o.DataVencimento <= dataLimiteVencimento)
+                    .Where(o => o.Status != EnumStatusObrigacao.Entregue)
+                    .OrderBy(o => o.DataVencimento)
+                    .Take(5)
+                    .ToListAsync(),
+
+                // Terceira linha de cards
+                LancamentosContabeisMes = await _context.LancamentosContabeis
+                    .CountAsync(l => l.DataLancamento >= dataInicioMes && l.DataLancamento <= dataFimMes),
+
+                TotalPlanoContas = await _context.PlanoContas
+                    .CountAsync(p => p.ContaAnalitica),
+
+                AliquotasConfiguradas = await _context.AliquotasImpostos.CountAsync(),
+
+                TotalContadores = await _context.ContadoresResponsaveis.CountAsync(c => c.Ativo),
+
+                // Dados adicionais
                 TotalClientes = await _context.Clientes.CountAsync(),
-                VeiculosEstoque = await _context.Veiculos.CountAsync(v => v.Situacao == EnumSituacaoVeiculo.Estoque),
-                VeiculosVendidos = await _context.Veiculos.CountAsync(v => v.Situacao == EnumSituacaoVeiculo.Vendido),
+
                 Aniversariantes = await _context.Clientes
                     .Where(x => x.DataNascimento.HasValue && x.DataNascimento.Value.Month == DateTime.UtcNow.Month)
                     .Take(4)
                     .ToListAsync(),
 
-                //ComparativoComMesAnterior = vendasMesAtual - vendasMesAnterior,
+                VendasMes = await _context.NotasFiscais
+                    .CountAsync(n => n.DataEmissao >= dataInicioMes && n.DataEmissao <= dataFimMes),
 
-                //VendasMes = await _context.Vendas.CountAsync(v => v.DataVenda.Month == DateTime.UtcNow.Month),
+                ValorVendasMes = await _context.NotasFiscais
+                    .Where(n => n.DataEmissao >= dataInicioMes && n.DataEmissao <= dataFimMes)
+                    .SumAsync(n => (decimal?)n.ValorTotal) ?? 0,
 
-                //ValorVendasMes = await _context.Vendas
-                //    .Where(v => v.DataVenda.Month == DateTime.UtcNow.Month)
-                //    .SumAsync(v => v.ValorVenda),
+                // Métricas detalhadas por regime tributário
+                EmpresasSimples = await _context.EmpresasClientes
+                    .CountAsync(e => e.RegimeTributario == EnumRegimeTributario.SimplesNacional),
 
-                //UltimasVendas = await _context.Vendas
-                //    .Include(x => x.Vendedor)
-                //    .Include(x => x.Veiculo)
-                //    .Include(x => x.Veiculo.VeiculoMarca)
-                //    .Include(x => x.Veiculo.VeiculoMarcaModelo)
-                //    .OrderByDescending(x => x.DataVenda)
-                //    .Take(4)
-                //    .ToListAsync()
+                EmpresasLucroPresumido = await _context.EmpresasClientes
+                    .CountAsync(e => e.RegimeTributario == EnumRegimeTributario.LucroPresumido),
 
-                ComparativoComMesAnterior = 2,
-                VendasMes = 30,
-                ValorVendasMes = (decimal)123530.50,
-                UltimasVendas = [1, 2, 3]
+                EmpresasLucroReal = await _context.EmpresasClientes
+                    .CountAsync(e => e.RegimeTributario == EnumRegimeTributario.LucroReal),
+
+                NotasEmitidas = await _context.NotasFiscais
+                    .CountAsync(n => n.DataEmissao >= dataInicioMes && n.DataEmissao <= dataFimMes),
+
+                NotasCanceladas = 0 // Adicionar quando houver campo de status na NotaFiscal
             };
 
             return View(dashboard);

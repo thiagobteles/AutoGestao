@@ -1,5 +1,6 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
+using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +10,7 @@ namespace AutoGestao.Entidades.Fiscal
     public class NotaFiscalItem : BaseEntidade
     {
         [Required]
-        public int NotaFiscalId { get; set; }
+        public long NotaFiscalId { get; set; }
 
         [FormField(Name = "Descrição", Order = 10, Section = "Produto/Serviço", Icon = "fas fa-tag", Type = EnumFieldType.Text, Required = true)]
         [Required]
@@ -36,7 +37,7 @@ namespace AutoGestao.Entidades.Fiscal
         [Column(TypeName = "decimal(18,2)")]
         public decimal ValorUnitario { get; set; }
 
-        [FormField(Name = "Valor Total", Order = 40, Section = "Valores", Icon = "fas fa-calculator", Type = EnumFieldType.Decimal, Readonly = true)]
+        [FormField(Name = "Valor Total", Order = 40, Section = "Valores", Icon = "fas fa-calculator", Type = EnumFieldType.Decimal, ReadOnly = true)]
         [Column(TypeName = "decimal(18,2)")]
         public decimal ValorTotal { get; set; }
 

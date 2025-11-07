@@ -1,5 +1,4 @@
 using AutoGestao.Atributes;
-using AutoGestao.Entidades.Veiculos;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 
@@ -40,8 +39,5 @@ namespace AutoGestao.Entidades
 
         [FormField(Order = 50, Name = "Documento RG (PDF)", Section = "Teste", Icon = "fas fa-file-pdf", Type = EnumFieldType.File, AllowedExtensions = "pdf", MaxSizeMB = 5)]
         public string? DocumentoRG { get; set; }
-
-        // Navigation properties
-        public virtual ICollection<Veiculo> Veiculos { get; set; } = [];
     }
 }

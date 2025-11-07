@@ -217,14 +217,7 @@ namespace AutoGestao.Controllers
                 // Buscar um registro de exemplo da entidade
                 object? sampleEntity = request.EntityType switch
                 {
-                    "Cliente" => await _context.Clientes.FirstOrDefaultAsync(),
-                    "Veiculo" => await _context.Veiculos
-                        .Include(v => v.Cliente)
-                        .Include(v => v.VeiculoMarca)
-                        .Include(v => v.VeiculoMarcaModelo)
-                        .Include(v => v.VeiculoCor)
-                        .FirstOrDefaultAsync(),
-                    _ => null
+                    "Cliente" => await _context.Clientes.FirstOrDefaultAsync()
                 };
 
                 if (sampleEntity == null)

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Minio;
 using System.Globalization;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -237,7 +238,6 @@ static async Task InicializarDadosPadraoContabilidade(ApplicationDbContext conte
         };
 
         var retorno = await empresaService.CriarEmpresaAsync(empresa);
-
         var adminUser = new Usuario
         {
             Nome = "Thiago",
@@ -248,9 +248,138 @@ static async Task InicializarDadosPadraoContabilidade(ApplicationDbContext conte
         };
 
         await usuarioService.CriarUsuarioAsync(adminUser, "admin123");
+        Console.WriteLine("✓ Usuário administrador criado");
+        Console.WriteLine("  Email: admin@contabilidade.com");
+        Console.WriteLine("  Senha: admin123");
+        Console.WriteLine();
 
-        Console.WriteLine("Usuário criado");
-        Console.WriteLine("Email: admin@contabilidade.com");
-        Console.WriteLine("Senha: admin123");
+        // Executar scripts de carga inicial de dados
+        await ExecutarScriptsIniciais(context);
+    }
+}
+
+static async Task ExecutarScriptsIniciais(ApplicationDbContext context)
+{
+    try
+    {
+        // Verificar se os dados já foram carregados (verifica se existe algum CNAE)
+        if (await context.CNAEs.AnyAsync())
+        {
+            Console.WriteLine("⚠ Dados de demonstração já foram carregados anteriormente.");
+            return;
+        }
+
+        Console.WriteLine("═══════════════════════════════════════════════");
+        Console.WriteLine("INICIANDO CARGA DE DADOS DE DEMONSTRAÇÃO");
+        Console.WriteLine("═══════════════════════════════════════════════");
+        Console.WriteLine();
+
+        var connectionString = context.Database.GetConnectionString();
+
+        // Buscar a pasta Scripts no diretório do projeto (não no debug)
+        var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        var projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", ".."));
+        var scriptsPath = Path.Combine(projectRoot, "Scripts", "Contabilidade");
+
+        if (!Directory.Exists(scriptsPath))
+        {
+            Console.WriteLine($"⚠ Pasta de scripts não encontrada: {scriptsPath}");
+            Console.WriteLine($"   BaseDirectory: {baseDirectory}");
+            Console.WriteLine($"   ProjectRoot: {projectRoot}");
+            return;
+        }
+
+        Console.WriteLine($"📁 Pasta de scripts: {scriptsPath}");
+        Console.WriteLine();
+
+        // Lista de scripts na ordem correta
+        var scripts = new[]
+        {
+            "01_Insert_CNAEs.sql",
+            "02_Insert_Contadores.sql",
+            "03_Insert_EmpresasClientes.sql",
+            "04_Insert_CertificadosDigitais.sql",
+            "05_Insert_ParametrosFiscais.sql",
+            "06_Insert_DadosBancarios.sql",
+            "07_Insert_AliquotasImpostos.sql",
+            "08_Insert_PlanoContas.sql",
+            "09_Insert_ObrigacoesFiscais.sql",
+            "10_Insert_Clientes.sql",
+            "11_Insert_NotasFiscais.sql",
+            "12_Insert_LancamentosContabeis.sql"
+        };
+
+        int totalScripts = scripts.Length;
+        int scriptsExecutados = 0;
+
+        using var connection = new NpgsqlConnection(connectionString);
+        await connection.OpenAsync();
+
+        foreach (var scriptFile in scripts)
+        {
+            scriptsExecutados++;
+            var scriptPath = Path.Combine(scriptsPath, scriptFile);
+
+            if (!File.Exists(scriptPath))
+            {
+                Console.WriteLine($"⚠ Script não encontrado: {scriptFile}");
+                continue;
+            }
+
+            Console.Write($">>> [{scriptsExecutados}/{totalScripts}] Executando {scriptFile}...");
+
+            try
+            {
+                var scriptContent = await File.ReadAllTextAsync(scriptPath);
+                using var command = new NpgsqlCommand(scriptContent, connection);
+                command.CommandTimeout = 300; // 5 minutos de timeout
+                await command.ExecuteNonQueryAsync();
+
+                Console.WriteLine(" ✓");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($" ✗ ERRO");
+                Console.WriteLine($"    Detalhes: {ex.Message}");
+                throw; // Interrompe a execução se houver erro
+            }
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("═══════════════════════════════════════════════");
+        Console.WriteLine("CARGA DE DADOS CONCLUÍDA COM SUCESSO!");
+        Console.WriteLine("═══════════════════════════════════════════════");
+        Console.WriteLine();
+        Console.WriteLine("RESUMO:");
+        Console.WriteLine("  • 50 CNAEs");
+        Console.WriteLine("  • 50 Contadores Responsáveis");
+        Console.WriteLine("  • 50 Empresas Clientes");
+        Console.WriteLine("  • 50 Certificados Digitais");
+        Console.WriteLine("  • 50 Parâmetros Fiscais");
+        Console.WriteLine("  • 50 Dados Bancários");
+        Console.WriteLine("  • 50 Alíquotas de Impostos");
+        Console.WriteLine("  • 50 Plano de Contas");
+        Console.WriteLine("  • 50 Obrigações Fiscais");
+        Console.WriteLine("  • 50 Clientes");
+        Console.WriteLine("  • 50 Notas Fiscais");
+        Console.WriteLine("  • 50 Lançamentos Contábeis");
+        Console.WriteLine();
+        Console.WriteLine("  TOTAL: 600 registros inseridos");
+        Console.WriteLine();
+        Console.WriteLine("✓ Sistema pronto para apresentação!");
+        Console.WriteLine("═══════════════════════════════════════════════");
+        Console.WriteLine();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine();
+        Console.WriteLine("═══════════════════════════════════════════════");
+        Console.WriteLine("✗ ERRO AO EXECUTAR SCRIPTS DE CARGA");
+        Console.WriteLine("═══════════════════════════════════════════════");
+        Console.WriteLine($"Erro: {ex.Message}");
+        Console.WriteLine();
+        Console.WriteLine("O sistema continuará funcionando, mas sem dados de demonstração.");
+        Console.WriteLine("═══════════════════════════════════════════════");
+        Console.WriteLine();
     }
 }

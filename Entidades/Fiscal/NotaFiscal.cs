@@ -1,6 +1,7 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Fiscal;
+using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,34 +20,37 @@ namespace AutoGestao.Entidades.Fiscal
         public int Serie { get; set; } = 1;
 
         [GridField("Chave de Acesso", Order = 20, ShowInGrid = false)]
-        [FormField(Name = "Chave de Acesso", Order = 20, Section = "Dados da Nota", Icon = "fas fa-key", Type = EnumFieldType.Text, Readonly = true)]
+        [FormField(Name = "Chave de Acesso", Order = 20, Section = "Dados da Nota", Icon = "fas fa-key", Type = EnumFieldType.Text, ReadOnly = true)]
         [MaxLength(44)]
         public string? ChaveAcesso { get; set; }
 
-        [GridField("Modelo", Order = 25, Width = "100px", EnumRender = EnumRenderType.Badge)]
+        [GridField("Modelo", Order = 25, Width = "100px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Modelo", Order = 25, Section = "Dados da Nota", Icon = "fas fa-file-alt", Type = EnumFieldType.Select, Required = true)]
         [Required]
         public EnumModeloNotaFiscal Modelo { get; set; }
 
-        [GridField("Tipo", Order = 30, Width = "100px", EnumRender = EnumRenderType.Badge)]
+        [GridField("Tipo", Order = 30, Width = "100px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Tipo", Order = 30, Section = "Dados da Nota", Icon = "fas fa-exchange-alt", Type = EnumFieldType.Select, Required = true)]
         [Required]
         public EnumTipoNotaFiscal Tipo { get; set; }
 
-        [GridField("Status", Order = 35, Width = "120px", EnumRender = EnumRenderType.Badge)]
+        [GridField("Status", Order = 35, Width = "120px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Status", Order = 35, Section = "Dados da Nota", Icon = "fas fa-info-circle", Type = EnumFieldType.Select)]
         public EnumStatusNotaFiscal Status { get; set; } = EnumStatusNotaFiscal.Rascunho;
 
-        [GridField("Empresa", Order = 40)]
-        [FormField(Name = "Empresa", Order = 40, Section = "Dados da Nota", Icon = "fas fa-building", Type = EnumFieldType.Reference, Required = true, ReferenceEntity = "EmpresaCliente")]
+        [FormField(Name = "Empresa", Order = 40, Section = "Dados da Nota", Icon = "fas fa-building", Type = EnumFieldType.Reference, Required = true, Reference = typeof(EmpresaCliente))]
         [Required]
-        public int EmpresaClienteId { get; set; }
+        public long EmpresaClienteId { get; set; }
+
+        [GridComposite("Empresa", Order = 40, NavigationPaths = new[] { "EmpresaCliente.RazaoSocial", "EmpresaCliente.CNPJ" },
+            Template = @"<div class=""vehicle-info""><div class=""fw-semibold"">{0}</div><div class=""text-muted small"">{1}</div></div>")]
+        public string EmpresaClienteNome => $"{EmpresaCliente?.RazaoSocial ?? "N/A"} - {EmpresaCliente?.CNPJ ?? "N/A"}";
 
         [GridField("Data Emissão", Order = 45, Width = "120px", Format = "dd/MM/yyyy HH:mm")]
         [FormField(Name = "Data de Emissão", Order = 45, Section = "Datas", Icon = "fas fa-calendar", Type = EnumFieldType.DateTime)]
         public DateTime? DataEmissao { get; set; }
 
-        [FormField(Name = "Data de Saída/Entrada", Order = 50, Section = "Datas", Icon = "fas fa-calendar-check", Type = EnumFieldType.DateTime")]
+        [FormField(Name = "Data de Saída/Entrada", Order = 50, Section = "Datas", Icon = "fas fa-calendar-check", Type = EnumFieldType.DateTime)]
         public DateTime? DataSaidaEntrada { get; set; }
 
         [GridField("Valor Total", Order = 55, Width = "120px", Format = "C")]

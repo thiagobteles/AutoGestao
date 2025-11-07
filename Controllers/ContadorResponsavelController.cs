@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoGestao.Controllers
 {
-    public class EmpresaClienteController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<EmpresaCliente>> logger)
-        : StandardGridController<EmpresaCliente>(context, fileStorageService, logger)
+    public class ContadorResponsavelController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<ContadorResponsavel>> logger)
+        : StandardGridController<ContadorResponsavel>(context, fileStorageService, logger)
     {
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
@@ -22,15 +22,15 @@ namespace AutoGestao.Controllers
                     Name = "search",
                     DisplayName = "Busca Geral",
                     Type = EnumGridFilterType.Text,
-                    Placeholder = "Razão Social, CNPJ, Nome Fantasia..."
+                    Placeholder = "Nome, CPF, CRC, Email..."
                 },
                 new()
                 {
-                    Name = "regimetributario",
-                    DisplayName = "Regime Tributário",
+                    Name = "estadocrc",
+                    DisplayName = "Estado do CRC",
                     Type = EnumGridFilterType.Select,
-                    Placeholder = "Todos os regimes...",
-                    Options = EnumExtension.GetSelectListItems<Enumerador.Fiscal.EnumRegimeTributario>(true)
+                    Placeholder = "Todos os estados...",
+                    Options = EnumExtension.GetSelectListItems<Enumerador.EnumEstado>(true)
                 },
                 new()
                 {
@@ -49,7 +49,7 @@ namespace AutoGestao.Controllers
             return standardGridViewModel;
         }
 
-        protected override IQueryable<EmpresaCliente> ApplyFilters(IQueryable<EmpresaCliente> query, Dictionary<string, object> filters)
+        protected override IQueryable<ContadorResponsavel> ApplyFilters(IQueryable<ContadorResponsavel> query, Dictionary<string, object> filters)
         {
             foreach (var filter in filters)
             {
@@ -60,21 +60,23 @@ namespace AutoGestao.Controllers
                         if (!string.IsNullOrEmpty(searchTerm))
                         {
                             query = ApplyTextFilter(query, searchTerm,
-                                e => e.RazaoSocial,
-                                e => e.NomeFantasia,
-                                e => e.CNPJ);
+                                c => c.Nome,
+                                c => c.CPF,
+                                c => c.CRC,
+                                c => c.Email,
+                                c => c.Escritorio);
                         }
+                        break;
+
+                    case "estadocrc":
+                        query = ApplyEnumFilter(query, filters, filter.Key, c => c.EstadoCRC);
                         break;
 
                     case "status":
                         if (bool.TryParse(filter.Value.ToString(), out bool status))
                         {
-                            query = query.Where(e => e.Ativo == status);
+                            query = query.Where(c => c.Ativo == status);
                         }
-                        break;
-
-                    case "regimetributario":
-                        query = ApplyEnumFilter(query, filters, filter.Key, e => e.RegimeTributario);
                         break;
                 }
             }
