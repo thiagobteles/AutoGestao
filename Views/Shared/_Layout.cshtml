@@ -471,16 +471,11 @@
                             fetch(url)
                                 .then(response => response.text())
                                 .then(html => {
-                                    // Criar elemento temporário para parsear o HTML
-                                    const tempDiv = document.createElement('div');
-                                    tempDiv.innerHTML = html;
-
-                                    // Extrair apenas o conteúdo do main-content
-                                    const newMainContent = tempDiv.querySelector('.main-content');
-
-                                    if (newMainContent && mainContent) {
+                                    // 🔧 FIX: View retornada (_StandardGridContent) não tem wrapper .main-content
+                                    // Usar todo o HTML retornado diretamente para substituir o conteúdo
+                                    if (mainContent) {
                                         // Substituir conteúdo
-                                        mainContent.innerHTML = newMainContent.innerHTML;
+                                        mainContent.innerHTML = html;
 
                                         // Atualizar URL sem reload
                                         window.history.pushState({}, '', url);
