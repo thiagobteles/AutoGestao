@@ -12,6 +12,7 @@ using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
@@ -283,19 +284,19 @@ namespace AutoGestao.Controllers.Base
         {
         }
 
-        protected virtual bool CanCreate(T? entity)
+        protected virtual Task<bool> CanCreate(T? entity)
         {
-            return true;
+            return Task.FromResult(true);
         }
 
-        protected virtual bool CanEdit(T entity)
+        protected virtual Task<bool> CanEdit(T entity)
         {
-            return true;
+            return Task.FromResult(true);
         }
 
-        protected virtual bool CanDelete(T entity)
+        protected virtual Task<bool> CanDelete(T entity)
         {
-            return true;
+            return Task.FromResult(true);
         }
 
         protected virtual void ProcessFileFieldsFromRequest(T entity)
@@ -598,7 +599,7 @@ namespace AutoGestao.Controllers.Base
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Create(T entity)
         {
-            if (!CanCreate(entity))
+            if (!await CanCreate(entity))
             {
                 if (IsAjaxRequest())
                 {
@@ -730,7 +731,7 @@ namespace AutoGestao.Controllers.Base
                     : NotFound();
             }
 
-            if (!CanEdit(existingEntity))
+            if (!await CanEdit(existingEntity))
             {
                 if (Request.IsAjaxRequest())
                 {
@@ -911,7 +912,7 @@ namespace AutoGestao.Controllers.Base
                 return NotFound();
             }
 
-            if (!CanDelete(entity))
+            if (!await CanDelete(entity))
             {
                 if (IsAjaxRequest())
                 {
@@ -1629,18 +1630,37 @@ namespace AutoGestao.Controllers.Base
 
         private static StandardGridViewModel ConfigureGrid(string controllerName)
         {
+            var formConfig = typeof(T).GetCustomAttribute<FormConfigAttribute>() ?? new FormConfigAttribute();
             var standardGridViewModel = new StandardGridViewModel
             {
-                Title = controllerName,
-                SubTitle = $"Gerencie todos os {controllerName}",
                 EntityName = typeof(T).Name,
                 ControllerName = controllerName,
                 Columns = GridColumnBuilder.BuildColumns<T>(),
+                Title = ObterGridTitle(controllerName, formConfig),
+                SubTitle = ObterGridSubTitle(controllerName, formConfig),
                 HeaderActions = ObterHeaderActionsPadrao(controllerName),
                 RowActions = ObterRowActionsPadrao(controllerName)
             };
 
             return standardGridViewModel;
+        }
+
+        private static string ObterGridTitle(string controllerName, FormConfigAttribute formConfig)
+        {
+            return string.IsNullOrEmpty(formConfig.GridTitle) 
+                ? string.IsNullOrEmpty(formConfig.Title)
+                    ? controllerName
+                    : formConfig.Title
+                : formConfig.GridTitle;
+        }
+
+        private static string ObterGridSubTitle(string controllerName, FormConfigAttribute formConfig)
+        {
+            return string.IsNullOrEmpty(formConfig.GridSubTitle)
+                ? string.IsNullOrEmpty(formConfig.Subtitle)
+                    ? $"Gerencie todos os {controllerName}"
+                    : formConfig.Subtitle
+                : formConfig.GridSubTitle;
         }
 
         private static bool ShouldAutoGenerateField(PropertyInfo property)
@@ -1662,6 +1682,7 @@ namespace AutoGestao.Controllers.Base
             var ignoredNames = new[] { "Id", "DataCadastro", "DataAlteracao", "UsuarioCadastro", "UsuarioAlteracao", "CriadoPorUsuarioId", "AlteradoPorUsuarioId" };
             return !ignoredNames.Contains(property.Name);
         }
+
 
         private static List<GridAction> ObterHeaderActionsPadrao(string controllerNome)
         {
@@ -1727,9 +1748,9 @@ namespace AutoGestao.Controllers.Base
                     Name = "Delete",
                     DisplayName = "Excluir",
                     Icon = "fas fa-trash",
+                    CssClass = "text-danger",
                     Url = $"/{controllerNome}/Delete/{{id}}",
-                    Type = EnumTypeRequest.Post,
-                    CssClass = "text-danger"
+                    Type = EnumTypeRequest.Post
                 }
             ];
         }
@@ -2710,7 +2731,7 @@ namespace AutoGestao.Controllers.Base
                 ParentController = parentController,
                 Items = [.. items.Cast<object>()],
                 Columns = columns,
-                CanCreate = CanCreate(null),
+                CanCreate = await CanCreate(null),
                 CanEdit = true,
                 CanDelete = true
             };

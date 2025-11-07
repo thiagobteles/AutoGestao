@@ -5,7 +5,7 @@ using AutoGestao.Enumerador.Veiculo;
 namespace AutoGestao.Entidades.Veiculos
 {
    
-    [FormConfig(Title = "Veículo", Subtitle = "Gerencie todas as informações do veículo", Icon = "fas fa-car", EnableAjaxSubmit = true)] // Anotação para geração da GRID
+    [FormConfig(Title = "Veículo", Subtitle = "Gerencie todas as informações do veículo", Icon = "fas fa-car")] // Anotação para geração da GRID
     [FormTabs(EnableTabs = true, DefaultTab = "principal")] // Anotações para geração de TABS
     [FormTab("arquivos", "Arquivos", TabIcon = "fas fa-folder", Order = 1, Controller = "VeiculoDocumento", LazyLoad = true)]
     [FormTab("midias", "Mídias", TabIcon = "fas fa-images", Order = 3, Controller = "VeiculoFoto", LazyLoad = true)]

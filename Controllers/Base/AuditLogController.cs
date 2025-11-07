@@ -66,19 +66,19 @@ namespace AutoGestao.Controllers.Base
             return Task.FromResult<IActionResult>(RedirectToAction(nameof(Index)));
         }
 
-        protected override bool CanCreate(AuditLog? entity)
+        protected override Task<bool> CanCreate(AuditLog? entity)
         {
-            return false; // Auditoria é read-only
+            return Task.FromResult(false); // Auditoria é read-only
         }
 
-        protected override bool CanEdit(AuditLog entity)
+        protected override Task<bool> CanEdit(AuditLog entity)
         {
-            return false; // Auditoria é read-only
+            return Task.FromResult(false); // Auditoria é read-only
         }
 
-        protected override bool CanDelete(AuditLog entity)
+        protected override Task<bool> CanDelete(AuditLog entity)
         {
-            return false; // Auditoria é read-only
+            return Task.FromResult(false); // Auditoria é read-only
         }
 
         protected override void ConfigureFormFields(List<FormFieldViewModel> fields, AuditLog entity, string action)

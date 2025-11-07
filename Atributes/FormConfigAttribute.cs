@@ -5,6 +5,8 @@ namespace AutoGestao.Atributes
     {
         public string Title { get; set; } = "";
         public string Subtitle { get; set; } = "";
+        public string GridTitle { get; set; } = "";
+        public string GridSubTitle { get; set; } = "";
         public string Icon { get; set; } = "fas fa-edit";
         public bool EnableAjaxSubmit { get; set; } = true;
         public string BackAction { get; set; } = "Index";

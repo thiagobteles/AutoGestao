@@ -4,9 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoGestao.Entidades.Relatorio
 {
-    /// <summary>
-    /// Entidade para salvar templates de relatório no banco
-    /// </summary>
     [FormConfig(Title = "Template de Relatório", Subtitle = "Gerencie templates de relatórios salvos", Icon = "fas fa-file-alt")]
     public class ReportTemplateEntity : BaseEntidade
     {
@@ -31,6 +28,6 @@ namespace AutoGestao.Entidades.Relatorio
         public new bool Ativo { get; set; } = true;
 
         [NotMapped]
-        public int TotalUsos { get; set; } // Pode ser calculado via relatório
+        public int TotalUsos { get; set; }
     }
 }

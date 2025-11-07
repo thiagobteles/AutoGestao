@@ -132,8 +132,8 @@ class StandardGrid {
         const form = document.querySelector(this.options.filtersFormSelector);
         if (!form) return;
 
-        // Preencher filtros com valores da URL
-        this.populateFiltersFromUrl(form);
+        // 🔧 REMOVIDO: Não preencher mais filtros da URL
+        // this.populateFiltersFromUrl(form);
 
         // 🔧 FIX: NÃO adicionar listener aqui - será adicionado em setupEventListeners()
         // para evitar duplicação após AJAX
@@ -174,33 +174,34 @@ class StandardGrid {
         this.searchTimeouts.set(key, timeout);
     }
 
-    populateFiltersFromUrl(form) {
-        // Obter parâmetros da URL
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // Preencher cada campo do formulário com o valor correspondente da URL
-        const inputs = form.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            const paramName = input.name;
-            if (paramName && urlParams.has(paramName)) {
-                const value = urlParams.get(paramName);
-
-                if (input.type === 'checkbox') {
-                    input.checked = value === 'true' || value === '1';
-                } else if (input.type === 'radio') {
-                    input.checked = input.value === value;
-                } else {
-                    input.value = value;
-                }
-            }
-        });
-
-        // Preencher seletor de tamanho de página
-        const pageSizeSelector = document.querySelector(this.options.pageSizeSelector);
-        if (pageSizeSelector && urlParams.has('pageSize')) {
-            pageSizeSelector.value = urlParams.get('pageSize');
-        }
-    }
+    // 🔧 REMOVIDO: Não preencher mais filtros da URL para manter navegação limpa
+    // populateFiltersFromUrl(form) {
+    //     // Obter parâmetros da URL
+    //     const urlParams = new URLSearchParams(window.location.search);
+    //
+    //     // Preencher cada campo do formulário com o valor correspondente da URL
+    //     const inputs = form.querySelectorAll('input, select');
+    //     inputs.forEach(input => {
+    //         const paramName = input.name;
+    //         if (paramName && urlParams.has(paramName)) {
+    //             const value = urlParams.get(paramName);
+    //
+    //             if (input.type === 'checkbox') {
+    //                 input.checked = value === 'true' || value === '1';
+    //             } else if (input.type === 'radio') {
+    //                 input.checked = input.value === value;
+    //             } else {
+    //                 input.value = value;
+    //             }
+    //         }
+    //     });
+    //
+    //     // Preencher seletor de tamanho de página
+    //     const pageSizeSelector = document.querySelector(this.options.pageSizeSelector);
+    //     if (pageSizeSelector && urlParams.has('pageSize')) {
+    //         pageSizeSelector.value = urlParams.get('pageSize');
+    //     }
+    // }
 
     aplicarFiltros(page = 1) {
         if (this.isLoading) {
@@ -265,7 +266,8 @@ class StandardGrid {
                 gridContainer.offsetHeight; // trigger reflow
                 gridContainer.style.display = '';
 
-                this.updateUrl(params);
+                // 🔧 FIX: URL não será mais atualizada para manter navegação limpa
+                // this.updateUrl(params);
                 this.reinitializeEvents();
 
                 // 🔧 FIX: Adicionar classe 'loaded' ao data-grid para torná-lo visível
@@ -528,14 +530,15 @@ class StandardGrid {
     // UTILITÁRIOS
     // ===================================================================
 
-    updateUrl(params) {
-        try {
-            const newUrl = `${window.location.pathname}?${params.toString()}`;
-            window.history.replaceState({}, '', newUrl);
-        } catch (error) {
-            console.error('Erro ao atualizar URL:', error);
-        }
-    }
+    // 🔧 REMOVIDO: Não atualizar mais a URL para manter navegação limpa e segura
+    // updateUrl(params) {
+    //     try {
+    //         const newUrl = `${window.location.pathname}?${params.toString()}`;
+    //         window.history.replaceState({}, '', newUrl);
+    //     } catch (error) {
+    //         console.error('Erro ao atualizar URL:', error);
+    //     }
+    // }
 
     debug() {
         const overlay = document.querySelector(this.options.loadingSelector);
@@ -753,37 +756,38 @@ function setupIntersectionObserver() {
     }
 }
 
-function changePage(page) {
-    const url = new URL(window.location);
-    url.searchParams.set('page', page);
-    window.location = url;
-}
+// 🔧 DESATIVADO: Funções legacy que alteravam URL - não mais necessário
+// function changePage(page) {
+//     const url = new URL(window.location);
+//     url.searchParams.set('page', page);
+//     window.location = url;
+// }
 
-document.getElementById('pageSizeSelector')?.addEventListener('change', function () {
-    const url = new URL(window.location);
-    url.searchParams.set('pageSize', this.value);
-    url.searchParams.set('page', '1');
-    window.location = url;
-});
+// document.getElementById('pageSizeSelector')?.addEventListener('change', function () {
+//     const url = new URL(window.location);
+//     url.searchParams.set('pageSize', this.value);
+//     url.searchParams.set('page', '1');
+//     window.location = url;
+// });
 
 // Sortable headers
-document.querySelectorAll('.sortable-header').forEach(header => {
-    header.addEventListener('click', function () {
-        const sortColumn = this.dataset.sortable;
-        const url = new URL(window.location);
-
-        let newDirection = 'asc';
-        if (url.searchParams.get('orderBy') === sortColumn && url.searchParams.get('orderDirection') === 'asc') {
-            newDirection = 'desc';
-        }
-
-        url.searchParams.set('orderBy', sortColumn);
-        url.searchParams.set('orderDirection', newDirection);
-        url.searchParams.set('page', '1');
-
-        window.location = url;
-    });
-});
+// document.querySelectorAll('.sortable-header').forEach(header => {
+//     header.addEventListener('click', function () {
+//         const sortColumn = this.dataset.sortable;
+//         const url = new URL(window.location);
+//
+//         let newDirection = 'asc';
+//         if (url.searchParams.get('orderBy') === sortColumn && url.searchParams.get('orderDirection') === 'asc') {
+//             newDirection = 'desc';
+//         }
+//
+//         url.searchParams.set('orderBy', sortColumn);
+//         url.searchParams.set('orderDirection', newDirection);
+//         url.searchParams.set('page', '1');
+//
+//         window.location = url;
+//     });
+// });
 
 // ===================================================================
 // CORREÇÕES DE LAYOUT PARA GRID COMPACTA

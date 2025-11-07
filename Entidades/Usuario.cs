@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 namespace AutoGestao.Entidades
 {
     [Auditable(EntityDisplayName = "Usuário")]
-    [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users", EnableAjaxSubmit = true)]
+    [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users")]
     public class Usuario : BaseEntidade
     {
         [GridMain("Nome")]

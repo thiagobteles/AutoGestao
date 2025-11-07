@@ -3,7 +3,7 @@ using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Entidades.Veiculos
 {
-    [FormConfig(Title = "Localização", Subtitle = "Gerencie as localizações de veículos", Icon = "fas fa-map-marker-alt", EnableAjaxSubmit = true)]
+    [FormConfig(Title = "Localização", Subtitle = "Gerencie as localizações de veículos", Icon = "fas fa-map-marker-alt")]
     public class VeiculoLocalizacao : BaseEntidade
     {
         [ReferenceText]
