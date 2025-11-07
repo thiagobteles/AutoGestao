@@ -88,7 +88,8 @@ namespace AutoGestao.Controllers.Veiculos
                             query = ApplyTextFilter(query, searchTerm,
                                 c => c.Codigo,
                                 c => c.Placa,
-                                //c => c.MarcaModelo,
+                                c => c.VeiculoMarcaModelo.Descricao,
+                                c => c.VeiculoMarca.Descricao,
                                 c => c.Chassi,
                                 c => c.Renavam);
                         }
