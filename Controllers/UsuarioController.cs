@@ -15,10 +15,79 @@ using System.Security.Claims;
 namespace AutoGestao.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class UsuarioController(ApplicationDbContext context, IUsuarioService usuarioService, IFileStorageService fileStorageService, ILogger<StandardGridController<Usuario>> logger) 
+    public class UsuarioController(ApplicationDbContext context, IUsuarioService usuarioService, IFileStorageService fileStorageService, ILogger<StandardGridController<Usuario>> logger)
         : StandardGridController<Usuario>(context, fileStorageService, logger)
     {
         private readonly IUsuarioService _usuarioService = usuarioService;
+
+        protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
+        {
+            standardGridViewModel.Filters =
+            [
+                new()
+                {
+                    Name = "search",
+                    DisplayName = "Busca Geral",
+                    Type = EnumGridFilterType.Text,
+                    Placeholder = "Nome, Email ou CPF..."
+                },
+                new()
+                {
+                    Name = "perfil",
+                    DisplayName = "Perfil",
+                    Type = EnumGridFilterType.Select,
+                    Placeholder = "Todos os perfis...",
+                    Options = EnumExtension.GetSelectListItems<EnumPerfilUsuario>(true)
+                },
+                new()
+                {
+                    Name = "ativo",
+                    DisplayName = "Status",
+                    Type = EnumGridFilterType.Select,
+                    Placeholder = "Todos...",
+                    Options =
+                    [
+                        new SelectListItem { Value = "true", Text = "✅ Ativos" },
+                        new SelectListItem { Value = "false", Text = "⛔ Inativos" }
+                    ]
+                }
+            ];
+
+            return standardGridViewModel;
+        }
+
+        protected override IQueryable<Usuario> ApplyFilters(IQueryable<Usuario> query, Dictionary<string, object> filters)
+        {
+            foreach (var filter in filters)
+            {
+                switch (filter.Key.ToLower())
+                {
+                    case "search":
+                        var searchTerm = filter.Value.ToString();
+                        if (!string.IsNullOrEmpty(searchTerm))
+                        {
+                            query = ApplyTextFilter(query, searchTerm,
+                                u => u.Nome,
+                                u => u.Email,
+                                u => u.Cpf);
+                        }
+                        break;
+
+                    case "perfil":
+                        query = ApplyEnumFilter(query, filters, filter.Key, u => u.Perfil);
+                        break;
+
+                    case "ativo":
+                        if (bool.TryParse(filter.Value.ToString(), out bool ativo))
+                        {
+                            query = query.Where(u => u.Ativo == ativo);
+                        }
+                        break;
+                }
+            }
+
+            return query;
+        }
 
         protected override async Task BeforeCreate(Usuario entity)
         {
