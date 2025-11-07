@@ -67,39 +67,180 @@ namespace AutoGestao.Controllers.Base
 
         protected virtual IQueryable<T> ApplyFilters(IQueryable<T> query, Dictionary<string, object> filters)
         {
-            var stringProperties = typeof(T).GetProperties()
-               .Where(p => p.PropertyType == typeof(string))
-               .ToList();
+            _logger?.LogInformation("🔍 ApplyFilters - Iniciando com {Count} filtros", filters?.Count ?? 0);
 
-            if (stringProperties.Count == 0)
+            if (filters == null || filters.Count == 0)
             {
+                _logger?.LogInformation("🔍 ApplyFilters - Nenhum filtro para aplicar");
                 return query;
             }
 
-            Expression<Func<T, bool>>? searchExpression = null;
-            var parameter = Expression.Parameter(typeof(T), typeof(T).Name);
+            var parameter = Expression.Parameter(typeof(T), "x");
+            Expression? combinedExpression = null;
 
             foreach (var filter in filters)
             {
-                foreach (var prop in stringProperties)
-                {
-                    var property = Expression.Property(parameter, prop.Name);
-                    var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
-                    var searchValue = Expression.Constant(filters, typeof(string));
-                    var nullCheck = Expression.NotEqual(property, Expression.Constant(null));
-                    var contains = Expression.Call(property, containsMethod, searchValue);
-                    var condition = Expression.AndAlso(nullCheck, contains);
+                var filterName = filter.Key;
+                var filterValue = filter.Value;
 
-                    searchExpression = searchExpression == null
-                        ? Expression.Lambda<Func<T, bool>>(condition, parameter)
-                        : Expression.Lambda<Func<T, bool>>(
-                            Expression.OrElse(searchExpression.Body, condition), parameter);
+                _logger?.LogInformation("🔍 ApplyFilters - Processando filtro: {FilterName} = {FilterValue}",
+                    filterName, filterValue);
+
+                // Ignorar filtros vazios
+                if (filterValue == null || string.IsNullOrWhiteSpace(filterValue.ToString()))
+                {
+                    _logger?.LogInformation("  ⏭️ Filtro vazio, pulando");
+                    continue;
+                }
+
+                // Encontrar a propriedade correspondente ao filtro
+                var property = typeof(T).GetProperty(filterName,
+                    System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.IgnoreCase);
+
+                if (property == null)
+                {
+                    _logger?.LogWarning("  ⚠️ Propriedade '{FilterName}' NÃO encontrada no tipo {TypeName}",
+                        filterName, typeof(T).Name);
+                    continue; // Propriedade não encontrada, pular
+                }
+
+                _logger?.LogInformation("  ✅ Propriedade encontrada: {PropertyName} ({PropertyType})",
+                    property.Name, property.PropertyType.Name);
+
+                var propertyAccess = Expression.Property(parameter, property);
+                Expression? filterExpression = null;
+
+                // Aplicar comparação baseada no tipo da propriedade
+                var propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+                if (propertyType == typeof(string))
+                {
+                    // String: usar Contains (case-insensitive)
+                    var nullCheck = Expression.NotEqual(propertyAccess, Expression.Constant(null, property.PropertyType));
+                    var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                    var propertyToLower = Expression.Call(propertyAccess, toLowerMethod);
+                    var valueToLower = filterValue.ToString().ToLower();
+                    var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
+                    var containsCall = Expression.Call(propertyToLower, containsMethod, Expression.Constant(valueToLower));
+                    filterExpression = Expression.AndAlso(nullCheck, containsCall);
+                }
+                else if (propertyType.IsEnum)
+                {
+                    // Enum: comparação exata
+                    try
+                    {
+                        var enumValue = Enum.Parse(propertyType, filterValue.ToString(), ignoreCase: true);
+                        var constantValue = Expression.Constant(enumValue, propertyType);
+
+                        // Se a propriedade for nullable, precisamos comparar o .Value
+                        if (property.PropertyType != propertyType)
+                        {
+                            var hasValueProperty = Expression.Property(propertyAccess, "HasValue");
+                            var valueProperty = Expression.Property(propertyAccess, "Value");
+                            var equality = Expression.Equal(valueProperty, constantValue);
+                            filterExpression = Expression.AndAlso(hasValueProperty, equality);
+                        }
+                        else
+                        {
+                            filterExpression = Expression.Equal(propertyAccess, constantValue);
+                        }
+                    }
+                    catch
+                    {
+                        continue; // Valor inválido para o enum, pular
+                    }
+                }
+                else if (propertyType == typeof(int) || propertyType == typeof(long))
+                {
+                    // Int/Long: comparação exata
+                    if (long.TryParse(filterValue.ToString(), out var numericValue))
+                    {
+                        var constantValue = Expression.Constant(Convert.ChangeType(numericValue, propertyType), propertyType);
+
+                        // Se a propriedade for nullable, precisamos comparar o .Value
+                        if (property.PropertyType != propertyType)
+                        {
+                            var hasValueProperty = Expression.Property(propertyAccess, "HasValue");
+                            var valueProperty = Expression.Property(propertyAccess, "Value");
+                            var equality = Expression.Equal(valueProperty, constantValue);
+                            filterExpression = Expression.AndAlso(hasValueProperty, equality);
+                        }
+                        else
+                        {
+                            filterExpression = Expression.Equal(propertyAccess, constantValue);
+                        }
+                    }
+                }
+                else if (propertyType == typeof(DateTime))
+                {
+                    // DateTime: comparação de data (ignora hora)
+                    if (DateTime.TryParse(filterValue.ToString(), out var dateValue))
+                    {
+                        var dateOnly = dateValue.Date;
+                        var nextDay = dateOnly.AddDays(1);
+                        var constantDateStart = Expression.Constant(dateOnly, typeof(DateTime));
+                        var constantDateEnd = Expression.Constant(nextDay, typeof(DateTime));
+
+                        // Se a propriedade for nullable, precisamos comparar o .Value
+                        Expression propertyToCompare = propertyAccess;
+                        if (property.PropertyType != propertyType)
+                        {
+                            var hasValueProperty = Expression.Property(propertyAccess, "HasValue");
+                            propertyToCompare = Expression.Property(propertyAccess, "Value");
+                            var greaterOrEqual = Expression.GreaterThanOrEqual(propertyToCompare, constantDateStart);
+                            var lessThan = Expression.LessThan(propertyToCompare, constantDateEnd);
+                            var dateRange = Expression.AndAlso(greaterOrEqual, lessThan);
+                            filterExpression = Expression.AndAlso(hasValueProperty, dateRange);
+                        }
+                        else
+                        {
+                            var greaterOrEqual = Expression.GreaterThanOrEqual(propertyToCompare, constantDateStart);
+                            var lessThan = Expression.LessThan(propertyToCompare, constantDateEnd);
+                            filterExpression = Expression.AndAlso(greaterOrEqual, lessThan);
+                        }
+                    }
+                }
+                else if (propertyType == typeof(bool))
+                {
+                    // Bool: comparação exata
+                    if (bool.TryParse(filterValue.ToString(), out var boolValue))
+                    {
+                        var constantValue = Expression.Constant(boolValue, typeof(bool));
+
+                        // Se a propriedade for nullable, precisamos comparar o .Value
+                        if (property.PropertyType != propertyType)
+                        {
+                            var hasValueProperty = Expression.Property(propertyAccess, "HasValue");
+                            var valueProperty = Expression.Property(propertyAccess, "Value");
+                            var equality = Expression.Equal(valueProperty, constantValue);
+                            filterExpression = Expression.AndAlso(hasValueProperty, equality);
+                        }
+                        else
+                        {
+                            filterExpression = Expression.Equal(propertyAccess, constantValue);
+                        }
+                    }
+                }
+
+                // Combinar com os filtros anteriores usando AND
+                if (filterExpression != null)
+                {
+                    combinedExpression = combinedExpression == null
+                        ? filterExpression
+                        : Expression.AndAlso(combinedExpression, filterExpression);
                 }
             }
 
-            return searchExpression != null
-                ? query.Where(searchExpression)
-                : query;
+            // Aplicar a expressão combinada
+            if (combinedExpression != null)
+            {
+                var lambda = Expression.Lambda<Func<T, bool>>(combinedExpression, parameter);
+                query = query.Where(lambda);
+            }
+
+            return query;
         }
 
         protected virtual IQueryable<T> ApplySort(IQueryable<T> query, string orderBy, string orderDirection)
@@ -364,7 +505,18 @@ namespace AutoGestao.Controllers.Base
                 filters["search"] = search;
             }
 
+            // 🔍 LOG: Filtros recebidos
+            _logger?.LogInformation("🔍 GetDataAjax - Filtros recebidos: {Filters}",
+                string.Join(", ", filters.Select(f => $"{f.Key}={f.Value}")));
+            _logger?.LogInformation("🔍 GetDataAjax - page={Page}, pageSize={PageSize}", page, pageSize);
+
+            var totalRecordsBeforeFilters = await query.CountAsync();
+            _logger?.LogInformation("🔍 GetDataAjax - Total de registros ANTES dos filtros: {Count}", totalRecordsBeforeFilters);
+
             query = ApplyFilters(query, filters);
+
+            var totalRecordsAfterFilters = await query.CountAsync();
+            _logger?.LogInformation("🔍 GetDataAjax - Total de registros APÓS filtros: {Count}", totalRecordsAfterFilters);
 
             // Aplicar ordenação
             if (!string.IsNullOrEmpty(orderBy))
@@ -401,7 +553,8 @@ namespace AutoGestao.Controllers.Base
             // Atualizar valores dos filtros
             UpdateFilterValues(gridConfig.Filters, filters);
 
-            return PartialView("_StandardGridContent", gridConfig);
+            // Retornar apenas a parte dinâmica da grid (sem header)
+            return PartialView("_GridContentOnly", gridConfig);
         }
 
         /// <summary>

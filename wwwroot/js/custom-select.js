@@ -30,17 +30,52 @@ function parseIconText(text) {
 }
 
 function initializeCustomSelects() {
+    console.log('🔍 initializeCustomSelects() chamado');
+
+    // 🔧 FIX: Primeiro, limpar TODOS os custom-select-wrappers existentes
+    // e restaurar os selects originais
+    const existingWrappers = document.querySelectorAll('.custom-select-wrapper');
+    console.log('🧹 Limpando', existingWrappers.length, 'custom-select-wrappers existentes');
+
+    existingWrappers.forEach(wrapper => {
+        // Encontrar o select original que está logo após o wrapper
+        const originalSelect = wrapper.nextElementSibling;
+        if (originalSelect && originalSelect.tagName === 'SELECT') {
+            // Restaurar o select original
+            const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            if (hiddenInput) {
+                originalSelect.name = hiddenInput.name;
+                originalSelect.value = hiddenInput.value;
+            }
+            originalSelect.style.display = '';
+            originalSelect.disabled = false;
+            originalSelect.removeAttribute('data-customized');
+        }
+        // Remover o wrapper
+        wrapper.remove();
+    });
+
     // Selecionar todos os selects que devem ser customizados
     const enumSelects = document.querySelectorAll('select.enum-select');
+    console.log('🔍 Encontrados', enumSelects.length, 'selects com classe enum-select');
 
-    enumSelects.forEach(select => {
+    enumSelects.forEach((select, index) => {
+        console.log(`🔍 Processando select ${index + 1}:`, select.name, 'customized:', select.dataset.customized);
         convertToCustomSelect(select);
     });
+
+    console.log('✅ initializeCustomSelects() concluído');
 }
 
+// Expor função globalmente para permitir reinicialização após AJAX
+window.initializeCustomSelects = initializeCustomSelects;
+
 function convertToCustomSelect(selectElement) {
+    console.log(`  🔧 convertToCustomSelect() - name: ${selectElement.name}, customized: ${selectElement.dataset.customized}`);
+
     // Verificar se já foi convertido
     if (selectElement.dataset.customized === 'true') {
+        console.log(`  ⏭️ Select ${selectElement.name} já foi customizado, pulando...`);
         return;
     }
 
@@ -50,6 +85,8 @@ function convertToCustomSelect(selectElement) {
     const isRequired = selectElement.hasAttribute('required');
     const isDisabled = selectElement.disabled;
     const currentValue = selectElement.value;
+
+    console.log(`  📋 Select info - id: ${selectId}, name: ${selectName}, value: ${currentValue}, options: ${selectElement.options.length}`);
 
     // Obter as opções
     const options = Array.from(selectElement.options).map(option => {
@@ -80,7 +117,13 @@ function convertToCustomSelect(selectElement) {
     // Input hidden para manter compatibilidade com formulários
     const hiddenInput = document.createElement('input');
     hiddenInput.type = 'hidden';
-    hiddenInput.id = selectId;
+    // Só define ID se o select original tiver um ID válido
+    if (selectId && selectId.trim() !== '') {
+        hiddenInput.id = selectId;
+    } else {
+        // Gerar um ID único baseado no name para evitar IDs duplicados vazios
+        hiddenInput.id = `hidden-${selectName}-${Math.random().toString(36).substr(2, 9)}`;
+    }
     hiddenInput.name = selectName;
     hiddenInput.value = currentValue;
     if (isRequired) {
@@ -160,9 +203,19 @@ function convertToCustomSelect(selectElement) {
     wrapper.appendChild(dropdown);
 
     // Substituir select original
+    console.log(`  📍 ANTES de inserir wrapper - parentNode:`, selectElement.parentNode?.className);
+    console.log(`  📍 ANTES de inserir wrapper - parentNode offsetHeight:`, selectElement.parentNode?.offsetHeight);
+
     selectElement.style.display = 'none';
     selectElement.dataset.customized = 'true';
+    // 🔧 FIX: Desabilitar select original para não ser incluído no FormData
+    selectElement.disabled = true;
+    // Remover o atributo name para garantir que não seja enviado
+    selectElement.removeAttribute('name');
     selectElement.parentNode.insertBefore(wrapper, selectElement);
+
+    console.log(`  ✅ Select ${selectName} convertido com sucesso! Wrapper inserido no DOM.`);
+    console.log(`  📍 DEPOIS de inserir wrapper - parentNode offsetHeight:`, selectElement.parentNode?.offsetHeight);
 
     // Event listeners
     if (!isDisabled) {
@@ -299,8 +352,9 @@ function selectOption(wrapper, option, optionElement) {
 
     // IMPORTANTE: Também disparar no select original para compatibilidade com comportamentos de tela
     const selectId = wrapper.dataset.selectId;
-    const originalSelect = document.querySelector(`select[id="${selectId}"]`);
-    if (originalSelect) {
+    // Buscar o select original que está logo após o wrapper (foi inserido antes dele)
+    const originalSelect = wrapper.nextElementSibling;
+    if (originalSelect && originalSelect.tagName === 'SELECT' && originalSelect.dataset.customized === 'true') {
         originalSelect.value = option.value;
         const selectChangeEvent = new Event('change', { bubbles: true });
         originalSelect.dispatchEvent(selectChangeEvent);

@@ -33,9 +33,11 @@ class StandardGrid {
     // ===================================================================
 
     showLoading(show = true) {
+        console.log(`🔄 showLoading(${show}) chamado`);
         const overlay = document.querySelector(this.options.loadingSelector);
 
         if (!overlay) {
+            console.log('⚠️ Loading overlay não encontrado');
             // Loading overlay é opcional - ignorar silenciosamente se não existir
             return;
         }
@@ -46,6 +48,7 @@ class StandardGrid {
         }
 
         if (show) {
+            console.log('👁️ Mostrando loading overlay');
             this.isLoading = true;
             overlay.classList.remove('d-none');
             overlay.style.display = 'flex';
@@ -59,11 +62,12 @@ class StandardGrid {
 
             // Timeout de segurança
             this.loadingTimeout = setTimeout(() => {
-                console.warn('Loading forçado a esconder após timeout');
+                console.warn('⏰ Loading forçado a esconder após timeout');
                 this.showLoading(false);
             }, 15000);
 
         } else {
+            console.log('🙈 Escondendo loading overlay');
             this.isLoading = false;
             overlay.style.opacity = '0';
 
@@ -140,45 +144,13 @@ class StandardGrid {
         // Preencher filtros com valores da URL
         this.populateFiltersFromUrl(form);
 
-        // 🔧 FIX: Interceptar submit do formulário para fazer AJAX ao invés de reload
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.aplicarFiltros(1);
-        });
+        // 🔧 FIX: NÃO adicionar listener aqui - será adicionado em setupEventListeners()
+        // para evitar duplicação após AJAX
 
-        // Filtros de texto com debounce
-        const textInputs = form.querySelectorAll('input[type="text"], input[type="search"]');
-        textInputs.forEach(input => {
-            input.addEventListener('input', (e) => {
-                this.handleTextFilterWithDebounce(e.target);
-            });
-        });
+        // REMOVIDO: Event listeners automáticos de input/change que executavam filtro durante digitação
+        // Agora o filtro só é aplicado ao clicar no botão "Buscar"
 
-        // Filtros de seleção (aplicam imediatamente)
-        const selectInputs = form.querySelectorAll('select');
-        selectInputs.forEach(select => {
-            select.addEventListener('change', () => {
-                this.aplicarFiltros(1);
-            });
-        });
-
-        // Filtros numéricos com debounce
-        const numberInputs = form.querySelectorAll('input[type="number"]');
-        numberInputs.forEach(input => {
-            input.addEventListener('input', (e) => {
-                this.handleTextFilterWithDebounce(e.target);
-            });
-        });
-
-        // Filtros de data (aplicam imediatamente)
-        const dateInputs = form.querySelectorAll('input[type="date"]');
-        dateInputs.forEach(input => {
-            input.addEventListener('change', () => {
-                this.aplicarFiltros(1);
-            });
-        });
-
-        // Seletor de tamanho de página
+        // Seletor de tamanho de página - mantido pois faz sentido aplicar imediatamente
         const pageSizeSelector = document.querySelector(this.options.pageSizeSelector);
         if (pageSizeSelector) {
             pageSizeSelector.addEventListener('change', () => {
@@ -187,22 +159,8 @@ class StandardGrid {
         }
     }
 
-    handleTextFilterWithDebounce(input) {
-        const filterId = input.name || input.id;
-
-        // Limpar timeout anterior para este filtro específico
-        if (this.searchTimeouts.has(filterId)) {
-            clearTimeout(this.searchTimeouts.get(filterId));
-        }
-
-        // Configurar novo timeout
-        const timeout = setTimeout(() => {
-            this.aplicarFiltros(1);
-            this.searchTimeouts.delete(filterId);
-        }, this.options.searchDebounceTime);
-
-        this.searchTimeouts.set(filterId, timeout);
-    }
+    // REMOVIDO: handleTextFilterWithDebounce - não é mais necessário
+    // pois o filtro só é aplicado ao clicar no botão "Buscar"
 
     populateFiltersFromUrl(form) {
         // Obter parâmetros da URL
@@ -233,15 +191,20 @@ class StandardGrid {
     }
 
     aplicarFiltros(page = 1) {
+        console.log('🚀 aplicarFiltros() chamado, page:', page);
+        console.trace('🔍 Stack trace para ver quem chamou aplicarFiltros');
+
         if (this.isLoading) {
-            console.log('Já carregando, ignorando nova requisição');
+            console.log('⏸️ Já carregando, ignorando nova requisição');
             return;
         }
 
+        console.log('▶️ Iniciando aplicação de filtros...');
         this.showLoading(true);
 
         const form = document.querySelector(this.options.filtersFormSelector);
         if (!form) {
+            console.error('Formulário de filtros não encontrado');
             this.showLoading(false);
             return;
         }
@@ -254,24 +217,39 @@ class StandardGrid {
         params.append('pageSize', pageSize);
 
         // Adicionar filtros
+        console.log('📋 Filtros do formulário:');
         for (let [key, value] of formData.entries()) {
+            console.log(`  - ${key}: "${value}"`);
             if (value && value.trim() !== '') {
                 params.append(key, value);
             }
         }
 
+        console.log('📤 Parâmetros finais da requisição:', params.toString());
+
         // Determinar URL baseado na página atual
         const ajaxUrl = this.getAjaxUrl();
         const gridContainer = document.querySelector(this.options.gridContainerSelector);
 
-        // Se não houver URL AJAX ou gridContainer, fazer reload tradicional
-        if (!ajaxUrl || !gridContainer) {
-            this.forceHideLoading();
-            window.location.href = `${window.location.pathname}?${params.toString()}`;
+        console.log('🌐 URL AJAX:', ajaxUrl);
+        console.log('📦 Grid Container:', gridContainer ? 'Encontrado' : 'NÃO ENCONTRADO');
+
+        // Validar se AJAX está configurado corretamente
+        if (!ajaxUrl) {
+            console.error('URL AJAX não foi identificada. Verifique se o controller está configurado corretamente.');
+            this.showLoading(false);
+            this.showErrorMessage('Erro: não foi possível determinar a URL para filtrar os dados.');
             return;
         }
 
-        // Tentar carregar via AJAX
+        if (!gridContainer) {
+            console.error('Grid container não encontrado:', this.options.gridContainerSelector);
+            this.showLoading(false);
+            this.showErrorMessage('Erro: container da grid não foi encontrado.');
+            return;
+        }
+
+        // Carregar via AJAX
         fetch(`${ajaxUrl}?${params.toString()}`)
             .then(response => {
                 if (!response.ok) {
@@ -280,20 +258,172 @@ class StandardGrid {
                 return response.text();
             })
             .then(html => {
+                console.log('📦 HTML recebido do servidor, tamanho:', html.length);
+                console.log('📦 Primeiros 500 caracteres:', html.substring(0, 500));
+
+                // Verificar se gridContainer existe e está visível
+                console.log('📍 gridContainer:', gridContainer);
+                console.log('📍 gridContainer display:', window.getComputedStyle(gridContainer).display);
+                console.log('📍 gridContainer visibility:', window.getComputedStyle(gridContainer).visibility);
+                console.log('📍 gridContainer offsetHeight:', gridContainer.offsetHeight);
+                console.log('📍 gridContainer offsetWidth:', gridContainer.offsetWidth);
+
                 gridContainer.innerHTML = html;
+                console.log('✅ HTML inserido no gridContainer');
+
+                // Verificar após inserção
+                console.log('📍 Após inserção - offsetHeight:', gridContainer.offsetHeight);
+                console.log('📍 Após inserção - innerHTML length:', gridContainer.innerHTML.length);
+                console.log('📍 Após inserção - childNodes:', gridContainer.childNodes.length);
+
+                // Verificar se há elementos dentro do gridContainer
+                const searchFilters = gridContainer.querySelector('.search-filters');
+                const dataGrid = gridContainer.querySelector('.data-grid');
+                const table = gridContainer.querySelector('table');
+                const tbody = gridContainer.querySelector('tbody');
+
+                console.log('📍 Elementos encontrados:');
+                console.log('  - .search-filters:', searchFilters ? 'SIM' : 'NÃO');
+                console.log('  - .data-grid:', dataGrid ? 'SIM' : 'NÃO');
+                console.log('  - table:', table ? 'SIM' : 'NÃO');
+                console.log('  - tbody:', tbody ? 'SIM' : 'NÃO');
+
+                if (tbody) {
+                    console.log('  - tbody rows:', tbody.querySelectorAll('tr').length);
+                }
+
+                // Forçar reflow para garantir renderização
+                console.log('🔄 Forçando reflow...');
+                gridContainer.style.display = 'none';
+                gridContainer.offsetHeight; // trigger reflow
+                gridContainer.style.display = '';
+                console.log('✅ Reflow forçado, nova altura:', gridContainer.offsetHeight);
+
+                // Log estado ANTES de reinicializar eventos
+                console.log('📸 Estado ANTES de reinitializeEvents():');
+                console.log('  - gridContainer visível:', gridContainer.offsetHeight > 0);
+                console.log('  - searchFilters visível:', searchFilters?.offsetHeight > 0);
+                console.log('  - dataGrid visível:', dataGrid?.offsetHeight > 0);
+                console.log('  - table visível:', table?.offsetHeight > 0);
+
                 this.updateUrl(params);
                 this.reinitializeEvents();
+
+                // 🔧 FIX: Adicionar classe 'loaded' ao data-grid para torná-lo visível
+                const dataGridElements = gridContainer.querySelectorAll('.data-grid');
+                dataGridElements.forEach(grid => {
+                    grid.classList.add('loaded');
+                });
+                console.log('✅ Classe "loaded" adicionada aos data-grids:', dataGridElements.length);
+
+                // Log estado DEPOIS de reinicializar eventos
+                console.log('📸 Estado DEPOIS de reinitializeEvents():');
+                console.log('  - gridContainer visível:', gridContainer.offsetHeight > 0);
+                console.log('  - gridContainer display:', window.getComputedStyle(gridContainer).display);
+                console.log('  - searchFilters visível:', searchFilters?.offsetHeight > 0);
+                console.log('  - dataGrid visível:', dataGrid?.offsetHeight > 0);
+                console.log('  - table visível:', table?.offsetHeight > 0);
+
+                // Verificar se form ainda existe
+                const formAfter = document.querySelector(this.options.filtersFormSelector);
+                console.log('  - Formulário ainda existe:', !!formAfter);
+                if (formAfter) {
+                    console.log('  - Formulário parentNode:', formAfter.parentNode?.className);
+                }
+
+                // 🔍 VERIFICAÇÃO DETALHADA DE CSS
+                console.log('🎨 CSS Computado dos elementos principais:');
+
+                // GridContainer
+                const gridStyle = window.getComputedStyle(gridContainer);
+                console.log('  gridContainer:', {
+                    display: gridStyle.display,
+                    visibility: gridStyle.visibility,
+                    opacity: gridStyle.opacity,
+                    position: gridStyle.position,
+                    height: gridStyle.height,
+                    overflow: gridStyle.overflow,
+                    zIndex: gridStyle.zIndex
+                });
+
+                // SearchFilters
+                if (searchFilters) {
+                    const filtersStyle = window.getComputedStyle(searchFilters);
+                    console.log('  searchFilters:', {
+                        display: filtersStyle.display,
+                        visibility: filtersStyle.visibility,
+                        opacity: filtersStyle.opacity,
+                        height: filtersStyle.height,
+                        offsetHeight: searchFilters.offsetHeight
+                    });
+                }
+
+                // DataGrid
+                if (dataGrid) {
+                    const dataGridStyle = window.getComputedStyle(dataGrid);
+                    console.log('  dataGrid:', {
+                        display: dataGridStyle.display,
+                        visibility: dataGridStyle.visibility,
+                        opacity: dataGridStyle.opacity,
+                        height: dataGridStyle.height,
+                        offsetHeight: dataGrid.offsetHeight
+                    });
+                }
+
+                // Table
+                if (table) {
+                    const tableStyle = window.getComputedStyle(table);
+                    console.log('  table:', {
+                        display: tableStyle.display,
+                        visibility: tableStyle.visibility,
+                        opacity: tableStyle.opacity,
+                        height: tableStyle.height,
+                        offsetHeight: table.offsetHeight
+                    });
+                }
+
+                // Verificar hierarquia de pais
+                console.log('🏗️ Hierarquia de elementos pais:');
+                let parent = gridContainer.parentElement;
+                let level = 1;
+                while (parent && level <= 5) {
+                    const parentStyle = window.getComputedStyle(parent);
+                    console.log(`  Nível ${level} (${parent.tagName}.${parent.className}):`, {
+                        display: parentStyle.display,
+                        visibility: parentStyle.visibility,
+                        opacity: parentStyle.opacity,
+                        height: parentStyle.height,
+                        overflow: parentStyle.overflow,
+                        offsetHeight: parent.offsetHeight
+                    });
+                    parent = parent.parentElement;
+                    level++;
+                }
+
+                console.log('✅ Eventos reinicializados');
             })
             .catch(error => {
-                // Se AJAX falhar, fazer reload tradicional
-                console.log('AJAX falhou, usando reload tradicional');
-                window.location.href = `${window.location.pathname}?${params.toString()}`;
+                console.error('Erro ao aplicar filtros via AJAX:', error);
+                this.showErrorMessage('Erro ao aplicar filtros. Por favor, tente novamente.');
             })
             .finally(() => {
+                console.log('🔚 Finally executado, escondendo loading...');
                 setTimeout(() => {
+                    console.log('🔚 Chamando showLoading(false) após 300ms...');
                     this.showLoading(false);
+                    console.log('✅ Loading escondido');
                 }, 300);
             });
+    }
+
+    showErrorMessage(message) {
+        // Tentar usar o sistema de toastr se disponível
+        if (typeof toastr !== 'undefined') {
+            toastr.error(message);
+        } else {
+            // Fallback para alert
+            alert(message);
+        }
     }
 
     getAjaxUrl() {
@@ -374,6 +504,48 @@ class StandardGrid {
     }
 
     reinitializeEvents() {
+        console.log('🔄 Reinicializando eventos da grid...');
+
+        // Primeiro: Reinicializar event listeners dos filtros
+        const form = document.querySelector(this.options.filtersFormSelector);
+        if (form) {
+            console.log('📝 Configurando submit do formulário de filtros...');
+
+            // 🔧 FIX: Remover listener antigo se existir (usando referência salva)
+            if (this.handleFormSubmit) {
+                form.removeEventListener('submit', this.handleFormSubmit);
+            }
+
+            // Criar nova função e salvar referência
+            this.handleFormSubmit = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // 🔧 FIX: Prevenir múltiplas chamadas
+                if (this.isLoading) {
+                    console.log('⏸️ Já processando submit, ignorando...');
+                    return;
+                }
+
+                console.log('📝 Submit do formulário disparado');
+                this.aplicarFiltros(1);
+            };
+
+            // Adicionar novo listener
+            form.addEventListener('submit', this.handleFormSubmit);
+        }
+
+        // Segundo: Reinicializar custom-selects (combos com ícones)
+        if (typeof initializeCustomSelects === 'function') {
+            console.log('🎨 Reinicializando custom-selects...');
+            initializeCustomSelects();
+        } else if (typeof window.initializeCustomSelects === 'function') {
+            console.log('🎨 Reinicializando custom-selects (via window)...');
+            window.initializeCustomSelects();
+        } else {
+            console.warn('⚠️ Função initializeCustomSelects não encontrada');
+        }
+
         // Duplo clique nas linhas
         const rows = document.querySelectorAll('.grid-row');
         rows.forEach(row => {
@@ -400,6 +572,8 @@ class StandardGrid {
 
         // Disparar evento customizado
         document.dispatchEvent(new CustomEvent('gridUpdated'));
+
+        console.log('✅ Eventos reinicializados com sucesso');
     }
 
     handleRowDoubleClick(e) {
@@ -569,8 +743,8 @@ window.confirmarExclusao = function (id) {
                             title: 'Exclusão Realizada!',
                             buttonText: 'OK'
                         }).then(() => {
-                            // Recarregar grid após fechar modal
-                            location.reload();
+                            // Recarregar apenas a grid (sem reload da página)
+                            window.aplicarFiltros(1);
                         });
                     } else {
                         showError('Não foi possível excluir o registro. ' + (result.mensagem || ''), {
@@ -1338,7 +1512,7 @@ class DropdownPortalSystem {
                                         if (window.showSuccess) {
                                             await window.showSuccess(result.mensagem || result.message || 'Operação realizada!');
                                         }
-                                        window.location.reload();
+                                        window.aplicarFiltros(1);
                                     } else {
                                         if (window.showError) {
                                             window.showError(result.mensagem || result.message || 'Erro na operação');
@@ -1557,7 +1731,7 @@ class DropdownPortalSystem {
                                 } else {
                                     alert(message);
                                 }
-                                window.location.reload();
+                                window.aplicarFiltros(1);
                             }
                         } else {
                             const errorMessage = result.mensagem || result.message || 'Erro ao executar operação.';
@@ -1657,8 +1831,8 @@ window.confirmarExclusao = function (id) {
                             title: 'Exclusão Realizada!',
                             buttonText: 'OK'
                         }).then(() => {
-                            // Recarregar grid após fechar modal
-                            location.reload();
+                            // Recarregar apenas a grid (sem reload da página)
+                            window.aplicarFiltros(1);
                         });
                     } else {
                         showError('Não foi possível excluir o registro. ' + (result.mensagem || ''), {

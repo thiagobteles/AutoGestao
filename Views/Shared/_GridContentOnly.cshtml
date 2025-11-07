@@ -3,30 +3,10 @@
 @using AutoGestao.Models
 @using AutoGestao.Models.Grid
 
-<!-- Page Header -->
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="h2 mb-1">@Model.Title</h1>
-            <p class="text-muted mb-0">@Model.SubTitle</p>
-        </div>
-        <div class="d-flex gap-2">
-            @foreach (var action in Model.HeaderActions)
-            {
-                <a href="@action.Url" class="@action.CssClass">
-                    <i class="@action.Icon"></i> @action.DisplayName
-                </a>
-            }
-        </div>
-    </div>
-</div>
-
-<!-- Grid Container - engloba filtros + grid para atualização AJAX -->
-<div id="gridContainer">
-    <!-- Search Filters -->
-    @if (Model.Filters?.Any() == true)
-    {
-        <div class="search-filters">
+<!-- Search Filters -->
+@if (Model.Filters?.Any() == true)
+{
+    <div class="search-filters">
         <form method="get" id="filtrosForm">
             <div class="row g-1">
                 @foreach (var filter in Model.Filters)
@@ -99,8 +79,8 @@
     </div>
 }
 
-    <!-- Data Grid -->
-    <div class="data-grid">
+<!-- Data Grid -->
+<div class="data-grid">
     <div class="table-responsive-enhanced" id="tableContainer">
         <table class="base-grid-table">
             <thead>
@@ -112,7 +92,7 @@
                             {
                                 <div class="sortable-header" data-sortable="@column.Name" role="button" tabindex="0">
                                     <span>@column.DisplayName</span>
-                                    <i class="sort-icon fas @(Model.OrderBy == column.Name 
+                                    <i class="sort-icon fas @(Model.OrderBy == column.Name
                                                 ? (Model.OrderDirection == "desc" ? "fa-sort-down" : "fa-sort-up")
                                                 : "fa-sort")"
                                         data-sort="@column.Name"></i>
@@ -147,7 +127,7 @@
                                         {
                                             Item = item,
                                             Column = column,
-                                            Actions = column.Type == EnumGridColumnType.Actions 
+                                            Actions = column.Type == EnumGridColumnType.Actions
                                                 ? Model.RowActions?.Where(a => a.ShowCondition == null || a.ShowCondition(item)).ToList()
                                                 : null
                                         })
@@ -200,122 +180,3 @@
         </div>
     </div>
 </div>
-</div><!-- Fecha gridContainer -->
-
-
-<style>
-    :root {
-        --primary-color: #3b82f6;
-        --success-color: #10b981;
-        --secondary-color: #6b7280;
-        --light-bg: #f8fafc;
-        --border-color: #e5e7eb;
-    }
-
-    .btn-search {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 0.2rem 1rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        text-align: center;
-        width: 100%;
-    }
-
-    .btn-new {
-        background: var(--success-color);
-        color: white;
-        border: none;
-        padding: 0.2rem 1rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .data-grid {
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    .base-grid-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-        .base-grid-table th {
-            background: var(--light-bg);
-            padding: 1rem;
-            border-bottom: 2px solid var(--border-color);
-            font-weight: 600;
-            color: var(--secondary-color);
-        }
-
-        .base-grid-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-    .sortable-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        user-select: none;
-    }
-
-        .sortable-header:hover {
-            color: var(--primary-color);
-        }
-
-    .sort-icon {
-        opacity: 0.5;
-        font-size: 0.8rem;
-    }
-
-        .sortable-header:hover .sort-icon,
-        .sort-icon[data-sort].active {
-            opacity: 1;
-            color: var(--primary-color);
-        }
-
-    .grid-controls {
-        padding: 1rem 1.5rem;
-        background: var(--light-bg);
-        border-top: 1px solid var(--border-color);
-    }
-
-    .pagination-container {
-        padding: 1rem 1.5rem;
-        background: var(--light-bg);
-        border-top: 1px solid var(--border-color);
-    }
-
-    .pagination {
-        margin: 0;
-        justify-content: center;
-    }
-
-    .page-link {
-        border: 1px solid var(--border-color);
-        color: var(--secondary-color);
-        padding: 0.5rem 0.75rem;
-        background: white;
-        border: none;
-    }
-
-    .page-item.active .page-link {
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .page-link:hover {
-        background: var(--primary-color);
-        color: white;
-    }
-</style>
