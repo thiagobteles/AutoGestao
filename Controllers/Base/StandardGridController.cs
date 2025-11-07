@@ -658,20 +658,20 @@ namespace AutoGestao.Controllers.Base
             var query = GetBaseQuery();
             var entityType = typeof(T);
 
-            var navigationProperties = entityType.GetProperties()
-                .Where(p => p.PropertyType.IsClass &&
-                            p.PropertyType != typeof(string) &&
-                            !p.PropertyType.IsArray &&
-                            p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
+            // 🔧 FIX: Buscar propriedades com FormFieldAttribute do tipo Reference (são os IDs)
+            var referenceIdProperties = entityType.GetProperties()
+                .Where(p => p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
 
-            foreach (var navProp in navigationProperties)
+            foreach (var idProp in referenceIdProperties)
             {
-                var propertyName = navProp.Name.StartsWith("Id") ? navProp.Name.Substring(2) : navProp.Name;
-                var property = entityType.GetProperty(propertyName);
+                // Obter nome da navigation property (ex: IdVeiculoMarca -> VeiculoMarca)
+                var navigationPropertyName = idProp.Name.StartsWith("Id") ? idProp.Name.Substring(2) : idProp.Name;
+                var navigationProperty = entityType.GetProperty(navigationPropertyName);
 
-                if (property != null)
+                if (navigationProperty != null && navigationProperty.PropertyType.IsClass && navigationProperty.PropertyType != typeof(string))
                 {
-                    query = query.Include(propertyName);
+                    _logger?.LogInformation("🔗 Fazendo Include de: {PropertyName}", navigationPropertyName);
+                    query = query.Include(navigationPropertyName);
                 }
             }
 
@@ -856,20 +856,21 @@ namespace AutoGestao.Controllers.Base
             var query = GetBaseQuery();
 
             var entityType = typeof(T);
-            var navigationProperties = entityType.GetProperties()
-                .Where(p => p.PropertyType.IsClass &&
-                            p.PropertyType != typeof(string) &&
-                            !p.PropertyType.IsArray &&
-                            p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
 
-            foreach (var navProp in navigationProperties)
+            // 🔧 FIX: Buscar propriedades com FormFieldAttribute do tipo Reference (são os IDs)
+            var referenceIdProperties = entityType.GetProperties()
+                .Where(p => p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
+
+            foreach (var idProp in referenceIdProperties)
             {
-                var propertyName = navProp.Name.StartsWith("Id") ? navProp.Name.Substring(2) : navProp.Name;
-                var property = entityType.GetProperty(propertyName);
+                // Obter nome da navigation property (ex: IdVeiculoMarca -> VeiculoMarca)
+                var navigationPropertyName = idProp.Name.StartsWith("Id") ? idProp.Name.Substring(2) : idProp.Name;
+                var navigationProperty = entityType.GetProperty(navigationPropertyName);
 
-                if (property != null)
+                if (navigationProperty != null && navigationProperty.PropertyType.IsClass && navigationProperty.PropertyType != typeof(string))
                 {
-                    query = query.Include(propertyName);
+                    _logger?.LogInformation("🔗 Fazendo Include de: {PropertyName}", navigationPropertyName);
+                    query = query.Include(navigationPropertyName);
                 }
             }
 

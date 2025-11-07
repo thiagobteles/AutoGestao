@@ -10,6 +10,7 @@ namespace AutoGestao.Entidades.Fiscal
     [FormConfig(Title = "Nota Fiscal", Subtitle = "Gerencie as notas fiscais eletrônicas", Icon = "fas fa-file-invoice")]
     public class NotaFiscal : BaseEntidade
     {
+        [ReferenceText]
         [GridField("Número", Order = 10, Width = "100px")]
         [FormField(Name = "Número da NF", Order = 10, Section = "Dados da Nota", Icon = "fas fa-hashtag", Type = EnumFieldType.Number, Required = true)]
         [Required]
@@ -24,6 +25,7 @@ namespace AutoGestao.Entidades.Fiscal
         [MaxLength(44)]
         public string? ChaveAcesso { get; set; }
 
+        [ReferenceSubtitle(Order = 0, Prefix = "Modelo: ")]
         [GridField("Modelo", Order = 25, Width = "100px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Modelo", Order = 25, Section = "Dados da Nota", Icon = "fas fa-file-alt", Type = EnumFieldType.Select, Required = true)]
         [Required]

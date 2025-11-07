@@ -19,13 +19,6 @@ namespace AutoGestao.Controllers
             [
                 new()
                 {
-                    Name = "search",
-                    DisplayName = "Busca Geral",
-                    Type = EnumGridFilterType.Text,
-                    Placeholder = "Buscar alíquotas..."
-                },
-                new()
-                {
                     Name = "tipoimposto",
                     DisplayName = "Tipo de Imposto",
                     Type = EnumGridFilterType.Select,

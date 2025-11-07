@@ -18,6 +18,7 @@ namespace AutoGestao.Entidades.Fiscal
             Template = @"<div class=""vehicle-info""><div class=""fw-semibold"">{0}</div><div class=""text-muted small"">{1}</div></div>")]
         public string EmpresaClienteNome => $"{EmpresaCliente?.RazaoSocial ?? "N/A"} - {EmpresaCliente?.CNPJ ?? "N/A"}";
 
+        [ReferenceText]
         [GridField("Tipo", Order = 15, Width = "180px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Tipo de Obrigação", Order = 15, Section = "Dados Principais", Icon = "fas fa-file-alt", Type = EnumFieldType.Select, Required = true)]
         [Required]
@@ -28,16 +29,19 @@ namespace AutoGestao.Entidades.Fiscal
         [Required]
         public EnumPeriodicidade Periodicidade { get; set; }
 
+        [ReferenceSubtitle(Order = 0, Prefix = "Competência: ", Format = "MM/yyyy")]
         [GridField("Competência", Order = 25, Width = "120px", Format = "MM/yyyy")]
         [FormField(Name = "Mês/Ano de Competência", Order = 25, Section = "Período", Icon = "fas fa-calendar", Type = EnumFieldType.Date, Required = true)]
         [Required]
         public DateTime Competencia { get; set; }
 
+        [ReferenceSubtitle(Order = 1, Prefix = "Vencimento: ", Format = "dd/MM/yyyy")]
         [GridField("Vencimento", Order = 30, Width = "120px", Format = "dd/MM/yyyy")]
         [FormField(Name = "Data de Vencimento", Order = 30, Section = "Período", Icon = "fas fa-calendar-times", Type = EnumFieldType.Date, Required = true)]
         [Required]
         public DateTime DataVencimento { get; set; }
 
+        [ReferenceSubtitle(Order = 2, Prefix = "Status: ")]
         [GridField("Status", Order = 35, Width = "130px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Status", Order = 35, Section = "Situação", Icon = "fas fa-info-circle", Type = EnumFieldType.Select, Required = true)]
         [Required]

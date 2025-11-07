@@ -7,10 +7,12 @@ namespace AutoGestao.Entidades
     [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users")]
     public class Usuario : BaseEntidade
     {
+        [ReferenceText]
         [GridMain("Nome")]
         [FormField(Name = "Nome Completo", Order = 1, Section = "Dados Básicos", Icon = "fas fa-user", Type = EnumFieldType.Text, Required = true, GridColumns = 2)]
         public string Nome { get; set; } = "";
 
+        [ReferenceSubtitle(Order = 1, Prefix = "Email: ")]
         [GridContact("E-mail/Login")]
         [FormField(Name = "Email/Login", Order = 2, Section = "Dados Básicos", Icon = "fas fa-envelope", Type = EnumFieldType.Email, Required = true)]
         public string Email { get; set; } = "";
@@ -19,6 +21,7 @@ namespace AutoGestao.Entidades
         [FormField(Name = "CPF", Order = 3, Section = "Dados Básicos", Icon = "fas fa-fingerprint", Type = EnumFieldType.Cpf)]
         public string? Cpf { get; set; }
 
+        [ReferenceSubtitle(Order = 0, Prefix = "Tel: ")]
         [GridField("Telefone", IsSubtitle = true, SubtitleOrder = 2, Order = 60)]
         [FormField(Name = "Telefone", Order = 4, Section = "Dados Básicos", Icon = "fas fa-phone", Type = EnumFieldType.Telefone)]
         public string? Telefone { get; set; }

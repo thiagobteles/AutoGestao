@@ -40,14 +40,6 @@ namespace AutoGestao.Controllers
                     Type = EnumGridFilterType.Select,
                     Placeholder = "Todos os tipos...",
                     Options = EnumExtension.GetSelectListItems<Enumerador.Fiscal.EnumTipoNotaFiscal>(true)
-                },
-                new()
-                {
-                    Name = "modelo",
-                    DisplayName = "Modelo",
-                    Type = EnumGridFilterType.Select,
-                    Placeholder = "Todos os modelos...",
-                    Options = EnumExtension.GetSelectListItems<Enumerador.Fiscal.EnumModeloNotaFiscal>(true)
                 }
             ];
 
