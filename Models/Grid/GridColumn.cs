@@ -19,5 +19,7 @@ namespace AutoGestao.Models.Grid
         public Func<object, string>? CustomRender { get; set; }
         public int Order { get; set; }
         public string Template { get; set; }
+        public string[] NavigationPaths { get; set; }
+        public bool IsHtmlContent { get; set; }
     }
 }

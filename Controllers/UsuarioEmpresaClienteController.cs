@@ -9,6 +9,7 @@ using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Controllers
 {
@@ -86,7 +87,9 @@ namespace AutoGestao.Controllers
         protected override IQueryable<UsuarioEmpresaCliente> GetBaseQuery()
         {
             // Sempre incluir as navigation properties para exibição na grid
-            return base.GetBaseQuery();
+            return base.GetBaseQuery()
+                .Include(ue => ue.EmpresaCliente)
+                .Include(ue => ue.Usuario);
         }
     }
 }

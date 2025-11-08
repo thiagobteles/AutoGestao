@@ -75,16 +75,48 @@ namespace AutoGestao.Controllers.Base
 
                 var query = asQueryableMethod.Invoke(null, [dbSet]) as IQueryable;
 
+                _logger.LogInformation("Query inicial criada");
+
+                // Entidades que precisam ignorar TODOS os query filters (incluindo dos relacionamentos)
+                var entitiesToIgnoreQueryFilters = new[]
+                {
+                    "UsuarioEmpresaCliente" // Tabela N:N - precisa ignorar filtros para ver todas as empresas vinculadas
+                };
+
+                if (entitiesToIgnoreQueryFilters.Contains(entityType.Name))
+                {
+                    _logger.LogInformation("Aplicando IgnoreQueryFilters para {EntityType}", entityType.Name);
+                    var ignoreQueryFiltersMethod = typeof(EntityFrameworkQueryableExtensions)
+                        .GetMethod("IgnoreQueryFilters")
+                        .MakeGenericMethod(entityType);
+                    query = ignoreQueryFiltersMethod.Invoke(null, [query]) as IQueryable;
+                }
+
                 query = ApplyParentFilter(query, entityType, filterField, parentId);
+                _logger.LogInformation("Filtro por parent aplicado: {FilterField} = {ParentId}", filterField, parentId);
+
+                // Entidades que NÃO devem ter filtro de tenant (são compartilhadas ou N:N)
+                var entitiesToExcludeFromTenantFilter = new[]
+                {
+                    "Usuario",
+                    "Empresa",
+                    "UsuarioEmpresaCliente" // Tabela N:N - deve mostrar todas as empresas do usuário
+                };
 
                 var idEmpresaProperty = entityType.GetProperty("IdEmpresa");
-                if (idEmpresaProperty != null)
+                if (idEmpresaProperty != null && !entitiesToExcludeFromTenantFilter.Contains(entityType.Name))
                 {
                     var idEmpresa = GetCurrentEmpresaId();
+                    _logger.LogInformation("Aplicando filtro de empresa: IdEmpresa = {IdEmpresa}", idEmpresa);
                     query = ApplyEmpresaFilter(query, entityType, idEmpresa);
+                }
+                else
+                {
+                    _logger.LogInformation("Entidade {EntityType} não terá filtro de empresa aplicado", entityType.Name);
                 }
 
                 query = ApplyIncludes(query, entityType);
+                _logger.LogInformation("Includes aplicados");
 
                 var toListAsyncMethod = typeof(EntityFrameworkQueryableExtensions)
                     .GetMethods()
@@ -92,6 +124,9 @@ namespace AutoGestao.Controllers.Base
                                 m.GetParameters().Length == 2 &&
                                 m.GetParameters()[0].ParameterType.IsGenericType)
                     .MakeGenericMethod(entityType);
+
+                // DEBUG: Verificar query SQL
+                _logger.LogInformation("Query antes de executar: {Query}", query.ToString());
 
                 var itemsTask = toListAsyncMethod.Invoke(null, [query, CancellationToken.None]) as Task;
                 await itemsTask;
@@ -101,6 +136,12 @@ namespace AutoGestao.Controllers.Base
                 var itemsList = (items as IEnumerable<object>).ToList();
 
                 _logger.LogInformation("Itens encontrados: {Count}", itemsList.Count);
+
+                // DEBUG: Logar dados dos itens
+                foreach (var item in itemsList)
+                {
+                    _logger.LogInformation("Item: {Item}", item);
+                }
 
                 var gridColumns = GetGridColumns(entityType);
                 var tabColumns = ConvertToTabColumns(gridColumns);
@@ -143,6 +184,25 @@ namespace AutoGestao.Controllers.Base
 
         private IQueryable ApplyIncludes(IQueryable? query, Type entityType)
         {
+            // Tratamento especial para entidades específicas que precisam de Includes explícitos
+            if (entityType.Name == "UsuarioEmpresaCliente")
+            {
+                _logger.LogInformation("Aplicando Includes explícitos para UsuarioEmpresaCliente");
+                var includeMethod = typeof(EntityFrameworkQueryableExtensions)
+                    .GetMethods()
+                    .First(m => m.Name == "Include" &&
+                                m.GetParameters().Length == 2 &&
+                                m.GetParameters()[1].ParameterType == typeof(string))
+                    .MakeGenericMethod(entityType);
+
+                query = includeMethod.Invoke(null, [query, "EmpresaCliente"]) as IQueryable;
+                _logger.LogInformation("Include aplicado para EmpresaCliente");
+                query = includeMethod.Invoke(null, [query, "Usuario"]) as IQueryable;
+                _logger.LogInformation("Include aplicado para Usuario");
+
+                return query;
+            }
+
             var properties = entityType.GetProperties()
                 .Where(p => p.PropertyType.IsClass &&
                             p.PropertyType != typeof(string) &&
@@ -255,7 +315,10 @@ namespace AutoGestao.Controllers.Base
                     DisplayName = gridColumn.DisplayName,
                     Width = gridColumn.Width,
                     Format = gridColumn.Format,
-                    Order = gridColumn.Order
+                    Order = gridColumn.Order,
+                    NavigationPaths = gridColumn.NavigationPaths,
+                    Template = gridColumn.Template,
+                    IsHtmlContent = gridColumn.IsHtmlContent
                 });
             }
 
@@ -332,6 +395,25 @@ namespace AutoGestao.Controllers.Base
                     continue;
                 }
 
+                // Processar GridComposite ANTES de GridField (GridComposite herda de GridField)
+                var gridCompositeAttr = property.GetCustomAttribute<GridCompositeAttribute>();
+                if (gridCompositeAttr != null)
+                {
+                    columns.Add(new GridColumn
+                    {
+                        PropertyName = property.Name,
+                        DisplayName = gridCompositeAttr.DisplayName,
+                        Type = EnumGridColumnType.Text,
+                        Width = gridCompositeAttr.Width ?? "auto",
+                        Format = gridCompositeAttr.Format,
+                        Order = gridCompositeAttr.Order,
+                        NavigationPaths = gridCompositeAttr.NavigationPaths,
+                        Template = gridCompositeAttr.Template,
+                        IsHtmlContent = !string.IsNullOrEmpty(gridCompositeAttr.Template)
+                    });
+                    continue;
+                }
+
                 var gridFieldAttr = property.GetCustomAttribute<GridFieldAttribute>();
                 if (gridFieldAttr != null)
                 {
@@ -344,6 +426,7 @@ namespace AutoGestao.Controllers.Base
                         Format = gridFieldAttr.Format,
                         Order = gridFieldAttr.Order
                     });
+                    continue;
                 }
             }
 

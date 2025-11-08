@@ -10,6 +10,9 @@ namespace AutoGestao.Models
         public string Width { get; set; }
         public string Format { get; set; }
         public int Order { get; set; }
+        public string[] NavigationPaths { get; set; }
+        public string Template { get; set; }
+        public bool IsHtmlContent { get; set; }
 
         public object GetValue(object item)
         {
@@ -20,6 +23,35 @@ namespace AutoGestao.Models
 
             try
             {
+                // Se tem NavigationPaths definido, processar como campo composto
+                if (NavigationPaths != null && NavigationPaths.Length > 0)
+                {
+                    var values = new List<object>();
+
+                    foreach (var path in NavigationPaths)
+                    {
+                        var valueInterno = GetNestedPropertyValue(item, path);
+                        values.Add(valueInterno ?? string.Empty);
+                    }
+
+                    // Se tem template, aplicar
+                    if (!string.IsNullOrEmpty(Template))
+                    {
+                        try
+                        {
+                            return string.Format(Template, values.ToArray());
+                        }
+                        catch
+                        {
+                            // Se falhar o format, retornar valores separados
+                            return string.Join(" - ", values.Where(v => v != null && !string.IsNullOrEmpty(v.ToString())));
+                        }
+                    }
+
+                    // Sem template, retornar valores separados
+                    return string.Join(" - ", values.Where(v => v != null && !string.IsNullOrEmpty(v.ToString())));
+                }
+
                 var property = item.GetType().GetProperty(PropertyName, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null)
                 {
@@ -91,6 +123,46 @@ namespace AutoGestao.Models
             }
 
             return enumValue.ToString();
+        }
+
+        /// <summary>
+        /// Obtém o valor de uma propriedade navegacional usando notação de ponto
+        /// Exemplo: "EmpresaCliente.RazaoSocial" navegará por EmpresaCliente e depois pegará RazaoSocial
+        /// </summary>
+        private static object GetNestedPropertyValue(object obj, string propertyPath)
+        {
+            if (obj == null || string.IsNullOrEmpty(propertyPath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var parts = propertyPath.Split('.');
+                object currentValue = obj;
+
+                foreach (var part in parts)
+                {
+                    if (currentValue == null)
+                    {
+                        return null;
+                    }
+
+                    var property = currentValue.GetType().GetProperty(part, BindingFlags.Public | BindingFlags.Instance);
+                    if (property == null)
+                    {
+                        return null;
+                    }
+
+                    currentValue = property.GetValue(currentValue);
+                }
+
+                return currentValue;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

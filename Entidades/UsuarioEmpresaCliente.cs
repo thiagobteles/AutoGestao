@@ -48,6 +48,11 @@ namespace AutoGestao.Entidades
         [ForeignKey("IdEmpresaCliente")]
         public virtual Fiscal.EmpresaCliente? EmpresaCliente { get; set; }
 
+        [Required]
+        [Column("id_empresa")]
         public long IdEmpresa { get; set; }
+
+        [ForeignKey("IdEmpresa")]
+        public virtual Empresa? Empresa { get; set; }
     }
 }

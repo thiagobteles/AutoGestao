@@ -51,7 +51,14 @@
                                             var value = column.GetValue(item);
                                             if (value != null)
                                             {
-                                                @value
+                                                if (column.IsHtmlContent)
+                                                {
+                                                    @Html.Raw(value)
+                                                }
+                                                else
+                                                {
+                                                    @value
+                                                }
                                             }
                                         }
                                     </td>
