@@ -65,6 +65,10 @@ namespace AutoGestao.Services
                 usuario.UltimoLogin = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
+                // DEBUG: Verificar se IdEmpresaCliente foi carregado
+                _logger.LogInformation("🔍 LOGIN DEBUG - UsuarioId: {Id}, Nome: {Nome}, IdEmpresaCliente: {IdEmpresaCliente}",
+                    usuario.Id, usuario.Nome, usuario.IdEmpresaCliente?.ToString() ?? "NULL");
+
                 // Log de login bem-sucedido
                 var auditServiceSuccess = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
                 await auditServiceSuccess?.LogLoginAsync(usuario.Id, usuario.IdEmpresa, true);
@@ -170,6 +174,9 @@ namespace AutoGestao.Services
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey não configurada"));
             var roles = GetRolesByPerfil(usuario.Perfil.ToString());
 
+            _logger.LogInformation("🔐 GenerateJwtToken - UsuarioId: {Id}, IdEmpresaCliente: {IdEmpresaCliente}",
+                usuario.Id, usuario.IdEmpresaCliente?.ToString() ?? "NULL");
+
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
@@ -181,7 +188,12 @@ namespace AutoGestao.Services
             // Adicionar EmpresaClienteId se o usuário tiver vínculo
             if (usuario.IdEmpresaCliente.HasValue)
             {
+                _logger.LogInformation("✅ Adicionando claim EmpresaClienteId: {Value}", usuario.IdEmpresaCliente.Value);
                 claims.Add(new Claim("EmpresaClienteId", usuario.IdEmpresaCliente.Value.ToString()));
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ IdEmpresaCliente é NULL - claim não será adicionada");
             }
 
             // Adicionar roles como claims
