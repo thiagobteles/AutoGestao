@@ -12,12 +12,13 @@ using System.Text;
 
 namespace AutoGestao.Services
 {
-    public class AuthService(ApplicationDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger) : IAuthService
+    public class AuthService(ApplicationDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger, IUsuarioEmpresaService usuarioEmpresaService) : IAuthService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IConfiguration _configuration = configuration;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly ILogger<AuthService> _logger = logger;
+        private readonly IUsuarioEmpresaService _usuarioEmpresaService = usuarioEmpresaService;
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
@@ -73,6 +74,12 @@ namespace AutoGestao.Services
                 var auditServiceSuccess = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
                 await auditServiceSuccess?.LogLoginAsync(usuario.Id, usuario.IdEmpresa, true);
 
+                // Buscar empresas vinculadas ao usuário
+                var empresasVinculadas = await _usuarioEmpresaService.GetEmpresasDoUsuarioAsync(usuario.Id);
+
+                _logger.LogInformation("🏢 Empresas vinculadas ao usuário {Id}: {Empresas}",
+                    usuario.Id, string.Join(", ", empresasVinculadas));
+
                 // Gerar token JWT
                 var token = GenerateJwtToken(usuario);
                 var roles = GetRolesByPerfil(usuario.Perfil.ToString());
@@ -90,6 +97,7 @@ namespace AutoGestao.Services
                         Perfil = usuario.Perfil.ToString(),
                         IdEmpresa = usuario.IdEmpresa,
                         IdEmpresaCliente = usuario.IdEmpresaCliente,
+                        EmpresasVinculadas = empresasVinculadas,
                         Roles = roles
                     }
                 };

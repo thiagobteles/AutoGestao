@@ -17,6 +17,7 @@ namespace AutoGestao.Data
 
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<UsuarioEmpresaCliente> UsuarioEmpresaClientes { get; set; }
         public DbSet<Empresa> Empresas { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<ReportTemplateEntity> ReportTemplates { get; set; }
