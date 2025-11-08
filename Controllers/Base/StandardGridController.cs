@@ -658,24 +658,74 @@ namespace AutoGestao.Controllers.Base
             var query = GetBaseQuery();
             var entityType = typeof(T);
 
+            _logger?.LogInformation("📝 Edit - Tipo de entidade: {EntityType}", entityType.Name);
+
             // 🔧 FIX: Buscar propriedades com FormFieldAttribute do tipo Reference (são os IDs)
             var referenceIdProperties = entityType.GetProperties()
-                .Where(p => p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference);
+                .Where(p => p.GetCustomAttribute<FormFieldAttribute>()?.Type == EnumFieldType.Reference)
+                .ToList();
+
+            _logger?.LogInformation("📊 Edit - Encontradas {Count} propriedades de referência", referenceIdProperties.Count);
 
             foreach (var idProp in referenceIdProperties)
             {
-                // Obter nome da navigation property (ex: IdVeiculoMarca -> VeiculoMarca)
-                var navigationPropertyName = idProp.Name.StartsWith("Id") ? idProp.Name.Substring(2) : idProp.Name;
+                // Obter nome da navigation property
+                // Ex1: IdVeiculoMarca -> VeiculoMarca (remove Id do INÍCIO)
+                // Ex2: EmpresaClienteId -> EmpresaCliente (remove Id do FINAL)
+                var navigationPropertyName = idProp.Name;
+
+                if (navigationPropertyName.StartsWith("Id") && navigationPropertyName.Length > 2 && char.IsUpper(navigationPropertyName[2]))
+                {
+                    // Remove "Id" do início (ex: IdVeiculoMarca -> VeiculoMarca)
+                    navigationPropertyName = navigationPropertyName.Substring(2);
+                }
+                else if (navigationPropertyName.EndsWith("Id") && navigationPropertyName.Length > 2)
+                {
+                    // Remove "Id" do final (ex: EmpresaClienteId -> EmpresaCliente)
+                    navigationPropertyName = navigationPropertyName.Substring(0, navigationPropertyName.Length - 2);
+                }
+
                 var navigationProperty = entityType.GetProperty(navigationPropertyName);
+
+                _logger?.LogInformation("🔍 Processando: {IdProp} -> {NavProp}", idProp.Name, navigationPropertyName);
 
                 if (navigationProperty != null && navigationProperty.PropertyType.IsClass && navigationProperty.PropertyType != typeof(string))
                 {
-                    _logger?.LogInformation("🔗 Fazendo Include de: {PropertyName}", navigationPropertyName);
+                    _logger?.LogInformation("✅ Fazendo Include de: {PropertyName} (tipo: {Type})", navigationPropertyName, navigationProperty.PropertyType.Name);
                     query = query.Include(navigationPropertyName);
+                }
+                else
+                {
+                    _logger?.LogWarning("⚠️ Navigation property NÃO encontrada ou inválida: {PropertyName}", navigationPropertyName);
                 }
             }
 
             var entity = await query.FirstOrDefaultAsync(e => e.Id == id);
+
+            if (entity != null)
+            {
+                _logger?.LogInformation("✅ Entidade carregada com sucesso: {EntityType} #{Id}", entityType.Name, id);
+
+                // Verificar quais navigation properties foram realmente carregadas
+                foreach (var idProp in referenceIdProperties)
+                {
+                    var navigationPropertyName = idProp.Name.StartsWith("Id") ? idProp.Name.Substring(2) : idProp.Name;
+                    var navigationProperty = entityType.GetProperty(navigationPropertyName);
+
+                    if (navigationProperty != null)
+                    {
+                        var navValue = navigationProperty.GetValue(entity);
+                        if (navValue == null)
+                        {
+                            _logger?.LogWarning("⚠️ Navigation property {PropertyName} está NULL após Include!", navigationPropertyName);
+                        }
+                        else
+                        {
+                            _logger?.LogInformation("✅ Navigation property {PropertyName} carregada: {Type}", navigationPropertyName, navValue.GetType().Name);
+                        }
+                    }
+                }
+            }
             if (entity == null)
             {
                 return NotFound();
@@ -863,8 +913,20 @@ namespace AutoGestao.Controllers.Base
 
             foreach (var idProp in referenceIdProperties)
             {
-                // Obter nome da navigation property (ex: IdVeiculoMarca -> VeiculoMarca)
-                var navigationPropertyName = idProp.Name.StartsWith("Id") ? idProp.Name.Substring(2) : idProp.Name;
+                // Obter nome da navigation property
+                // Ex1: IdVeiculoMarca -> VeiculoMarca (remove Id do INÍCIO)
+                // Ex2: EmpresaClienteId -> EmpresaCliente (remove Id do FINAL)
+                var navigationPropertyName = idProp.Name;
+
+                if (navigationPropertyName.StartsWith("Id") && navigationPropertyName.Length > 2 && char.IsUpper(navigationPropertyName[2]))
+                {
+                    navigationPropertyName = navigationPropertyName.Substring(2);
+                }
+                else if (navigationPropertyName.EndsWith("Id") && navigationPropertyName.Length > 2)
+                {
+                    navigationPropertyName = navigationPropertyName.Substring(0, navigationPropertyName.Length - 2);
+                }
+
                 var navigationProperty = entityType.GetProperty(navigationPropertyName);
 
                 if (navigationProperty != null && navigationProperty.PropertyType.IsClass && navigationProperty.PropertyType != typeof(string))
@@ -2285,31 +2347,47 @@ namespace AutoGestao.Controllers.Base
         {
             if (referenceType == null)
             {
+                Console.WriteLine($"⚠️ ReferenceType é null para {property.Name}");
                 return null;
             }
 
             try
             {
-                // Buscar a navigation property (ex: IdVeiculoMarca -> VeiculoMarca)
-                var navigationPropertyName = property.Name.StartsWith("Id")
-                    ? property.Name.Substring(2)
-                    : property.Name;
+                // Obter nome da navigation property
+                // Ex1: IdVeiculoMarca -> VeiculoMarca (remove Id do INÍCIO)
+                // Ex2: EmpresaClienteId -> EmpresaCliente (remove Id do FINAL)
+                var navigationPropertyName = property.Name;
+
+                if (navigationPropertyName.StartsWith("Id") && navigationPropertyName.Length > 2 && char.IsUpper(navigationPropertyName[2]))
+                {
+                    navigationPropertyName = navigationPropertyName.Substring(2);
+                }
+                else if (navigationPropertyName.EndsWith("Id") && navigationPropertyName.Length > 2)
+                {
+                    navigationPropertyName = navigationPropertyName.Substring(0, navigationPropertyName.Length - 2);
+                }
+
+                Console.WriteLine($"🔍 Tentando obter navigation property: {navigationPropertyName} para {property.Name}");
 
                 var navigationProperty = typeof(T).GetProperty(navigationPropertyName);
 
                 if (navigationProperty == null)
                 {
-                    Console.WriteLine($"Navigation property não encontrada: {navigationPropertyName}");
+                    Console.WriteLine($"❌ Navigation property não encontrada: {navigationPropertyName} em {typeof(T).Name}");
                     return null;
                 }
+
+                Console.WriteLine($"✅ Navigation property encontrada: {navigationPropertyName}");
 
                 // Obter a entidade relacionada
                 var relatedEntity = navigationProperty.GetValue(entity);
                 if (relatedEntity == null)
                 {
-                    Console.WriteLine($"Entidade relacionada é null para: {navigationPropertyName}");
+                    Console.WriteLine($"❌ Entidade relacionada é NULL para: {navigationPropertyName} (propriedade existe mas não foi carregada - faltou Include?)");
                     return null;
                 }
+
+                Console.WriteLine($"✅ Entidade relacionada carregada: {relatedEntity.GetType().Name}");
 
                 // Buscar propriedade com [ReferenceText] ou [GridMain]
                 var displayProperty = referenceType.GetProperties()
@@ -2319,6 +2397,7 @@ namespace AutoGestao.Controllers.Base
 
                 if (displayProperty == null)
                 {
+                    Console.WriteLine($"⚠️ Nenhuma propriedade com [ReferenceText] ou [GridMain] encontrada. Tentando fallback...");
                     // Fallback: tentar Nome, Descricao ou qualquer string
                     displayProperty = referenceType.GetProperty("Nome") ??
                                     referenceType.GetProperty("Descricao") ??
@@ -2330,17 +2409,18 @@ namespace AutoGestao.Controllers.Base
                     var value = displayProperty.GetValue(relatedEntity);
                     var displayText = value?.ToString();
 
-                    Console.WriteLine($"DisplayText para {property.Name}: {displayText}");
+                    Console.WriteLine($"✅ DisplayText para {property.Name}: '{displayText}' (propriedade: {displayProperty.Name})");
 
                     return displayText;
                 }
 
-                Console.WriteLine($"DisplayProperty não encontrada para tipo: {referenceType.Name}");
+                Console.WriteLine($"❌ DisplayProperty não encontrada para tipo: {referenceType.Name}");
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao obter DisplayText para {property.Name}: {ex.Message}");
+                Console.WriteLine($"❌ ERRO ao obter DisplayText para {property.Name}: {ex.Message}");
+                Console.WriteLine($"Stack: {ex.StackTrace}");
                 return null;
             }
         }
