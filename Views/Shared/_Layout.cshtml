@@ -70,157 +70,158 @@
 
                 <!-- Cadastros com Submenus -->
                 <div class="menu-section">
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <div class="menu-section-title">Cadastros</div>
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="menu-section-title">Cadastros</div>
 
-                        <!-- Menu Item Expansível: Empresas Clientes -->
-                        <div class="menu-item has-submenu">
-                            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                                <i class="fas fa-building"></i>
-                                <span class="menu-link-text">Empresas</span>
-                                <i class="fas fa-chevron-down submenu-arrow"></i>
-                                <div class="menu-tooltip">Empresas</div>
-                            </a>
-                            <div class="submenu">
-                                <div class="menu-item">
-                                    <a href="/EmpresaCliente/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "EmpresaCliente" ? "active" : "")">
-                                        <i class="fas fa-building"></i>
-                                        <span class="menu-link-text">Empresas Clientes</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/CertificadoDigital/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CertificadoDigital" ? "active" : "")">
-                                        <i class="fas fa-certificate"></i>
-                                        <span class="menu-link-text">Certificados Digitais</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/ParametroFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ParametroFiscal" ? "active" : "")">
-                                        <i class="fas fa-cogs"></i>
-                                        <span class="menu-link-text">Parâmetros Fiscais</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/DadoBancario/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "DadoBancario" ? "active" : "")">
-                                        <i class="fas fa-university"></i>
-                                        <span class="menu-link-text">Dados Bancários</span>
-                                    </a>
-                                </div>
+                    <!-- Menu Item Expansível: Empresas Clientes -->
+                    <div class="menu-item has-submenu">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="fas fa-building"></i>
+                            <span class="menu-link-text">Empresas</span>
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                            <div class="menu-tooltip">Empresas</div>
+                        </a>
+                        <div class="submenu">
+                            <div class="menu-item">
+                                <a href="/EmpresaCliente/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "EmpresaCliente" ? "active" : "")">
+                                    <i class="fas fa-building"></i>
+                                    <span class="menu-link-text">Empresas Clientes</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/CertificadoDigital/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CertificadoDigital" ? "active" : "")">
+                                    <i class="fas fa-certificate"></i>
+                                    <span class="menu-link-text">Certificados Digitais</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/ParametroFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ParametroFiscal" ? "active" : "")">
+                                    <i class="fas fa-cogs"></i>
+                                    <span class="menu-link-text">Parâmetros Fiscais</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/DadoBancario/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "DadoBancario" ? "active" : "")">
+                                    <i class="fas fa-university"></i>
+                                    <span class="menu-link-text">Dados Bancários</span>
+                                </a>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Menu Item Expansível: Fiscal -->
-                        <div class="menu-item has-submenu">
-                            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                                <i class="fas fa-file-invoice"></i>
-                                <span class="menu-link-text">Fiscal</span>
-                                <i class="fas fa-chevron-down submenu-arrow"></i>
-                                <div class="menu-tooltip">Fiscal</div>
-                            </a>
-                            <div class="submenu">
-                                <div class="menu-item">
-                                    <a href="/NotaFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NotaFiscal" ? "active" : "")">
-                                        <i class="fas fa-file-invoice"></i>
-                                        <span class="menu-link-text">Notas Fiscais</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/NotaFiscal/ImportarXML" class="menu-link submenu-link">
-                                        <i class="fas fa-file-import"></i>
-                                        <span class="menu-link-text">Importar XML</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/ObrigacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ObrigacaoFiscal" ? "active" : "")">
-                                        <i class="fas fa-tasks"></i>
-                                        <span class="menu-link-text">Obrigações Fiscais</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/AliquotaImposto/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AliquotaImposto" ? "active" : "")">
-                                        <i class="fas fa-percentage"></i>
-                                        <span class="menu-link-text">Alíquotas de Impostos</span>
-                                    </a>
-                                </div>
+                    <!-- Menu Item Expansível: Fiscal -->
+                    <div class="menu-item has-submenu">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="fas fa-file-invoice"></i>
+                            <span class="menu-link-text">Fiscal</span>
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                            <div class="menu-tooltip">Fiscal</div>
+                        </a>
+                        <div class="submenu">
+                            <div class="menu-item">
+                                <a href="/NotaFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NotaFiscal" ? "active" : "")">
+                                    <i class="fas fa-file-invoice"></i>
+                                    <span class="menu-link-text">Notas Fiscais</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/NotaFiscal/ImportarXML" class="menu-link submenu-link">
+                                    <i class="fas fa-file-import"></i>
+                                    <span class="menu-link-text">Importar XML</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/ObrigacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ObrigacaoFiscal" ? "active" : "")">
+                                    <i class="fas fa-tasks"></i>
+                                    <span class="menu-link-text">Obrigações Fiscais</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/AliquotaImposto/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AliquotaImposto" ? "active" : "")">
+                                    <i class="fas fa-percentage"></i>
+                                    <span class="menu-link-text">Alíquotas de Impostos</span>
+                                </a>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Menu Item Expansível: Contabilidade -->
-                        <div class="menu-item has-submenu">
-                            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                                <i class="fas fa-chart-pie"></i>
-                                <span class="menu-link-text">Contabilidade</span>
-                                <i class="fas fa-chevron-down submenu-arrow"></i>
-                                <div class="menu-tooltip">Contabilidade</div>
-                            </a>
-                            <div class="submenu">
-                                <div class="menu-item">
-                                    <a href="/PlanoContas/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "PlanoContas" ? "active" : "")">
-                                        <i class="fas fa-sitemap"></i>
-                                        <span class="menu-link-text">Plano de Contas</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/LancamentoContabil/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "LancamentoContabil" ? "active" : "")">
-                                        <i class="fas fa-file-invoice-dollar"></i>
-                                        <span class="menu-link-text">Lançamentos</span>
-                                    </a>
-                                </div>
+                    <!-- Menu Item Expansível: Contabilidade -->
+                    <div class="menu-item has-submenu">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="fas fa-chart-pie"></i>
+                            <span class="menu-link-text">Contabilidade</span>
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                            <div class="menu-tooltip">Contabilidade</div>
+                        </a>
+                        <div class="submenu">
+                            <div class="menu-item">
+                                <a href="/PlanoContas/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "PlanoContas" ? "active" : "")">
+                                    <i class="fas fa-sitemap"></i>
+                                    <span class="menu-link-text">Plano de Contas</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/LancamentoContabil/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "LancamentoContabil" ? "active" : "")">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                    <span class="menu-link-text">Lançamentos</span>
+                                </a>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Menu Item Expansível: Cadastros Auxiliares -->
-                        <div class="menu-item has-submenu">
-                            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                                <i class="fas fa-database"></i>
-                                <span class="menu-link-text">Auxiliares</span>
-                                <i class="fas fa-chevron-down submenu-arrow"></i>
-                                <div class="menu-tooltip">Auxiliares</div>
-                            </a>
-                            <div class="submenu">
-                                <div class="menu-item">
-                                    <a href="/CNAE/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CNAE" ? "active" : "")">
-                                        <i class="fas fa-industry"></i>
-                                        <span class="menu-link-text">CNAEs</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/ContadorResponsavel/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ContadorResponsavel" ? "active" : "")">
-                                        <i class="fas fa-user-tie"></i>
-                                        <span class="menu-link-text">Contadores</span>
-                                    </a>
-                                </div>
-                                <div class="menu-item">
-                                    <a href="/Cliente/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Cliente" ? "active" : "")">
-                                        <i class="fas fa-users"></i>
-                                        <span class="menu-link-text">Clientes</span>
-                                    </a>
-                                </div>
+                    <!-- Menu Item Expansível: Cadastros Auxiliares -->
+                    <div class="menu-item has-submenu">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="fas fa-database"></i>
+                            <span class="menu-link-text">Auxiliares</span>
+                            <i class="fas fa-chevron-down submenu-arrow"></i>
+                            <div class="menu-tooltip">Auxiliares</div>
+                        </a>
+                        <div class="submenu">
+                            <div class="menu-item">
+                                <a href="/CNAE/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CNAE" ? "active" : "")">
+                                    <i class="fas fa-industry"></i>
+                                    <span class="menu-link-text">CNAEs</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/ContadorResponsavel/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ContadorResponsavel" ? "active" : "")">
+                                    <i class="fas fa-user-tie"></i>
+                                    <span class="menu-link-text">Contadores</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a href="/Cliente/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Cliente" ? "active" : "")">
+                                    <i class="fas fa-users"></i>
+                                    <span class="menu-link-text">Clientes</span>
+                                </a>
                             </div>
                         </div>
-                    }
-                    else
-                    {
-                        <div class="menu-item">
-                            <a href="/NotaFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NotaFiscal" ? "active" : "")">
-                                <i class="fas fa-file-invoice"></i>
-                                <span class="menu-link-text">Notas Fiscais</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a href="/NotaFiscal/ImportarXML" class="menu-link submenu-link">
-                                <i class="fas fa-file-import"></i>
-                                <span class="menu-link-text">Importar XML</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a href="/ObrigacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ObrigacaoFiscal" ? "active" : "")">
-                                <i class="fas fa-tasks"></i>
-                                <span class="menu-link-text">Obrigações Fiscais</span>
-                            </a>
-                        </div>
-                    }
+                    </div>
+                }
+                else
+                {
+                    <div class="menu-item">
+                        <a href="/NotaFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NotaFiscal" ? "active" : "")">
+                            <i class="fas fa-file-invoice"></i>
+                            <span class="menu-link-text">Notas Fiscais</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="/NotaFiscal/ImportarXML" class="menu-link submenu-link">
+                            <i class="fas fa-file-import"></i>
+                            <span class="menu-link-text">Importar XML</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="/ObrigacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ObrigacaoFiscal" ? "active" : "")">
+                            <i class="fas fa-tasks"></i>
+                            <span class="menu-link-text">Obrigações Fiscais</span>
+                        </a>
+                    </div>
+                }
+
                 </div>
 
                 <!-- Relatórios -->
