@@ -47,6 +47,12 @@ namespace AutoGestao.Controllers.Base
                 new("Perfil", result.Usuario.Perfil)
             };
 
+            // Adicionar EmpresaClienteId se o usuário tiver vínculo
+            if (result.Usuario.IdEmpresaCliente.HasValue)
+            {
+                claims.Add(new Claim("EmpresaClienteId", result.Usuario.IdEmpresaCliente.Value.ToString()));
+            }
+
             // Adicionar roles
             foreach (var role in result.Usuario.Roles)
             {
