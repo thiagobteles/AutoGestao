@@ -22,7 +22,8 @@ namespace AutoGestao.Controllers.Base
             [FromQuery] string controller,
             [FromQuery] string tab,
             [FromQuery] long parentId,
-            [FromQuery] string parentController)
+            [FromQuery] string parentController,
+            [FromQuery] string? mode = null)
         {
             try
             {
@@ -152,6 +153,10 @@ namespace AutoGestao.Controllers.Base
 
                 _logger.LogInformation("Controller name ajustado: {Original} -> {Adjusted}", controller, controller);
 
+                // Se o modo for "Details", não permitir criar, editar ou excluir
+                var isReadOnly = mode?.Equals("Details", StringComparison.OrdinalIgnoreCase) == true;
+                _logger.LogInformation("Modo: {Mode}, IsReadOnly: {IsReadOnly}", mode, isReadOnly);
+
                 var viewModel = new TabContentViewModel
                 {
                     TabId = tab,
@@ -162,9 +167,9 @@ namespace AutoGestao.Controllers.Base
                     ParentController = parentController,
                     Items = itemsList,
                     Columns = tabColumns,
-                    CanCreate = true,
-                    CanEdit = true,
-                    CanDelete = true
+                    CanCreate = !isReadOnly,
+                    CanEdit = !isReadOnly,
+                    CanDelete = !isReadOnly
                 };
 
                 return PartialView("_TabContent", viewModel);

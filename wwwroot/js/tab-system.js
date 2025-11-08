@@ -4,6 +4,7 @@ class TabSystem {
         this.loadedTabs = new Set();
         this.currentParentController = null;
         this.currentParentId = null;
+        this.currentMode = null;
     }
 
     init() {
@@ -35,9 +36,16 @@ class TabSystem {
             }
         }
 
+        // Detectar o modo (Create, Edit, Details)
+        const container = document.querySelector('[data-mode]');
+        if (container) {
+            this.currentMode = container.dataset.mode;
+        }
+
         console.log('Parent info detectado:', {
             controller: this.currentParentController,
-            id: this.currentParentId
+            id: this.currentParentId,
+            mode: this.currentMode
         });
     }
 
@@ -148,7 +156,12 @@ class TabSystem {
             }
 
             // Construir URL
-            const url = `/TabContent/LoadTab?controller=${encodeURIComponent(controller)}&tab=${encodeURIComponent(tabId)}&parentId=${this.currentParentId}&parentController=${encodeURIComponent(this.currentParentController)}`;
+            let url = `/TabContent/LoadTab?controller=${encodeURIComponent(controller)}&tab=${encodeURIComponent(tabId)}&parentId=${this.currentParentId}&parentController=${encodeURIComponent(this.currentParentController)}`;
+
+            // Adicionar modo se disponível
+            if (this.currentMode) {
+                url += `&mode=${encodeURIComponent(this.currentMode)}`;
+            }
 
             console.log('URL de carregamento:', url);
 
