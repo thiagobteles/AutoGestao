@@ -1,4 +1,5 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Fiscal;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -27,7 +28,7 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Telefone", Order = 4, Section = "Dados Básicos", Icon = "fas fa-phone", Type = EnumFieldType.Telefone)]
         public string? Telefone { get; set; }
 
-        [FormField(Name = "Empresa Cliente", Order = 9, Section = "Vínculo Empresarial", Icon = "fas fa-building", Type = EnumFieldType.Reference, Reference = typeof(EmpresaCliente), HelpText = "Empresa vinculada ao usuário. Deixe em branco para usuários Admin.", GridColumns = 1)]
+        [FormField(Name = "Empresa Cliente", Order = 9, Section = "Vínculo Empresarial", Icon = "fas fa-building", Type = EnumFieldType.Reference, Reference = typeof(EmpresaCliente), Placeholder = "Empresa vinculada ao usuário. Deixe em branco para usuários Admin.", GridColumns = 1)]
         public long? IdEmpresaCliente { get; set; }
 
         [GridField("Perfil", Order = 10, Width = "120px")]
