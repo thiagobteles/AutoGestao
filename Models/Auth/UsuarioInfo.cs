@@ -12,6 +12,8 @@ namespace AutoGestao.Models.Auth
 
         public long IdEmpresa { get; set; }
 
+        public long? IdEmpresaCliente { get; set; }
+
         public string[] Roles { get; set; } = [];
     }
 }

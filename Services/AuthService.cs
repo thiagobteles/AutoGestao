@@ -85,6 +85,7 @@ namespace AutoGestao.Services
                         Email = usuario.Email,
                         Perfil = usuario.Perfil.ToString(),
                         IdEmpresa = usuario.IdEmpresa,
+                        IdEmpresaCliente = usuario.IdEmpresaCliente,
                         Roles = roles
                     }
                 };
@@ -176,6 +177,12 @@ namespace AutoGestao.Services
                 new(ClaimTypes.Email, usuario.Email),
                 new("Perfil", usuario.Perfil.ToString())
             };
+
+            // Adicionar EmpresaClienteId se o usuário tiver vínculo
+            if (usuario.IdEmpresaCliente.HasValue)
+            {
+                claims.Add(new Claim("EmpresaClienteId", usuario.IdEmpresaCliente.Value.ToString()));
+            }
 
             // Adicionar roles como claims
             foreach (var role in roles)

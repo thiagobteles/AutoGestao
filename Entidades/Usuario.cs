@@ -1,5 +1,6 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoGestao.Entidades
 {
@@ -26,6 +27,9 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Telefone", Order = 4, Section = "Dados Básicos", Icon = "fas fa-phone", Type = EnumFieldType.Telefone)]
         public string? Telefone { get; set; }
 
+        [FormField(Name = "Empresa Cliente", Order = 9, Section = "Vínculo Empresarial", Icon = "fas fa-building", Type = EnumFieldType.Reference, Reference = typeof(EmpresaCliente), HelpText = "Empresa vinculada ao usuário. Deixe em branco para usuários Admin.", GridColumns = 1)]
+        public long? IdEmpresaCliente { get; set; }
+
         [GridField("Perfil", Order = 10, Width = "120px")]
         [FormField(Name = "Perfil", Order = 10, Section = "Informações", Icon = "fas fa-user-tag", Type = EnumFieldType.Select, Required = true, GridColumns = 2)]
         public EnumPerfilUsuario Perfil { get; set; }
@@ -45,6 +49,9 @@ namespace AutoGestao.Entidades
         public string? Observacoes { get; set; }
 
         // Navigation properties
+        [ForeignKey("IdEmpresaCliente")]
+        public virtual EmpresaCliente? EmpresaCliente { get; set; }
+
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = [];
         public virtual ICollection<BaseEntidade> EntidadesCriadas { get; set; } = [];
         public virtual ICollection<BaseEntidade> EntidadesAlteradas { get; set; } = [];

@@ -62,6 +62,27 @@ namespace AutoGestao.Controllers.Base
                 query = query.Include(prop.Name);
             }
 
+            // FILTRO AUTOMÁTICO POR EMPRESA CLIENTE
+            // Se o usuário tiver EmpresaClienteId (não-admin vinculado a uma empresa)
+            // E a entidade tiver propriedade IdEmpresaCliente, filtrar automaticamente
+            var empresaClienteId = GetCurrentEmpresaClienteId();
+            if (empresaClienteId.HasValue)
+            {
+                var empresaClienteProperty = typeof(T).GetProperty("IdEmpresaCliente") ?? typeof(T).GetProperty("EmpresaClienteId");
+                if (empresaClienteProperty != null)
+                {
+                    _logger?.LogInformation("🔒 Aplicando filtro automático por EmpresaClienteId = {Id}", empresaClienteId.Value);
+
+                    var parameter = Expression.Parameter(typeof(T), "x");
+                    var property = Expression.Property(parameter, empresaClienteProperty);
+                    var constant = Expression.Constant(empresaClienteId.Value, empresaClienteProperty.PropertyType);
+                    var equality = Expression.Equal(property, constant);
+                    var lambda = Expression.Lambda<Func<T, bool>>(equality, parameter);
+
+                    query = query.Where(lambda);
+                }
+            }
+
             return query.OrderByDescending(x => x.Id);
         }
 
@@ -349,6 +370,23 @@ namespace AutoGestao.Controllers.Base
                 entity.IdEmpresa = GetCurrentEmpresaId();
             }
 
+            // FILTRO AUTOMÁTICO: Preencher IdEmpresaCliente para usuários não-admin
+            var empresaClienteId = GetCurrentEmpresaClienteId();
+            if (empresaClienteId.HasValue)
+            {
+                var empresaClienteProperty = typeof(T).GetProperty("IdEmpresaCliente") ?? typeof(T).GetProperty("EmpresaClienteId");
+                if (empresaClienteProperty != null)
+                {
+                    var currentValue = empresaClienteProperty.GetValue(entity);
+                    // Se o campo está vazio (0 ou null), preencher com a empresa do usuário
+                    if (currentValue == null || (currentValue is long longValue && longValue == 0))
+                    {
+                        empresaClienteProperty.SetValue(entity, empresaClienteId.Value);
+                        _logger?.LogInformation("🔒 IdEmpresaCliente preenchido automaticamente: {Id}", empresaClienteId.Value);
+                    }
+                }
+            }
+
             // CRÍTICO: Preencher TODOS os campos obrigatórios da BaseEntidade (se aplicável)
             if (entity is BaseEntidade baseEntity)
             {
@@ -413,6 +451,14 @@ namespace AutoGestao.Controllers.Base
             var usuarioIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             return long.TryParse(usuarioIdClaim, out var usuarioId)
                 ? usuarioId
+                : null;
+        }
+
+        protected virtual long? GetCurrentEmpresaClienteId()
+        {
+            var empresaClienteIdClaim = User.FindFirst("EmpresaClienteId")?.Value;
+            return long.TryParse(empresaClienteIdClaim, out var empresaClienteId)
+                ? empresaClienteId
                 : null;
         }
 
