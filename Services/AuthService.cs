@@ -12,12 +12,13 @@ using System.Text;
 
 namespace AutoGestao.Services
 {
-    public class AuthService(ApplicationDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger) : IAuthService
+    public class AuthService(ApplicationDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger, IUsuarioEmpresaService usuarioEmpresaService) : IAuthService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IConfiguration _configuration = configuration;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly ILogger<AuthService> _logger = logger;
+        private readonly IUsuarioEmpresaService _usuarioEmpresaService = usuarioEmpresaService;
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
@@ -65,9 +66,19 @@ namespace AutoGestao.Services
                 usuario.UltimoLogin = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
+                // DEBUG: Verificar se IdEmpresaCliente foi carregado
+                _logger.LogInformation("🔍 LOGIN DEBUG - UsuarioId: {Id}, Nome: {Nome}, IdEmpresaCliente: {IdEmpresaCliente}",
+                    usuario.Id, usuario.Nome, usuario.IdEmpresaCliente?.ToString() ?? "NULL");
+
                 // Log de login bem-sucedido
                 var auditServiceSuccess = _httpContextAccessor.HttpContext?.RequestServices.GetService<IAuditService>();
                 await auditServiceSuccess?.LogLoginAsync(usuario.Id, usuario.IdEmpresa, true);
+
+                // Buscar empresas vinculadas ao usuário
+                var empresasVinculadas = await _usuarioEmpresaService.GetEmpresasDoUsuarioAsync(usuario.Id);
+
+                _logger.LogInformation("🏢 Empresas vinculadas ao usuário {Id}: {Empresas}",
+                    usuario.Id, string.Join(", ", empresasVinculadas));
 
                 // Gerar token JWT
                 var token = GenerateJwtToken(usuario);
@@ -85,6 +96,8 @@ namespace AutoGestao.Services
                         Email = usuario.Email,
                         Perfil = usuario.Perfil.ToString(),
                         IdEmpresa = usuario.IdEmpresa,
+                        IdEmpresaCliente = usuario.IdEmpresaCliente,
+                        EmpresasVinculadas = empresasVinculadas,
                         Roles = roles
                     }
                 };
@@ -169,6 +182,9 @@ namespace AutoGestao.Services
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey não configurada"));
             var roles = GetRolesByPerfil(usuario.Perfil.ToString());
 
+            _logger.LogInformation("🔐 GenerateJwtToken - UsuarioId: {Id}, IdEmpresaCliente: {IdEmpresaCliente}",
+                usuario.Id, usuario.IdEmpresaCliente?.ToString() ?? "NULL");
+
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
@@ -176,6 +192,17 @@ namespace AutoGestao.Services
                 new(ClaimTypes.Email, usuario.Email),
                 new("Perfil", usuario.Perfil.ToString())
             };
+
+            // Adicionar EmpresaClienteId se o usuário tiver vínculo
+            if (usuario.IdEmpresaCliente.HasValue)
+            {
+                _logger.LogInformation("✅ Adicionando claim EmpresaClienteId: {Value}", usuario.IdEmpresaCliente.Value);
+                claims.Add(new Claim("EmpresaClienteId", usuario.IdEmpresaCliente.Value.ToString()));
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ IdEmpresaCliente é NULL - claim não será adicionada");
+            }
 
             // Adicionar roles como claims
             foreach (var role in roles)

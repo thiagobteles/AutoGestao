@@ -22,12 +22,12 @@ namespace AutoGestao.Services
 
         public async Task<Usuario?> BuscarPorEmailAsync(string email)
         {
-            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
+            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
         public async Task<bool> EmailExisteAsync(string email, long? usuarioId = null)
         {
-            var query = _context.Usuarios.Where(u => u.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
+            var query = _context.Usuarios.Where(u => u.Email.ToLower() == email.ToLower());
             if (usuarioId.HasValue)
             {
                 query = query.Where(u => u.Id != usuarioId.Value);

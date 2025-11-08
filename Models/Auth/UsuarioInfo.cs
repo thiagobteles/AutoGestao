@@ -12,6 +12,13 @@ namespace AutoGestao.Models.Auth
 
         public long IdEmpresa { get; set; }
 
+        public long? IdEmpresaCliente { get; set; }
+
+        /// <summary>
+        /// Lista de IDs de todas as empresas que o usuário tem acesso
+        /// </summary>
+        public List<long> EmpresasVinculadas { get; set; } = [];
+
         public string[] Roles { get; set; } = [];
     }
 }

@@ -3,6 +3,7 @@ using System;
 using AutoGestao.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoGestao.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251108053305_AdicionarIdEmpresaClienteEmUsuario")]
+    partial class AdicionarIdEmpresaClienteEmUsuario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1724,45 +1727,6 @@ namespace AutoGestao.Migrations
                     b.ToTable("usuarios", (string)null);
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.UsuarioEmpresaCliente", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<DateTime>("DataVinculo")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("data_vinculo");
-
-                    b.Property<long>("IdEmpresa")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa");
-
-                    b.Property<long>("IdEmpresaCliente")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_empresa_cliente");
-
-                    b.Property<long>("IdUsuario")
-                        .HasColumnType("bigint")
-                        .HasColumnName("id_usuario");
-
-                    b.HasKey("Id")
-                        .HasName("pk_usuario_empresa_cliente");
-
-                    b.HasIndex("IdEmpresaCliente");
-
-                    b.HasIndex("IdUsuario");
-
-                    b.ToTable("usuario_empresa_cliente");
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.AuditLog", b =>
                 {
                     b.HasOne("AutoGestao.Entidades.Empresa", "Empresa")
@@ -2036,25 +2000,6 @@ namespace AutoGestao.Migrations
                     b.Navigation("EmpresaCliente");
                 });
 
-            modelBuilder.Entity("AutoGestao.Entidades.UsuarioEmpresaCliente", b =>
-                {
-                    b.HasOne("AutoGestao.Entidades.Fiscal.EmpresaCliente", "EmpresaCliente")
-                        .WithMany()
-                        .HasForeignKey("IdEmpresaCliente")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AutoGestao.Entidades.Usuario", "Usuario")
-                        .WithMany("EmpresasVinculadas")
-                        .HasForeignKey("IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EmpresaCliente");
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("AutoGestao.Entidades.Fiscal.ContadorResponsavel", b =>
                 {
                     b.Navigation("EmpresasClientes");
@@ -2090,8 +2035,6 @@ namespace AutoGestao.Migrations
             modelBuilder.Entity("AutoGestao.Entidades.Usuario", b =>
                 {
                     b.Navigation("AuditLogs");
-
-                    b.Navigation("EmpresasVinculadas");
                 });
 #pragma warning restore 612, 618
         }

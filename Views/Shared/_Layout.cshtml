@@ -70,6 +70,8 @@
 
                 <!-- Cadastros com Submenus -->
                 <div class="menu-section">
+                @if (User.IsInRole("Admin"))
+                {
                     <div class="menu-section-title">Cadastros</div>
 
                     <!-- Menu Item Expansível: Empresas Clientes -->
@@ -121,12 +123,6 @@
                                 <a href="/NotaFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NotaFiscal" ? "active" : "")">
                                     <i class="fas fa-file-invoice"></i>
                                     <span class="menu-link-text">Notas Fiscais</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a href="/NotaFiscal/Create" class="menu-link submenu-link">
-                                    <i class="fas fa-plus-circle"></i>
-                                    <span class="menu-link-text">Emitir Nota</span>
                                 </a>
                             </div>
                             <div class="menu-item">
@@ -203,6 +199,29 @@
                             </div>
                         </div>
                     </div>
+                }
+                else
+                {
+                    <div class="menu-item">
+                        <a href="/NotaFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NotaFiscal" ? "active" : "")">
+                            <i class="fas fa-file-invoice"></i>
+                            <span class="menu-link-text">Notas Fiscais</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="/NotaFiscal/ImportarXML" class="menu-link submenu-link">
+                            <i class="fas fa-file-import"></i>
+                            <span class="menu-link-text">Importar XML</span>
+                        </a>
+                    </div>
+                    <div class="menu-item">
+                        <a href="/ObrigacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ObrigacaoFiscal" ? "active" : "")">
+                            <i class="fas fa-tasks"></i>
+                            <span class="menu-link-text">Obrigações Fiscais</span>
+                        </a>
+                    </div>
+                }
+
                 </div>
 
                 <!-- Relatórios -->

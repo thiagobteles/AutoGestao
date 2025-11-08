@@ -1,10 +1,14 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Fiscal;
 using AutoGestao.Enumerador.Gerais;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoGestao.Entidades
 {
     [Auditable(EntityDisplayName = "Usuário")]
     [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users")]
+    [FormTabs(EnableTabs = true, DefaultTab = "principal")] // Anotações para geração de TABS
+    [FormTab("empresas-vinculadas", "Empresas Vinculadas", TabIcon = "fas fa-building", Order = 1, Controller = "UsuarioEmpresaCliente", Action = "Index", LazyLoad = true, RequiredRoles = new[] { "Admin" })]
     public class Usuario : BaseEntidade
     {
         [ReferenceText]
@@ -26,6 +30,9 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Telefone", Order = 4, Section = "Dados Básicos", Icon = "fas fa-phone", Type = EnumFieldType.Telefone)]
         public string? Telefone { get; set; }
 
+        [FormField(Name = "Empresa Padrão", Order = 9, Section = "Vínculo Empresarial", Icon = "fas fa-building", Type = EnumFieldType.Reference, Reference = typeof(EmpresaCliente), Placeholder = "Empresa padrão do usuário. Para múltiplas empresas, use a tab 'Empresas Vinculadas'", GridColumns = 1)]
+        public long? IdEmpresaCliente { get; set; }
+
         [GridField("Perfil", Order = 10, Width = "120px")]
         [FormField(Name = "Perfil", Order = 10, Section = "Informações", Icon = "fas fa-user-tag", Type = EnumFieldType.Select, Required = true, GridColumns = 2)]
         public EnumPerfilUsuario Perfil { get; set; }
@@ -45,6 +52,15 @@ namespace AutoGestao.Entidades
         public string? Observacoes { get; set; }
 
         // Navigation properties
+        [ForeignKey("IdEmpresaCliente")]
+        public virtual EmpresaCliente? EmpresaCliente { get; set; }
+
+        /// <summary>
+        /// Relacionamento N:N com EmpresaCliente
+        /// Permite que um usuário tenha acesso a múltiplas empresas
+        /// </summary>
+        public virtual ICollection<UsuarioEmpresaCliente> EmpresasVinculadas { get; set; } = [];
+
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = [];
         public virtual ICollection<BaseEntidade> EntidadesCriadas { get; set; } = [];
         public virtual ICollection<BaseEntidade> EntidadesAlteradas { get; set; } = [];

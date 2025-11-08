@@ -20,6 +20,35 @@ namespace AutoGestao.Controllers
     {
         private readonly IUsuarioService _usuarioService = usuarioService;
 
+        protected override IQueryable<Usuario> GetBaseQuery()
+        {
+            // IMPORTANTE: Não aplicar filtro automático por EmpresaCliente para usuários
+            // Queremos que admins possam gerenciar TODOS os usuários do sistema
+            _context.CurrentEmpresaId = GetCurrentEmpresaId();
+
+            List<string> listaIgnorada = ["CriadoPorUsuario", "AlteradoPorUsuario", "Empresa"];
+
+            var query = _context.Set<Usuario>().AsQueryable();
+
+            // Buscar propriedades virtuais (navigation properties)
+            var virtualProperties = typeof(Usuario).GetProperties()
+                .Where(p => p.GetGetMethod()?.IsVirtual == true
+                    && !p.GetGetMethod()?.IsFinal == true
+                    && p.PropertyType.IsClass
+                    && p.PropertyType != typeof(string)
+                    && !typeof(System.Collections.IEnumerable).IsAssignableFrom(p.PropertyType))
+                .ToList();
+
+            // Aplicar Include para navigation properties
+            foreach (var prop in virtualProperties.Where(x => !listaIgnorada.Contains(x.Name)))
+            {
+                query = query.Include(prop.Name);
+            }
+
+            // NÃO aplicar filtro por EmpresaCliente aqui
+            return query.OrderByDescending(x => x.Id);
+        }
+
         protected override StandardGridViewModel ConfigureCustomGrid(StandardGridViewModel standardGridViewModel)
         {
             standardGridViewModel.Filters =

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace AutoGestao.Controllers.Base
 {
@@ -46,6 +47,24 @@ namespace AutoGestao.Controllers.Base
                 new("IdEmpresa", result.Usuario.IdEmpresa.ToString()),
                 new("Perfil", result.Usuario.Perfil)
             };
+
+            // Adicionar EmpresaClienteId se o usuário tiver vínculo (empresa padrão ou primeira da lista)
+            if (result.Usuario.IdEmpresaCliente.HasValue)
+            {
+                claims.Add(new Claim("EmpresaClienteId", result.Usuario.IdEmpresaCliente.Value.ToString()));
+            }
+            else if (result.Usuario.EmpresasVinculadas?.Count > 0)
+            {
+                // Se não tem empresa padrão mas tem empresas vinculadas, usar a primeira
+                claims.Add(new Claim("EmpresaClienteId", result.Usuario.EmpresasVinculadas[0].ToString()));
+            }
+
+            // Adicionar lista de empresas vinculadas como JSON
+            if (result.Usuario.EmpresasVinculadas?.Count > 0)
+            {
+                var empresasJson = JsonSerializer.Serialize(result.Usuario.EmpresasVinculadas);
+                claims.Add(new Claim("EmpresasVinculadas", empresasJson));
+            }
 
             // Adicionar roles
             foreach (var role in result.Usuario.Roles)

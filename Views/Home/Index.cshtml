@@ -15,302 +15,383 @@
             </h1>
             <p class="page-subtitle mb-0">Visão geral da gestão contábil e fiscal</p>
         </div>
-        <div>
-            <button class="btn-modern btn-outline-modern">
-                <i class="fas fa-download"></i>
-                Exportar Relatório
-            </button>
-        </div>
     </div>
 
-    <!-- Cards de Estatísticas - Primeira Linha -->
-    <div class="grid-4 mb-4">
-        <div class="stats-card">
-            <div class="stats-content">
-                <div class="stats-info">
-                    <h3>@Model.TotalEmpresasClientes</h3>
-                    <p>Empresas Clientes</p>
+    @if (User.IsInRole("Admin"))
+    {
+        <!-- Cards de Estatísticas - Primeira Linha -->
+        <div class="grid-4 mb-4">
+            <div class="stats-card">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <h3>@Model.TotalEmpresasClientes</h3>
+                        <p>Empresas Clientes</p>
+                    </div>
+                    <div class="stats-icon primary">
+                        <i class="fas fa-building"></i>
+                    </div>
                 </div>
-                <div class="stats-icon primary">
-                    <i class="fas fa-building"></i>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <h3>@Model.NotasFiscaisEmitidas</h3>
+                        <p>Notas Emitidas (Mês)</p>
+                    </div>
+                    <div class="stats-icon success">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <h3>@Model.ObrigacoesPendentes</h3>
+                        <p>Obrigações Pendentes</p>
+                    </div>
+                    <div class="stats-icon warning">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <h3>@Model.CertificadosVencendo</h3>
+                        <p>Certificados Vencendo</p>
+                    </div>
+                    <div class="stats-icon info">
+                        <i class="fas fa-certificate"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="stats-card">
-            <div class="stats-content">
-                <div class="stats-info">
-                    <h3>@Model.NotasFiscaisEmitidas</h3>
-                    <p>Notas Emitidas (Mês)</p>
+        <!-- Segunda linha - Full Width -->
+        <div class="grid-3 mb-4">
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-chart-line"></i>
+                    Faturamento do Mês
                 </div>
-                <div class="stats-icon success">
-                    <i class="fas fa-file-invoice"></i>
+                <div class="card-body-modern">
+                    <h2 class="text-success mb-3">@Model.FaturamentoMes.ToString("C")</h2>
+                    <div class="progress mb-2" style="height: 10px;">
+                        <div class="progress-bar" style="width: @(Model.FaturamentoMes * 100 / (Model.MetaMensal > 0 ? Model.MetaMensal : 1))%; background: var(--accent-color);"></div>
+                    </div>
+                    <small class="text-muted">Meta mensal: @Model.MetaMensal.ToString("C") - @((Model.FaturamentoMes * 100 / (Model.MetaMensal > 0 ? Model.MetaMensal : 1)).ToString("F1"))% atingido</small>
+
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted"><i class="fas fa-file-invoice"></i> NFe</span>
+                            <span class="fw-bold">@Model.FaturamentoNFe.ToString("C")</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted"><i class="fas fa-file-alt"></i> NFSe</span>
+                            <span class="fw-bold">@Model.FaturamentoNFSe.ToString("C")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-rocket"></i>
+                    Ações Rápidas
+                </div>
+                <div class="card-body-modern">
+                    <div class="d-grid gap-3">
+                        <a asp-controller="EmpresaCliente" asp-action="Create" class="btn-modern btn-primary-modern">
+                            <i class="fas fa-building"></i>
+                            Nova Empresa
+                        </a>
+                        <a asp-controller="NotaFiscal" asp-action="Create" class="btn-modern btn-accent-modern">
+                            <i class="fas fa-file-invoice"></i>
+                            Emitir Nota Fiscal
+                        </a>
+                        <a asp-controller="LancamentoContabil" asp-action="Create" class="btn-modern btn-success-modern">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            Novo Lançamento
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Obrigações Próximas
+                </div>
+                <div class="card-body-modern">
+                    @if (Model.ObrigacoesProximas.Any())
+                    {
+                        <div class="activity-list">
+                            @foreach (var obrigacao in Model.ObrigacoesProximas.Take(3))
+                            {
+                                var diasRestantes = (obrigacao.DataVencimento - DateTime.Now).Days;
+                                var corIcone = diasRestantes <= 5 ? "bg-danger" : diasRestantes <= 10 ? "bg-warning" : "bg-info";
+                                <div class="activity-item d-flex align-items-center @(obrigacao != Model.ObrigacoesProximas.Take(3).Last() ? "mb-3" : "")">
+                                    <div class="activity-icon @corIcone text-white rounded-circle me-3" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-@(diasRestantes <= 5 ? "exclamation" : "clock") fa-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">@obrigacao.TipoObrigacao.ToString()</div>
+                                        <small class="text-muted">Vencimento: @obrigacao.DataVencimento.ToString("dd/MM/yyyy") (@diasRestantes dias)</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-check-circle fa-3x mb-3"></i>
+                            <p>Nenhuma obrigação pendente nos próximos 30 dias</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
 
-        <div class="stats-card">
-            <div class="stats-content">
-                <div class="stats-info">
-                    <h3>@Model.ObrigacoesPendentes</h3>
-                    <p>Obrigações Pendentes</p>
+        <!-- Terceira linha - Métricas Contábeis -->
+        <div class="grid-4 mb-4">
+            <div class="stats-card">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <h3>@Model.LancamentosContabeisMes</h3>
+                        <p>Lançamentos (Mês)</p>
+                    </div>
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
                 </div>
-                <div class="stats-icon warning">
-                    <i class="fas fa-tasks"></i>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <h3>@Model.TotalPlanoContas</h3>
+                        <p>Contas Contábeis</p>
+                    </div>
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="fas fa-list-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <h3>@Model.AliquotasConfiguradas</h3>
+                        <p>Alíquotas Cadastradas</p>
+                    </div>
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="fas fa-percent"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <h3>@Model.TotalContadores</h3>
+                        <p>Contadores Ativos</p>
+                    </div>
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="stats-card">
-            <div class="stats-content">
-                <div class="stats-info">
-                    <h3>@Model.CertificadosVencendo</h3>
-                    <p>Certificados Vencendo</p>
+        <!-- Quarta linha - Distribuição por Regime Tributário -->
+        <div class="grid-3 mb-4">
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-chart-pie"></i>
+                    Distribuição por Regime
                 </div>
-                <div class="stats-icon info">
-                    <i class="fas fa-certificate"></i>
+                <div class="card-body-modern">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted"><i class="fas fa-circle text-success"></i> Simples Nacional</span>
+                            <span class="fw-bold">@Model.EmpresasSimples empresas</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: @(Model.TotalEmpresasClientes > 0 ? (Model.EmpresasSimples * 100.0 / Model.TotalEmpresasClientes) : 0)%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted"><i class="fas fa-circle text-warning"></i> Lucro Presumido</span>
+                            <span class="fw-bold">@Model.EmpresasLucroPresumido empresas</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: @(Model.TotalEmpresasClientes > 0 ? (Model.EmpresasLucroPresumido * 100.0 / Model.TotalEmpresasClientes) : 0)%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted"><i class="fas fa-circle text-danger"></i> Lucro Real</span>
+                            <span class="fw-bold">@Model.EmpresasLucroReal empresas</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" style="width: @(Model.TotalEmpresasClientes > 0 ? (Model.EmpresasLucroReal * 100.0 / Model.TotalEmpresasClientes) : 0)%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Segunda linha - Full Width -->
-    <div class="grid-3 mb-4">
-        <div class="card-modern">
-            <div class="card-header-modern">
-                <i class="fas fa-chart-line"></i>
-                Faturamento do Mês
-            </div>
-            <div class="card-body-modern">
-                <h2 class="text-success mb-3">@Model.FaturamentoMes.ToString("C")</h2>
-                <div class="progress mb-2" style="height: 10px;">
-                    <div class="progress-bar" style="width: @(Model.FaturamentoMes * 100 / (Model.MetaMensal > 0 ? Model.MetaMensal : 1))%; background: var(--accent-color);"></div>
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-clipboard-check"></i>
+                    Status das Obrigações
                 </div>
-                <small class="text-muted">Meta mensal: @Model.MetaMensal.ToString("C") - @((Model.FaturamentoMes * 100 / (Model.MetaMensal > 0 ? Model.MetaMensal : 1)).ToString("F1"))% atingido</small>
+                <div class="card-body-modern">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                        <div>
+                            <i class="fas fa-hourglass-half text-warning fa-2x"></i>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-0">@Model.ObrigacoesPendentes</h4>
+                            <small class="text-muted">Pendentes</small>
+                        </div>
+                    </div>
 
-                <div class="mt-3">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted"><i class="fas fa-file-invoice"></i> NFe</span>
-                        <span class="fw-bold">@Model.FaturamentoNFe.ToString("C")</span>
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                        <div>
+                            <i class="fas fa-certificate text-info fa-2x"></i>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-0">@Model.CertificadosVencendo</h4>
+                            <small class="text-muted">Certificados Vencendo</small>
+                        </div>
+                    </div>
+
+                    <a asp-controller="ObrigacaoFiscal" asp-action="Index" class="btn-modern btn-primary-modern w-100">
+                        <i class="fas fa-eye"></i>
+                        Ver Todas Obrigações
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-info-circle"></i>
+                    Resumo do Sistema
+                </div>
+                <div class="card-body-modern">
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted">Total de Clientes</span>
+                        <span class="fw-bold">@Model.TotalClientes</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted">Empresas Cadastradas</span>
+                        <span class="fw-bold">@Model.TotalEmpresasClientes</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted">Notas no Mês</span>
+                        <span class="fw-bold">@Model.NotasFiscaisEmitidas</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted">Lançamentos no Mês</span>
+                        <span class="fw-bold">@Model.LancamentosContabeisMes</span>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <span class="text-muted"><i class="fas fa-file-alt"></i> NFSe</span>
-                        <span class="fw-bold">@Model.FaturamentoNFSe.ToString("C")</span>
+                        <span class="text-muted">Contadores Ativos</span>
+                        <span class="fw-bold">@Model.TotalContadores</span>
                     </div>
                 </div>
             </div>
         </div>
+    }
+    else
+    {
+        <div class="grid-3 mb-4">
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-chart-line"></i>
+                    Faturamento do Mês
+                </div>
+                <div class="card-body-modern">
+                    <h2 class="text-success mb-3">@Model.FaturamentoMes.ToString("C")</h2>
+                    <div class="progress mb-2" style="height: 10px;">
+                        <div class="progress-bar" style="width: @(Model.FaturamentoMes * 100 / (Model.MetaMensal > 0 ? Model.MetaMensal : 1))%; background: var(--accent-color);"></div>
+                    </div>
+                    <small class="text-muted">Meta mensal: @Model.MetaMensal.ToString("C") - @((Model.FaturamentoMes * 100 / (Model.MetaMensal > 0 ? Model.MetaMensal : 1)).ToString("F1"))% atingido</small>
 
-        <div class="card-modern">
-            <div class="card-header-modern">
-                <i class="fas fa-rocket"></i>
-                Ações Rápidas
-            </div>
-            <div class="card-body-modern">
-                <div class="d-grid gap-3">
-                    <a asp-controller="EmpresaCliente" asp-action="Create" class="btn-modern btn-primary-modern">
-                        <i class="fas fa-building"></i>
-                        Nova Empresa
-                    </a>
-                    <a asp-controller="NotaFiscal" asp-action="Create" class="btn-modern btn-accent-modern">
-                        <i class="fas fa-file-invoice"></i>
-                        Emitir Nota Fiscal
-                    </a>
-                    <a asp-controller="LancamentoContabil" asp-action="Create" class="btn-modern btn-success-modern">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                        Novo Lançamento
-                    </a>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted"><i class="fas fa-file-invoice"></i> NFe</span>
+                            <span class="fw-bold">@Model.FaturamentoNFe.ToString("C")</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted"><i class="fas fa-file-alt"></i> NFSe</span>
+                            <span class="fw-bold">@Model.FaturamentoNFSe.ToString("C")</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card-modern">
-            <div class="card-header-modern">
-                <i class="fas fa-exclamation-triangle"></i>
-                Obrigações Próximas
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-rocket"></i>
+                    Ações Rápidas
+                </div>
+                <div class="card-body-modern">
+                    <div class="d-grid gap-5">
+                        <a asp-controller="NotaFiscal" asp-action="Create" class="btn-modern btn-accent-modern" style="height: 45px !important;">
+                            <i class="fas fa-file-invoice"></i>
+                            Emitir Nota Fiscal
+                        </a>
+                        <a asp-controller="LancamentoContabil" asp-action="Create" class="btn-modern btn-success-modern" style="height: 45px !important;">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            Importar Xml
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="card-body-modern">
-                @if (Model.ObrigacoesProximas.Any())
-                {
-                    <div class="activity-list">
-                        @foreach (var obrigacao in Model.ObrigacoesProximas.Take(3))
-                        {
-                            var diasRestantes = (obrigacao.DataVencimento - DateTime.Now).Days;
-                            var corIcone = diasRestantes <= 5 ? "bg-danger" : diasRestantes <= 10 ? "bg-warning" : "bg-info";
-                            <div class="activity-item d-flex align-items-center @(obrigacao != Model.ObrigacoesProximas.Take(3).Last() ? "mb-3" : "")">
-                                <div class="activity-icon @corIcone text-white rounded-circle me-3" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-@(diasRestantes <= 5 ? "exclamation" : "clock") fa-sm"></i>
+
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Obrigações Próximas
+                </div>
+                <div class="card-body-modern">
+                    @if (Model.ObrigacoesProximas.Any())
+                    {
+                        <div class="activity-list">
+                            @foreach (var obrigacao in Model.ObrigacoesProximas.Take(3))
+                            {
+                                var diasRestantes = (obrigacao.DataVencimento - DateTime.Now).Days;
+                                var corIcone = diasRestantes <= 5 ? "bg-danger" : diasRestantes <= 10 ? "bg-warning" : "bg-info";
+                                <div class="activity-item d-flex align-items-center @(obrigacao != Model.ObrigacoesProximas.Take(3).Last() ? "mb-3" : "")">
+                                    <div class="activity-icon @corIcone text-white rounded-circle me-3" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-@(diasRestantes <= 5 ? "exclamation" : "clock") fa-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">@obrigacao.TipoObrigacao.ToString()</div>
+                                        <small class="text-muted">Vencimento: @obrigacao.DataVencimento.ToString("dd/MM/yyyy") (@diasRestantes dias)</small>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="fw-semibold">@obrigacao.TipoObrigacao.ToString()</div>
-                                    <small class="text-muted">Vencimento: @obrigacao.DataVencimento.ToString("dd/MM/yyyy") (@diasRestantes dias)</small>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-check-circle fa-3x mb-3"></i>
-                        <p>Nenhuma obrigação pendente nos próximos 30 dias</p>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-
-    <!-- Terceira linha - Métricas Contábeis -->
-    <div class="grid-4 mb-4">
-        <div class="stats-card">
-            <div class="stats-content">
-                <div class="stats-info">
-                    <h3>@Model.LancamentosContabeisMes</h3>
-                    <p>Lançamentos (Mês)</p>
-                </div>
-                <div class="stats-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <i class="fas fa-file-invoice-dollar"></i>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-check-circle fa-3x mb-3"></i>
+                            <p>Nenhuma obrigação pendente nos próximos 30 dias</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
+    }
 
-        <div class="stats-card">
-            <div class="stats-content">
-                <div class="stats-info">
-                    <h3>@Model.TotalPlanoContas</h3>
-                    <p>Contas Contábeis</p>
-                </div>
-                <div class="stats-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <i class="fas fa-list-alt"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="stats-card">
-            <div class="stats-content">
-                <div class="stats-info">
-                    <h3>@Model.AliquotasConfiguradas</h3>
-                    <p>Alíquotas Cadastradas</p>
-                </div>
-                <div class="stats-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                    <i class="fas fa-percent"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="stats-card">
-            <div class="stats-content">
-                <div class="stats-info">
-                    <h3>@Model.TotalContadores</h3>
-                    <p>Contadores Ativos</p>
-                </div>
-                <div class="stats-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                    <i class="fas fa-user-tie"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quarta linha - Distribuição por Regime Tributário -->
-    <div class="grid-3 mb-4">
-        <div class="card-modern">
-            <div class="card-header-modern">
-                <i class="fas fa-chart-pie"></i>
-                Distribuição por Regime
-            </div>
-            <div class="card-body-modern">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted"><i class="fas fa-circle text-success"></i> Simples Nacional</span>
-                        <span class="fw-bold">@Model.EmpresasSimples empresas</span>
-                    </div>
-                    <div class="progress mb-3" style="height: 8px;">
-                        <div class="progress-bar bg-success" style="width: @(Model.TotalEmpresasClientes > 0 ? (Model.EmpresasSimples * 100.0 / Model.TotalEmpresasClientes) : 0)%"></div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted"><i class="fas fa-circle text-warning"></i> Lucro Presumido</span>
-                        <span class="fw-bold">@Model.EmpresasLucroPresumido empresas</span>
-                    </div>
-                    <div class="progress mb-3" style="height: 8px;">
-                        <div class="progress-bar bg-warning" style="width: @(Model.TotalEmpresasClientes > 0 ? (Model.EmpresasLucroPresumido * 100.0 / Model.TotalEmpresasClientes) : 0)%"></div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted"><i class="fas fa-circle text-danger"></i> Lucro Real</span>
-                        <span class="fw-bold">@Model.EmpresasLucroReal empresas</span>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-danger" style="width: @(Model.TotalEmpresasClientes > 0 ? (Model.EmpresasLucroReal * 100.0 / Model.TotalEmpresasClientes) : 0)%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card-modern">
-            <div class="card-header-modern">
-                <i class="fas fa-clipboard-check"></i>
-                Status das Obrigações
-            </div>
-            <div class="card-body-modern">
-                <div class="d-flex justify-content-between align-items-center mb-3 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
-                    <div>
-                        <i class="fas fa-hourglass-half text-warning fa-2x"></i>
-                    </div>
-                    <div class="text-end">
-                        <h4 class="mb-0">@Model.ObrigacoesPendentes</h4>
-                        <small class="text-muted">Pendentes</small>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mb-3 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
-                    <div>
-                        <i class="fas fa-certificate text-info fa-2x"></i>
-                    </div>
-                    <div class="text-end">
-                        <h4 class="mb-0">@Model.CertificadosVencendo</h4>
-                        <small class="text-muted">Certificados Vencendo</small>
-                    </div>
-                </div>
-
-                <a asp-controller="ObrigacaoFiscal" asp-action="Index" class="btn-modern btn-primary-modern w-100">
-                    <i class="fas fa-eye"></i>
-                    Ver Todas Obrigações
-                </a>
-            </div>
-        </div>
-
-        <div class="card-modern">
-            <div class="card-header-modern">
-                <i class="fas fa-info-circle"></i>
-                Resumo do Sistema
-            </div>
-            <div class="card-body-modern">
-                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                    <span class="text-muted">Total de Clientes</span>
-                    <span class="fw-bold">@Model.TotalClientes</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                    <span class="text-muted">Empresas Cadastradas</span>
-                    <span class="fw-bold">@Model.TotalEmpresasClientes</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                    <span class="text-muted">Notas no Mês</span>
-                    <span class="fw-bold">@Model.NotasFiscaisEmitidas</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                    <span class="text-muted">Lançamentos no Mês</span>
-                    <span class="fw-bold">@Model.LancamentosContabeisMes</span>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <span class="text-muted">Contadores Ativos</span>
-                    <span class="fw-bold">@Model.TotalContadores</span>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
