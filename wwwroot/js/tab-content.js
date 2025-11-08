@@ -328,7 +328,7 @@ class TabContentManager {
         console.log('Configurando formulário do modal');
 
         if (typeof window.referenceFieldManager !== 'undefined') {
-            window.referenceFieldManager.initializeFormElements(modal);
+            window.referenceFieldManager.initializeAllFields(modal);
         }
 
         if (typeof $.fn.mask !== 'undefined') {
