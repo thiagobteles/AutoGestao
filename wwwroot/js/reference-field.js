@@ -640,7 +640,7 @@ class ReferenceFieldManager {
 
         try {
             const controller = referenceType;
-            const modal = this.createSearchModal(controller, referenceType, targetField);
+            const modal = this.createSearchModal(controller, referenceType, targetField, btn);
             document.body.appendChild(modal);
 
             await this.loadSearchContent(modal, controller, btn);
@@ -663,9 +663,9 @@ class ReferenceFieldManager {
         }
     }
 
-    createSearchModal(controller, referenceType, targetField) {
-        // Detectar nível do modal atual
-        const currentModal = event?.target?.closest('.modal');
+    createSearchModal(controller, referenceType, targetField, btn) {
+        // Detectar nível do modal atual usando o botão que abriu o modal
+        const currentModal = btn?.closest('.modal');
         const currentLevel = currentModal ? parseInt(currentModal.dataset.modalLevel || '0') : 0;
         const newLevel = currentLevel + 1;
 
