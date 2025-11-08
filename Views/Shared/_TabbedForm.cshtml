@@ -23,7 +23,7 @@
     @if (Model.EnableTabs && Model.Tabs.Any())
     {
         <!-- Navegação das Abas -->
-        <div class="tab-navigation mb-4">
+        <div class="tab-navigation">
             <ul class="nav nav-tabs nav-tabs-modern" id="entityTabs" role="tablist">
                 @foreach (var tab in Model.Tabs.Where(t => t.HasAccess).OrderBy(t => t.Order))
                 {

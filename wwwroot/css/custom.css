@@ -3195,6 +3195,7 @@ body .dashboard-container,
 /* Remover margins desnecessárias do final */
 .dashboard-container > *:last-child {
     margin-bottom: 0 !important;
+    margin-top: 3px !important;
 }
 
 /* Otimizar altura do topbar */
