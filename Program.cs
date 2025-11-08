@@ -248,6 +248,18 @@ static async Task InicializarDadosPadraoContabilidade(ApplicationDbContext conte
         };
 
         await usuarioService.CriarUsuarioAsync(adminUser, "admin123");
+
+        var clienteUser = new Usuario
+        {
+            Nome = "Cliente",
+            Email = "cliente@contabilidade.com",
+            Perfil = EnumPerfilUsuario.Visualizador,
+            IdEmpresa = retorno.Id,
+            Ativo = true
+        };
+
+        await usuarioService.CriarUsuarioAsync(clienteUser, "cliente123");
+
         Console.WriteLine("✓ Usuário administrador criado");
         Console.WriteLine("  Email: admin@contabilidade.com");
         Console.WriteLine("  Senha: admin123");

@@ -4,6 +4,7 @@ using AutoGestao.Entidades;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
+using AutoGestao.Models;
 using AutoGestao.Models.Grid;
 using AutoGestao.Services.Interface;
 
