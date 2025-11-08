@@ -1050,9 +1050,7 @@ namespace AutoGestao.Controllers.Base
                     return Json(new
                     {
                         success = false,
-                        mensagem = "Você não tem permissão para excluir este registro.",
-                        redirectUrl = Url.Action("Index"),
-                        script = "showError('Você não tem permissão para excluir este registro.')"
+                        message = "Você não tem permissão para excluir este registro."
                     });
                 }
 
@@ -1071,10 +1069,8 @@ namespace AutoGestao.Controllers.Base
                 {
                     return Json(new
                     {
-                        sucesso = true,
-                        mensagem = "Registro excluído com sucesso!",
-                        redirectUrl = Url.Action("Index"),
-                        script = "showSuccess('Registro excluído com sucesso!')"
+                        success = true,
+                        message = "Registro excluído com sucesso!"
                     });
                 }
 
@@ -1088,8 +1084,7 @@ namespace AutoGestao.Controllers.Base
                     return Json(new
                     {
                         success = false,
-                        mensagem = $"Erro ao excluir registro: {ex.Message}",
-                        script = $"showError('Erro ao excluir registro: {EscapeJavaScript(ex.Message)}')"
+                        message = $"Erro ao excluir registro: {ex.Message}"
                     });
                 }
 
