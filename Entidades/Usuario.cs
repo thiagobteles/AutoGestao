@@ -8,7 +8,7 @@ namespace AutoGestao.Entidades
     [Auditable(EntityDisplayName = "Usuário")]
     [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users")]
     [FormTabs(EnableTabs = true, DefaultTab = "principal")] // Anotações para geração de TABS
-    [FormTab("UsuarioEmpresaCliente", "Empresas", TabIcon = "fas fa-folder", Order = 1, Controller = "UsuarioEmpresaCliente", LazyLoad = true)]
+    [FormTab("empresas-vinculadas", "Empresas Vinculadas", TabIcon = "fas fa-building", Order = 1, Controller = "UsuarioEmpresaCliente", Action = "Index", LazyLoad = true, RequiredRoles = new[] { "Admin" })]
     public class Usuario : BaseEntidade
     {
         [ReferenceText]

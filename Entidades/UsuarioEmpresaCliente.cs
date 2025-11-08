@@ -1,5 +1,6 @@
 using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -46,5 +47,7 @@ namespace AutoGestao.Entidades
             Template = @"<div class=""vehicle-info""><div class=""fw-semibold"">{0}</div><div class=""text-muted small"">CNPJ: {1}</div></div>")]
         [ForeignKey("IdEmpresaCliente")]
         public virtual Fiscal.EmpresaCliente? EmpresaCliente { get; set; }
+
+        public long IdEmpresa { get; set; }
     }
 }

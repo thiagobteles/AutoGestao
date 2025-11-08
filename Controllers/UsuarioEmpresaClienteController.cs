@@ -3,6 +3,7 @@ using AutoGestao.Data;
 using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
+using AutoGestao.Models;
 using AutoGestao.Models.Grid;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
