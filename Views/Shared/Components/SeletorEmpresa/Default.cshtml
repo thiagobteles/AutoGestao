@@ -1,0 +1,94 @@
+@model AutoGestao.ViewComponents.SeletorEmpresaViewModel
+
+@if (Model.Empresas.Any())
+{
+    <div class="dropdown me-3">
+        <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" id="dropdownEmpresa" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-building me-2"></i>
+            <span id="empresa-ativa-nome">
+                @{
+                    var empresaAtiva = Model.Empresas.FirstOrDefault(e => e.Id == Model.EmpresaAtivaId);
+                    if (empresaAtiva != null)
+                    {
+                        <text>@empresaAtiva.DisplayText</text>
+                    }
+                    else
+                    {
+                        <text>Selecionar Empresa</text>
+                    }
+                }
+            </span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownEmpresa" style="min-width: 300px;">
+            <li class="dropdown-header">
+                <i class="fas fa-building me-2"></i>
+                Empresas Vinculadas (@Model.Empresas.Count)
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            @foreach (var empresa in Model.Empresas)
+            {
+                <li>
+                    <a class="dropdown-item @(empresa.Id == Model.EmpresaAtivaId ? "active" : "")"
+                       href="javascript:void(0)"
+                       onclick="trocarEmpresa(@empresa.Id, '@empresa.DisplayText')">
+                        <div class="d-flex flex-column">
+                            <strong>@empresa.DisplayText</strong>
+                            @if (!string.IsNullOrEmpty(empresa.CNPJ))
+                            {
+                                <small class="text-muted">CNPJ: @empresa.CNPJ</small>
+                            }
+                        </div>
+                        @if (empresa.Id == Model.EmpresaAtivaId)
+                        {
+                            <i class="fas fa-check text-success float-end"></i>
+                        }
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <script>
+        function trocarEmpresa(idEmpresa, nomeEmpresa) {
+            // Mostrar loading
+            const btn = document.getElementById('dropdownEmpresa');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Trocando...';
+
+            // Chamar endpoint
+            fetch('/api/usuario/trocar-empresa', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ idEmpresaCliente: idEmpresa })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    // Atualizar texto do botão
+                    document.getElementById('empresa-ativa-nome').textContent = nomeEmpresa;
+
+                    // Mostrar mensagem de sucesso
+                    console.log('✅ Empresa alterada com sucesso');
+
+                    // Recarregar página para aplicar os filtros
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 300);
+                } else {
+                    alert('Erro ao trocar empresa: ' + (data.mensagem || 'Erro desconhecido'));
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao trocar empresa. Tente novamente.');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            });
+        }
+    </script>
+}
