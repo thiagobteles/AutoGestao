@@ -28,7 +28,7 @@ namespace AutoGestao.Entidades
         [FormField(Name = "Telefone", Order = 4, Section = "Dados Básicos", Icon = "fas fa-phone", Type = EnumFieldType.Telefone)]
         public string? Telefone { get; set; }
 
-        [FormField(Name = "Empresa Padrão", Order = 9, Section = "Vínculo Empresarial", Icon = "fas fa-building", Type = EnumFieldType.Reference, Reference = typeof(EmpresaCliente), HelpText = "Empresa padrão do usuário. Para múltiplas empresas, use a tab 'Empresas Vinculadas'", GridColumns = 1)]
+        [FormField(Name = "Empresa Padrão", Order = 9, Section = "Vínculo Empresarial", Icon = "fas fa-building", Type = EnumFieldType.Reference, Reference = typeof(EmpresaCliente), Placeholder = "Empresa padrão do usuário. Para múltiplas empresas, use a tab 'Empresas Vinculadas'", GridColumns = 1)]
         public long? IdEmpresaCliente { get; set; }
 
         [GridField("Perfil", Order = 10, Width = "120px")]
