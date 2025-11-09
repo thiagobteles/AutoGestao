@@ -14,11 +14,13 @@ namespace AutoGestao.Entidades.Fiscal
         [FormField(Name = "Razão Social", Order = 10, Section = "Dados Principais", Icon = "fas fa-building", Type = EnumFieldType.Text, Required = true, Placeholder = "Razão social da empresa...")]
         [Required(ErrorMessage = "Razão social é obrigatória")]
         [ReferenceText]
+        [ReferenceSearchable]
         [MaxLength(200)]
         public string RazaoSocial { get; set; } = string.Empty;
 
         [GridField("Nome Fantasia", Order = 15)]
         [FormField(Name = "Nome Fantasia", Order = 15, Section = "Dados Principais", Icon = "fas fa-store", Type = EnumFieldType.Text, Placeholder = "Nome fantasia...")]
+        [ReferenceSearchable]
         [MaxLength(200)]
         public string? NomeFantasia { get; set; }
 
@@ -26,6 +28,7 @@ namespace AutoGestao.Entidades.Fiscal
         [FormField(Name = "CNPJ", Order = 20, Section = "Dados Principais", Icon = "fas fa-id-card", Type = EnumFieldType.Cnpj, Required = true)]
         [Required(ErrorMessage = "CNPJ é obrigatório")]
         [ReferenceSubtitle(Order = 0, Prefix = "CNPJ: ", Format = "##.###.###/####-##")]
+        [ReferenceSearchable]
         [MaxLength(18)]
         public string CNPJ { get; set; } = string.Empty;
 

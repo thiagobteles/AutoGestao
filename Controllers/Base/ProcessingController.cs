@@ -1,6 +1,7 @@
 using AutoGestao.Atributes;
 using AutoGestao.Data;
 using AutoGestao.Entidades.Processing;
+using AutoGestao.Helpers;
 using AutoGestao.Models;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -143,17 +144,9 @@ namespace AutoGestao.Controllers.Base
                     });
                 }
 
-                // 2. Forçar EmpresaClienteId para usuários não-admin
-                var empresaClienteIdProp = typeof(T).GetProperty("EmpresaClienteId");
-                if (empresaClienteIdProp != null && !User.IsInRole("Admin"))
-                {
-                    var empresaClienteId = GetCurrentEmpresaClienteId();
-                    if (empresaClienteId.HasValue)
-                    {
-                        empresaClienteIdProp.SetValue(model, empresaClienteId.Value);
-                        _logger?.LogInformation("🔒 EmpresaClienteId forçado para usuário não-admin: {Value}", empresaClienteId.Value);
-                    }
-                }
+                // 2. 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN (LÓGICA CENTRALIZADA)
+                EmpresaClienteFieldHelper.ForceEmpresaClienteId(model, User);
+                _logger?.LogInformation("🔒 EmpresaClienteId validado/forçado para processamento");
 
                 // 3. Processar upload de arquivos (se houver)
                 await ProcessFileUploadsAsync(model);
@@ -230,19 +223,16 @@ namespace AutoGestao.Controllers.Base
                     sections[sectionName] = [];
                 }
 
-                // Verificar se o campo é EmpresaClienteId e o usuário não é admin
+                // 🔒 LÓGICA CENTRALIZADA DE EMPRESA CLIENTE
                 bool shouldHideField = false;
                 object? defaultValue = null;
 
-                if (prop.Name == "EmpresaClienteId" && !User.IsInRole("Admin"))
+                if (EmpresaClienteFieldHelper.ShouldHideEmpresaClienteField(prop, User, out var empresaClienteIdLogada))
                 {
-                    var empresaClienteId = GetCurrentEmpresaClienteId();
-                    if (empresaClienteId.HasValue)
-                    {
-                        shouldHideField = true;
-                        defaultValue = empresaClienteId.Value;
-                        _logger?.LogInformation("🔒 Campo EmpresaClienteId oculto para usuário não-admin. Valor: {Value}", empresaClienteId.Value);
-                    }
+                    shouldHideField = true;
+                    defaultValue = empresaClienteIdLogada.Value;
+                    _logger?.LogInformation("🔒 Campo {PropertyName} oculto para usuário não-admin. EmpresaClienteId forçado: {Value}",
+                        prop.Name, empresaClienteIdLogada);
                 }
 
                 var fieldViewModel = new FormFieldViewModel

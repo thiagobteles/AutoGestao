@@ -694,6 +694,9 @@ namespace AutoGestao.Controllers.Base
             {
                 try
                 {
+                    // 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN
+                    EmpresaClienteFieldHelper.ForceEmpresaClienteId(entity, User);
+
                     await BeforeCreate(entity);
                     _context.Set<T>().Add(entity);
                     await _context.SaveChangesAsync();
@@ -869,6 +872,9 @@ namespace AutoGestao.Controllers.Base
             {
                 try
                 {
+                    // 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN
+                    EmpresaClienteFieldHelper.ForceEmpresaClienteId(entity, User);
+
                     // Preservar valores
                     entity.IdEmpresa = existingEntity.IdEmpresa;
 
@@ -2287,15 +2293,32 @@ namespace AutoGestao.Controllers.Base
                     }
                 }
 
+                // 🔒 APLICAR LÓGICA DE EMPRESA CLIENTE LOGADA
+                // Se o campo é EmpresaCliente e o usuário não-admin está logado em uma empresa,
+                // ocultar o campo e forçar o valor
+                var fieldType = formFieldAttr.Type;
+                var isReadOnly = action == "Details" || formFieldAttr.ReadOnly;
+
+                if (EmpresaClienteFieldHelper.ShouldHideEmpresaClienteField(property, User, out var empresaClienteIdLogada))
+                {
+                    // Campo deve ser ocultado e valor forçado
+                    fieldType = EnumFieldType.Hidden;
+                    isReadOnly = true;
+                    formattedValue = empresaClienteIdLogada?.ToString();
+
+                    _logger?.LogInformation("🔒 Campo {PropertyName} oculto para usuário não-admin. EmpresaClienteId forçado: {Value}",
+                        property.Name, empresaClienteIdLogada);
+                }
+
                 return new FormFieldViewModel
                 {
                     PropertyName = property.Name,
                     DisplayName = formFieldAttr.Name ?? GetDisplayName(property),
                     Icon = formFieldAttr.Icon ?? GetDefaultIcon(property),
                     Placeholder = formFieldAttr.Placeholder ?? GetDefaultPlaceholder(property),
-                    Type = formFieldAttr.Type,
+                    Type = fieldType,
                     Required = isRequired,
-                    ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
+                    ReadOnly = isReadOnly,
                     Value = formattedValue,
                     DisplayText = displayText,
                     Reference = formFieldAttr.Reference ?? null,
@@ -2787,6 +2810,9 @@ namespace AutoGestao.Controllers.Base
                 {
                     if (controller.ModelState.IsValid)
                     {
+                        // 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN
+                        EmpresaClienteFieldHelper.ForceEmpresaClienteId(entity, controller.User);
+
                         // Executar lógica de criação
                         await controller.BeforeCreate(entity);
                         controller._context.Set<T>().Add(entity);
@@ -2848,6 +2874,9 @@ namespace AutoGestao.Controllers.Base
         {
             try
             {
+                // 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN
+                EmpresaClienteFieldHelper.ForceEmpresaClienteId(entity, controller.User);
+
                 await controller.BeforeCreate(entity);
 
                 if (controller.ModelState.IsValid)
