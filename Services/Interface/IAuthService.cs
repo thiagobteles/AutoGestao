@@ -1,3 +1,4 @@
+using AutoGestao.Entidades.Fiscal;
 using AutoGestao.Models.Auth;
 
 namespace AutoGestao.Services.Interface
@@ -11,5 +12,7 @@ namespace AutoGestao.Services.Interface
         Task LogoutAsync(int usuarioId);
 
         string[] GetRolesByPerfil(string perfil);
+
+        Task<List<EmpresaCliente>> ObterEmpresasPorIdsAsync(List<long> ids);
     }
 }

@@ -1,5 +1,6 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
+using AutoGestao.Entidades.Fiscal;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Models.Auth;
 using AutoGestao.Services.Interface;
@@ -227,10 +228,35 @@ namespace AutoGestao.Services
         {
             return BCrypt.Net.BCrypt.Verify(password, hash);
         }
-            
+
         public static string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt(12));
+        }
+
+        public async Task<List<EmpresaCliente>> ObterEmpresasPorIdsAsync(List<long> ids)
+        {
+            try
+            {
+                _logger.LogInformation("🔍 ObterEmpresasPorIdsAsync - Buscando empresas com IDs: {Ids}", string.Join(", ", ids));
+
+                // IgnoreQueryFilters para permitir buscar empresas de qualquer tenant
+                // (necessário para listar empresas vinculadas ao usuário)
+                var empresas = await _context.EmpresasClientes
+                    .IgnoreQueryFilters()
+                    .Where(e => ids.Contains(e.Id))
+                    .OrderBy(e => e.RazaoSocial)
+                    .ToListAsync();
+
+                _logger.LogInformation("✅ ObterEmpresasPorIdsAsync - Encontradas {Count} empresas", empresas.Count);
+
+                return empresas;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao buscar empresas pelos IDs: {Ids}", string.Join(", ", ids));
+                return [];
+            }
         }
     }
 }
