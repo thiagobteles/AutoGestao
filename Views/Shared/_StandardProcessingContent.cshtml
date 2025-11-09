@@ -21,18 +21,27 @@
 
     <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
 
-    @foreach (var formSection in Model.Sections)
+    @* Campos Hidden (fora das seções) *@
+    @foreach (var itemSection in Model.Sections)
+    {
+        @foreach (var field in itemSection.Fields.Where(f => f.Type == EnumFieldType.Hidden).OrderBy(f => f.Order))
+        {
+            <input type="hidden" name="@field.PropertyName" value="@field.Value" />
+        }
+    }
+
+    @foreach (var itemSection in Model.Sections)
     {
         <div class="card-modern mb-4">
             <div class="card-header-modern">
                 <i class="fas fa-cog"></i>
-                @formSection.Name
+                @itemSection.Name
             </div>
             <div class="card-body-modern">
-                <div class="row">
-                    @foreach (var field in formSection.Fields.OrderBy(f => f.Order))
+                <div class="grid-@(itemSection.GridColumns)">
+                    @foreach (var field in itemSection.Fields.Where(f => f.Type != EnumFieldType.Hidden).OrderBy(f => f.Order))
                     {
-                        <div class="col-md-@field.GridColumns mb-3">
+                        <div class="form-group-modern @field.CssClass">
                             <label class="form-label-modern">
                                 @if (!string.IsNullOrEmpty(field.Icon))
                                 {
@@ -121,17 +130,20 @@
                                             name="@field.PropertyName"
                                             @(field.Required ? "required" : "")>
                                         <option value="">Selecione...</option>
-                                        @if (field.SelectOptions != null)
+                                        @if (field.Options != null && field.Options.Any())
                                         {
-                                            @foreach (var option in field.SelectOptions)
+                                            @foreach (var option in field.Options)
                                             {
-                                                var isSelected = field.Value?.ToString() == option.Value;
-                                                <option value="@option.Value" selected="@isSelected">
+                                                <option value="@option.Value" selected="@(field.Value?.ToString() == option.Value)">
                                                     @option.Text
                                                 </option>
                                             }
                                         }
                                     </select>
+                                    break;
+
+                                case EnumFieldType.Reference:
+                                    @await Html.PartialAsync("_ReferenceField", field)
                                     break;
 
                                 case EnumFieldType.File:

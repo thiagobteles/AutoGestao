@@ -143,13 +143,25 @@ namespace AutoGestao.Controllers.Base
                     });
                 }
 
-                // 2. Processar upload de arquivos (se houver)
+                // 2. Forçar EmpresaClienteId para usuários não-admin
+                var empresaClienteIdProp = typeof(T).GetProperty("EmpresaClienteId");
+                if (empresaClienteIdProp != null && !User.IsInRole("Admin"))
+                {
+                    var empresaClienteId = GetCurrentEmpresaClienteId();
+                    if (empresaClienteId.HasValue)
+                    {
+                        empresaClienteIdProp.SetValue(model, empresaClienteId.Value);
+                        _logger?.LogInformation("🔒 EmpresaClienteId forçado para usuário não-admin: {Value}", empresaClienteId.Value);
+                    }
+                }
+
+                // 3. Processar upload de arquivos (se houver)
                 await ProcessFileUploadsAsync(model);
 
-                // 3. Hook antes do processamento
+                // 4. Hook antes do processamento
                 await OnBeforeProcessAsync(model);
 
-                // 4. Executar processamento
+                // 5. Executar processamento
                 var userId = GetCurrentUserId();
                 var empresaId = GetCurrentEmpresaId();
 
@@ -157,7 +169,7 @@ namespace AutoGestao.Controllers.Base
 
                 var result = await model.ProcessAsync(_context, _fileStorageService, userId, empresaId);
 
-                // 5. Log do resultado
+                // 6. Log do resultado
                 if (result.Success)
                 {
                     _logger?.LogInformation("✅ Processamento concluído com sucesso: {Message}", result.Message);
@@ -169,7 +181,7 @@ namespace AutoGestao.Controllers.Base
                     await OnAfterProcessFailureAsync(model, result);
                 }
 
-                // 6. Retornar resultado
+                // 7. Retornar resultado
                 return Json(new
                 {
                     success = result.Success,
@@ -218,11 +230,26 @@ namespace AutoGestao.Controllers.Base
                     sections[sectionName] = [];
                 }
 
+                // Verificar se o campo é EmpresaClienteId e o usuário não é admin
+                bool shouldHideField = false;
+                object? defaultValue = null;
+
+                if (prop.Name == "EmpresaClienteId" && !User.IsInRole("Admin"))
+                {
+                    var empresaClienteId = GetCurrentEmpresaClienteId();
+                    if (empresaClienteId.HasValue)
+                    {
+                        shouldHideField = true;
+                        defaultValue = empresaClienteId.Value;
+                        _logger?.LogInformation("🔒 Campo EmpresaClienteId oculto para usuário não-admin. Valor: {Value}", empresaClienteId.Value);
+                    }
+                }
+
                 var fieldViewModel = new FormFieldViewModel
                 {
                     PropertyName = prop.Name,
                     DisplayName = formFieldAttr.Name,
-                    Type = formFieldAttr.Type,
+                    Type = shouldHideField ? Enumerador.Gerais.EnumFieldType.Hidden : formFieldAttr.Type,
                     Required = formFieldAttr.Required,
                     Icon = formFieldAttr.Icon,
                     GridColumns = formFieldAttr.GridColumns,
@@ -232,7 +259,15 @@ namespace AutoGestao.Controllers.Base
                     MaxSizeMB = formFieldAttr.MaxSizeMB,
                     ImageSize = formFieldAttr.ImageSize,
                     Placeholder = formFieldAttr.Placeholder,
-                    HelpText = formFieldAttr.HelpText
+                    HelpText = formFieldAttr.HelpText,
+                    Value = defaultValue ?? prop.GetValue(new T()),
+                    Options = formFieldAttr.Type == Enumerador.Gerais.EnumFieldType.Select
+                        ? GetAutoEnumOptions(prop)
+                        : new(),
+                    ReferenceConfig = formFieldAttr.Reference != null
+                        ? ReferenceFieldConfig.GetDefault(formFieldAttr.Reference)
+                        : new(),
+                    ReadOnly = shouldHideField
                 };
 
                 sections[sectionName].Add(fieldViewModel);
@@ -331,6 +366,42 @@ namespace AutoGestao.Controllers.Base
                 prop.SetValue(model, filePath);
 
                 _logger?.LogInformation("✅ Arquivo uploaded com sucesso: {FilePath}", filePath);
+            }
+        }
+
+        /// <summary>
+        /// Obtém as opções de select automaticamente para propriedades Enum
+        /// </summary>
+        private static List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> GetAutoEnumOptions(PropertyInfo property)
+        {
+            try
+            {
+                var propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+                if (!propertyType.IsEnum)
+                {
+                    return new();
+                }
+
+                // Usa reflexão para chamar EnumExtension.GetSelectListItems<TEnum>(true)
+                var enumExtensionMethod = typeof(AutoGestao.Extensions.EnumExtension)
+                    .GetMethod("GetSelectListItems");
+
+                if (enumExtensionMethod == null)
+                {
+                    return new();
+                }
+
+                var genericMethod = enumExtensionMethod.MakeGenericMethod(propertyType);
+
+                // Chama o método com obterIcone = true
+                var result = genericMethod.Invoke(null, new object[] { true })
+                    as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>;
+
+                return result ?? new();
+            }
+            catch
+            {
+                return new();
             }
         }
 

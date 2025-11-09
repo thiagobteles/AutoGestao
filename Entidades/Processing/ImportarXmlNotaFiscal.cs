@@ -4,10 +4,10 @@ using AutoGestao.Entidades.Fiscal;
 using AutoGestao.Enumerador.Fiscal;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Services.Interface;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Xml.Linq;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Entidades.Processing
 {
@@ -279,5 +279,7 @@ namespace AutoGestao.Entidades.Processing
         }
 
         #endregion
+
+        public virtual EmpresaCliente? EmpresaCliente { get; set; }
     }
 }
