@@ -126,9 +126,9 @@ namespace AutoGestao.Controllers
                 ModelState.AddModelError(nameof(entity.Email), "Email já cadastrado");
             }
 
-            // Validar senha
-            var senha = Request.Form["SenhaHash"].ToString();
-            var confirmarSenha = Request.Form["ConfirmarSenha"].ToString();
+            // Validar senha - a senha vem na entidade, não em Request.Form
+            var senha = entity.SenhaHash;
+            var confirmarSenha = entity.ConfirmarSenha;
 
             if (string.IsNullOrEmpty(senha))
             {
@@ -160,8 +160,8 @@ namespace AutoGestao.Controllers
                 ModelState.AddModelError(nameof(entity.Email), "Email já cadastrado");
             }
 
-            // Se senha foi informada, alterar
-            var novaSenha = Request.Form["SenhaHash"].ToString();
+            // Se senha foi informada, alterar - a senha vem na entidade
+            var novaSenha = entity.SenhaHash;
             if (!string.IsNullOrEmpty(novaSenha))
             {
                 entity.SenhaHash = Services.AuthService.HashPassword(novaSenha);

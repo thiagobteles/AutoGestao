@@ -145,25 +145,7 @@
    ANIMAÇÕES
    ======================================== */
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.tab-content-wrapper {
-    animation: fadeIn 0.3s ease;
-}
-
-.grid-row {
-    animation: fadeIn 0.2s ease;
-}
+/* Animações de fade removidas para melhor performance e UX */
 
 /* ========================================
    MODAL FULLSCREEN PARA TABS

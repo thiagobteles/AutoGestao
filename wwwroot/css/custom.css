@@ -3673,35 +3673,7 @@ html body .sidebar.collapsed::before {
    ANIMAÇÕES ESPECÍFICAS DA GRID
    =================================================================== */
 
-/* Animação das linhas da tabela ao carregar */
-.base-grid-table tbody tr {
-    animation: fadeInUp 0.4s ease-out;
-    animation-fill-mode: both;
-}
-
-    .base-grid-table tbody tr:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .base-grid-table tbody tr:nth-child(2) {
-        animation-delay: 0.15s;
-    }
-
-    .base-grid-table tbody tr:nth-child(3) {
-        animation-delay: 0.2s;
-    }
-
-    .base-grid-table tbody tr:nth-child(4) {
-        animation-delay: 0.25s;
-    }
-
-    .base-grid-table tbody tr:nth-child(5) {
-        animation-delay: 0.3s;
-    }
-
-    .base-grid-table tbody tr:nth-child(n+6) {
-        animation-delay: 0.35s;
-    }
+/* Animações de linhas removidas para melhor UX e performance */
 
 /* ===================================================================
    LOADING SKELETON
@@ -4185,12 +4157,10 @@ html body .sidebar.collapsed::before {
 
 .base-grid-table tbody tr {
     border-bottom: 1px solid var(--border-color);
-    transition: all 0.2s ease;
 }
 
     .base-grid-table tbody tr:hover {
         background-color: rgba(55, 65, 81, 0.05);
-        transform: translateX(2px);
     }
 
     .base-grid-table tbody tr.grid-row {
@@ -4199,7 +4169,6 @@ html body .sidebar.collapsed::before {
 
         .base-grid-table tbody tr.grid-row:hover {
             background-color: rgba(55, 65, 81, 0.08);
-            box-shadow: 0 2px 4px var(--black-10);
         }
 
 /* ===================================================================
@@ -6637,9 +6606,7 @@ body .dropdown-menu {
    ANIMAÇÕES PARA ABAS
    =================================================================== */
 
-.tab-pane {
-    animation: fadeInUp 0.3s ease;
-}
+/* Animação de tab-pane removida para melhor performance */
 
 @keyframes fadeInUp {
     from {
@@ -6928,10 +6895,7 @@ body .dropdown-menu {
     font-weight: 500;
 }
 
-/* Animações de entrada */
-.fade-in-up {
-    animation: fadeInUp 0.3s ease-out;
-}
+/* Animações de entrada removidas para melhor performance */
 
 @keyframes fadeInUp {
     from {
