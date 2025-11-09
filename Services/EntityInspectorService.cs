@@ -1,6 +1,6 @@
 using AutoGestao.Atributes;
 using AutoGestao.Data;
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Models.Report;
 using System.Reflection;
 

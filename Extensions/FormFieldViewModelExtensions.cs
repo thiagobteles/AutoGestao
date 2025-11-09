@@ -69,5 +69,53 @@ namespace AutoGestao.Extensions
                 .Where(p => p.GetCustomAttributes(typeof(ReferenceSubtitleAttribute), false).Any())
                 .Select(p => p.Name)];
         }
+
+        /// <summary>
+        /// Gera o placeholder para um campo de referência baseado nos campos ReferenceSearchable
+        /// </summary>
+        /// <param name="referenceType">Tipo da entidade de referência</param>
+        /// <returns>Placeholder gerado automaticamente</returns>
+        public static string GetReferencePlaceholder(Type referenceType)
+        {
+            // Buscar propriedades com [ReferenceSearchable]
+            var searchableProperties = referenceType.GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(ReferenceSearchableAttribute), false).Any())
+                .ToList();
+
+            if (!searchableProperties.Any())
+            {
+                // Se não houver campos searchable, retornar placeholder padrão
+                return "Digite para pesquisar...";
+            }
+
+            // Obter os nomes de exibição das propriedades
+            var displayNames = new List<string>();
+            foreach (var prop in searchableProperties)
+            {
+                // Buscar FormFieldAttribute para obter o nome de exibição
+                var formFieldAttr = prop.GetCustomAttributes(typeof(FormFieldAttribute), false)
+                    .Cast<FormFieldAttribute>()
+                    .FirstOrDefault();
+
+                var displayName = formFieldAttr?.Name ?? prop.Name;
+                displayNames.Add(displayName);
+            }
+
+            // Montar o texto do placeholder
+            if (displayNames.Count == 1)
+            {
+                return $"Digite {displayNames[0]} para filtrar";
+            }
+            else if (displayNames.Count == 2)
+            {
+                return $"Digite {displayNames[0]} ou {displayNames[1]} para filtrar";
+            }
+            else
+            {
+                var lastItem = displayNames.Last();
+                var otherItems = string.Join(", ", displayNames.Take(displayNames.Count - 1));
+                return $"Digite {otherItems} ou {lastItem} para filtrar";
+            }
+        }
     }
 }

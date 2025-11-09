@@ -1,7 +1,8 @@
 using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
-using AutoGestao.Entidades.Fiscal;
-using AutoGestao.Entidades.Processing;
+using AutoGestao.Entidades;
+using AutoGestao.Entidades.Processamento;
+using AutoGestao.Interfaces;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Services.Interface

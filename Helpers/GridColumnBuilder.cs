@@ -85,10 +85,14 @@ namespace AutoGestao.Helpers
                 // Searchable fields - verificar atributo dedicado primeiro
                 if (referenceSearchableAttr != null)
                 {
+                    // ✅ IMPORTANTE: Buscar Format do ReferenceSubtitleAttribute do mesmo campo (se existir)
+                    var subtitleAttr = referenceSubtitleAttrs.FirstOrDefault();
+
                     metadata.SearchableProperties.Add(new ReferencePropertyInfo
                     {
                         Property = prop,
-                        NavigationPath = referenceSearchableAttr.NavigationPath
+                        NavigationPath = referenceSearchableAttr.NavigationPath,
+                        Format = subtitleAttr?.Format // Copiar Format do subtitle para o searchable
                     });
                 }
 

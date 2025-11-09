@@ -1,11 +1,12 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Fiscal;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades.Fiscal
+namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Lançamento Contábil", Subtitle = "Registre lançamentos contábeis de débito e crédito", Icon = "fas fa-file-invoice-dollar")]
     public class LancamentoContabil : BaseEntidade
@@ -63,7 +64,7 @@ namespace AutoGestao.Entidades.Fiscal
         [MaxLength(50)]
         public string? NumeroDocumento { get; set; }
 
-        [FormField(Name = "Nota Fiscal", Order = 55, Section = "Documento de Origem", Icon = "fas fa-file-invoice", Type = EnumFieldType.Reference, Reference = typeof(NotaFiscal), Placeholder = "Vincular a uma nota fiscal...")]
+        [FormField(Name = "Nota Fiscal", Order = 55, Section = "Documento de Origem", Icon = "fas fa-file-invoice", Type = EnumFieldType.Reference, Reference = typeof(NotaFiscal))]
         public long? NotaFiscalId { get; set; }
 
         [GridField("Conciliado", Order = 60, Width = "100px")]

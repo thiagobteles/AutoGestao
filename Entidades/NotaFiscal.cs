@@ -1,15 +1,24 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Fiscal;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades.Fiscal
+namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Nota Fiscal", Subtitle = "Gerencie as notas fiscais eletrônicas", Icon = "fas fa-file-invoice")]
     public class NotaFiscal : BaseEntidade
     {
+        [FormField(Name = "Empresa", Order = 40, Section = "Empresa", Icon = "fas fa-building", Type = EnumFieldType.Reference, Required = true, Reference = typeof(EmpresaCliente), GridColumns = 1)]
+        [Required]
+        public long EmpresaClienteId { get; set; }
+
+        [GridComposite("Empresa", Order = 40, NavigationPaths = new[] { "EmpresaCliente.RazaoSocial", "EmpresaCliente.CNPJ" },
+            Template = @"<div class=""vehicle-info""><div class=""fw-semibold"">{0}</div><div class=""text-muted small"">{1}</div></div>")]
+        public string EmpresaClienteNome => $"{EmpresaCliente?.RazaoSocial ?? "N/A"} - {EmpresaCliente?.CNPJ ?? "N/A"}";
+
         [ReferenceText]
         [GridField("Número", Order = 10, Width = "100px")]
         [FormField(Name = "Número da NF", Order = 10, Section = "Dados da Nota", Icon = "fas fa-hashtag", Type = EnumFieldType.Number, Required = true)]
@@ -39,14 +48,6 @@ namespace AutoGestao.Entidades.Fiscal
         [GridField("Status", Order = 35, Width = "120px", EnumRender = EnumRenderType.IconDescription)]
         [FormField(Name = "Status", Order = 35, Section = "Dados da Nota", Icon = "fas fa-info-circle", Type = EnumFieldType.Select)]
         public EnumStatusNotaFiscal Status { get; set; } = EnumStatusNotaFiscal.Rascunho;
-
-        [FormField(Name = "Empresa", Order = 40, Section = "Dados da Nota", Icon = "fas fa-building", Type = EnumFieldType.Reference, Required = true, Reference = typeof(EmpresaCliente))]
-        [Required]
-        public long EmpresaClienteId { get; set; }
-
-        [GridComposite("Empresa", Order = 40, NavigationPaths = new[] { "EmpresaCliente.RazaoSocial", "EmpresaCliente.CNPJ" },
-            Template = @"<div class=""vehicle-info""><div class=""fw-semibold"">{0}</div><div class=""text-muted small"">{1}</div></div>")]
-        public string EmpresaClienteNome => $"{EmpresaCliente?.RazaoSocial ?? "N/A"} - {EmpresaCliente?.CNPJ ?? "N/A"}";
 
         [GridField("Data Emissão", Order = 45, Width = "120px", Format = "dd/MM/yyyy HH:mm")]
         [FormField(Name = "Data de Emissão", Order = 45, Section = "Datas", Icon = "fas fa-calendar", Type = EnumFieldType.DateTime)]

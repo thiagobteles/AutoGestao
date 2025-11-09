@@ -1,15 +1,15 @@
 using AutoGestao.Atributes;
 using AutoGestao.Data;
-using AutoGestao.Entidades.Fiscal;
 using AutoGestao.Enumerador.Fiscal;
 using AutoGestao.Enumerador.Gerais;
+using AutoGestao.Interfaces;
 using AutoGestao.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Xml.Linq;
 
-namespace AutoGestao.Entidades.Processing
+namespace AutoGestao.Entidades.Processamento
 {
     /// <summary>
     /// Processamento para importar XML de Nota Fiscal Eletrônica (NFe)
@@ -97,7 +97,7 @@ namespace AutoGestao.Entidades.Processing
 
                 // 7. Criar ou atualizar nota fiscal
                 NotaFiscal notaFiscal;
-                bool isNova = false;
+                var isNova = false;
 
                 if (notaExistente != null)
                 {

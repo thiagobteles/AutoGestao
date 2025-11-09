@@ -3,7 +3,7 @@ using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 
-namespace AutoGestao.Entidades
+namespace AutoGestao.Entidades.Base
 {
     [Auditable(AuditCreate = true, AuditUpdate = true, AuditDelete = true)]
     public class BaseEntidadeDocumento : BaseEntidade

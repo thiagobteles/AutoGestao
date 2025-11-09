@@ -1,5 +1,5 @@
 using AutoGestao.Data;
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoGestao.Helpers

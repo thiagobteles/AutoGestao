@@ -1,3 +1,4 @@
+@using AutoGestao.Entidades.Base
 @using AutoGestao.Enumerador.Gerais
 @model StandardFormViewModel
 
@@ -90,8 +91,8 @@
         <input type="hidden" name="Id" value="@dynamicModel.Id" />
 
         @* Se a entidade herda de BaseEntidadeEmpresa, incluir IdEmpresa *@
-        @if (Model.Model.GetType().IsSubclassOf(typeof(AutoGestao.Entidades.BaseEntidade)) ||
-            Model.Model.GetType() == typeof(AutoGestao.Entidades.BaseEntidade))
+        @if (Model.Model.GetType().IsSubclassOf(typeof(BaseEntidade)) ||
+            Model.Model.GetType() == typeof(BaseEntidade))
         {
             <input type="hidden" name="IdEmpresa" value="@dynamicModel.IdEmpresa" />
         }

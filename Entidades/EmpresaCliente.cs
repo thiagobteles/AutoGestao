@@ -1,11 +1,12 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Fiscal;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades.Fiscal
+namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Empresa Cliente", Subtitle = "Gerencie as empresas dos seus clientes contábeis", Icon = "fas fa-building")]
     public class EmpresaCliente : BaseEntidade
@@ -27,7 +28,7 @@ namespace AutoGestao.Entidades.Fiscal
         [GridField("CNPJ", Order = 20, Width = "150px")]
         [FormField(Name = "CNPJ", Order = 20, Section = "Dados Principais", Icon = "fas fa-id-card", Type = EnumFieldType.Cnpj, Required = true)]
         [Required(ErrorMessage = "CNPJ é obrigatório")]
-        [ReferenceSubtitle(Order = 0, Prefix = "CNPJ: ", Format = "##.###.###/####-##")]
+        [ReferenceSubtitle(Order = 0, Prefix = "CNPJ: ", Format = "##.###.###/####-##")] // Format será usado automaticamente como replace quando for Searchable!
         [ReferenceSearchable]
         [MaxLength(18)]
         public string CNPJ { get; set; } = string.Empty;

@@ -1,4 +1,4 @@
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Models;
 using AutoGestao.Services;
 using Microsoft.AspNetCore.Mvc;

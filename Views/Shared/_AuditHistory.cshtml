@@ -1,6 +1,7 @@
+@using AutoGestao.Entidades.Base
 @model (string EntidadeNome, string EntidadeId)
 @{
-    var logs = ViewBag.AuditLogs as List<AutoGestao.Entidades.AuditLog> ?? new List<AutoGestao.Entidades.AuditLog>();
+    var logs = ViewBag.AuditLogs as List<AuditLog> ?? new List<AuditLog>();
 }
 
 <div class="card">

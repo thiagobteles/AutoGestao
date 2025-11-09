@@ -1,6 +1,6 @@
 using AutoGestao.Atributes;
 using AutoGestao.Data;
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Helpers;
@@ -1998,6 +1998,14 @@ namespace AutoGestao.Controllers.Base
         private static string GetDefaultPlaceholder(PropertyInfo property)
         {
             var propertyName = property.Name.ToLower();
+
+            // IMPORTANTE: Verificar primeiro se é um campo de referência através do FormFieldAttribute
+            var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
+            if (formFieldAttr?.Type == EnumFieldType.Reference && formFieldAttr?.Reference != null)
+            {
+                return FormFieldViewModelExtensions.GetReferencePlaceholder(formFieldAttr.Reference);
+            }
+
             var fieldType = DetermineFieldType(property);
 
             return fieldType switch
@@ -3152,30 +3160,65 @@ namespace AutoGestao.Controllers.Base
                 return query;
             }
 
+            // Normalizar termo de busca (remover pontuação para CNPJ, CPF, telefone, etc.)
+            var searchTermNormalized = NormalizeSearchTerm(searchTerm);
+
             // Construir expressão OR para buscar em todas as propriedades
             var parameter = Expression.Parameter(typeof(T), "x");
             Expression? orExpression = null;
 
             var searchTermLower = searchTerm.ToLower();
             var searchTermConstant = Expression.Constant(searchTermLower);
+            var searchTermNormalizedConstant = Expression.Constant(searchTermNormalized);
 
             foreach (var prop in searchableProperties)
             {
+                // Verificar se a propriedade tem formato de máscara (CNPJ, CPF, etc.)
+                var subtitleAttr = prop.GetCustomAttribute<ReferenceSubtitleAttribute>();
+                var hasFormatMask = subtitleAttr?.Format != null && HasFormatMask(subtitleAttr.Format);
+
                 // x.PropertyName
                 var propertyAccess = Expression.Property(parameter, prop);
 
                 // x.PropertyName != null
                 var notNullCheck = Expression.NotEqual(propertyAccess, Expression.Constant(null, typeof(string)));
 
-                // x.PropertyName.ToLower()
-                var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
-                var propertyToLower = Expression.Call(propertyAccess, toLowerMethod!);
+                Expression containsCall;
 
-                // x.PropertyName.ToLower().Contains(searchTerm.ToLower())
-                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                var containsCall = Expression.Call(propertyToLower, containsMethod!, searchTermConstant);
+                if (hasFormatMask)
+                {
+                    // Para campos com máscara (CNPJ, CPF, telefone), aplicar normalização
+                    var replaceMethod = typeof(string).GetMethod("Replace", new[] { typeof(string), typeof(string) });
+                    if (replaceMethod != null)
+                    {
+                        // Aplicar múltiplos replaces para remover pontuação
+                        var normalizedProperty = ApplyNormalizationReplaces(propertyAccess, replaceMethod);
 
-                // x.PropertyName != null && x.PropertyName.ToLower().Contains(searchTerm.ToLower())
+                        // normalizedProperty.Contains(searchTermNormalized)
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                        containsCall = Expression.Call(normalizedProperty, containsMethod!, searchTermNormalizedConstant);
+                    }
+                    else
+                    {
+                        // Fallback para busca normal se Replace não estiver disponível
+                        var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                        var propertyToLower = Expression.Call(propertyAccess, toLowerMethod!);
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                        containsCall = Expression.Call(propertyToLower, containsMethod!, searchTermConstant);
+                    }
+                }
+                else
+                {
+                    // x.PropertyName.ToLower()
+                    var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                    var propertyToLower = Expression.Call(propertyAccess, toLowerMethod!);
+
+                    // x.PropertyName.ToLower().Contains(searchTerm.ToLower())
+                    var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                    containsCall = Expression.Call(propertyToLower, containsMethod!, searchTermConstant);
+                }
+
+                // x.PropertyName != null && x.PropertyName.Contains(searchTerm)
                 var condition = Expression.AndAlso(notNullCheck, containsCall);
 
                 // Combinar com OR
@@ -3190,6 +3233,60 @@ namespace AutoGestao.Controllers.Base
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Normaliza o termo de busca removendo caracteres de pontuação
+        /// </summary>
+        private static string NormalizeSearchTerm(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+                return term;
+
+            // Remove caracteres comuns de formatação
+            return term.Replace(".", "")
+                      .Replace("-", "")
+                      .Replace("/", "")
+                      .Replace("(", "")
+                      .Replace(")", "")
+                      .Replace(" ", "")
+                      .ToLower();
+        }
+
+        /// <summary>
+        /// Verifica se o formato indica um campo com máscara (CNPJ, CPF, telefone, etc)
+        /// </summary>
+        private static bool HasFormatMask(string? format)
+        {
+            if (string.IsNullOrEmpty(format))
+                return false;
+
+            // Formatos conhecidos que usam pontuação
+            return format.Contains(".") ||
+                   format.Contains("-") ||
+                   format.Contains("/") ||
+                   format.Contains("(") ||
+                   format.Contains(")");
+        }
+
+        /// <summary>
+        /// Aplica múltiplos replaces para remover caracteres de formatação do campo
+        /// </summary>
+        private static Expression ApplyNormalizationReplaces(Expression property, MethodInfo replaceMethod)
+        {
+            // Cadeia de replaces: campo.Replace(".", "").Replace("-", "").Replace("/", "")...
+            Expression result = property;
+
+            var charsToRemove = new[] { ".", "-", "/", "(", ")", " " };
+
+            foreach (var charToRemove in charsToRemove)
+            {
+                var searchChar = Expression.Constant(charToRemove);
+                var emptyString = Expression.Constant("");
+                result = Expression.Call(result, replaceMethod, searchChar, emptyString);
+            }
+
+            return result;
         }
 
         private PropertyInfo? GetDisplayProperty()

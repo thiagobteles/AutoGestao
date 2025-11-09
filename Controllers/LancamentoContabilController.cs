@@ -1,6 +1,6 @@
 using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
-using AutoGestao.Entidades.Fiscal;
+using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;

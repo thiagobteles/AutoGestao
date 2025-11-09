@@ -1,7 +1,7 @@
 using AutoGestao.Data;
 using AutoGestao.Services.Interface;
 
-namespace AutoGestao.Entidades.Processing
+namespace AutoGestao.Interfaces
 {
     /// <summary>
     /// Interface base para entidades de processamento genéricas

@@ -2,7 +2,7 @@ using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 
-namespace AutoGestao.Entidades
+namespace AutoGestao.Entidades.Base
 {
     [FormConfig(Title = "Cliente", Subtitle = "Gerencie as informações dos clientes", Icon = "fas fa-user")]
     public class Cliente : BaseEntidadeDocumento

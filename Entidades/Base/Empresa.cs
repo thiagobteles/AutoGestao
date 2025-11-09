@@ -2,7 +2,7 @@ using AutoGestao.Atributes;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 
-namespace AutoGestao.Entidades
+namespace AutoGestao.Entidades.Base
 {
     [FormConfig(Title = "Empresa", Subtitle = "Gerencie as informações das empresas", Icon = "fas fa-user")]
     public class Empresa : BaseEntidade

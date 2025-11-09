@@ -3195,7 +3195,8 @@ body .dashboard-container,
 /* Remover margins desnecessárias do final */
 .dashboard-container > *:last-child {
     margin-bottom: 0 !important;
-    margin-top: 3px !important;
+    margin-top: 0px !important;
+    border-radius: var(--border-radius-md);
 }
 
 /* Otimizar altura do topbar */
@@ -6370,7 +6371,7 @@ body .dropdown-menu {
 
 .tab-content {
     background: white;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-top: none;
     border-radius: 0 0 0.75rem 0.75rem;
     min-height: 400px;

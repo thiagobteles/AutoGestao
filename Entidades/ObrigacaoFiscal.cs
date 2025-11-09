@@ -1,11 +1,12 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Fiscal;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades.Fiscal
+namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Obrigação Fiscal", Subtitle = "Controle de obrigações acessórias e prazos fiscais", Icon = "fas fa-tasks")]
     public class ObrigacaoFiscal : BaseEntidade

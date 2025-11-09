@@ -1,10 +1,11 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades.Fiscal
+namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Contador Responsável", Subtitle = "Cadastro dos contadores responsáveis pelas empresas", Icon = "fas fa-user-tie")]
     public class ContadorResponsavel : BaseEntidade

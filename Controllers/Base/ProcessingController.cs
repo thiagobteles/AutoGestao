@@ -1,7 +1,8 @@
 using AutoGestao.Atributes;
 using AutoGestao.Data;
-using AutoGestao.Entidades.Processing;
+using AutoGestao.Extensions;
 using AutoGestao.Helpers;
+using AutoGestao.Interfaces;
 using AutoGestao.Models;
 using AutoGestao.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -235,6 +236,16 @@ namespace AutoGestao.Controllers.Base
                         prop.Name, empresaClienteIdLogada);
                 }
 
+                // Determinar o placeholder
+                var placeholder = formFieldAttr.Placeholder;
+                if (string.IsNullOrEmpty(placeholder) &&
+                    formFieldAttr.Type == Enumerador.Gerais.EnumFieldType.Reference &&
+                    formFieldAttr.Reference != null)
+                {
+                    // Gerar placeholder automaticamente baseado nos campos ReferenceSearchable
+                    placeholder = FormFieldViewModelExtensions.GetReferencePlaceholder(formFieldAttr.Reference);
+                }
+
                 var fieldViewModel = new FormFieldViewModel
                 {
                     PropertyName = prop.Name,
@@ -248,7 +259,7 @@ namespace AutoGestao.Controllers.Base
                     AllowedExtensions = formFieldAttr.AllowedExtensions,
                     MaxSizeMB = formFieldAttr.MaxSizeMB,
                     ImageSize = formFieldAttr.ImageSize,
-                    Placeholder = formFieldAttr.Placeholder,
+                    Placeholder = placeholder,
                     HelpText = formFieldAttr.HelpText,
                     Value = defaultValue ?? prop.GetValue(new T()),
                     Options = formFieldAttr.Type == Enumerador.Gerais.EnumFieldType.Select

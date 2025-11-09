@@ -1,5 +1,5 @@
 using AutoGestao.Atributes;
-using AutoGestao.Entidades.Fiscal;
+using AutoGestao.Entidades;
 using AutoGestao.Enumerador.Gerais;
 using System.Reflection;
 using System.Security.Claims;

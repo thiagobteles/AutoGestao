@@ -1,6 +1,6 @@
 using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Helpers;
 using AutoGestao.Interfaces;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,5 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Interfaces;
 using System.ComponentModel.DataAnnotations;
@@ -26,7 +27,7 @@ namespace AutoGestao.Entidades
 
         [Required]
         [Column("id_empresa_cliente")]
-        [FormField(Name = "Empresa Cliente", Order = 2, Section = "Dados do Vínculo", Icon = "fas fa-building", Type = EnumFieldType.Reference, Required = true, Reference = typeof(Fiscal.EmpresaCliente))]
+        [FormField(Name = "Empresa Cliente", Order = 2, Section = "Dados do Vínculo", Icon = "fas fa-building", Type = EnumFieldType.Reference, Required = true, Reference = typeof(EmpresaCliente))]
         public long IdEmpresaCliente { get; set; }
 
         [Column("data_vinculo")]
@@ -46,7 +47,7 @@ namespace AutoGestao.Entidades
         [GridComposite("Empresa Cliente", Order = 10, NavigationPaths = new[] { "EmpresaCliente.RazaoSocial", "EmpresaCliente.CNPJ" },
             Template = @"<div class=""vehicle-info""><div class=""fw-semibold"">{0}</div><div class=""text-muted small"">CNPJ: {1}</div></div>")]
         [ForeignKey("IdEmpresaCliente")]
-        public virtual Fiscal.EmpresaCliente? EmpresaCliente { get; set; }
+        public virtual EmpresaCliente? EmpresaCliente { get; set; }
 
         [Required]
         [Column("id_empresa")]

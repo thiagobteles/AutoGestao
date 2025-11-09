@@ -1,5 +1,5 @@
 using AutoGestao.Entidades;
-using AutoGestao.Entidades.Fiscal;
+using AutoGestao.Entidades.Base;
 
 namespace AutoGestao.Models
 {

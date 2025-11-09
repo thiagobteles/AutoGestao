@@ -1,11 +1,12 @@
 using AutoGestao.Atributes;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Fiscal;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades.Fiscal
+namespace AutoGestao.Entidades
 {
     [FormConfig(Title = "Parâmetro Fiscal", Subtitle = "Configure os parâmetros fiscais para emissão de notas", Icon = "fas fa-cogs")]
     public class ParametroFiscal : BaseEntidade

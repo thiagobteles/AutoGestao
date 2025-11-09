@@ -1,4 +1,4 @@
-using AutoGestao.Entidades.Fiscal;
+using AutoGestao.Entidades;
 using AutoGestao.Models.Auth;
 
 namespace AutoGestao.Services.Interface

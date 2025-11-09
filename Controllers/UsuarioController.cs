@@ -1,6 +1,6 @@
 using AutoGestao.Controllers.Base;
 using AutoGestao.Data;
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Extensions;
 using AutoGestao.Models;

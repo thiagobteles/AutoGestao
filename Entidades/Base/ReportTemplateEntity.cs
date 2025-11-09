@@ -2,7 +2,7 @@ using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades.Relatorio
+namespace AutoGestao.Entidades.Base
 {
     [FormConfig(Title = "Template de Relatório", Subtitle = "Gerencie templates de relatórios salvos", Icon = "fas fa-file-alt")]
     public class ReportTemplateEntity : BaseEntidade

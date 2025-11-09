@@ -1,6 +1,6 @@
 using AutoGestao;
 using AutoGestao.Data;
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Models;
@@ -29,7 +29,6 @@ CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
 
 // Obtem o nome do cliente
 var cliente = builder.Configuration.GetValue<string>("Cliente");
-Globais.Cliente = cliente;
 Globais.CorSistema = (EnumCorSistema)builder.Configuration.GetValue<int>("CorSistema");
 
 // Registrar HttpContextAccessor antes de tudo
@@ -163,7 +162,7 @@ using (var scope = app.Services.CreateScope())
     var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
     var empresaService = scope.ServiceProvider.GetRequiredService<IEmpresaService>();
 
-    if (Globais.EhAutoGestao)
+    if (cliente.ToLower().Equals("autogestao"))
     {
         await InicializarDadosPadraoAutoGestao(context, usuarioService, empresaService);
     }

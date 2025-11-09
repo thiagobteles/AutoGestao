@@ -1,6 +1,6 @@
 using AutoGestao.Data;
 using AutoGestao.Entidades;
-using AutoGestao.Entidades.Fiscal;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Models.Auth;
 using AutoGestao.Services.Interface;

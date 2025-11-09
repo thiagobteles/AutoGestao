@@ -2,7 +2,7 @@ using AutoGestao.Atributes;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Interfaces;
 
-namespace AutoGestao.Entidades
+namespace AutoGestao.Entidades.Base
 {
     [FormConfig(Title = "Log de Auditoria", Subtitle = "Histórico completo de operações do sistema", Icon = "fas fa-history")]
     public class AuditLog : IEntity

@@ -1,4 +1,4 @@
-using AutoGestao.Entidades;
+using AutoGestao.Entidades.Base;
 
 namespace AutoGestao.Services.Interface
 {

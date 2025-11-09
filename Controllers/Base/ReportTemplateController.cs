@@ -1,5 +1,5 @@
 using AutoGestao.Data;
-using AutoGestao.Entidades.Relatorio;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Enumerador.Gerais;
 using AutoGestao.Models;
 using AutoGestao.Models.Grid;

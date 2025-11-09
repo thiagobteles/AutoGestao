@@ -1,5 +1,5 @@
 using AutoGestao.Data;
-using AutoGestao.Entidades.Relatorio;
+using AutoGestao.Entidades.Base;
 using AutoGestao.Models.Report;
 using AutoGestao.Services;
 using AutoGestao.Services.Interface;
