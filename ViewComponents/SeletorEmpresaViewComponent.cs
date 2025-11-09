@@ -76,7 +76,7 @@ namespace AutoGestao.ViewComponents
     public class SeletorEmpresaViewModel
     {
         public long? EmpresaAtivaId { get; set; }
-        public List<EmpresaViewModel> Empresas { get; set; } = new();
+        public List<EmpresaViewModel> Empresas { get; set; } = [];
     }
 
     public class EmpresaViewModel

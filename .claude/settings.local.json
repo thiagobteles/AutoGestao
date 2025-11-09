@@ -11,7 +11,8 @@
       "Bash(findstr:*)",
       "WebSearch",
       "Bash(dotnet ef dbcontext script:*)",
-      "Bash(dotnet run:*)"
+      "Bash(dotnet run:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
