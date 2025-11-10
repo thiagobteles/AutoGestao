@@ -1,14 +1,14 @@
-using AutoGestao.Atributes;
-using AutoGestao.Data;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
-using AutoGestao.Helpers;
-using AutoGestao.Interfaces;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
-using AutoGestao.Models.Report;
-using AutoGestao.Services.Interface;
+using FGT.Atributes;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
+using FGT.Helpers;
+using FGT.Interfaces;
+using FGT.Models;
+using FGT.Models.Grid;
+using FGT.Models.Report;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +17,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null, IAuditService? auditService = null)
         : Controller where T : class, IEntity, new()
@@ -1900,7 +1900,9 @@ namespace AutoGestao.Controllers.Base
         protected static string EscapeJavaScript(string text)
         {
             if (string.IsNullOrEmpty(text))
+            {
                 return text;
+            }
 
             return text
                 .Replace("\\", "\\\\")  // Backslash deve ser primeiro
@@ -3120,7 +3122,9 @@ namespace AutoGestao.Controllers.Base
         private IQueryable<T> ApplyTextSearch(IQueryable<T> query, string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
+            {
                 return query;
+            }
 
             // Buscar propriedades marcadas com ReferenceSearchableAttribute
             var searchableProperties = typeof(T).GetProperties()
@@ -3128,7 +3132,7 @@ namespace AutoGestao.Controllers.Base
                 .ToList();
 
             // Se não houver ReferenceSearchable, buscar ReferenceText
-            if (!searchableProperties.Any())
+            if (searchableProperties.Count == 0)
             {
                 var referenceTextProp = typeof(T).GetProperties()
                     .FirstOrDefault(p => p.GetCustomAttribute<ReferenceTextAttribute>() != null && p.PropertyType == typeof(string));
@@ -3140,7 +3144,7 @@ namespace AutoGestao.Controllers.Base
             }
 
             // Se ainda não houver, buscar propriedades comuns
-            if (!searchableProperties.Any())
+            if (searchableProperties.Count == 0)
             {
                 var commonNames = new[] { "Nome", "Descricao", "Titulo", "Codigo" };
                 foreach (var name in commonNames)
@@ -3154,7 +3158,7 @@ namespace AutoGestao.Controllers.Base
             }
 
             // Se não encontrou nenhuma propriedade searchable, retornar query original
-            if (!searchableProperties.Any())
+            if (searchableProperties.Count == 0)
             {
                 _logger?.LogWarning("Nenhuma propriedade searchable encontrada para tipo {TypeName}", typeof(T).Name);
                 return query;
@@ -3241,7 +3245,9 @@ namespace AutoGestao.Controllers.Base
         private static string NormalizeSearchTerm(string term)
         {
             if (string.IsNullOrEmpty(term))
+            {
                 return term;
+            }
 
             // Remove caracteres comuns de formatação
             return term.Replace(".", "")
@@ -3259,7 +3265,9 @@ namespace AutoGestao.Controllers.Base
         private static bool HasFormatMask(string? format)
         {
             if (string.IsNullOrEmpty(format))
+            {
                 return false;
+            }
 
             // Formatos conhecidos que usam pontuação
             return format.Contains(".") ||
@@ -3318,9 +3326,7 @@ namespace AutoGestao.Controllers.Base
         private List<PropertyInfo> GetSubtitleProperties()
         {
             // Buscar propriedades marcadas com ReferenceSubtitleAttribute
-            return typeof(T).GetProperties()
-                .Where(p => p.GetCustomAttribute<ReferenceSubtitleAttribute>() != null)
-                .ToList();
+            return [.. typeof(T).GetProperties().Where(p => p.GetCustomAttribute<ReferenceSubtitleAttribute>() != null)];
         }
 
         private string GetDisplayText(T item, PropertyInfo? property)

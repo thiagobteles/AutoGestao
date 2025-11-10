@@ -1,10 +1,10 @@
-using AutoGestao.Atributes;
-using AutoGestao.Data;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Models.Report;
+using FGT.Atributes;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Models.Report;
 using System.Reflection;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     /// <summary>
     /// Serviço para inspecionar entidades e descobrir suas propriedades e relacionamentos
@@ -140,12 +140,35 @@ namespace AutoGestao.Services
         {
             var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
-            if (underlyingType == typeof(string)) return "text";
-            if (underlyingType == typeof(int) || underlyingType == typeof(long)) return "number";
-            if (underlyingType == typeof(decimal) || underlyingType == typeof(double) || underlyingType == typeof(float)) return "currency";
-            if (underlyingType == typeof(DateTime) || underlyingType == typeof(DateTimeOffset)) return "date";
-            if (underlyingType == typeof(bool)) return "boolean";
-            if (underlyingType.IsEnum) return "enum";
+            if (underlyingType == typeof(string))
+            {
+                return "text";
+            }
+
+            if (underlyingType == typeof(int) || underlyingType == typeof(long))
+            {
+                return "number";
+            }
+
+            if (underlyingType == typeof(decimal) || underlyingType == typeof(double) || underlyingType == typeof(float))
+            {
+                return "currency";
+            }
+
+            if (underlyingType == typeof(DateTime) || underlyingType == typeof(DateTimeOffset))
+            {
+                return "date";
+            }
+
+            if (underlyingType == typeof(bool))
+            {
+                return "boolean";
+            }
+
+            if (underlyingType.IsEnum)
+            {
+                return "enum";
+            }
 
             return "text";
         }

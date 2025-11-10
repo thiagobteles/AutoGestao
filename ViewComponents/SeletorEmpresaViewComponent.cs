@@ -1,11 +1,11 @@
-using AutoGestao.Data;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace AutoGestao.ViewComponents
+namespace FGT.ViewComponents
 {
     public class SeletorEmpresaViewComponent : ViewComponent
     {

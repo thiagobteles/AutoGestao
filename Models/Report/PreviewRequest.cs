@@ -1,4 +1,4 @@
-namespace AutoGestao.Models.Report
+namespace FGT.Models.Report
 {
     public class PreviewRequest
     {

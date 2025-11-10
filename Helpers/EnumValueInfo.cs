@@ -1,4 +1,4 @@
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     /// <summary>
     /// Informações sobre um valor de Enum

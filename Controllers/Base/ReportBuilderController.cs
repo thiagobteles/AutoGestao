@@ -1,13 +1,13 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Models.Report;
-using AutoGestao.Services;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Models.Report;
+using FGT.Services;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers.Base
 {
     /// <summary>
     /// Controller para construção visual de templates de relatórios
@@ -905,7 +905,7 @@ namespace AutoGestao.Controllers
                 while (reader.Read())
                 {
                     var row = new Dictionary<string, object>();
-                    for (int i = 0; i < reader.FieldCount; i++)
+                    for (var i = 0; i < reader.FieldCount; i++)
                     {
                         var columnName = reader.GetName(i);
                         var value = reader.IsDBNull(i) ? null : reader.GetValue(i);

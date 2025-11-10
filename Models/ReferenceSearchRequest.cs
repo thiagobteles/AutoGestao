@@ -1,7 +1,7 @@
-using AutoGestao.Enumerador.Gerais;
+using FGT.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 
-namespace AutoGestao.Models
+namespace FGT.Models
 {
     /// <summary>
     /// Request para busca de referências com suporte a filtros dinâmicos

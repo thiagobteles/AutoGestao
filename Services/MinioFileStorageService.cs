@@ -2,12 +2,12 @@ using Minio;
 using Minio.DataModel.Args;
 using Minio.Exceptions;
 using Microsoft.Extensions.Options;
-using AutoGestao.Models;
+using FGT.Models;
 using System.Security.Claims;
 using Minio.ApiEndpoints;
-using AutoGestao.Services.Interface;
+using FGT.Services.Interface;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     public class MinioFileStorageService(IMinioClient minioClient, IOptions<MinioSettings> settings, ILogger<MinioFileStorageService> logger) : IFileStorageService
     {
@@ -15,12 +15,7 @@ namespace AutoGestao.Services
         private readonly MinioSettings _settings = settings.Value;
         private readonly ILogger<MinioFileStorageService> _logger = logger;
 
-        public async Task<string> UploadFileAsync(
-            IFormFile file,
-            string entityName,
-            string propertyName,
-            long idEmpresa,
-            string? customBucket = null)
+        public async Task<string> UploadFileAsync(IFormFile file, string entityName, string propertyName, long idEmpresa, string? customBucket = null)
         {
             try
             {
@@ -47,12 +42,7 @@ namespace AutoGestao.Services
                     .WithContentType(contentType);
 
                 await _minioClient.PutObjectAsync(putObjectArgs);
-
-                _logger.LogInformation(
-                    "Arquivo enviado com sucesso: {BucketName}/{FileName}",
-                    bucketName,
-                    uniqueFileName);
-
+                _logger.LogInformation("Arquivo enviado com sucesso: {BucketName}/{FileName}", bucketName, uniqueFileName);
                 return uniqueFileName;
             }
             catch (Exception ex)
@@ -79,7 +69,6 @@ namespace AutoGestao.Services
 
                 await _minioClient.GetObjectAsync(getObjectArgs);
                 memoryStream.Position = 0;
-
                 return memoryStream;
             }
             catch (Exception ex)
@@ -94,18 +83,9 @@ namespace AutoGestao.Services
             try
             {
                 var bucketName = customBucket ?? GetBucketName(entityName, idEmpresa);
-
-                var removeObjectArgs = new RemoveObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(filePath);
-
+                var removeObjectArgs = new RemoveObjectArgs().WithBucket(bucketName).WithObject(filePath);
                 await _minioClient.RemoveObjectAsync(removeObjectArgs);
-
-                _logger.LogInformation(
-                    "Arquivo excluído com sucesso: {BucketName}/{FilePath}",
-                    bucketName,
-                    filePath);
-
+                _logger.LogInformation("Arquivo excluído com sucesso: {BucketName}/{FilePath}", bucketName, filePath);
                 return true;
             }
             catch (Exception ex)
@@ -132,13 +112,8 @@ namespace AutoGestao.Services
                     throw new FileNotFoundException($"Arquivo não encontrado: {filePath}");
                 }
 
-                var presignedGetObjectArgs = new PresignedGetObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(filePath)
-                    .WithExpiry(expiry);
-
+                var presignedGetObjectArgs = new PresignedGetObjectArgs().WithBucket(bucketName).WithObject(filePath).WithExpiry(expiry);
                 var url = await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs);
-
                 _logger.LogInformation($"[MINIO] URL gerada com sucesso: {url}");
 
                 return url;
@@ -155,11 +130,7 @@ namespace AutoGestao.Services
             try
             {
                 var bucketName = customBucket ?? GetBucketName(entityName, idEmpresa);
-
-                var statObjectArgs = new StatObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(filePath);
-
+                var statObjectArgs = new StatObjectArgs().WithBucket(bucketName).WithObject(filePath);
                 await _minioClient.StatObjectAsync(statObjectArgs);
                 return true;
             }
@@ -208,7 +179,6 @@ namespace AutoGestao.Services
                 {
                     var mbArgs = new MakeBucketArgs().WithBucket(bucketName);
                     await _minioClient.MakeBucketAsync(mbArgs);
-
                     _logger.LogInformation("Bucket criado: {BucketName}", bucketName);
                 }
             }

@@ -12,7 +12,9 @@
       "WebSearch",
       "Bash(dotnet ef dbcontext script:*)",
       "Bash(dotnet run:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(dotnet add:*)",
+      "Bash(del \"C:\\Source\\Pessoal\\Contabilidade\\Controllers\\ImportacaoNegociacaoFiscalController.cs\")"
     ],
     "deny": [],
     "ask": []

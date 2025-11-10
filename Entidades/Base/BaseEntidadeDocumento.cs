@@ -1,9 +1,9 @@
-using AutoGestao.Atributes;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
+using FGT.Atributes;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
 
-namespace AutoGestao.Entidades.Base
+namespace FGT.Entidades.Base
 {
     [Auditable(AuditCreate = true, AuditUpdate = true, AuditDelete = true)]
     public class BaseEntidadeDocumento : BaseEntidade

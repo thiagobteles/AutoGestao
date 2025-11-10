@@ -1,9 +1,9 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models.Auth;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Models.Auth;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     public class AuthService(ApplicationDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger, IUsuarioEmpresaService usuarioEmpresaService) : IAuthService
     {

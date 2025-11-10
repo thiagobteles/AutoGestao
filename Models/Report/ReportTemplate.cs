@@ -1,6 +1,6 @@
-using AutoGestao.Enumerador.Gerais;
+using FGT.Enumerador.Gerais;
 
-namespace AutoGestao.Models.Report
+namespace FGT.Models.Report
 {
     public class ReportTemplate
     {

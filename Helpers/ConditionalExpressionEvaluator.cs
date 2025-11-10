@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     /// <summary>
     /// Avalia expressões condicionais para exibição e validação de campos

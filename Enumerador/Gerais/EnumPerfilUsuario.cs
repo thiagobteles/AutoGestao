@@ -1,7 +1,7 @@
-using AutoGestao.Atributes;
+using FGT.Atributes;
 using System.ComponentModel;
 
-namespace AutoGestao.Enumerador.Gerais
+namespace FGT.Enumerador.Gerais
 {
     public enum EnumPerfilUsuario
     {

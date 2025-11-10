@@ -1,10 +1,10 @@
-using AutoGestao.Atributes;
-using AutoGestao.Entidades;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Entidades;
+using FGT.Enumerador.Gerais;
 using System.Reflection;
 using System.Security.Claims;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     /// <summary>
     /// Helper centralizado para gerenciar campos de EmpresaCliente

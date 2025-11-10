@@ -1,7 +1,7 @@
-using AutoGestao.Entidades;
-using AutoGestao.Entidades.Base;
+using FGT.Entidades;
+using FGT.Entidades.Base;
 
-namespace AutoGestao.Models
+namespace FGT.Models
 {
     public class DashboardViewModel
     {

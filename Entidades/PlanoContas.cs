@@ -1,12 +1,12 @@
-using AutoGestao.Atributes;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Fiscal;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Fiscal;
+using FGT.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades
+namespace FGT.Entidades
 {
     [FormConfig(Title = "Plano de Contas", Subtitle = "Estrutura contábil para classificação de receitas e despesas", Icon = "fas fa-sitemap")]
     public class PlanoContas : BaseEntidade

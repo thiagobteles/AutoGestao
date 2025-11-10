@@ -1,10 +1,11 @@
-using AutoGestao.Entidades;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Extensions;
+using FGT.Entidades;
+using FGT.Entidades.Base;
+using FGT.Entidades.Fiscal;
+using FGT.Entidades.Processing;
+using FGT.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Data
+namespace FGT.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
@@ -38,8 +39,15 @@ namespace AutoGestao.Data
         public DbSet<PlanoContas> PlanoContas { get; set; }
         public DbSet<LancamentoContabil> LancamentosContabeis { get; set; }
         public DbSet<ObrigacaoFiscal> ObrigacoesFiscais { get; set; }
+        public DbSet<NegociacaoFiscal> NegociacoesFiscais { get; set; }
 
         #endregion DbSets Específicos da contabilidade
+
+        #region DbSets de Processamento
+
+        public DbSet<ImportacaoNegociacaoFiscal> ImportacoesNegociacoesFiscais { get; set; }
+
+        #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

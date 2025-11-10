@@ -1,4 +1,4 @@
-namespace AutoGestao.Services.Interface
+namespace FGT.Services.Interface
 {
     public interface IFileStorageService
     {

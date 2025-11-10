@@ -1,12 +1,12 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Claims;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     public class AuditService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<AuditService> logger) : IAuditService
     {
@@ -366,7 +366,7 @@ namespace AutoGestao.Services
             }
 
             // Usuário não autenticado ou sistema
-            return (0, "Sistema", "sistema@autogestao.com", null);
+            return (0, "Sistema", "sistema@FGT.com", null);
         }
 
         private string GetClientIpAddress()

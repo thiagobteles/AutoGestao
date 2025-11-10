@@ -1,4 +1,4 @@
-namespace AutoGestao.Models
+namespace FGT.Models
 {
     /// <summary>
     /// Configurações específicas para campos de referência

@@ -1,14 +1,14 @@
-using AutoGestao.Controllers.Base;
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
-using AutoGestao.Services.Interface;
+using FGT.Controllers.Base;
+using FGT.Data;
+using FGT.Entidades;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
+using FGT.Models;
+using FGT.Models.Grid;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers
 {
     public class AliquotaImpostoController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<AliquotaImposto>> logger)
         : StandardGridController<AliquotaImposto>(context, fileStorageService, logger)

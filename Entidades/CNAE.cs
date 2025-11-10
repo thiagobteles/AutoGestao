@@ -1,10 +1,10 @@
-using AutoGestao.Atributes;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 
-namespace AutoGestao.Entidades
+namespace FGT.Entidades
 {
     [FormConfig(Title = "CNAE", Subtitle = "Classificação Nacional de Atividades Econômicas", Icon = "fas fa-industry")]
     public class CNAE : BaseEntidade

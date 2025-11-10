@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AutoGestao.Models.Auth
+namespace FGT.Models.Auth
 {
     public class LoginRequest
     {

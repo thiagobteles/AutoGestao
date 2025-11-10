@@ -1,14 +1,13 @@
-using AutoGestao.Controllers.Base;
-using AutoGestao.Data;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
+using FGT.Models;
+using FGT.Models.Grid;
+using FGT.Services.Interface;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers.Base
 {
     public class EmpresaController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Empresa>> logger)
         : StandardGridController<Empresa>(context, fileStorageService, logger)

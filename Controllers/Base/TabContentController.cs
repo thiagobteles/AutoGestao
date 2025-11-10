@@ -1,14 +1,14 @@
-using AutoGestao.Atributes;
-using AutoGestao.Data;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
+using FGT.Atributes;
+using FGT.Data;
+using FGT.Enumerador.Gerais;
+using FGT.Models;
+using FGT.Models.Grid;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     [Authorize]
     [Route("[controller]")]
@@ -335,11 +335,11 @@ namespace AutoGestao.Controllers.Base
             var entityName = controller;
             var mapping = new Dictionary<string, string>
             {
-                { "Despesa", "AutoGestao.Entidades.Despesa, AutoGestao" },
-                { "VeiculoDocumento", "AutoGestao.Entidades.Veiculos.VeiculoDocumento, AutoGestao" },
-                { "VeiculoFoto", "AutoGestao.Entidades.Veiculos.VeiculoFoto, AutoGestao" },
-                { "VeiculoNFE", "AutoGestao.Entidades.Veiculos.VeiculoNFE, AutoGestao" },
-                { "VeiculoLancamento", "AutoGestao.Entidades.Veiculos.VeiculoLancamento, AutoGestao" },
+                { "Despesa", "FGT.Entidades.Despesa, AutoGestao" },
+                { "VeiculoDocumento", "FGT.Entidades.Veiculos.VeiculoDocumento, AutoGestao" },
+                { "VeiculoFoto", "FGT.Entidades.Veiculos.VeiculoFoto, AutoGestao" },
+                { "VeiculoNFE", "FGT.Entidades.Veiculos.VeiculoNFE, AutoGestao" },
+                { "VeiculoLancamento", "FGT.Entidades.Veiculos.VeiculoLancamento, AutoGestao" },
             };
 
             if (mapping.TryGetValue(entityName, out var value))
@@ -355,7 +355,7 @@ namespace AutoGestao.Controllers.Base
             return assembly.GetTypes()
                 .FirstOrDefault(t => t.Name == entityName &&
                                    t.Namespace != null &&
-                                   t.Namespace.StartsWith("AutoGestao.Entidades"));
+                                   t.Namespace.StartsWith("FGT.Entidades"));
         }
 
         private static string GetParentFieldName(string controller, string parentController)

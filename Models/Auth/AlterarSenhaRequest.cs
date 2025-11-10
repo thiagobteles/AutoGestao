@@ -1,4 +1,4 @@
-namespace AutoGestao.Models.Auth
+namespace FGT.Models.Auth
 {
     public class AlterarSenhaRequest
     {

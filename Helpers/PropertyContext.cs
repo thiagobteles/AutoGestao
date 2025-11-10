@@ -1,7 +1,7 @@
-using AutoGestao.Atributes;
+using FGT.Atributes;
 using System.Reflection;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     public class PropertyContext(PropertyInfo property)
     {

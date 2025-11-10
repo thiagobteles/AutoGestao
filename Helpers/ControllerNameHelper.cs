@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     /// <summary>
     /// Helper genérico para resolver nomes de controllers baseado em convenção

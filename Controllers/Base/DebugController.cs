@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers.Base
 {
     [Authorize]
     [Route("api/[controller]")]
@@ -17,8 +17,8 @@ namespace AutoGestao.Controllers
         {
             var claims = User.Claims.Select(c => new
             {
-                Type = c.Type,
-                Value = c.Value
+                c.Type,
+                c.Value
             }).ToList();
 
             var empresaClienteIdClaim = User.FindFirst("EmpresaClienteId")?.Value;

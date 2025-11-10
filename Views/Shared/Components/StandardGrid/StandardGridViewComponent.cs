@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using AutoGestao.Models;
+using FGT.Models;
 
-namespace AutoGestao.Views.Shared.Components.StandardGrid
+namespace FGT.Views.Shared.Components.StandardGrid
 {
     public class StandardGridViewComponent : ViewComponent
     {

@@ -1,6 +1,6 @@
-using AutoGestao.Enumerador.Gerais;
+using FGT.Enumerador.Gerais;
 
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     /// <summary>
     /// Define múltiplas regras condicionais para um campo

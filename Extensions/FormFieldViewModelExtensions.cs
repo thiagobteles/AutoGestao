@@ -1,9 +1,9 @@
-using AutoGestao.Atributes;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Helpers;
-using AutoGestao.Models;
+using FGT.Atributes;
+using FGT.Enumerador.Gerais;
+using FGT.Helpers;
+using FGT.Models;
 
-namespace AutoGestao.Extensions
+namespace FGT.Extensions
 {
     /// <summary>
     /// Extensões para FormFieldViewModel com suporte a Reference
@@ -82,7 +82,7 @@ namespace AutoGestao.Extensions
                 .Where(p => p.GetCustomAttributes(typeof(ReferenceSearchableAttribute), false).Any())
                 .ToList();
 
-            if (!searchableProperties.Any())
+            if (searchableProperties.Count == 0)
             {
                 // Se não houver campos searchable, retornar placeholder padrão
                 return "Digite para pesquisar...";

@@ -1,7 +1,7 @@
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
 
-namespace AutoGestao.Services.Interface
+namespace FGT.Services.Interface
 {
     public interface IAuditService
     {

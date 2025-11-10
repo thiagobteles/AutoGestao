@@ -1,11 +1,11 @@
-using AutoGestao.Atributes;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Interfaces;
+using FGT.Atributes;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades
+namespace FGT.Entidades
 {
     /// <summary>
     /// Tabela de relacionamento N:N entre Usuario e EmpresaCliente

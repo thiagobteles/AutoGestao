@@ -1,4 +1,4 @@
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     /// <summary>
     /// Controla quando um campo deve ser obrigatório baseado em regras condicionais

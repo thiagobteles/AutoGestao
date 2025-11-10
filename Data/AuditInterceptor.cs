@@ -1,12 +1,12 @@
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Services.Interface;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Text.Json;
 
-namespace AutoGestao.Data
+namespace FGT.Data
 {
     /// <summary>
     /// Interceptor para auditoria automática de operações CRUD no banco de dados
@@ -39,13 +39,11 @@ namespace AutoGestao.Data
                 _isProcessingAudit = true;
 
                 var entries = eventData.Context.ChangeTracker.Entries()
-                    .Where(e => !(e.Entity is AuditLog) && // Não auditar os próprios logs
-                               e.State != EntityState.Unchanged &&
-                               e.State != EntityState.Detached)
+                    .Where(e => e.Entity is not AuditLog &&  e.State != EntityState.Unchanged && e.State != EntityState.Detached)
                     .ToList();
 
                 // Se não houver mudanças para auditar, retornar
-                if (!entries.Any())
+                if (entries.Count == 0)
                 {
                     return await base.SavingChangesAsync(eventData, result, cancellationToken);
                 }

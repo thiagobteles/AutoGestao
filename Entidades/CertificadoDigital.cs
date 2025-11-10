@@ -1,11 +1,11 @@
-using AutoGestao.Atributes;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades
+namespace FGT.Entidades
 {
     [FormConfig(Title = "Certificado Digital", Subtitle = "Gerencie os certificados digitais A1 das empresas", Icon = "fas fa-certificate")]
     public class CertificadoDigital : BaseEntidade

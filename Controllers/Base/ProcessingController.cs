@@ -1,14 +1,14 @@
-using AutoGestao.Atributes;
-using AutoGestao.Data;
-using AutoGestao.Extensions;
-using AutoGestao.Helpers;
-using AutoGestao.Interfaces;
-using AutoGestao.Models;
-using AutoGestao.Services.Interface;
+using FGT.Atributes;
+using FGT.Data;
+using FGT.Extensions;
+using FGT.Helpers;
+using FGT.Interfaces;
+using FGT.Models;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     /// <summary>
     /// Controller base para telas de processamento genéricas
@@ -16,7 +16,10 @@ namespace AutoGestao.Controllers.Base
     /// </summary>
     /// <typeparam name="T">Tipo da entidade de processamento que implementa IProcessingEntity</typeparam>
     /// <typeparam name="TResult">Tipo do resultado do processamento</typeparam>
-    public abstract class ProcessingController<T, TResult>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<ProcessingController<T, TResult>>? logger = null) 
+    public abstract class ProcessingController<T, TResult>(
+        ApplicationDbContext context,
+        IFileStorageService fileStorageService,
+        ILogger<ProcessingController<T, TResult>>? logger = null) 
         : Controller where T : class, IProcessingEntity<TResult>, new()
     {
         protected readonly ApplicationDbContext _context = context;
@@ -215,7 +218,10 @@ namespace AutoGestao.Controllers.Base
             foreach (var prop in properties)
             {
                 var formFieldAttr = prop.GetCustomAttribute<FormFieldAttribute>();
-                if (formFieldAttr == null) continue;
+                if (formFieldAttr == null)
+                {
+                    continue;
+                }
 
                 var sectionName = formFieldAttr.Section ?? "Geral";
 
@@ -232,15 +238,12 @@ namespace AutoGestao.Controllers.Base
                 {
                     shouldHideField = true;
                     defaultValue = empresaClienteIdLogada.Value;
-                    _logger?.LogInformation("🔒 Campo {PropertyName} oculto para usuário não-admin. EmpresaClienteId forçado: {Value}",
-                        prop.Name, empresaClienteIdLogada);
+                    _logger?.LogInformation("🔒 Campo {PropertyName} oculto para usuário não-admin. EmpresaClienteId forçado: {Value}", prop.Name, empresaClienteIdLogada);
                 }
 
                 // Determinar o placeholder
                 var placeholder = formFieldAttr.Placeholder;
-                if (string.IsNullOrEmpty(placeholder) &&
-                    formFieldAttr.Type == Enumerador.Gerais.EnumFieldType.Reference &&
-                    formFieldAttr.Reference != null)
+                if (string.IsNullOrEmpty(placeholder) && formFieldAttr.Type == Enumerador.Gerais.EnumFieldType.Reference && formFieldAttr.Reference != null)
                 {
                     // Gerar placeholder automaticamente baseado nos campos ReferenceSearchable
                     placeholder = FormFieldViewModelExtensions.GetReferencePlaceholder(formFieldAttr.Reference);
@@ -262,12 +265,8 @@ namespace AutoGestao.Controllers.Base
                     Placeholder = placeholder,
                     HelpText = formFieldAttr.HelpText,
                     Value = defaultValue ?? prop.GetValue(new T()),
-                    Options = formFieldAttr.Type == Enumerador.Gerais.EnumFieldType.Select
-                        ? GetAutoEnumOptions(prop)
-                        : new(),
-                    ReferenceConfig = formFieldAttr.Reference != null
-                        ? ReferenceFieldConfig.GetDefault(formFieldAttr.Reference)
-                        : new(),
+                    Options = formFieldAttr.Type == Enumerador.Gerais.EnumFieldType.Select ? GetAutoEnumOptions(prop) : [],
+                    ReferenceConfig = formFieldAttr.Reference != null ? ReferenceFieldConfig.GetDefault(formFieldAttr.Reference) : new(),
                     ReadOnly = shouldHideField
                 };
 
@@ -279,7 +278,7 @@ namespace AutoGestao.Controllers.Base
                 .Select(kvp => new FormSectionViewModel
                 {
                     Name = kvp.Key,
-                    Fields = kvp.Value.OrderBy(f => f.Order).ToList()
+                    Fields = [.. kvp.Value.OrderBy(f => f.Order)]
                 })
                 .ToList();
 
@@ -314,29 +313,31 @@ namespace AutoGestao.Controllers.Base
             foreach (var prop in properties)
             {
                 var formFieldAttr = prop.GetCustomAttribute<FormFieldAttribute>();
-                if (formFieldAttr == null) continue;
+                if (formFieldAttr == null)
+                {
+                    continue;
+                }
 
                 // Verificar se é campo de arquivo
-                if (formFieldAttr.Type != Enumerador.Gerais.EnumFieldType.File &&
-                    formFieldAttr.Type != Enumerador.Gerais.EnumFieldType.Image)
+                if (formFieldAttr.Type != Enumerador.Gerais.EnumFieldType.File && formFieldAttr.Type != Enumerador.Gerais.EnumFieldType.Image)
                 {
                     continue;
                 }
 
                 // Verificar se há arquivo no request
                 var file = Request.Form.Files.GetFile(prop.Name);
-                if (file == null || file.Length == 0) continue;
+                if (file == null || file.Length == 0)
+                {
+                    continue;
+                }
 
-                _logger?.LogInformation("📁 Processando upload do arquivo: {FileName} (Campo: {PropertyName})",
-                    file.FileName, prop.Name);
+                _logger?.LogInformation("📁 Processando upload do arquivo: {FileName} (Campo: {PropertyName})", file.FileName, prop.Name);
 
                 // Validar extensão
                 if (!string.IsNullOrEmpty(formFieldAttr.AllowedExtensions))
                 {
                     var extension = Path.GetExtension(file.FileName).TrimStart('.');
-                    var allowedExtensions = formFieldAttr.AllowedExtensions.Split(',')
-                        .Select(e => e.Trim().ToLowerInvariant());
-
+                    var allowedExtensions = formFieldAttr.AllowedExtensions.Split(',').Select(e => e.Trim().ToLowerInvariant());
                     if (!allowedExtensions.Contains(extension.ToLowerInvariant()))
                     {
                         throw new InvalidOperationException(
@@ -360,12 +361,10 @@ namespace AutoGestao.Controllers.Base
                 // Upload para MinIO
                 var entityName = typeof(T).Name;
                 var idEmpresa = GetCurrentEmpresaId();
-                var filePath = await _fileStorageService.UploadFileAsync(
-                    file, entityName, prop.Name, idEmpresa);
+                var filePath = await _fileStorageService.UploadFileAsync(file, entityName, prop.Name, idEmpresa);
 
                 // Atualizar propriedade
                 prop.SetValue(model, filePath);
-
                 _logger?.LogInformation("✅ Arquivo uploaded com sucesso: {FilePath}", filePath);
             }
         }
@@ -380,29 +379,25 @@ namespace AutoGestao.Controllers.Base
                 var propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
                 if (!propertyType.IsEnum)
                 {
-                    return new();
+                    return [];
                 }
 
                 // Usa reflexão para chamar EnumExtension.GetSelectListItems<TEnum>(true)
-                var enumExtensionMethod = typeof(AutoGestao.Extensions.EnumExtension)
-                    .GetMethod("GetSelectListItems");
-
+                var enumExtensionMethod = typeof(EnumExtension).GetMethod("GetSelectListItems");
                 if (enumExtensionMethod == null)
                 {
-                    return new();
+                    return [];
                 }
 
                 var genericMethod = enumExtensionMethod.MakeGenericMethod(propertyType);
 
                 // Chama o método com obterIcone = true
-                var result = genericMethod.Invoke(null, new object[] { true })
-                    as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>;
-
-                return result ?? new();
+                var result = genericMethod.Invoke(null, [true]) as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>;
+                return result ?? [];
             }
             catch
             {
-                return new();
+                return [];
             }
         }
 

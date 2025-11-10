@@ -1,4 +1,4 @@
-@using AutoGestao.Entidades
+@using FGT.Entidades
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -143,6 +143,12 @@
                                         <span class="menu-link-text">Alíquotas de Impostos</span>
                                     </a>
                                 </div>
+                                <div class="menu-item">
+                                    <a href="/NegociacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NegociacaoFiscal" ? "active" : "")">
+                                        <i class="fas fa-handshake"></i>
+                                        <span class="menu-link-text">Negociações Fiscais</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -220,6 +226,12 @@
                                 <span class="menu-link-text">Obrigações Fiscais</span>
                             </a>
                         </div>
+                        <div class="menu-item">
+                            <a href="/ImportacaoNegociacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ImportacaoNegociacaoFiscal" ? "active" : "")">
+                                <i class="fas fa-file-excel"></i>
+                                <span class="menu-link-text">Importar Negociações</span>
+                            </a>
+                        </div>
                     }
 
                 </div>
@@ -247,6 +259,7 @@
                         </div>
                     </div>
                 }
+
             </nav>
         </aside>
 

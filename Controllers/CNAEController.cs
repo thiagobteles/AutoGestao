@@ -1,13 +1,13 @@
-using AutoGestao.Controllers.Base;
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
-using AutoGestao.Services.Interface;
+using FGT.Controllers.Base;
+using FGT.Data;
+using FGT.Entidades;
+using FGT.Enumerador.Gerais;
+using FGT.Models;
+using FGT.Models.Grid;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers
 {
     public class CNAEController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<CNAE>> logger)
         : StandardGridController<CNAE>(context, fileStorageService, logger)

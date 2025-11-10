@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGestao", "AutoGestao.csproj", "{256F1C35-3934-D4F6-4FFE-0C81BEE58E6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FGT", "FGT.csproj", "{256F1C35-3934-D4F6-4FFE-0C81BEE58E6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

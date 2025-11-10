@@ -1,11 +1,11 @@
-using AutoGestao.Atributes;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades
+namespace FGT.Entidades
 {
     [FormConfig(Title = "Item da Nota Fiscal", Subtitle = "Itens e produtos da nota fiscal", Icon = "fas fa-list")]
     public class NotaFiscalItem : BaseEntidade

@@ -1,4 +1,4 @@
-namespace AutoGestao.Models;
+namespace FGT.Models;
 
 /// <summary>
 /// ViewModel para formulários de processamento

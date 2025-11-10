@@ -1,11 +1,11 @@
-using AutoGestao.Atributes;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models.Grid;
+using FGT.Atributes;
+using FGT.Enumerador.Gerais;
+using FGT.Models.Grid;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     /// <summary>
     /// Helper inteligente para gerar GridColumns e processar ReferenceItems
@@ -97,7 +97,7 @@ namespace AutoGestao.Helpers
                 }
 
                 // Subtitle fields - verificar atributos dedicados primeiro
-                if (referenceSubtitleAttrs.Any())
+                if (referenceSubtitleAttrs.Count != 0)
                 {
                     foreach (var subtitleAttr in referenceSubtitleAttrs)
                     {

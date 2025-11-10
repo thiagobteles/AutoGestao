@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace AutoGestao.Migrations
+namespace FGT.Migrations
 {
     /// <inheritdoc />
     public partial class AdicionarUsuarioEmpresaCliente : Migration

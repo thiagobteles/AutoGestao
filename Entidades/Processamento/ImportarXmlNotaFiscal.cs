@@ -1,15 +1,15 @@
-using AutoGestao.Atributes;
-using AutoGestao.Data;
-using AutoGestao.Enumerador.Fiscal;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Interfaces;
-using AutoGestao.Services.Interface;
+using FGT.Atributes;
+using FGT.Data;
+using FGT.Enumerador.Fiscal;
+using FGT.Enumerador.Gerais;
+using FGT.Interfaces;
+using FGT.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Xml.Linq;
 
-namespace AutoGestao.Entidades.Processamento
+namespace FGT.Entidades.Processamento
 {
     /// <summary>
     /// Processamento para importar XML de Nota Fiscal Eletrônica (NFe)

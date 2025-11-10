@@ -1,10 +1,10 @@
-using AutoGestao.Atributes;
-using AutoGestao.Enumerador;
+using FGT.Atributes;
+using FGT.Enumerador;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace AutoGestao.Extensions
+namespace FGT.Extensions
 {
     public static class EnumExtension
     {

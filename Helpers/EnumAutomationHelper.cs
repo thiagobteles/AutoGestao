@@ -1,9 +1,9 @@
-using AutoGestao.Atributes;
-using AutoGestao.Extensions;
+using FGT.Atributes;
+using FGT.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Reflection;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     /// <summary>
     /// Helper para automação de propriedades Enum nas telas Create/Edit/Details

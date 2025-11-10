@@ -1,7 +1,7 @@
-using AutoGestao.Enumerador.Gerais;
+using FGT.Enumerador.Gerais;
 using System;
 
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     /// <summary>
     /// Atributo para definir filtros dinâmicos em campos de referência.

@@ -1,4 +1,4 @@
-namespace AutoGestao.Enumerador.Gerais
+namespace FGT.Enumerador.Gerais
 {
     /// <summary>
     /// Tipos de regras condicionais

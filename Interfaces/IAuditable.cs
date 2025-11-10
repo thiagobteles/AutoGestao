@@ -1,4 +1,4 @@
-namespace AutoGestao.Interfaces
+namespace FGT.Interfaces
 {
     /// <summary>
     /// Interface para entidades que devem ser auditadas

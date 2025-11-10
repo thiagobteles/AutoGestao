@@ -1,6 +1,6 @@
-using AutoGestao.Enumerador.Gerais;
+using FGT.Enumerador.Gerais;
 
-namespace AutoGestao.Models.Auth
+namespace FGT.Models.Auth
 {
     public class DashboardAuditViewModel
     {

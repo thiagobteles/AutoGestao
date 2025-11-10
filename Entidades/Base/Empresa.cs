@@ -1,8 +1,8 @@
-using AutoGestao.Atributes;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
 
-namespace AutoGestao.Entidades.Base
+namespace FGT.Entidades.Base
 {
     [FormConfig(Title = "Empresa", Subtitle = "Gerencie as informações das empresas", Icon = "fas fa-user")]
     public class Empresa : BaseEntidade

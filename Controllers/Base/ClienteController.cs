@@ -1,16 +1,15 @@
-using AutoGestao.Controllers.Base;
-using AutoGestao.Data;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
+using FGT.Models;
+using FGT.Models.Grid;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers.Base
 {
     public class ClienteController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<Cliente>> logger) 
         : StandardGridController<Cliente>(context, fileStorageService, logger)
@@ -118,7 +117,7 @@ namespace AutoGestao.Controllers
                         break;
 
                     case "status":
-                        if (bool.TryParse(filter.Value.ToString(), out bool status))
+                        if (bool.TryParse(filter.Value.ToString(), out var status))
                         {
                             query = query.Where(c => c.Ativo == status);
                         }

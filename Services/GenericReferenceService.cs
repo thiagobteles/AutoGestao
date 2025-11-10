@@ -1,11 +1,11 @@
-using AutoGestao.Data;
-using AutoGestao.Helpers;
-using AutoGestao.Models;
+using FGT.Data;
+using FGT.Helpers;
+using FGT.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     public class GenericReferenceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<GenericReferenceService> logger)
     {
@@ -118,7 +118,7 @@ namespace AutoGestao.Services
                 }
             }
 
-            item.Subtitle = subtitleParts.Any() ? string.Join(" | ", subtitleParts) : null;
+            item.Subtitle = subtitleParts.Count != 0 ? string.Join(" | ", subtitleParts) : null;
             return item;
         }
 

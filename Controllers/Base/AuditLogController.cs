@@ -1,17 +1,17 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
-using AutoGestao.Helpers;
-using AutoGestao.Models;
-using AutoGestao.Models.Auth;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
+using FGT.Helpers;
+using FGT.Models;
+using FGT.Models.Auth;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     [Authorize(Roles = "Admin,Gerente")]
     public class AuditLogController(ApplicationDbContext context, IAuditService auditService, IFileStorageService fileStorageService)

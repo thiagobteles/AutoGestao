@@ -1,8 +1,8 @@
-using AutoGestao.Atributes;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades.Base
+namespace FGT.Entidades.Base
 {
     [Auditable(EntityDisplayName = "Usuário")]
     [FormConfig(Title = "Usuário", Subtitle = "Gerencie os usuários do sistema", Icon = "fas fa-users")]

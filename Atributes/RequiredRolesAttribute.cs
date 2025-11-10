@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     [AttributeUsage(AttributeTargets.All)]
     public class RequiredRolesAttribute(params string[] roles) : Attribute, IAuthorizationFilter

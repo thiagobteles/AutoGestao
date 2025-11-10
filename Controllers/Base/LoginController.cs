@@ -1,5 +1,5 @@
-using AutoGestao.Models.Auth;
-using AutoGestao.Services.Interface;
+using FGT.Models.Auth;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     [AllowAnonymous]
     public class LoginController(IAuthService authService) : Controller
@@ -42,9 +42,10 @@ namespace AutoGestao.Controllers.Base
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, result.Usuario!.Id.ToString()),
+                new("UserId", result.Usuario.Id.ToString()),
                 new(ClaimTypes.Name, result.Usuario.Nome),
                 new(ClaimTypes.Email, result.Usuario.Email),
-                new("IdEmpresa", result.Usuario.IdEmpresa.ToString()),
+                new("EmpresaId", result.Usuario.IdEmpresa.ToString()),
                 new("Perfil", result.Usuario.Perfil)
             };
 

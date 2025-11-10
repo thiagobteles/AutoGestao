@@ -1,8 +1,8 @@
 using System.Reflection;
-using AutoGestao.Atributes;
-using AutoGestao.Models;
+using FGT.Atributes;
+using FGT.Models;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     /// <summary>
     /// Helper para processar anotações [ReferenceFilter] e gerar configurações

@@ -1,7 +1,7 @@
-using AutoGestao.Data;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Services.Interface;
 
-namespace AutoGestao.Interfaces
+namespace FGT.Interfaces
 {
     /// <summary>
     /// Interface base para entidades de processamento genéricas

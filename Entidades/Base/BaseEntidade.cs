@@ -1,7 +1,7 @@
-using AutoGestao.Atributes;
-using AutoGestao.Interfaces;
+using FGT.Atributes;
+using FGT.Interfaces;
 
-namespace AutoGestao.Entidades.Base
+namespace FGT.Entidades.Base
 {
     [Auditable(AuditCreate = true, AuditUpdate = true, AuditDelete = true)]
     public class BaseEntidade : IEntity, IAuditable

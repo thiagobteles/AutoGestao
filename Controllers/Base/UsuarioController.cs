@@ -1,18 +1,17 @@
-using AutoGestao.Controllers.Base;
-using AutoGestao.Data;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
-using AutoGestao.Models;
-using AutoGestao.Models.Auth;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
+using FGT.Models;
+using FGT.Models.Auth;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers.Base
 {
     [Authorize(Roles = "Admin")]
     public class UsuarioController(ApplicationDbContext context, IUsuarioService usuarioService, IFileStorageService fileStorageService, ILogger<StandardGridController<Usuario>> logger)
@@ -107,7 +106,7 @@ namespace AutoGestao.Controllers
                         break;
 
                     case "ativo":
-                        if (bool.TryParse(filter.Value.ToString(), out bool ativo))
+                        if (bool.TryParse(filter.Value.ToString(), out var ativo))
                         {
                             query = query.Where(u => u.Ativo == ativo);
                         }

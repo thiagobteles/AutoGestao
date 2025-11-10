@@ -1,4 +1,4 @@
-namespace AutoGestao.Extensions
+namespace FGT.Extensions
 {
     public static class StringExtensions
     {

@@ -1,7 +1,7 @@
-using AutoGestao.Entidades;
-using AutoGestao.Models.Auth;
+using FGT.Entidades;
+using FGT.Models.Auth;
 
-namespace AutoGestao.Services.Interface
+namespace FGT.Services.Interface
 {
     public interface IAuthService
     {

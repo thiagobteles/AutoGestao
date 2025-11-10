@@ -1,6 +1,6 @@
 using System;
 
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     /// <summary>
     /// Define qual propriedade será usada como Text no ReferenceItem

@@ -1,12 +1,12 @@
-using AutoGestao.Atributes;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Fiscal;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Fiscal;
+using FGT.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades
+namespace FGT.Entidades
 {
     [FormConfig(Title = "Lançamento Contábil", Subtitle = "Registre lançamentos contábeis de débito e crédito", Icon = "fas fa-file-invoice-dollar")]
     public class LancamentoContabil : BaseEntidade

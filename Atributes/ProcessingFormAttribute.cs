@@ -1,4 +1,4 @@
-namespace AutoGestao.Atributes;
+namespace FGT.Atributes;
 
 /// <summary>
 /// Atributo para configurar formulários de processamento

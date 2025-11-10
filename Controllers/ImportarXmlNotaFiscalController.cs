@@ -1,14 +1,14 @@
-using AutoGestao.Controllers.Base;
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Entidades.Processamento;
-using AutoGestao.Interfaces;
-using AutoGestao.Services.Interface;
+using FGT.Controllers.Base;
+using FGT.Data;
+using FGT.Entidades;
+using FGT.Entidades.Processamento;
+using FGT.Interfaces;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers
 {
     /// <summary>
     /// Controller para importação de XML de Nota Fiscal

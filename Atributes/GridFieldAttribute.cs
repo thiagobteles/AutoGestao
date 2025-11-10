@@ -1,9 +1,9 @@
-using AutoGestao.Entidades;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Entidades;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
 using System;
 
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class GridFieldAttribute(string? displayName = null) : Attribute

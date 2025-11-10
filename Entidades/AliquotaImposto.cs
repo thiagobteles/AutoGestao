@@ -1,12 +1,12 @@
-using AutoGestao.Atributes;
-using AutoGestao.Entidades.Base;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Fiscal;
-using AutoGestao.Enumerador.Gerais;
+using FGT.Atributes;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Fiscal;
+using FGT.Enumerador.Gerais;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoGestao.Entidades
+namespace FGT.Entidades
 {
     [FormConfig(Title = "Alíquota de Imposto", Subtitle = "Gerencie as alíquotas de impostos para cálculos fiscais", Icon = "fas fa-percentage")]
     public class AliquotaImposto : BaseEntidade

@@ -1,11 +1,11 @@
-using AutoGestao.Data;
-using AutoGestao.Enumerador.Fiscal;
-using AutoGestao.Models;
+using FGT.Data;
+using FGT.Enumerador.Fiscal;
+using FGT.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     [Authorize]
     public class HomeController(ApplicationDbContext context) : Controller

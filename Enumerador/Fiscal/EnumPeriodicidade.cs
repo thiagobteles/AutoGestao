@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace AutoGestao.Enumerador.Fiscal
+namespace FGT.Enumerador.Fiscal
 {
     public enum EnumPeriodicidade
     {
