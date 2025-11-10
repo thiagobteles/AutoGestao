@@ -1,4 +1,4 @@
-@using AutoGestao.Models.Auth
+@using FGT.Models.Auth
 @model DashboardAuditViewModel
 @{
     ViewData["Title"] = "Dashboard de Auditoria";
@@ -305,20 +305,20 @@
 </script>
 
 @{
-    string GetOperationDisplayName(AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria operacao)
+    string GetOperationDisplayName(FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria operacao)
     {
         return operacao switch
         {
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "Criação",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "Alteração",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "Exclusão",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "Login",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Logout => "Logout",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.LoginFailed => "Login Falhado",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.PasswordChange => "Alteração de Senha",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.View => "Visualização",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Export => "Exportação",
-            AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Import => "Importação",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "Criação",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "Alteração",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "Exclusão",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "Login",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Logout => "Logout",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.LoginFailed => "Login Falhado",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.PasswordChange => "Alteração de Senha",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.View => "Visualização",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Export => "Exportação",
+            FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Import => "Importação",
             _ => operacao.ToString()
         };
     }

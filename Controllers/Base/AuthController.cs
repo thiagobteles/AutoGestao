@@ -1,9 +1,9 @@
-using AutoGestao.Models.Auth;
-using AutoGestao.Services.Interface;
+using FGT.Models.Auth;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     [Route("api/[controller]")]
     [ApiController]

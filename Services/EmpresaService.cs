@@ -1,9 +1,9 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     public class EmpresaService(ApplicationDbContext context) : IEmpresaService
     {

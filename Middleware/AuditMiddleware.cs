@@ -1,7 +1,7 @@
-using AutoGestao.Services.Interface;
+using FGT.Services.Interface;
 using System.Diagnostics;
 
-namespace AutoGestao.Middleware
+namespace FGT.Middleware
 {
     public class AuditMiddleware(RequestDelegate next, ILogger<AuditMiddleware> logger)
     {

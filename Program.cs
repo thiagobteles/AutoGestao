@@ -1,11 +1,11 @@
 using AutoGestao;
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Enumerador;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models;
-using AutoGestao.Services;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador;
+using FGT.Enumerador.Gerais;
+using FGT.Models;
+using FGT.Services;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Minio;
@@ -29,7 +29,6 @@ CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
 
 // Obtem o nome do cliente
 var cliente = builder.Configuration.GetValue<string>("Cliente");
-Globais.Cliente = cliente;
 Globais.CorSistema = (EnumCorSistema)builder.Configuration.GetValue<int>("CorSistema");
 
 // Registrar HttpContextAccessor antes de tudo
@@ -108,7 +107,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // Adicionar middleware de auditoria (ANTES de UseAuthentication)
-app.UseMiddleware<AutoGestao.Middleware.AuditMiddleware>();
+app.UseMiddleware<FGT.Middleware.AuditMiddleware>();
 
 // 🔧 MIDDLEWARE DE AUTENTICAÇÃO
 app.UseAuthentication();
@@ -163,7 +162,7 @@ using (var scope = app.Services.CreateScope())
     var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
     var empresaService = scope.ServiceProvider.GetRequiredService<IEmpresaService>();
 
-    if (Globais.EhAutoGestao)
+    if (cliente.ToLower().Equals("autogestao"))
     {
         await InicializarDadosPadraoAutoGestao(context, usuarioService, empresaService);
     }
@@ -202,7 +201,7 @@ static async Task InicializarDadosPadraoAutoGestao(ApplicationDbContext context,
         var adminUser = new Usuario
         {
             Nome = "Thiago",
-            Email = "admin@autogestao.com",
+            Email = "admin@FGT.com",
             Perfil = EnumPerfilUsuario.Admin,
             IdEmpresa = 1,
             Ativo = true
@@ -211,7 +210,7 @@ static async Task InicializarDadosPadraoAutoGestao(ApplicationDbContext context,
         await usuarioService.CriarUsuarioAsync(adminUser, "admin123");
 
         Console.WriteLine("Usuário administrador criado:");
-        Console.WriteLine("Email: admin@autogestao.com");
+        Console.WriteLine("Email: admin@FGT.com");
         Console.WriteLine("Senha: admin123");
     }
 }

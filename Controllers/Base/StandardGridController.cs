@@ -1,14 +1,14 @@
-using AutoGestao.Atributes;
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
-using AutoGestao.Helpers;
-using AutoGestao.Interfaces;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
-using AutoGestao.Models.Report;
-using AutoGestao.Services.Interface;
+using FGT.Atributes;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
+using FGT.Helpers;
+using FGT.Interfaces;
+using FGT.Models;
+using FGT.Models.Grid;
+using FGT.Models.Report;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +17,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     public abstract class StandardGridController<T>(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<T>>? logger = null, IAuditService? auditService = null)
         : Controller where T : class, IEntity, new()
@@ -694,6 +694,9 @@ namespace AutoGestao.Controllers.Base
             {
                 try
                 {
+                    // 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN
+                    EmpresaClienteFieldHelper.ForceEmpresaClienteId(entity, User);
+
                     await BeforeCreate(entity);
                     _context.Set<T>().Add(entity);
                     await _context.SaveChangesAsync();
@@ -869,6 +872,9 @@ namespace AutoGestao.Controllers.Base
             {
                 try
                 {
+                    // 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN
+                    EmpresaClienteFieldHelper.ForceEmpresaClienteId(entity, User);
+
                     // Preservar valores
                     entity.IdEmpresa = existingEntity.IdEmpresa;
 
@@ -1050,9 +1056,7 @@ namespace AutoGestao.Controllers.Base
                     return Json(new
                     {
                         success = false,
-                        mensagem = "Você não tem permissão para excluir este registro.",
-                        redirectUrl = Url.Action("Index"),
-                        script = "showError('Você não tem permissão para excluir este registro.')"
+                        message = "Você não tem permissão para excluir este registro."
                     });
                 }
 
@@ -1071,10 +1075,8 @@ namespace AutoGestao.Controllers.Base
                 {
                     return Json(new
                     {
-                        sucesso = true,
-                        mensagem = "Registro excluído com sucesso!",
-                        redirectUrl = Url.Action("Index"),
-                        script = "showSuccess('Registro excluído com sucesso!')"
+                        success = true,
+                        message = "Registro excluído com sucesso!"
                     });
                 }
 
@@ -1088,8 +1090,7 @@ namespace AutoGestao.Controllers.Base
                     return Json(new
                     {
                         success = false,
-                        mensagem = $"Erro ao excluir registro: {ex.Message}",
-                        script = $"showError('Erro ao excluir registro: {EscapeJavaScript(ex.Message)}')"
+                        message = $"Erro ao excluir registro: {ex.Message}"
                     });
                 }
 
@@ -1899,7 +1900,9 @@ namespace AutoGestao.Controllers.Base
         protected static string EscapeJavaScript(string text)
         {
             if (string.IsNullOrEmpty(text))
+            {
                 return text;
+            }
 
             return text
                 .Replace("\\", "\\\\")  // Backslash deve ser primeiro
@@ -1997,6 +2000,14 @@ namespace AutoGestao.Controllers.Base
         private static string GetDefaultPlaceholder(PropertyInfo property)
         {
             var propertyName = property.Name.ToLower();
+
+            // IMPORTANTE: Verificar primeiro se é um campo de referência através do FormFieldAttribute
+            var formFieldAttr = property.GetCustomAttribute<FormFieldAttribute>();
+            if (formFieldAttr?.Type == EnumFieldType.Reference && formFieldAttr?.Reference != null)
+            {
+                return FormFieldViewModelExtensions.GetReferencePlaceholder(formFieldAttr.Reference);
+            }
+
             var fieldType = DetermineFieldType(property);
 
             return fieldType switch
@@ -2292,15 +2303,32 @@ namespace AutoGestao.Controllers.Base
                     }
                 }
 
+                // 🔒 APLICAR LÓGICA DE EMPRESA CLIENTE LOGADA
+                // Se o campo é EmpresaCliente e o usuário não-admin está logado em uma empresa,
+                // ocultar o campo e forçar o valor
+                var fieldType = formFieldAttr.Type;
+                var isReadOnly = action == "Details" || formFieldAttr.ReadOnly;
+
+                if (EmpresaClienteFieldHelper.ShouldHideEmpresaClienteField(property, User, out var empresaClienteIdLogada))
+                {
+                    // Campo deve ser ocultado e valor forçado
+                    fieldType = EnumFieldType.Hidden;
+                    isReadOnly = true;
+                    formattedValue = empresaClienteIdLogada?.ToString();
+
+                    _logger?.LogInformation("🔒 Campo {PropertyName} oculto para usuário não-admin. EmpresaClienteId forçado: {Value}",
+                        property.Name, empresaClienteIdLogada);
+                }
+
                 return new FormFieldViewModel
                 {
                     PropertyName = property.Name,
                     DisplayName = formFieldAttr.Name ?? GetDisplayName(property),
                     Icon = formFieldAttr.Icon ?? GetDefaultIcon(property),
                     Placeholder = formFieldAttr.Placeholder ?? GetDefaultPlaceholder(property),
-                    Type = formFieldAttr.Type,
+                    Type = fieldType,
                     Required = isRequired,
-                    ReadOnly = action == "Details" || formFieldAttr.ReadOnly,
+                    ReadOnly = isReadOnly,
                     Value = formattedValue,
                     DisplayText = displayText,
                     Reference = formFieldAttr.Reference ?? null,
@@ -2792,6 +2820,9 @@ namespace AutoGestao.Controllers.Base
                 {
                     if (controller.ModelState.IsValid)
                     {
+                        // 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN
+                        EmpresaClienteFieldHelper.ForceEmpresaClienteId(entity, controller.User);
+
                         // Executar lógica de criação
                         await controller.BeforeCreate(entity);
                         controller._context.Set<T>().Add(entity);
@@ -2853,6 +2884,9 @@ namespace AutoGestao.Controllers.Base
         {
             try
             {
+                // 🔒 FORÇAR EMPRESACLIENTEID PARA USUÁRIOS NÃO-ADMIN
+                EmpresaClienteFieldHelper.ForceEmpresaClienteId(entity, controller.User);
+
                 await controller.BeforeCreate(entity);
 
                 if (controller.ModelState.IsValid)
@@ -3088,7 +3122,9 @@ namespace AutoGestao.Controllers.Base
         private IQueryable<T> ApplyTextSearch(IQueryable<T> query, string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
+            {
                 return query;
+            }
 
             // Buscar propriedades marcadas com ReferenceSearchableAttribute
             var searchableProperties = typeof(T).GetProperties()
@@ -3096,7 +3132,7 @@ namespace AutoGestao.Controllers.Base
                 .ToList();
 
             // Se não houver ReferenceSearchable, buscar ReferenceText
-            if (!searchableProperties.Any())
+            if (searchableProperties.Count == 0)
             {
                 var referenceTextProp = typeof(T).GetProperties()
                     .FirstOrDefault(p => p.GetCustomAttribute<ReferenceTextAttribute>() != null && p.PropertyType == typeof(string));
@@ -3108,7 +3144,7 @@ namespace AutoGestao.Controllers.Base
             }
 
             // Se ainda não houver, buscar propriedades comuns
-            if (!searchableProperties.Any())
+            if (searchableProperties.Count == 0)
             {
                 var commonNames = new[] { "Nome", "Descricao", "Titulo", "Codigo" };
                 foreach (var name in commonNames)
@@ -3122,11 +3158,14 @@ namespace AutoGestao.Controllers.Base
             }
 
             // Se não encontrou nenhuma propriedade searchable, retornar query original
-            if (!searchableProperties.Any())
+            if (searchableProperties.Count == 0)
             {
                 _logger?.LogWarning("Nenhuma propriedade searchable encontrada para tipo {TypeName}", typeof(T).Name);
                 return query;
             }
+
+            // Normalizar termo de busca (remover pontuação para CNPJ, CPF, telefone, etc.)
+            var searchTermNormalized = NormalizeSearchTerm(searchTerm);
 
             // Construir expressão OR para buscar em todas as propriedades
             var parameter = Expression.Parameter(typeof(T), "x");
@@ -3134,24 +3173,56 @@ namespace AutoGestao.Controllers.Base
 
             var searchTermLower = searchTerm.ToLower();
             var searchTermConstant = Expression.Constant(searchTermLower);
+            var searchTermNormalizedConstant = Expression.Constant(searchTermNormalized);
 
             foreach (var prop in searchableProperties)
             {
+                // Verificar se a propriedade tem formato de máscara (CNPJ, CPF, etc.)
+                var subtitleAttr = prop.GetCustomAttribute<ReferenceSubtitleAttribute>();
+                var hasFormatMask = subtitleAttr?.Format != null && HasFormatMask(subtitleAttr.Format);
+
                 // x.PropertyName
                 var propertyAccess = Expression.Property(parameter, prop);
 
                 // x.PropertyName != null
                 var notNullCheck = Expression.NotEqual(propertyAccess, Expression.Constant(null, typeof(string)));
 
-                // x.PropertyName.ToLower()
-                var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
-                var propertyToLower = Expression.Call(propertyAccess, toLowerMethod!);
+                Expression containsCall;
 
-                // x.PropertyName.ToLower().Contains(searchTerm.ToLower())
-                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                var containsCall = Expression.Call(propertyToLower, containsMethod!, searchTermConstant);
+                if (hasFormatMask)
+                {
+                    // Para campos com máscara (CNPJ, CPF, telefone), aplicar normalização
+                    var replaceMethod = typeof(string).GetMethod("Replace", new[] { typeof(string), typeof(string) });
+                    if (replaceMethod != null)
+                    {
+                        // Aplicar múltiplos replaces para remover pontuação
+                        var normalizedProperty = ApplyNormalizationReplaces(propertyAccess, replaceMethod);
 
-                // x.PropertyName != null && x.PropertyName.ToLower().Contains(searchTerm.ToLower())
+                        // normalizedProperty.Contains(searchTermNormalized)
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                        containsCall = Expression.Call(normalizedProperty, containsMethod!, searchTermNormalizedConstant);
+                    }
+                    else
+                    {
+                        // Fallback para busca normal se Replace não estiver disponível
+                        var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                        var propertyToLower = Expression.Call(propertyAccess, toLowerMethod!);
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                        containsCall = Expression.Call(propertyToLower, containsMethod!, searchTermConstant);
+                    }
+                }
+                else
+                {
+                    // x.PropertyName.ToLower()
+                    var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                    var propertyToLower = Expression.Call(propertyAccess, toLowerMethod!);
+
+                    // x.PropertyName.ToLower().Contains(searchTerm.ToLower())
+                    var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                    containsCall = Expression.Call(propertyToLower, containsMethod!, searchTermConstant);
+                }
+
+                // x.PropertyName != null && x.PropertyName.Contains(searchTerm)
                 var condition = Expression.AndAlso(notNullCheck, containsCall);
 
                 // Combinar com OR
@@ -3166,6 +3237,64 @@ namespace AutoGestao.Controllers.Base
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Normaliza o termo de busca removendo caracteres de pontuação
+        /// </summary>
+        private static string NormalizeSearchTerm(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return term;
+            }
+
+            // Remove caracteres comuns de formatação
+            return term.Replace(".", "")
+                      .Replace("-", "")
+                      .Replace("/", "")
+                      .Replace("(", "")
+                      .Replace(")", "")
+                      .Replace(" ", "")
+                      .ToLower();
+        }
+
+        /// <summary>
+        /// Verifica se o formato indica um campo com máscara (CNPJ, CPF, telefone, etc)
+        /// </summary>
+        private static bool HasFormatMask(string? format)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                return false;
+            }
+
+            // Formatos conhecidos que usam pontuação
+            return format.Contains(".") ||
+                   format.Contains("-") ||
+                   format.Contains("/") ||
+                   format.Contains("(") ||
+                   format.Contains(")");
+        }
+
+        /// <summary>
+        /// Aplica múltiplos replaces para remover caracteres de formatação do campo
+        /// </summary>
+        private static Expression ApplyNormalizationReplaces(Expression property, MethodInfo replaceMethod)
+        {
+            // Cadeia de replaces: campo.Replace(".", "").Replace("-", "").Replace("/", "")...
+            Expression result = property;
+
+            var charsToRemove = new[] { ".", "-", "/", "(", ")", " " };
+
+            foreach (var charToRemove in charsToRemove)
+            {
+                var searchChar = Expression.Constant(charToRemove);
+                var emptyString = Expression.Constant("");
+                result = Expression.Call(result, replaceMethod, searchChar, emptyString);
+            }
+
+            return result;
         }
 
         private PropertyInfo? GetDisplayProperty()
@@ -3197,9 +3326,7 @@ namespace AutoGestao.Controllers.Base
         private List<PropertyInfo> GetSubtitleProperties()
         {
             // Buscar propriedades marcadas com ReferenceSubtitleAttribute
-            return typeof(T).GetProperties()
-                .Where(p => p.GetCustomAttribute<ReferenceSubtitleAttribute>() != null)
-                .ToList();
+            return [.. typeof(T).GetProperties().Where(p => p.GetCustomAttribute<ReferenceSubtitleAttribute>() != null)];
         }
 
         private string GetDisplayText(T item, PropertyInfo? property)

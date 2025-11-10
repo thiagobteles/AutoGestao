@@ -1,9 +1,9 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades;
+using FGT.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     public class UsuarioEmpresaService(ApplicationDbContext context) : IUsuarioEmpresaService
     {
@@ -64,7 +64,9 @@ namespace AutoGestao.Services
                 .FirstOrDefaultAsync(ue => ue.IdUsuario == idUsuario && ue.IdEmpresaCliente == idEmpresaCliente);
 
             if (vinculo == null)
+            {
                 return false;
+            }
 
             // Soft delete - apenas desativar
             vinculo.Ativo = false;
@@ -79,7 +81,9 @@ namespace AutoGestao.Services
                 .AnyAsync(ue => ue.IdUsuario == idUsuario && ue.IdEmpresaCliente == idEmpresaCliente && ue.Ativo);
 
             if (temVinculo)
+            {
                 return true;
+            }
 
             // Verificar se é a empresa padrão
             var usuario = await _context.Usuarios.FindAsync(idUsuario);

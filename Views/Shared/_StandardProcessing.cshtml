@@ -1,0 +1,190 @@
+@model ProcessingFormViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="dashboard-container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">
+                <i class="@Model.Icon"></i>
+                @Model.Title
+            </h1>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="page-subtitle mb-0">@Model.Description</p>
+            }
+        </div>
+    </div>
+
+    @* Exibir resultado do último processamento (se houver) *@
+    @if (Model.LastResult != null)
+    {
+        <div class="alert @(Model.LastResult.Success ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-start">
+                <i class="@(Model.LastResult.Success ? "fas fa-check-circle" : "fas fa-exclamation-triangle") me-2 mt-1"></i>
+                <div class="flex-grow-1">
+                    <strong>@(Model.LastResult.Success ? "Sucesso!" : "Erro!")</strong>
+                    <p class="mb-0">@Model.LastResult.Message</p>
+
+                    @if (Model.LastResult.Warnings.Any())
+                    {
+                        <div class="mt-2">
+                            <strong>Avisos:</strong>
+                            <ul class="mb-0">
+                                @foreach (var warning in Model.LastResult.Warnings)
+                                {
+                                    <li>@warning</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    @if (Model.LastResult.Errors.Any())
+                    {
+                        <div class="mt-2">
+                            <strong>Erros:</strong>
+                            <ul class="mb-0">
+                                @foreach (var error in Model.LastResult.Errors)
+                                {
+                                    <li>@error</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    @if (Model.LastResult.Metadata.Any())
+                    {
+                        <div class="mt-2">
+                            <strong>Informações adicionais:</strong>
+                            <ul class="mb-0">
+                                @foreach (var meta in Model.LastResult.Metadata)
+                                {
+                                    <li><strong>@meta.Key:</strong> @meta.Value</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @await Html.PartialAsync("_StandardProcessingContent", Model)
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            const form = $('.processing-form');
+            const submitBtn = $('#btnProcessar');
+            const btnText = submitBtn.find('.btn-text');
+            const btnIcon = submitBtn.find('i');
+            const originalText = btnText.text();
+            const originalIconClass = btnIcon.attr('class');
+            const showConfirmation = @(Model.ShowConfirmation ? "true" : "false");
+            const confirmationMessage = '@(Model.ConfirmationMessage ?? "Deseja realmente executar este processamento?")';
+            const allowMultiple = @(Model.AllowMultipleExecutions ? "true" : "false");
+            const redirectUrl = '@(Model.RedirectOnSuccessUrl ?? "")';
+
+            form.on('submit', function(e) {
+                e.preventDefault();
+
+                // Confirmação
+                if (showConfirmation) {
+                    if (!confirm(confirmationMessage)) {
+                        return;
+                    }
+                }
+
+                // Desabilitar botão
+                submitBtn.prop('disabled', true);
+                btnText.text('Processando...');
+                btnIcon.attr('class', 'fas fa-spinner fa-spin me-2');
+
+                // Criar FormData
+                const formData = new FormData(this);
+
+                // Enviar requisição
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            // Sucesso
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso!',
+                                html: buildResultHtml(response),
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                if (redirectUrl) {
+                                    window.location.href = redirectUrl;
+                                } else if (!allowMultiple) {
+                                    window.location.reload();
+                                } else {
+                                    // Limpar formulário
+                                    form[0].reset();
+                                }
+                            });
+                        } else {
+                            // Erro
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro no processamento',
+                                html: buildResultHtml(response),
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: 'Erro ao executar processamento: ' + error,
+                            confirmButtonText: 'OK'
+                        });
+                    },
+                    complete: function() {
+                        // Reabilitar botão
+                        submitBtn.prop('disabled', false);
+                        btnText.text(originalText);
+                        btnIcon.attr('class', originalIconClass);
+                    }
+                });
+            });
+
+            function buildResultHtml(response) {
+                let html = '<div class="text-start">';
+                html += '<p>' + response.message + '</p>';
+
+                if (response.warnings && response.warnings.length > 0) {
+                    html += '<div class="mt-2"><strong>Avisos:</strong><ul>';
+                    response.warnings.forEach(w => html += '<li>' + w + '</li>');
+                    html += '</ul></div>';
+                }
+
+                if (response.errors && response.errors.length > 0) {
+                    html += '<div class="mt-2"><strong>Erros:</strong><ul>';
+                    response.errors.forEach(e => html += '<li>' + e + '</li>');
+                    html += '</ul></div>';
+                }
+
+                if (response.metadata && Object.keys(response.metadata).length > 0) {
+                    html += '<div class="mt-2"><strong>Informações:</strong><ul>';
+                    for (const [key, value] of Object.entries(response.metadata)) {
+                        html += '<li><strong>' + key + ':</strong> ' + value + '</li>';
+                    }
+                    html += '</ul></div>';
+                }
+
+                html += '</div>';
+                return html;
+            }
+        });
+    </script>
+}

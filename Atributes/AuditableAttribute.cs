@@ -1,6 +1,6 @@
 using System;
 
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     /// <summary>
     /// Atributo para marcar entidades que devem ser auditadas

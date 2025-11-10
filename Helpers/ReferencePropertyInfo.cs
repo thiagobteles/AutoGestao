@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     public class ReferencePropertyInfo
     {

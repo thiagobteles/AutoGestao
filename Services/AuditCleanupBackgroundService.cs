@@ -1,4 +1,4 @@
-using AutoGestao.Services.Interface;
+using FGT.Services.Interface;
 
 public class AuditCleanupBackgroundService(IServiceProvider serviceProvider, ILogger<AuditCleanupBackgroundService> logger) : BackgroundService
 {

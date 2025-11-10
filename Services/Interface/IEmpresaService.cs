@@ -1,6 +1,6 @@
-using AutoGestao.Entidades;
+using FGT.Entidades.Base;
 
-namespace AutoGestao.Services.Interface
+namespace FGT.Services.Interface
 {
     public interface IEmpresaService
     {

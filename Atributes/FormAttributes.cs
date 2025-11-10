@@ -1,6 +1,6 @@
-using AutoGestao.Enumerador.Gerais;
+using FGT.Enumerador.Gerais;
 
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     /* 
      * ============================================================
@@ -121,5 +121,10 @@ namespace AutoGestao.Atributes
         /// Caso o arquivo precise ser salvo em um bucket diferente
         /// </summary>
         public string CustomBucket { get; set; } = "";
+
+        /// <summary>
+        /// Texto de ajuda exibido abaixo do campo
+        /// </summary>
+        public string HelpText { get; set; } = "";
     }
 }

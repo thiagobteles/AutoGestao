@@ -1,7 +1,7 @@
-using AutoGestao.Enumerador.Gerais;
+using FGT.Enumerador.Gerais;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace AutoGestao.Models
+namespace FGT.Models
 {
     public class FormFieldViewModel
     {
@@ -36,5 +36,8 @@ namespace AutoGestao.Models
         public string? FileUrl { get; set; }
         public string? FileName { get; set; }
         public string? FilePath { get; set; }
+        public string HelpText { get; set; } = "";
+        public Type? ReferenceType => Reference;
+        public List<SelectListItem> SelectOptions => Options;
     }
 }

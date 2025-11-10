@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace AutoGestao.Migrations
+namespace FGT.Migrations
 {
     /// <inheritdoc />
     public partial class AdicionarIdEmpresaClienteEmUsuario : Migration

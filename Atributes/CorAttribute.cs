@@ -1,4 +1,4 @@
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class CorAttribute(string cor) : Attribute

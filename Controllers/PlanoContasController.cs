@@ -1,15 +1,15 @@
-using AutoGestao.Controllers.Base;
-using AutoGestao.Data;
-using AutoGestao.Entidades.Fiscal;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Extensions;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
-using AutoGestao.Services.Interface;
+using FGT.Controllers.Base;
+using FGT.Data;
+using FGT.Entidades;
+using FGT.Enumerador.Gerais;
+using FGT.Extensions;
+using FGT.Models;
+using FGT.Models.Grid;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Controllers
+namespace FGT.Controllers
 {
     public class PlanoContasController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<PlanoContas>> logger)
         : StandardGridController<PlanoContas>(context, fileStorageService, logger)

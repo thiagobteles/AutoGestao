@@ -1,5 +1,5 @@
-using AutoGestao.Models.Auth;
-using AutoGestao.Services.Interface;
+using FGT.Models.Auth;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     [AllowAnonymous]
     public class LoginController(IAuthService authService) : Controller
@@ -42,9 +42,10 @@ namespace AutoGestao.Controllers.Base
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, result.Usuario!.Id.ToString()),
+                new("UserId", result.Usuario.Id.ToString()),
                 new(ClaimTypes.Name, result.Usuario.Nome),
                 new(ClaimTypes.Email, result.Usuario.Email),
-                new("IdEmpresa", result.Usuario.IdEmpresa.ToString()),
+                new("EmpresaId", result.Usuario.IdEmpresa.ToString()),
                 new("Perfil", result.Usuario.Perfil)
             };
 
@@ -102,5 +103,107 @@ namespace AutoGestao.Controllers.Base
             TempData["InfoMessage"] = "Logout realizado com sucesso!";
             return RedirectToAction("Index", "Login");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> TrocarEmpresa([FromBody] TrocarEmpresaRequest request)
+        {
+            // Verificar autenticação manualmente já que a classe é [AllowAnonymous]
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Json(new { success = false, message = "Usuário não autenticado" });
+            }
+
+            // Obter empresas vinculadas do claim
+            var empresasVinculadasClaim = User.FindFirst("EmpresasVinculadas")?.Value;
+            if (string.IsNullOrEmpty(empresasVinculadasClaim))
+            {
+                return Json(new { success = false, message = "Usuário não possui empresas vinculadas" });
+            }
+
+            // Deserializar lista de empresas
+            var empresasVinculadas = JsonSerializer.Deserialize<List<long>>(empresasVinculadasClaim);
+            if (empresasVinculadas == null || !empresasVinculadas.Contains(request.IdEmpresaCliente))
+            {
+                return Json(new { success = false, message = "Empresa selecionada não está vinculada ao usuário" });
+            }
+
+            // Obter todos os claims atuais exceto EmpresaClienteId
+            var currentClaims = ((ClaimsIdentity)User.Identity).Claims
+                .Where(c => c.Type != "EmpresaClienteId")
+                .ToList();
+
+            // Adicionar novo claim de EmpresaClienteId
+            var newClaims = new List<Claim>(currentClaims)
+            {
+                new Claim("EmpresaClienteId", request.IdEmpresaCliente.ToString())
+            };
+
+            // Recriar a identidade com os novos claims
+            var claimsIdentity = new ClaimsIdentity(newClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            // Obter propriedades de autenticação atuais
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+            };
+
+            // Re-fazer sign-in com os novos claims
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                claimsPrincipal,
+                authProperties);
+
+            return Json(new { success = true, message = "Empresa alterada com sucesso" });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ObterEmpresasVinculadas()
+        {
+            // Verificar autenticação manualmente já que a classe é [AllowAnonymous]
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Json(new { success = false, message = "Usuário não autenticado" });
+            }
+
+            // Verificar se é admin - admin não precisa seletor de empresas
+            if (User.IsInRole("Admin"))
+            {
+                return Json(new { success = true, isAdmin = true, empresas = new List<object>() });
+            }
+
+            var empresasVinculadasClaim = User.FindFirst("EmpresasVinculadas")?.Value;
+            if (string.IsNullOrEmpty(empresasVinculadasClaim))
+            {
+                return Json(new { success = true, empresas = new List<object>() });
+            }
+
+            var empresasIds = JsonSerializer.Deserialize<List<long>>(empresasVinculadasClaim);
+            if (empresasIds == null || empresasIds.Count == 0)
+            {
+                return Json(new { success = true, empresas = new List<object>() });
+            }
+
+            var empresaAtualId = User.FindFirst("EmpresaClienteId")?.Value;
+
+            // Buscar informações das empresas
+            var empresasInfo = await _authService.ObterEmpresasPorIdsAsync(empresasIds);
+
+            var resultado = empresasInfo.Select(e => new
+            {
+                id = e.Id,
+                nome = e.RazaoSocial ?? e.NomeFantasia ?? $"Empresa #{e.Id}",
+                cnpj = e.CNPJ,
+                isSelecionada = e.Id.ToString() == empresaAtualId
+            }).ToList();
+
+            return Json(new { success = true, empresas = resultado, empresaAtualId });
+        }
+    }
+
+    public class TrocarEmpresaRequest
+    {
+        public long IdEmpresaCliente { get; set; }
     }
 }

@@ -1,8 +1,8 @@
 // Enumerador/EnumFormaPagamento.cs
-using AutoGestao.Atributes;
+using FGT.Atributes;
 using System.ComponentModel;
 
-namespace AutoGestao.Enumerador
+namespace FGT.Enumerador
 {
     public enum EnumFormaPagamento
     {

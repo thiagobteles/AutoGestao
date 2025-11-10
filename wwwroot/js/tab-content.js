@@ -195,33 +195,54 @@ class TabContentManager {
     }
 
     async lockParentField(modal, parentField, parentId, parentController) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        console.log(`🔒 Tentando bloquear campo: ${parentField} com valor: ${parentId} (controller: ${parentController})`);
+
+        // Aguardar um pouco mais para garantir que o HTML foi carregado
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         const hiddenInput = modal.querySelector(`input[name="${parentField}"]`);
 
         if (hiddenInput) {
+            console.log(`✅ Campo hidden encontrado: ${parentField}`);
             hiddenInput.value = parentId;
+
+            // Buscar o campo de pesquisa visual
             const searchInput = modal.querySelector(`input.reference-search-input[data-target-field="${parentField}"]`);
 
             if (searchInput) {
-                console.log('Campo de busca encontrado:', searchInput);
+                console.log('✅ Campo de busca encontrado:', searchInput.id);
 
-                if (!searchInput.value || searchInput.value === '') {
-                    const displayName = await this.fetchParentDisplayName(parentController, parentId);
-                    if (displayName) {
-                        searchInput.value = displayName;
+                // SEMPRE buscar o display name, independente se o campo já tem valor
+                console.log(`📞 Buscando display name de ${parentController} #${parentId}...`);
+                const displayName = await this.fetchParentDisplayName(parentController, parentId);
+
+                if (displayName) {
+                    console.log(`✅ Display name encontrado: ${displayName}`);
+                    searchInput.value = displayName;
+                    searchInput.classList.add('selected');
+                } else {
+                    console.warn(`⚠️ Não foi possível buscar o display name para ${parentController} #${parentId}`);
+                    // Fallback: tentar buscar do próprio input se já tiver valor
+                    if (!searchInput.value || searchInput.value === '') {
+                        searchInput.value = `${parentController} #${parentId}`;
                         searchInput.classList.add('selected');
                     }
                 }
 
+                // Bloquear o campo
                 searchInput.setAttribute('readonly', 'readonly');
                 searchInput.setAttribute('disabled', 'disabled');
-                const bgDisabled = getComputedStyle(document.documentElement).getPropertyValue('--bg-disabled').trim();
+                const bgDisabled = getComputedStyle(document.documentElement).getPropertyValue('--bg-disabled').trim() || '#e9ecef';
                 searchInput.style.backgroundColor = bgDisabled;
                 searchInput.style.cursor = 'not-allowed';
                 searchInput.title = 'Este campo não pode ser alterado pois o registro pertence a este contexto';
+
+                console.log(`🔒 Campo ${parentField} bloqueado com sucesso`);
+            } else {
+                console.warn(`⚠️ Campo de busca não encontrado para: ${parentField}`);
             }
 
+            // Esconder botões de ação
             const container = hiddenInput.closest('.reference-field-container');
             if (container) {
                 const createBtn = container.querySelector('.reference-create-btn');
@@ -233,12 +254,18 @@ class TabContentManager {
                 if (clearBtn) {
                     clearBtn.style.display = 'none';
                 }
+
+                const searchBtn = container.querySelector('.reference-search-btn');
+                if (searchBtn) {
+                    searchBtn.style.display = 'none';
+                }
             }
 
+            // Adicionar ícone de cadeado
             if (searchInput && searchInput.parentElement) {
                 const lockIcon = document.createElement('span');
-                lockIcon.className = 'position-absolute';
-                const textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
+                lockIcon.className = 'position-absolute field-lock-icon';
+                const textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6c757d';
                 lockIcon.style.cssText = `right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: ${textMuted};`;
                 lockIcon.innerHTML = '<i class="fas fa-lock"></i>';
 
@@ -249,24 +276,36 @@ class TabContentManager {
                 parent.appendChild(lockIcon);
             }
         } else {
-            console.warn(`Campo ${parentField} não encontrado no formulário`);
+            console.error(`❌ Campo ${parentField} não encontrado no formulário`);
         }
     }
 
     async fetchParentDisplayName(parentController, parentId) {
         try {
-            const response = await fetch(`/${parentController}/${AutoGestao.Controllers.Base.StandardGridController.GetDisplayName(parentController)}/${parentId}`, {
+            console.log(`📞 Fazendo requisição para buscar display name: ${parentController} #${parentId}`);
+
+            const response = await fetch(`/api/Reference/GetById`, {
+                method: 'POST',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    entityType: parentController,
+                    id: parentId.toString()
+                })
             });
 
             if (response.ok) {
                 const result = await response.json();
-                return result.displayName || result.name || result.text;
+                console.log(`✅ Display name recebido:`, result);
+                return result.text || result.displayName || result.name || `#${parentId}`;
+            } else {
+                const errorText = await response.text();
+                console.warn(`⚠️ Erro ao buscar display name: ${response.status} ${response.statusText}`, errorText);
             }
         } catch (error) {
-            console.warn('Não foi possível buscar o nome do registro pai:', error);
+            console.warn('❌ Erro ao buscar o nome do registro pai:', error);
         }
 
         return null;
@@ -280,6 +319,7 @@ class TabContentManager {
         modal.setAttribute('tabindex', '-1');
         modal.setAttribute('data-controller', controller);
         modal.setAttribute('data-mode', mode);
+        modal.setAttribute('data-modal-level', '1'); // IMPORTANTE: Define nível do modal para que campos de referência possam abrir modais aninhados corretamente
 
         modal.innerHTML = `
             <div class="modal-dialog modal-xl" style="max-width: 90%; width: 1400px;">
@@ -443,12 +483,17 @@ class TabContentManager {
         }
 
         try {
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : '';
+
             const response = await fetch(`/${controller}/Delete/${id}`, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: token ? `__RequestVerificationToken=${encodeURIComponent(token)}` : ''
             });
 
             if (response.ok) {
@@ -470,6 +515,25 @@ class TabContentManager {
         } catch (error) {
             console.error('Erro ao excluir:', error);
             this.showError('Erro ao excluir registro');
+        }
+    }
+
+    // Métodos helper para alertas (delegam para funções globais)
+    showError(message) {
+        if (typeof window.showError === 'function') {
+            window.showError(message);
+        }
+    }
+
+    showSuccess(message) {
+        if (typeof window.showSuccess === 'function') {
+            window.showSuccess(message);
+        }
+    }
+
+    showWarning(message) {
+        if (typeof window.showWarning === 'function') {
+            window.showWarning(message);
         }
     }
 

@@ -1,4 +1,5 @@
-@model AutoGestao.Entidades.AuditLog
+@using FGT.Entidades.Base
+@model AuditLog
 @{
     ViewData["Title"] = "Detalhes da Auditoria";
 }
@@ -72,18 +73,18 @@
                             @{
                                 var operacaoClass = Model.TipoOperacao switch
                                 {
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "success",
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "warning",
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "danger",
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "info",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "success",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "warning",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "danger",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "info",
                                     _ => "secondary"
                                 };
                                 var operacaoIcon = Model.TipoOperacao switch
                                 {
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "fa-plus",
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "fa-edit",
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "fa-trash",
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "fa-sign-in-alt",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "fa-plus",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "fa-edit",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "fa-trash",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Login => "fa-sign-in-alt",
                                     _ => "fa-cog"
                                 };
                             }

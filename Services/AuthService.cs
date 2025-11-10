@@ -1,8 +1,9 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models.Auth;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Models.Auth;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     public class AuthService(ApplicationDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger, IUsuarioEmpresaService usuarioEmpresaService) : IAuthService
     {
@@ -227,10 +228,35 @@ namespace AutoGestao.Services
         {
             return BCrypt.Net.BCrypt.Verify(password, hash);
         }
-            
+
         public static string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt(12));
+        }
+
+        public async Task<List<EmpresaCliente>> ObterEmpresasPorIdsAsync(List<long> ids)
+        {
+            try
+            {
+                _logger.LogInformation("🔍 ObterEmpresasPorIdsAsync - Buscando empresas com IDs: {Ids}", string.Join(", ", ids));
+
+                // IgnoreQueryFilters para permitir buscar empresas de qualquer tenant
+                // (necessário para listar empresas vinculadas ao usuário)
+                var empresas = await _context.EmpresasClientes
+                    .IgnoreQueryFilters()
+                    .Where(e => ids.Contains(e.Id))
+                    .OrderBy(e => e.RazaoSocial)
+                    .ToListAsync();
+
+                _logger.LogInformation("✅ ObterEmpresasPorIdsAsync - Encontradas {Count} empresas", empresas.Count);
+
+                return empresas;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao buscar empresas pelos IDs: {Ids}", string.Join(", ", ids));
+                return [];
+            }
         }
     }
 }

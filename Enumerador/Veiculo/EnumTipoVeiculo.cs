@@ -1,7 +1,7 @@
-using AutoGestao.Atributes;
+using FGT.Atributes;
 using System.ComponentModel;
 
-namespace AutoGestao.Enumerador.Veiculo
+namespace FGT.Enumerador.Veiculo
 {
     public enum EnumTipoVeiculo
     {

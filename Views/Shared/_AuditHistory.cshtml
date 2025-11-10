@@ -1,6 +1,7 @@
+@using FGT.Entidades.Base
 @model (string EntidadeNome, string EntidadeId)
 @{
-    var logs = ViewBag.AuditLogs as List<AutoGestao.Entidades.AuditLog> ?? new List<AutoGestao.Entidades.AuditLog>();
+    var logs = ViewBag.AuditLogs as List<AuditLog> ?? new List<AuditLog>();
 }
 
 <div class="card">
@@ -22,9 +23,9 @@
                             @{
                                 var icon = log.TipoOperacao switch
                                 {
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "fa-plus text-success",
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "fa-edit text-warning",
-                                    AutoGestao.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "fa-trash text-danger",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Create => "fa-plus text-success",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Update => "fa-edit text-warning",
+                                    FGT.Enumerador.Gerais.EnumTipoOperacaoAuditoria.Delete => "fa-trash text-danger",
                                     _ => "fa-info-circle text-info"
                                 };
                             }

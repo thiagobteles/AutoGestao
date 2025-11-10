@@ -1,7 +1,7 @@
-using AutoGestao.Entidades;
-using AutoGestao.Entidades.Fiscal;
+using FGT.Entidades;
+using FGT.Entidades.Base;
 
-namespace AutoGestao.Models
+namespace FGT.Models
 {
     public class DashboardViewModel
     {
@@ -15,7 +15,7 @@ namespace AutoGestao.Models
         public decimal FaturamentoMes { get; set; }
         public decimal FaturamentoNFe { get; set; }
         public decimal FaturamentoNFSe { get; set; }
-        public List<ObrigacaoFiscal> ObrigacoesProximas { get; set; } = new();
+        public List<ObrigacaoFiscal> ObrigacoesProximas { get; set; } = [];
 
         // Terceira linha de cards
         public int LancamentosContabeisMes { get; set; }
@@ -29,8 +29,8 @@ namespace AutoGestao.Models
         public decimal ValorVendasMes { get; set; }
         public decimal MetaMensal { get; set; } = 150000;
         public decimal ComparativoComMesAnterior { get; set; }
-        public List<Cliente> Aniversariantes { get; set; } = new();
-        public List<long> UltimasVendas { get; set; } = new();
+        public List<Cliente> Aniversariantes { get; set; } = [];
+        public List<long> UltimasVendas { get; set; } = [];
 
         // Métricas detalhadas
         public int EmpresasSimples { get; set; }

@@ -1,11 +1,11 @@
-using AutoGestao.Entidades;
-using AutoGestao.Models;
-using AutoGestao.Services;
+using FGT.Entidades.Base;
+using FGT.Models;
+using FGT.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     [ApiController]
     [Route("api/[controller]")]

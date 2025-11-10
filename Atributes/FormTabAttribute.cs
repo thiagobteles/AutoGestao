@@ -1,4 +1,4 @@
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class FormTabAttribute(string tabId, string tabName) : Attribute

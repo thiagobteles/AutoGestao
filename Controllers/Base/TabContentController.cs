@@ -1,14 +1,14 @@
-using AutoGestao.Atributes;
-using AutoGestao.Data;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
+using FGT.Atributes;
+using FGT.Data;
+using FGT.Enumerador.Gerais;
+using FGT.Models;
+using FGT.Models.Grid;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     [Authorize]
     [Route("[controller]")]
@@ -22,7 +22,8 @@ namespace AutoGestao.Controllers.Base
             [FromQuery] string controller,
             [FromQuery] string tab,
             [FromQuery] long parentId,
-            [FromQuery] string parentController)
+            [FromQuery] string parentController,
+            [FromQuery] string? mode = null)
         {
             try
             {
@@ -75,16 +76,48 @@ namespace AutoGestao.Controllers.Base
 
                 var query = asQueryableMethod.Invoke(null, [dbSet]) as IQueryable;
 
+                _logger.LogInformation("Query inicial criada");
+
+                // Entidades que precisam ignorar TODOS os query filters (incluindo dos relacionamentos)
+                var entitiesToIgnoreQueryFilters = new[]
+                {
+                    "UsuarioEmpresaCliente" // Tabela N:N - precisa ignorar filtros para ver todas as empresas vinculadas
+                };
+
+                if (entitiesToIgnoreQueryFilters.Contains(entityType.Name))
+                {
+                    _logger.LogInformation("Aplicando IgnoreQueryFilters para {EntityType}", entityType.Name);
+                    var ignoreQueryFiltersMethod = typeof(EntityFrameworkQueryableExtensions)
+                        .GetMethod("IgnoreQueryFilters")
+                        .MakeGenericMethod(entityType);
+                    query = ignoreQueryFiltersMethod.Invoke(null, [query]) as IQueryable;
+                }
+
                 query = ApplyParentFilter(query, entityType, filterField, parentId);
+                _logger.LogInformation("Filtro por parent aplicado: {FilterField} = {ParentId}", filterField, parentId);
+
+                // Entidades que NÃO devem ter filtro de tenant (são compartilhadas ou N:N)
+                var entitiesToExcludeFromTenantFilter = new[]
+                {
+                    "Usuario",
+                    "Empresa",
+                    "UsuarioEmpresaCliente" // Tabela N:N - deve mostrar todas as empresas do usuário
+                };
 
                 var idEmpresaProperty = entityType.GetProperty("IdEmpresa");
-                if (idEmpresaProperty != null)
+                if (idEmpresaProperty != null && !entitiesToExcludeFromTenantFilter.Contains(entityType.Name))
                 {
                     var idEmpresa = GetCurrentEmpresaId();
+                    _logger.LogInformation("Aplicando filtro de empresa: IdEmpresa = {IdEmpresa}", idEmpresa);
                     query = ApplyEmpresaFilter(query, entityType, idEmpresa);
+                }
+                else
+                {
+                    _logger.LogInformation("Entidade {EntityType} não terá filtro de empresa aplicado", entityType.Name);
                 }
 
                 query = ApplyIncludes(query, entityType);
+                _logger.LogInformation("Includes aplicados");
 
                 var toListAsyncMethod = typeof(EntityFrameworkQueryableExtensions)
                     .GetMethods()
@@ -92,6 +125,9 @@ namespace AutoGestao.Controllers.Base
                                 m.GetParameters().Length == 2 &&
                                 m.GetParameters()[0].ParameterType.IsGenericType)
                     .MakeGenericMethod(entityType);
+
+                // DEBUG: Verificar query SQL
+                _logger.LogInformation("Query antes de executar: {Query}", query.ToString());
 
                 var itemsTask = toListAsyncMethod.Invoke(null, [query, CancellationToken.None]) as Task;
                 await itemsTask;
@@ -102,6 +138,12 @@ namespace AutoGestao.Controllers.Base
 
                 _logger.LogInformation("Itens encontrados: {Count}", itemsList.Count);
 
+                // DEBUG: Logar dados dos itens
+                foreach (var item in itemsList)
+                {
+                    _logger.LogInformation("Item: {Item}", item);
+                }
+
                 var gridColumns = GetGridColumns(entityType);
                 var tabColumns = ConvertToTabColumns(gridColumns);
 
@@ -110,6 +152,10 @@ namespace AutoGestao.Controllers.Base
                 var icon = formConfig?.Icon ?? "fas fa-list";
 
                 _logger.LogInformation("Controller name ajustado: {Original} -> {Adjusted}", controller, controller);
+
+                // Se o modo for "Details", não permitir criar, editar ou excluir
+                var isReadOnly = mode?.Equals("Details", StringComparison.OrdinalIgnoreCase) == true;
+                _logger.LogInformation("Modo: {Mode}, IsReadOnly: {IsReadOnly}", mode, isReadOnly);
 
                 var viewModel = new TabContentViewModel
                 {
@@ -121,9 +167,9 @@ namespace AutoGestao.Controllers.Base
                     ParentController = parentController,
                     Items = itemsList,
                     Columns = tabColumns,
-                    CanCreate = true,
-                    CanEdit = true,
-                    CanDelete = true
+                    CanCreate = !isReadOnly,
+                    CanEdit = !isReadOnly,
+                    CanDelete = !isReadOnly
                 };
 
                 return PartialView("_TabContent", viewModel);
@@ -143,6 +189,25 @@ namespace AutoGestao.Controllers.Base
 
         private IQueryable ApplyIncludes(IQueryable? query, Type entityType)
         {
+            // Tratamento especial para entidades específicas que precisam de Includes explícitos
+            if (entityType.Name == "UsuarioEmpresaCliente")
+            {
+                _logger.LogInformation("Aplicando Includes explícitos para UsuarioEmpresaCliente");
+                var includeMethod = typeof(EntityFrameworkQueryableExtensions)
+                    .GetMethods()
+                    .First(m => m.Name == "Include" &&
+                                m.GetParameters().Length == 2 &&
+                                m.GetParameters()[1].ParameterType == typeof(string))
+                    .MakeGenericMethod(entityType);
+
+                query = includeMethod.Invoke(null, [query, "EmpresaCliente"]) as IQueryable;
+                _logger.LogInformation("Include aplicado para EmpresaCliente");
+                query = includeMethod.Invoke(null, [query, "Usuario"]) as IQueryable;
+                _logger.LogInformation("Include aplicado para Usuario");
+
+                return query;
+            }
+
             var properties = entityType.GetProperties()
                 .Where(p => p.PropertyType.IsClass &&
                             p.PropertyType != typeof(string) &&
@@ -255,7 +320,10 @@ namespace AutoGestao.Controllers.Base
                     DisplayName = gridColumn.DisplayName,
                     Width = gridColumn.Width,
                     Format = gridColumn.Format,
-                    Order = gridColumn.Order
+                    Order = gridColumn.Order,
+                    NavigationPaths = gridColumn.NavigationPaths,
+                    Template = gridColumn.Template,
+                    IsHtmlContent = gridColumn.IsHtmlContent
                 });
             }
 
@@ -267,11 +335,11 @@ namespace AutoGestao.Controllers.Base
             var entityName = controller;
             var mapping = new Dictionary<string, string>
             {
-                { "Despesa", "AutoGestao.Entidades.Despesa, AutoGestao" },
-                { "VeiculoDocumento", "AutoGestao.Entidades.Veiculos.VeiculoDocumento, AutoGestao" },
-                { "VeiculoFoto", "AutoGestao.Entidades.Veiculos.VeiculoFoto, AutoGestao" },
-                { "VeiculoNFE", "AutoGestao.Entidades.Veiculos.VeiculoNFE, AutoGestao" },
-                { "VeiculoLancamento", "AutoGestao.Entidades.Veiculos.VeiculoLancamento, AutoGestao" },
+                { "Despesa", "FGT.Entidades.Despesa, AutoGestao" },
+                { "VeiculoDocumento", "FGT.Entidades.Veiculos.VeiculoDocumento, AutoGestao" },
+                { "VeiculoFoto", "FGT.Entidades.Veiculos.VeiculoFoto, AutoGestao" },
+                { "VeiculoNFE", "FGT.Entidades.Veiculos.VeiculoNFE, AutoGestao" },
+                { "VeiculoLancamento", "FGT.Entidades.Veiculos.VeiculoLancamento, AutoGestao" },
             };
 
             if (mapping.TryGetValue(entityName, out var value))
@@ -287,7 +355,7 @@ namespace AutoGestao.Controllers.Base
             return assembly.GetTypes()
                 .FirstOrDefault(t => t.Name == entityName &&
                                    t.Namespace != null &&
-                                   t.Namespace.StartsWith("AutoGestao.Entidades"));
+                                   t.Namespace.StartsWith("FGT.Entidades"));
         }
 
         private static string GetParentFieldName(string controller, string parentController)
@@ -332,6 +400,25 @@ namespace AutoGestao.Controllers.Base
                     continue;
                 }
 
+                // Processar GridComposite ANTES de GridField (GridComposite herda de GridField)
+                var gridCompositeAttr = property.GetCustomAttribute<GridCompositeAttribute>();
+                if (gridCompositeAttr != null)
+                {
+                    columns.Add(new GridColumn
+                    {
+                        PropertyName = property.Name,
+                        DisplayName = gridCompositeAttr.DisplayName,
+                        Type = EnumGridColumnType.Text,
+                        Width = gridCompositeAttr.Width ?? "auto",
+                        Format = gridCompositeAttr.Format,
+                        Order = gridCompositeAttr.Order,
+                        NavigationPaths = gridCompositeAttr.NavigationPaths,
+                        Template = gridCompositeAttr.Template,
+                        IsHtmlContent = !string.IsNullOrEmpty(gridCompositeAttr.Template)
+                    });
+                    continue;
+                }
+
                 var gridFieldAttr = property.GetCustomAttribute<GridFieldAttribute>();
                 if (gridFieldAttr != null)
                 {
@@ -344,6 +431,7 @@ namespace AutoGestao.Controllers.Base
                         Format = gridFieldAttr.Format,
                         Order = gridFieldAttr.Order
                     });
+                    continue;
                 }
             }
 

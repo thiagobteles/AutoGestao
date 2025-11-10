@@ -1,4 +1,4 @@
-namespace AutoGestao.Models.Grid
+namespace FGT.Models.Grid
 {
     public class GridCellViewModel
     {

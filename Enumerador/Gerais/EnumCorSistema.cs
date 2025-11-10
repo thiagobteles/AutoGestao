@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace AutoGestao.Enumerador.Gerais
+namespace FGT.Enumerador.Gerais
 {
     public enum EnumCorSistema
     {

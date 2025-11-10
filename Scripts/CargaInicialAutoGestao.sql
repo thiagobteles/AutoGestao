@@ -1886,9 +1886,9 @@ INSERT INTO fornecedores (id_empresa, id, tipo_pessoa, nome, cpf, cnpj, rg, emai
 -- 3. VENDEDORES
 -- ====================================================================
 INSERT INTO vendedores (id_empresa, id, nome, cpf, email, telefone, celular, percentual_comissao, meta, ativo, data_cadastro, data_alteracao) VALUES
-(1, 1, 'Carlos Alberto Vendas', '12312312312', 'carlos.vendas@autogestao.com.br', '1133445566', '11988776655', 5.50, 50000.00, true, NOW(), NOW()),
-(1, 2, 'Mariana Santos Comercial', '32132132132', 'mariana.comercial@autogestao.com.br', '1144556677', '11977665544', 6.00, 45000.00, true, NOW(), NOW()),
-(1, 3, 'Roberto Silva Negócios', '45645645645', 'roberto.negocios@autogestao.com.br', '1155667788', '11966554433', 4.75, 55000.00, true, NOW(), NOW());
+(1, 1, 'Carlos Alberto Vendas', '12312312312', 'carlos.vendas@FGT.com.br', '1133445566', '11988776655', 5.50, 50000.00, true, NOW(), NOW()),
+(1, 2, 'Mariana Santos Comercial', '32132132132', 'mariana.comercial@FGT.com.br', '1144556677', '11977665544', 6.00, 45000.00, true, NOW(), NOW()),
+(1, 3, 'Roberto Silva Negócios', '45645645645', 'roberto.negocios@FGT.com.br', '1155667788', '11966554433', 4.75, 55000.00, true, NOW(), NOW());
 
 -- ====================================================================
 -- 4. VEÍCULOS ALEATÓRIOS

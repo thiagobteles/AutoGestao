@@ -1,10 +1,11 @@
-using AutoGestao.Data;
-using AutoGestao.Helpers;
-using AutoGestao.Models;
+using FGT.Data;
+using FGT.Helpers;
+using FGT.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Reflection;
 
-namespace AutoGestao.Services
+namespace FGT.Services
 {
     public class GenericReferenceService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<GenericReferenceService> logger)
     {
@@ -65,7 +66,7 @@ namespace AutoGestao.Services
             return [.. entities.Select(e => BuildReferenceItem(e, metadata))];
         }
 
-        private static ReferenceMetadata GetMetadata<T>() where T : class
+        private ReferenceMetadata GetMetadata<T>() where T : class
         {
             var type = typeof(T);
             if (_metadataCache.TryGetValue(type, out var cached))
@@ -75,6 +76,16 @@ namespace AutoGestao.Services
 
             var metadata = GridColumnBuilder.GetReferenceMetadata<T>();
             _metadataCache[type] = metadata;
+
+            // 📊 Log para debug
+            _logger.LogInformation(
+                "🔍 Metadata carregada para {Type}: Text={Text}, Searchable={Searchable}, Subtitle={Subtitle}",
+                type.Name,
+                metadata.TextProperty?.Property.Name ?? "N/A",
+                string.Join(", ", metadata.SearchableProperties.Select(p => p.Property.Name)),
+                string.Join(", ", metadata.SubtitleProperties.Select(p => p.Property.Name))
+            );
+
             return metadata;
         }
 
@@ -107,7 +118,7 @@ namespace AutoGestao.Services
                 }
             }
 
-            item.Subtitle = subtitleParts.Any() ? string.Join(" | ", subtitleParts) : null;
+            item.Subtitle = subtitleParts.Count != 0 ? string.Join(" | ", subtitleParts) : null;
             return item;
         }
 
@@ -194,6 +205,7 @@ namespace AutoGestao.Services
         private static IQueryable<T> ApplySearchFilter<T>(IQueryable<T> query, string searchTerm, ReferenceMetadata metadata) where T : class
         {
             var termLower = searchTerm.ToLower();
+            var termNormalized = NormalizeSearchTerm(searchTerm); // Remove pontuação
             var parameter = Expression.Parameter(typeof(T), "e");
             Expression? filterExpression = null;
 
@@ -219,6 +231,7 @@ namespace AutoGestao.Services
 
                 var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
                 var containsMethod = typeof(string).GetMethod("Contains", [typeof(string)]);
+                var replaceMethod = typeof(string).GetMethod("Replace", [typeof(string), typeof(string)]);
 
                 if (toLowerMethod != null && containsMethod != null)
                 {
@@ -245,11 +258,25 @@ namespace AutoGestao.Services
                         nullCheckExpression = Expression.NotEqual(property, Expression.Constant(null));
                     }
 
-                    var toLower = Expression.Call(property, toLowerMethod);
-                    var constant = Expression.Constant(termLower);
-                    var contains = Expression.Call(toLower, containsMethod, constant);
-                    var condition = Expression.AndAlso(nullCheckExpression, contains);
+                    Expression searchExpression;
 
+                    // ✅ NOVO: Se o campo tem Format (CNPJ, CPF, telefone), aplicar replace para normalizar
+                    if (HasFormatMask(searchProp.Format))
+                    {
+                        // Remover pontuação do campo do banco antes de comparar
+                        var normalizedProperty = ApplyNormalizationReplaces(property, replaceMethod!);
+                        var normalizedConstant = Expression.Constant(termNormalized);
+                        searchExpression = Expression.Call(normalizedProperty, containsMethod, normalizedConstant);
+                    }
+                    else
+                    {
+                        // Busca normal com ToLower
+                        var toLower = Expression.Call(property, toLowerMethod);
+                        var constant = Expression.Constant(termLower);
+                        searchExpression = Expression.Call(toLower, containsMethod, constant);
+                    }
+
+                    var condition = Expression.AndAlso(nullCheckExpression, searchExpression);
                     filterExpression = filterExpression == null ? condition : Expression.OrElse(filterExpression, condition);
                 }
             }
@@ -261,6 +288,64 @@ namespace AutoGestao.Services
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Normaliza o termo de busca removendo caracteres de pontuação
+        /// </summary>
+        private static string NormalizeSearchTerm(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return term;
+            }
+
+            // Remove caracteres comuns de formatação
+            return term.Replace(".", "")
+                      .Replace("-", "")
+                      .Replace("/", "")
+                      .Replace("(", "")
+                      .Replace(")", "")
+                      .Replace(" ", "")
+                      .ToLower();
+        }
+
+        /// <summary>
+        /// Verifica se o formato indica um campo com máscara (CNPJ, CPF, telefone, etc)
+        /// </summary>
+        private static bool HasFormatMask(string? format)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                return false;
+            }
+
+            // Formatos conhecidos que usam pontuação
+            return format.Contains(".") ||
+                   format.Contains("-") ||
+                   format.Contains("/") ||
+                   format.Contains("(") ||
+                   format.Contains(")");
+        }
+
+        /// <summary>
+        /// Aplica múltiplos replaces para remover caracteres de formatação do campo
+        /// </summary>
+        private static Expression ApplyNormalizationReplaces(Expression property, MethodInfo replaceMethod)
+        {
+            // Cadeia de replaces: campo.Replace(".", "").Replace("-", "").Replace("/", "")...
+            Expression result = property;
+
+            var charsToRemove = new[] { ".", "-", "/", "(", ")", " " };
+
+            foreach (var charToRemove in charsToRemove)
+            {
+                var searchChar = Expression.Constant(charToRemove);
+                var emptyString = Expression.Constant("");
+                result = Expression.Call(result, replaceMethod, searchChar, emptyString);
+            }
+
+            return result;
         }
 
         private static IQueryable<T> ApplyDynamicFilters<T>(IQueryable<T> query, Dictionary<string, string> filters) where T : class

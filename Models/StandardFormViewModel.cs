@@ -1,4 +1,4 @@
-namespace AutoGestao.Models
+namespace FGT.Models
 {
     public class StandardFormViewModel
     {

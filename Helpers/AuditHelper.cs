@@ -1,8 +1,8 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades;
+using FGT.Data;
+using FGT.Entidades.Base;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     public static class AuditHelper
     {

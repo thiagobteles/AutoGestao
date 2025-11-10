@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace AutoGestao.Enumerador.Fiscal
+namespace FGT.Enumerador.Fiscal
 {
     /// <summary>
     /// Tipo de nota fiscal (Entrada ou Saída)

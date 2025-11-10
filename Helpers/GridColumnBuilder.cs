@@ -1,11 +1,11 @@
-using AutoGestao.Atributes;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models.Grid;
+using FGT.Atributes;
+using FGT.Enumerador.Gerais;
+using FGT.Models.Grid;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     /// <summary>
     /// Helper inteligente para gerar GridColumns e processar ReferenceItems
@@ -67,43 +67,87 @@ namespace AutoGestao.Helpers
 
             foreach (var prop in properties)
             {
-                var attr = prop.GetCustomAttribute<GridFieldAttribute>();
-                if (attr == null)
-                {
-                    continue;
-                }
+                // ✅ NOVO: Verificar atributos dedicados de Reference
+                var referenceTextAttr = prop.GetCustomAttribute<ReferenceTextAttribute>();
+                var referenceSearchableAttr = prop.GetCustomAttribute<ReferenceSearchableAttribute>();
+                var referenceSubtitleAttrs = prop.GetCustomAttributes<ReferenceSubtitleAttribute>().ToList();
 
-                // TextField (IsText = true)
-                if (attr.IsText)
+                // TextField - verificar atributo dedicado primeiro
+                if (referenceTextAttr != null)
                 {
                     metadata.TextProperty = new ReferencePropertyInfo
                     {
                         Property = prop,
-                        NavigationPath = attr.NavigationPath
+                        NavigationPath = referenceTextAttr.NavigationPath
                     };
                 }
 
-                // Searchable fields
-                if (attr.IsSearchable)
+                // Searchable fields - verificar atributo dedicado primeiro
+                if (referenceSearchableAttr != null)
                 {
+                    // ✅ IMPORTANTE: Buscar Format do ReferenceSubtitleAttribute do mesmo campo (se existir)
+                    var subtitleAttr = referenceSubtitleAttrs.FirstOrDefault();
+
                     metadata.SearchableProperties.Add(new ReferencePropertyInfo
                     {
                         Property = prop,
-                        NavigationPath = attr.NavigationPath
+                        NavigationPath = referenceSearchableAttr.NavigationPath,
+                        Format = subtitleAttr?.Format // Copiar Format do subtitle para o searchable
                     });
                 }
 
-                // Subtitle fields
-                if (attr.IsSubtitle)
+                // Subtitle fields - verificar atributos dedicados primeiro
+                if (referenceSubtitleAttrs.Count != 0)
                 {
-                    metadata.SubtitleProperties.Add(new ReferencePropertyInfo
+                    foreach (var subtitleAttr in referenceSubtitleAttrs)
                     {
-                        Property = prop,
-                        NavigationPath = attr.NavigationPath,
-                        Prefix = attr.SubtitlePrefix,
-                        Order = attr.SubtitleOrder,
-                        Format = attr.Format
-                    });
+                        metadata.SubtitleProperties.Add(new ReferencePropertyInfo
+                        {
+                            Property = prop,
+                            NavigationPath = subtitleAttr.NavigationPath,
+                            Prefix = subtitleAttr.Prefix,
+                            Order = subtitleAttr.Order,
+                            Format = subtitleAttr.Format
+                        });
+                    }
+                }
+
+                // ✅ FALLBACK: Verificar GridFieldAttribute (backward compatibility)
+                var gridFieldAttr = prop.GetCustomAttribute<GridFieldAttribute>();
+                if (gridFieldAttr != null)
+                {
+                    // TextField (IsText = true) - apenas se não foi definido via atributo dedicado
+                    if (gridFieldAttr.IsText && metadata.TextProperty == null)
+                    {
+                        metadata.TextProperty = new ReferencePropertyInfo
+                        {
+                            Property = prop,
+                            NavigationPath = gridFieldAttr.NavigationPath
+                        };
+                    }
+
+                    // Searchable fields - apenas se não foi definido via atributo dedicado
+                    if (gridFieldAttr.IsSearchable && !metadata.SearchableProperties.Any(p => p.Property == prop))
+                    {
+                        metadata.SearchableProperties.Add(new ReferencePropertyInfo
+                        {
+                            Property = prop,
+                            NavigationPath = gridFieldAttr.NavigationPath
+                        });
+                    }
+
+                    // Subtitle fields - apenas se não foi definido via atributo dedicado
+                    if (gridFieldAttr.IsSubtitle && !metadata.SubtitleProperties.Any(p => p.Property == prop))
+                    {
+                        metadata.SubtitleProperties.Add(new ReferencePropertyInfo
+                        {
+                            Property = prop,
+                            NavigationPath = gridFieldAttr.NavigationPath,
+                            Prefix = gridFieldAttr.SubtitlePrefix,
+                            Order = gridFieldAttr.SubtitleOrder,
+                            Format = gridFieldAttr.Format
+                        });
+                    }
                 }
             }
 

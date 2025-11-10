@@ -1,0 +1,113 @@
+@* Seletor de Empresa para usuários não-admin *@
+@if (!User.IsInRole("Admin"))
+{
+    <div id="seletor-empresa-container" class="seletor-empresa-wrapper">
+        <div class="dropdown">
+            <button class="btn btn-empresa dropdown-toggle" type="button" id="seletorEmpresaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-building me-2"></i>
+                <span id="empresa-atual-nome">Carregando...</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-empresa-lista" aria-labelledby="seletorEmpresaDropdown" id="lista-empresas">
+                <li class="dropdown-item-text text-center py-2">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+
+<style>
+.seletor-empresa-wrapper {
+    position: relative;
+}
+
+.btn-empresa {
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--secondary-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-empresa:hover {
+    background: var(--light-bg);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-empresa:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.25);
+}
+
+.dropdown-empresa-lista {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-width: 480px;
+    max-width: 490px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+
+    /* Esconder scrollbar mas manter funcionalidade */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.dropdown-empresa-lista::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Edge */
+}
+
+.empresa-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-left: 3px solid transparent;
+    display: block;
+    overflow: hidden;
+}
+
+.empresa-item:hover {
+    background-color: rgba(var(--primary-rgb), 0.08);
+}
+
+.empresa-item.empresa-selecionada {
+    background-color: rgba(var(--primary-rgb), 0.1);
+    border-left-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.empresa-item-nome {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 420px;
+}
+
+.empresa-item-cnpj {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.empresa-item-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: white;
+    margin-left: auto;
+}
+</style>

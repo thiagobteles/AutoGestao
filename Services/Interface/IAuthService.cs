@@ -1,6 +1,7 @@
-using AutoGestao.Models.Auth;
+using FGT.Entidades;
+using FGT.Models.Auth;
 
-namespace AutoGestao.Services.Interface
+namespace FGT.Services.Interface
 {
     public interface IAuthService
     {
@@ -11,5 +12,7 @@ namespace AutoGestao.Services.Interface
         Task LogoutAsync(int usuarioId);
 
         string[] GetRolesByPerfil(string perfil);
+
+        Task<List<EmpresaCliente>> ObterEmpresasPorIdsAsync(List<long> ids);
     }
 }

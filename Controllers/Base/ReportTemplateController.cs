@@ -1,13 +1,13 @@
-using AutoGestao.Data;
-using AutoGestao.Entidades.Relatorio;
-using AutoGestao.Enumerador.Gerais;
-using AutoGestao.Models;
-using AutoGestao.Models.Grid;
-using AutoGestao.Services.Interface;
+using FGT.Data;
+using FGT.Entidades.Base;
+using FGT.Enumerador.Gerais;
+using FGT.Models;
+using FGT.Models.Grid;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Controllers.Base
+namespace FGT.Controllers.Base
 {
     public class ReportTemplateController(ApplicationDbContext context, IFileStorageService fileStorageService, ILogger<StandardGridController<ReportTemplateEntity>> logger)
         : StandardGridController<ReportTemplateEntity>(context, fileStorageService, logger)

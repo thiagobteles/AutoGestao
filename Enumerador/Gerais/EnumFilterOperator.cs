@@ -1,4 +1,4 @@
-namespace AutoGestao.Enumerador.Gerais
+namespace FGT.Enumerador.Gerais
 {
     /// <summary>
     /// Operadores de comparação para filtros

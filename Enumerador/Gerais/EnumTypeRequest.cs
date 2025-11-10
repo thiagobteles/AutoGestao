@@ -1,4 +1,4 @@
-namespace AutoGestao.Enumerador.Gerais
+namespace FGT.Enumerador.Gerais
 {
     /// <summary>
     /// Define o tipo de requisição HTTP para ações da grid

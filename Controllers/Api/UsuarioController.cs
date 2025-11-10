@@ -1,4 +1,4 @@
-using AutoGestao.Services.Interface;
+using FGT.Services.Interface;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -6,21 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace AutoGestao.Controllers.Api
+namespace FGT.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class UsuarioController : ControllerBase
+    public class UsuarioController(IUsuarioEmpresaService usuarioEmpresaService, ILogger<UsuarioController> logger) : ControllerBase
     {
-        private readonly IUsuarioEmpresaService _usuarioEmpresaService;
-        private readonly ILogger<UsuarioController> _logger;
-
-        public UsuarioController(IUsuarioEmpresaService usuarioEmpresaService, ILogger<UsuarioController> logger)
-        {
-            _usuarioEmpresaService = usuarioEmpresaService;
-            _logger = logger;
-        }
+        private readonly IUsuarioEmpresaService _usuarioEmpresaService = usuarioEmpresaService;
+        private readonly ILogger<UsuarioController> _logger = logger;
 
         /// <summary>
         /// Troca a empresa ativa do usuário logado

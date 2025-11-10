@@ -1,0 +1,232 @@
+@using FGT.Enumerador.Gerais
+@model ProcessingFormViewModel
+
+@functions {
+    bool HasValidationError(string propertyName)
+    {
+        return Model.ModelState != null && Model.ModelState.ContainsKey(propertyName) && !string.IsNullOrEmpty(Model.ModelState[propertyName]);
+    }
+
+    string GetValidationError(string propertyName)
+    {
+        if (Model.ModelState != null && Model.ModelState.ContainsKey(propertyName))
+        {
+            return Model.ModelState[propertyName];
+        }
+        return string.Empty;
+    }
+}
+
+<form asp-action="@Model.ActionName" method="post" enctype="multipart/form-data" class="slide-in-right processing-form">
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
+
+    @* Campos Hidden (fora das seções) *@
+    @foreach (var itemSection in Model.Sections)
+    {
+        @foreach (var field in itemSection.Fields.Where(f => f.Type == EnumFieldType.Hidden).OrderBy(f => f.Order))
+        {
+            <input type="hidden" name="@field.PropertyName" value="@field.Value" />
+        }
+    }
+
+    @foreach (var itemSection in Model.Sections)
+    {
+        <div class="card-modern mb-4">
+            <div class="card-header-modern">
+                <i class="fas fa-cog"></i>
+                @itemSection.Name
+            </div>
+            <div class="card-body-modern">
+                <div class="grid-@(itemSection.GridColumns)">
+                    @foreach (var field in itemSection.Fields.Where(f => f.Type != EnumFieldType.Hidden).OrderBy(f => f.Order))
+                    {
+                        <div class="form-group-modern @field.CssClass">
+                            <label class="form-label-modern">
+                                @if (!string.IsNullOrEmpty(field.Icon))
+                                {
+                                    <i class="@field.Icon me-1"></i>
+                                }
+                                @field.DisplayName
+                                @if (field.Required)
+                                {
+                                    <span class="text-danger">*</span>
+                                }
+                            </label>
+
+                            @switch (field.Type)
+                            {
+                                case EnumFieldType.Text:
+                                    <input type="text"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@field.Placeholder"
+                                           @(field.Required ? "required" : "") />
+                                    break;
+
+                                case EnumFieldType.Number:
+                                    <input type="number"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@field.Placeholder"
+                                           @(field.Required ? "required" : "") />
+                                    break;
+
+                                case EnumFieldType.Email:
+                                    <input type="email"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@field.Placeholder"
+                                           @(field.Required ? "required" : "") />
+                                    break;
+
+                                case EnumFieldType.Date:
+                                    <input type="date"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           @(field.Required ? "required" : "") />
+                                    break;
+
+                                case EnumFieldType.DateTime:
+                                    <input type="datetime-local"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           @(field.Required ? "required" : "") />
+                                    break;
+
+                                case EnumFieldType.TextArea:
+                                    <textarea class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                              id="@field.PropertyName"
+                                              name="@field.PropertyName"
+                                              rows="4"
+                                              placeholder="@field.Placeholder"
+                                              @(field.Required ? "required" : "")>@field.Value</textarea>
+                                    break;
+
+                                case EnumFieldType.Checkbox:
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox"
+                                               class="form-check-input @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                               id="@field.PropertyName"
+                                               name="@field.PropertyName"
+                                               value="true"
+                                               @(field.Value?.ToString() == "True" ? "checked" : "") />
+                                    </div>
+                                    break;
+
+                                case EnumFieldType.Select:
+                                    <select class="form-select @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                            id="@field.PropertyName"
+                                            name="@field.PropertyName"
+                                            @(field.Required ? "required" : "")>
+                                        <option value="">Selecione...</option>
+                                        @if (field.Options != null && field.Options.Any())
+                                        {
+                                            @foreach (var option in field.Options)
+                                            {
+                                                <option value="@option.Value" selected="@(field.Value?.ToString() == option.Value)">
+                                                    @option.Text
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                    break;
+
+                                case EnumFieldType.Reference:
+                                    @await Html.PartialAsync("_ReferenceField", field)
+                                    break;
+
+                                case EnumFieldType.File:
+                                    <input type="file"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           accept="@(!string.IsNullOrEmpty(field.AllowedExtensions) ? "." + field.AllowedExtensions.Replace(",", ",.") : "")"
+                                           @(field.Required ? "required" : "") />
+                                    @if (!string.IsNullOrEmpty(field.AllowedExtensions))
+                                    {
+                                        <small class="form-text text-muted">
+                                            Extensões permitidas: @field.AllowedExtensions
+                                        </small>
+                                    }
+                                    @if (field.MaxSizeMB > 0)
+                                    {
+                                        <small class="form-text text-muted d-block">
+                                            Tamanho máximo: @field.MaxSizeMB MB
+                                        </small>
+                                    }
+                                    break;
+
+                                case EnumFieldType.Image:
+                                    <input type="file"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           accept="image/*"
+                                           @(field.Required ? "required" : "") />
+                                    @if (!string.IsNullOrEmpty(field.ImageSize))
+                                    {
+                                        <small class="form-text text-muted">
+                                            Tamanho recomendado: @field.ImageSize pixels
+                                        </small>
+                                    }
+                                    break;
+
+                                case EnumFieldType.Currency:
+                                case EnumFieldType.Decimal:
+                                    <input type="number"
+                                           step="0.01"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@field.Placeholder"
+                                           @(field.Required ? "required" : "") />
+                                    break;
+
+                                default:
+                                    <input type="text"
+                                           class="form-control @(HasValidationError(field.PropertyName) ? "is-invalid" : "")"
+                                           id="@field.PropertyName"
+                                           name="@field.PropertyName"
+                                           value="@field.Value"
+                                           placeholder="@field.Placeholder"
+                                           @(field.Required ? "required" : "") />
+                                    break;
+                            }
+
+                            @if (!string.IsNullOrEmpty(field.HelpText))
+                            {
+                                <small class="form-text text-muted">@field.HelpText</small>
+                            }
+
+                            @if (HasValidationError(field.PropertyName))
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @GetValidationError(field.PropertyName)
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" id="btnProcessar" class="btn-modern btn-primary-modern">
+            <i class="@Model.SubmitButtonIcon me-2"></i>
+            <span class="btn-text">@Model.SubmitButtonText</span>
+        </button>
+    </div>
+</form>

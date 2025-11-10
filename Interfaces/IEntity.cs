@@ -1,4 +1,4 @@
-namespace AutoGestao.Interfaces
+namespace FGT.Interfaces
 {
     /// <summary>
     /// Interface base para todas as entidades do sistema

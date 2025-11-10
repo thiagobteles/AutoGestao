@@ -1,4 +1,4 @@
-namespace AutoGestao.Helpers
+namespace FGT.Helpers
 {
     public class EnumConditionalHelper
     {

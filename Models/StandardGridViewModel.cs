@@ -1,7 +1,7 @@
 
-using AutoGestao.Models.Grid;
+using FGT.Models.Grid;
 
-namespace AutoGestao.Models
+namespace FGT.Models
 {
     public class StandardGridViewModel
     {

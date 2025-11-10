@@ -548,14 +548,18 @@ class ReferenceFieldManager {
 
     getDropdown(input) {
         const targetField = input.dataset.targetField;
-        let dropdown = document.querySelector(`#${targetField}_dropdown`);
+        const container = input.closest('.reference-field-container');
+
+        // IMPORTANTE: Buscar dropdown dentro do container específico do campo
+        // para evitar conflitos em modais aninhados
+        let dropdown = container.querySelector(`#${targetField}_dropdown`);
 
         if (!dropdown) {
             dropdown = document.createElement('div');
             dropdown.id = `${targetField}_dropdown`;
             dropdown.className = 'reference-dropdown';
             dropdown.style.display = 'none';
-            input.closest('.reference-field-container').appendChild(dropdown);
+            container.appendChild(dropdown);
         }
 
         return dropdown;

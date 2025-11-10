@@ -1,6 +1,6 @@
-using AutoGestao.Services.Interface;
+using FGT.Services.Interface;
 
-namespace AutoGestao.Extensions
+namespace FGT.Extensions
 {
     public static class FileStorageServiceExtensions
     {

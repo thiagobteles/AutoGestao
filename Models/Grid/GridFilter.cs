@@ -1,7 +1,7 @@
-using AutoGestao.Enumerador.Gerais;
+using FGT.Enumerador.Gerais;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace AutoGestao.Models.Grid
+namespace FGT.Models.Grid
 {
     public class GridFilter
     {

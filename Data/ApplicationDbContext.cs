@@ -1,11 +1,11 @@
-using AutoGestao.Entidades;
-using AutoGestao.Entidades.Fiscal;
-using AutoGestao.Entidades.Relatorio;
-using AutoGestao.Enumerador;
-using AutoGestao.Extensions;
+using FGT.Entidades;
+using FGT.Entidades.Base;
+using FGT.Entidades.Fiscal;
+using FGT.Entidades.Processing;
+using FGT.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutoGestao.Data
+namespace FGT.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
@@ -22,6 +22,10 @@ namespace AutoGestao.Data
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<ReportTemplateEntity> ReportTemplates { get; set; }
 
+        #endregion
+
+        #region DbSets Específicos da contabilidade
+
         // 📊 Entidades Fiscais/Contabilidade
         public DbSet<EmpresaCliente> EmpresasClientes { get; set; }
         public DbSet<NotaFiscal> NotasFiscais { get; set; }
@@ -35,6 +39,13 @@ namespace AutoGestao.Data
         public DbSet<PlanoContas> PlanoContas { get; set; }
         public DbSet<LancamentoContabil> LancamentosContabeis { get; set; }
         public DbSet<ObrigacaoFiscal> ObrigacoesFiscais { get; set; }
+        public DbSet<NegociacaoFiscal> NegociacoesFiscais { get; set; }
+
+        #endregion DbSets Específicos da contabilidade
+
+        #region DbSets de Processamento
+
+        public DbSet<ImportacaoNegociacaoFiscal> ImportacoesNegociacoesFiscais { get; set; }
 
         #endregion
 
@@ -130,7 +141,7 @@ namespace AutoGestao.Data
 
                     if (string.IsNullOrEmpty(originalName))
                     {
-                        var fkProperty = foreignKey.Properties.First().GetColumnName().ToSnakeCase();
+                        var fkProperty = foreignKey.Properties[0].GetColumnName().ToSnakeCase();
                         foreignKey.SetConstraintName($"fk_{tableNameInterno}_{fkProperty}");
                     }
                 }
@@ -262,6 +273,43 @@ namespace AutoGestao.Data
             modelBuilder.Entity<AuditLog>().HasOne(v => v.Empresa).WithMany().HasForeignKey(v => v.IdEmpresa).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<AuditLog>().HasOne(a => a.Usuario).WithMany(u => u.AuditLogs).HasForeignKey(a => a.UsuarioId).OnDelete(DeleteBehavior.SetNull);
 
+            #endregion CONFIGURAÇÕES DE RELACIONAMENTOS
+
+            #region CONFIGURAÇÕES DE ÍNDICES
+
+            // ===========================================
+            // ÍNDICES ÚNICOS - CLIENTE
+            // ===========================================
+            modelBuilder.Entity<Cliente>().HasIndex(c => c.Cpf).IsUnique().HasFilter("cpf IS NOT NULL");
+            modelBuilder.Entity<Cliente>().HasIndex(c => c.Cnpj).IsUnique().HasFilter("cnpj IS NOT NULL");
+
+            // ===========================================
+            // ÍNDICES PARA PERFORMANCE - CLIENTE
+            // ===========================================
+            modelBuilder.Entity<Cliente>().HasIndex(c => c.Nome).HasDatabaseName("ix_cliente_nome");
+
+            // ===========================================
+            // ÍNDICES PARA EMPRESA
+            // ===========================================
+            modelBuilder.Entity<Usuario>().HasIndex(u => u.IdEmpresa);
+            modelBuilder.Entity<AuditLog>().HasIndex(a => a.IdEmpresa);
+
+            // ===========================================
+            // ÍNDICES PARA PERFORMANCE - AUDITLOG
+            // ===========================================
+            modelBuilder.Entity<AuditLog>().HasIndex(a => a.DataHora);
+            modelBuilder.Entity<AuditLog>().HasIndex(a => a.UsuarioId);
+            modelBuilder.Entity<AuditLog>().HasIndex(a => new { a.EntidadeNome, a.EntidadeId });
+
+            #endregion CONFIGURAÇÕES DE ÍNDICES
+
+            ConfiguracoesEspecificas(modelBuilder);
+        }
+
+        private static void ConfiguracoesEspecificas(ModelBuilder modelBuilder)
+        {
+            #region CONFIGURAÇÕES ESPECÍFICAS DA CONTABILIDADE
+
             // ===========================================
             // RELACIONAMENTOS DAS ENTIDADES FISCAIS/CONTÁBEIS
             // ===========================================
@@ -305,35 +353,7 @@ namespace AutoGestao.Data
                 .HasForeignKey(e => e.ContadorResponsavelId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            #endregion CONFIGURAÇÕES DE RELACIONAMENTOS
-
-            #region CONFIGURAÇÕES DE ÍNDICES
-
-            // ===========================================
-            // ÍNDICES ÚNICOS - CLIENTE
-            // ===========================================
-            modelBuilder.Entity<Cliente>().HasIndex(c => c.Cpf).IsUnique().HasFilter("cpf IS NOT NULL");
-            modelBuilder.Entity<Cliente>().HasIndex(c => c.Cnpj).IsUnique().HasFilter("cnpj IS NOT NULL");
-
-            // ===========================================
-            // ÍNDICES PARA PERFORMANCE - CLIENTE
-            // ===========================================
-            modelBuilder.Entity<Cliente>().HasIndex(c => c.Nome).HasDatabaseName("ix_cliente_nome");
-
-            // ===========================================
-            // ÍNDICES PARA EMPRESA
-            // ===========================================
-            modelBuilder.Entity<Usuario>().HasIndex(u => u.IdEmpresa);
-            modelBuilder.Entity<AuditLog>().HasIndex(a => a.IdEmpresa);
-
-            // ===========================================
-            // ÍNDICES PARA PERFORMANCE - AUDITLOG
-            // ===========================================
-            modelBuilder.Entity<AuditLog>().HasIndex(a => a.DataHora);
-            modelBuilder.Entity<AuditLog>().HasIndex(a => a.UsuarioId);
-            modelBuilder.Entity<AuditLog>().HasIndex(a => new { a.EntidadeNome, a.EntidadeId });
-
-            #endregion CONFIGURAÇÕES DE ÍNDICES
+            #endregion
         }
     }
 }

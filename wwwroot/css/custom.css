@@ -3195,7 +3195,8 @@ body .dashboard-container,
 /* Remover margins desnecessárias do final */
 .dashboard-container > *:last-child {
     margin-bottom: 0 !important;
-    margin-top: 3px !important;
+    margin-top: 0px !important;
+    border-radius: var(--border-radius-md);
 }
 
 /* Otimizar altura do topbar */
@@ -3672,35 +3673,7 @@ html body .sidebar.collapsed::before {
    ANIMAÇÕES ESPECÍFICAS DA GRID
    =================================================================== */
 
-/* Animação das linhas da tabela ao carregar */
-.base-grid-table tbody tr {
-    animation: fadeInUp 0.4s ease-out;
-    animation-fill-mode: both;
-}
-
-    .base-grid-table tbody tr:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .base-grid-table tbody tr:nth-child(2) {
-        animation-delay: 0.15s;
-    }
-
-    .base-grid-table tbody tr:nth-child(3) {
-        animation-delay: 0.2s;
-    }
-
-    .base-grid-table tbody tr:nth-child(4) {
-        animation-delay: 0.25s;
-    }
-
-    .base-grid-table tbody tr:nth-child(5) {
-        animation-delay: 0.3s;
-    }
-
-    .base-grid-table tbody tr:nth-child(n+6) {
-        animation-delay: 0.35s;
-    }
+/* Animações de linhas removidas para melhor UX e performance */
 
 /* ===================================================================
    LOADING SKELETON
@@ -4184,12 +4157,10 @@ html body .sidebar.collapsed::before {
 
 .base-grid-table tbody tr {
     border-bottom: 1px solid var(--border-color);
-    transition: all 0.2s ease;
 }
 
     .base-grid-table tbody tr:hover {
         background-color: rgba(55, 65, 81, 0.05);
-        transform: translateX(2px);
     }
 
     .base-grid-table tbody tr.grid-row {
@@ -4198,7 +4169,6 @@ html body .sidebar.collapsed::before {
 
         .base-grid-table tbody tr.grid-row:hover {
             background-color: rgba(55, 65, 81, 0.08);
-            box-shadow: 0 2px 4px var(--black-10);
         }
 
 /* ===================================================================
@@ -6315,42 +6285,48 @@ body .dropdown-menu {
    =================================================================== */
 
 .nav-tabs-modern {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
     margin-bottom: 0;
+    padding-left: 1rem; /* Espaçamento inicial para evitar que borda passe */
+    gap: 0.5rem; /* Espaçamento entre os botões */
 }
 
-    .nav-tabs-modern.nav-link-modern {
-        border: none;
-        border-radius: 0;
+    .nav-tabs-modern .nav-link-modern {
+        border: 1px solid transparent;
+        border-radius: 8px 8px 0 0;
         color: var(--secondary-color);
         font-weight: 500;
-        padding: 1rem 1.5rem;
+        padding: 0.875rem 1.5rem;
         position: relative;
         transition: all 0.3s ease;
-        background: transparent;
+        background: rgba(var(--secondary-rgb), 0.05);
+        margin-bottom: -2px; /* Sobrepor a borda inferior */
     }
 
-        .nav-tabs-modern.nav-link-modern:hover {
-            border: none;
+        .nav-tabs-modern .nav-link-modern:hover {
+            border: 1px solid var(--border-color);
+            border-bottom-color: transparent;
             color: var(--primary-color);
-            background: rgba(var(--primary-rgb), 0.05);
+            background: rgba(var(--primary-rgb), 0.08);
+            transform: translateY(-2px);
         }
 
-        .nav-tabs-modern.nav-link-modern.active {
-            border: none;
+        .nav-tabs-modern .nav-link-modern.active {
+            border: 2px solid var(--primary-color);
+            border-bottom-color: white;
             color: var(--primary-color);
             background: white;
-            border-bottom: 3px solid var(--primary-color);
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
         }
 
-            .nav-tabs-modern.nav-link-modern.active::after {
+            .nav-tabs-modern .nav-link-modern.active::after {
                 content: '';
                 position: absolute;
                 bottom: -2px;
-                left: 0;
-                right: 0;
-                height: 3px;
-                background: var(--primary-color);
+                left: -1px;
+                right: -1px;
+                height: 2px;
+                background: white;
             }
 
 /* Loading spinner nas abas */
@@ -6364,7 +6340,7 @@ body .dropdown-menu {
 
 .tab-content {
     background: white;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-top: none;
     border-radius: 0 0 0.75rem 0.75rem;
     min-height: 400px;
@@ -6600,16 +6576,17 @@ body .dropdown-menu {
 @media(max-width: 768px) {
     .nav-tabs-modern {
         flex-direction: column;
+        padding-left: 0.5rem;
     }
 
-        .nav-tabs-modern.nav-link-modern {
+        .nav-tabs-modern .nav-link-modern {
             text-align: center;
-            border-bottom: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
         }
 
-            .nav-tabs-modern.nav-link-modern.active {
-                border-left: 3px solid var(--primary-color);
-                border-bottom: 1px solid var(--border-color);
+            .nav-tabs-modern .nav-link-modern.active {
+                border: 2px solid var(--primary-color);
             }
 
     .tab-pane {
@@ -6629,9 +6606,7 @@ body .dropdown-menu {
    ANIMAÇÕES PARA ABAS
    =================================================================== */
 
-.tab-pane {
-    animation: fadeInUp 0.3s ease;
-}
+/* Animação de tab-pane removida para melhor performance */
 
 @keyframes fadeInUp {
     from {
@@ -6920,10 +6895,7 @@ body .dropdown-menu {
     font-weight: 500;
 }
 
-/* Animações de entrada */
-.fade-in-up {
-    animation: fadeInUp 0.3s ease-out;
-}
+/* Animações de entrada removidas para melhor performance */
 
 @keyframes fadeInUp {
     from {

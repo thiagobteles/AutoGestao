@@ -1,4 +1,4 @@
-namespace AutoGestao.Atributes
+namespace FGT.Atributes
 {
     /// <summary>
     /// Define um campo composto na grid que combina múltiplas propriedades
