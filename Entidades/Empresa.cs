@@ -4,7 +4,7 @@ using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Entidades
 {
-    [FormConfig(Title = "Empresa", Subtitle = "Gerencie as informações das empresas", Icon = "fas fa-user", EnableAjaxSubmit = true)]
+    [FormConfig(Title = "Empresa", Subtitle = "Gerencie as informações das empresas", Icon = "fas fa-user")]
     public class Empresa : BaseEntidade
     {
         [GridMain("Razão Social")]

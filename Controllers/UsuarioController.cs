@@ -89,23 +89,23 @@ namespace AutoGestao.Controllers
             return base.AfterUpdate(entity);
         }
 
-        protected override bool CanDelete(Usuario entity)
+        protected override Task<bool> CanDelete(Usuario entity)
         {
             // Não permitir deletar o próprio usuário ou se for o único admin
             var usuarioLogadoId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
             if (entity.Id == usuarioLogadoId)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             if (entity.Perfil == EnumPerfilUsuario.Admin)
             {
                 var totalAdmins = _context.Usuarios.Count(u => u.Perfil == EnumPerfilUsuario.Admin && u.Ativo);
-                return totalAdmins > 1;
+                return Task.FromResult(totalAdmins > 1);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         protected override void ConfigureFormFields(List<FormFieldViewModel> fields, Usuario entity, string action)

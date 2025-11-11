@@ -392,8 +392,16 @@
                         // Toggle do item atual
                         if (isExpanded) {
                             menuItem.classList.remove('expanded');
+                            menuItem.classList.remove('manual-expand');
                         } else {
                             menuItem.classList.add('expanded');
+                            // 🔧 FIX: Adicionar classe manual-expand para ativar animações
+                            menuItem.classList.add('manual-expand');
+
+                            // Remover a classe manual-expand após as animações terminarem
+                            setTimeout(() => {
+                                menuItem.classList.remove('manual-expand');
+                            }, 600); // 0.3s de animação + delays
                         }
                     });
                 });
@@ -418,6 +426,7 @@
                             requestAnimationFrame(() => {
                                 menuItem.classList.add('expanded');
                                 menuItem.classList.add('has-active-child');
+                                // 🔧 FIX: NÃO adicionar 'manual-expand' aqui - expansão automática não deve animar
                                 console.log('📂 Submenu expandido automaticamente (contém item ativo)');
                             });
                         }
@@ -431,6 +440,136 @@
                         expandActiveSubmenu();
                     });
                 }
+
+                // 🔧 FIX: Navegação AJAX para evitar reload da página
+                function setupAjaxNavigation() {
+                    // Interceptar cliques em links do submenu
+                    const submenuLinks = document.querySelectorAll('.submenu-link');
+
+                    submenuLinks.forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+
+                            const url = this.getAttribute('href');
+                            if (!url || url === '#' || url === 'javascript:void(0)') return;
+
+                            // Remover classe active de todos os links
+                            document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                            document.querySelectorAll('.submenu-link').forEach(l => l.classList.remove('active'));
+
+                            // Adicionar classe active no link clicado
+                            this.classList.add('active');
+
+                            // Mostrar loading
+                            const mainContent = document.querySelector('.main-content');
+                            if (mainContent) {
+                                mainContent.style.opacity = '0.5';
+                                mainContent.style.pointerEvents = 'none';
+                            }
+
+                            // Fazer requisição AJAX
+                            fetch(url)
+                                .then(response => response.text())
+                                .then(html => {
+                                    // Criar elemento temporário para parsear o HTML
+                                    const tempDiv = document.createElement('div');
+                                    tempDiv.innerHTML = html;
+
+                                    // Tentar extrair o conteúdo de .main-content da resposta
+                                    // (quando servidor retorna página completa com layout)
+                                    const newMainContent = tempDiv.querySelector('.main-content');
+
+                                    if (mainContent) {
+                                        // Se encontrou .main-content na resposta, usar apenas esse conteúdo
+                                        // Caso contrário, usar todo o HTML (partial view sem layout)
+                                        mainContent.innerHTML = newMainContent ? newMainContent.innerHTML : html;
+
+                                        // Atualizar URL sem reload
+                                        window.history.pushState({}, '', url);
+
+                                        // Aguardar um frame para garantir que o DOM foi atualizado
+                                        requestAnimationFrame(() => {
+                                            // Reinicializar scripts necessários
+
+                                            // 🔧 REMOVIDO: Não executar scripts inline da resposta AJAX
+                                            // Motivo: Podem conter código Razor ou sintaxe inválida fora do contexto do servidor
+                                            // Os componentes necessários são reinicializados manualmente abaixo
+
+                                            // 1. Reinicializar grid system
+                                            if (typeof StandardGrid !== 'undefined') {
+                                                const gridContainer = document.querySelector('#gridContainer');
+                                                if (gridContainer) {
+                                                    console.log('🔄 Reinicializando StandardGrid...');
+                                                    window.gridInstance = new StandardGrid();
+
+                                                    // 🔧 FIX: Carregar dados iniciais da grid após reinicialização
+                                                    setTimeout(() => {
+                                                        if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                                                            console.log('🔄 Carregando dados iniciais da grid...');
+                                                            window.gridInstance.aplicarFiltros(1);
+                                                        }
+                                                    }, 150);
+                                                }
+                                            }
+
+                                            // 2. Reinicializar custom selects
+                                            if (typeof window.initializeCustomSelects === 'function') {
+                                                console.log('🔄 Reinicializando custom selects...');
+                                                window.initializeCustomSelects();
+                                            } else if (typeof initializeCustomSelects === 'function') {
+                                                console.log('🔄 Reinicializando custom selects (global)...');
+                                                initializeCustomSelects();
+                                            }
+
+                                            // 3. Reinicializar reference fields
+                                            if (typeof window.initializeReferenceFields === 'function') {
+                                                console.log('🔄 Reinicializando reference fields...');
+                                                window.initializeReferenceFields();
+                                            } else if (typeof initializeReferenceFields === 'function') {
+                                                console.log('🔄 Reinicializando reference fields (global)...');
+                                                initializeReferenceFields();
+                                            }
+
+                                            // 4. Reinicializar dropdown portal system
+                                            // 🔧 FIX: NÃO reinicializar DropdownPortalSystem
+                                            // Motivo: Usa event delegation no document, já funciona globalmente
+                                            // Reinicializar cria event listeners duplicados causando posicionamento incorreto
+                                            if (typeof DropdownPortalSystem !== 'undefined' && !window.dropdownPortalSystem) {
+                                                console.log('🔄 Inicializando dropdown portal...');
+                                                window.dropdownPortalSystem = new DropdownPortalSystem();
+                                            }
+
+                                            // 5. Disparar evento customizado para outros scripts
+                                            document.dispatchEvent(new CustomEvent('ajaxContentLoaded'));
+
+                                            // Restaurar opacidade
+                                            mainContent.style.opacity = '1';
+                                            mainContent.style.pointerEvents = 'auto';
+
+                                            // Scroll para o topo
+                                            mainContent.scrollTop = 0;
+
+                                            console.log('✅ Navegação AJAX concluída com sucesso');
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Erro ao carregar página:', error);
+                                    // Em caso de erro, fazer navegação normal
+                                    window.location.href = url;
+                                });
+                        });
+                    });
+                }
+
+                // Inicializar navegação AJAX
+                setupAjaxNavigation();
+
+                // 🔧 FIX: Suporte para botões voltar/avançar do navegador
+                window.addEventListener('popstate', function(event) {
+                    // Recarregar a página quando usar botão voltar/avançar
+                    location.reload();
+                });
 
                 // Fechar todos os submenus quando o sidebar for colapsado
                 const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
@@ -625,17 +764,22 @@
 
                 showLoading(true);
 
-                const formData = new FormData(document.getElementById('filtrosForm'));
+                // 🔧 FIX: Formulário de filtros é OPCIONAL
+                // Se não houver filtros definidos, ainda assim carrega os dados
+                const filtrosForm = document.getElementById('filtrosForm');
                 const pageSize = document.getElementById('pageSizeSelector')?.value || 50;
 
                 const params = new URLSearchParams();
                 params.append('page', page);
                 params.append('pageSize', pageSize);
 
-                // Adicionar filtros
-                for (let [key, value] of formData.entries()) {
-                    if (value && value.trim() !== '') {
-                        params.append(key, value);
+                // Adicionar filtros (se formulário existir)
+                if (filtrosForm) {
+                    const formData = new FormData(filtrosForm);
+                    for (let [key, value] of formData.entries()) {
+                        if (value && value.trim() !== '') {
+                            params.append(key, value);
+                        }
                     }
                 }
 
@@ -646,7 +790,7 @@
                 let controller = gridControllerResolver.getCurrentController(); //this.getAttribute('data-controller');
                 if (controller != null)
                 {
-                    ajaxUrl = `'${controller}/Get${controller}Ajax`;
+                    ajaxUrl = `/${controller}/GetDataAjax`;
                 }
                 else
                 {

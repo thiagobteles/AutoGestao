@@ -5,7 +5,7 @@ using AutoGestao.Enumerador.Gerais;
 
 namespace AutoGestao.Entidades
 {
-    [FormConfig(Title = "Cliente", Subtitle = "Gerencie as informações dos clientes", Icon = "fas fa-user", EnableAjaxSubmit = true)]
+    [FormConfig(Title = "Cliente", Subtitle = "Gerencie as informações dos clientes", Icon = "fas fa-user")]
     public class Cliente : BaseEntidadeDocumento
     {
         [GridField("CEP", Order = 70, Width = "100px", Format = "#####-###", ShowInGrid = false)]
@@ -13,7 +13,7 @@ namespace AutoGestao.Entidades
         public string? CEP { get; set; }
 
         [GridField("UF", Order = 75, Width = "65px", EnumRender = EnumRenderType.Description)]
-        [FormField(Name = "Estado", Order = 30, Section = "Endereço", Icon = "fas fa-flag", Type = EnumFieldType.Select)]
+        [FormField(Name = "Estado", Order = 30, Section = "Endereço", Icon = "fas fa-flag", Type = EnumFieldType.Select, Required = true)]
         public EnumEstado Estado { get; set; }
 
         [GridField("Cidade", Order = 72)]

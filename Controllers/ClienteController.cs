@@ -155,9 +155,9 @@ namespace AutoGestao.Controllers
             return base.AfterUpdate(entity);
         }
 
-        protected override bool CanEdit(Cliente entity)
+        protected override Task<bool> CanEdit(Cliente entity)
         {
-            return entity.Ativo;
+            return Task.FromResult(entity.Ativo);
         }
 
         protected override void ConfigureFormFields(List<FormFieldViewModel> fields, Cliente entity, string action)

@@ -88,8 +88,8 @@ namespace AutoGestao.Controllers.Veiculos
                             query = ApplyTextFilter(query, searchTerm,
                                 c => c.Codigo,
                                 c => c.Placa,
-                                //c => c.VeiculoMarca.Descricao,
-                                //c => c.VeiculoMarcaModelo.Descricao,
+                                c => c.VeiculoMarcaModelo.Descricao,
+                                c => c.VeiculoMarca.Descricao,
                                 c => c.Chassi,
                                 c => c.Renavam);
                         }
@@ -142,9 +142,9 @@ namespace AutoGestao.Controllers.Veiculos
             return base.BeforeUpdate(entity);
         }
 
-        protected override bool CanDelete(Veiculo entity)
+        protected override Task<bool> CanDelete(Veiculo entity)
         {
-            return entity.Situacao != EnumSituacaoVeiculo.Vendido;
+            return Task.FromResult(entity.Situacao != EnumSituacaoVeiculo.Vendido);
         }
 
         private void ValidarVeiculo(Veiculo entity)
