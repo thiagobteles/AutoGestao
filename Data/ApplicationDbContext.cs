@@ -1,7 +1,6 @@
 using FGT.Entidades;
 using FGT.Entidades.Base;
-using FGT.Entidades.Fiscal;
-using FGT.Entidades.Processing;
+using FGT.Entidades.Processamento;
 using FGT.Extensions;
 using Microsoft.EntityFrameworkCore;
 

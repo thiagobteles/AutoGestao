@@ -76,115 +76,216 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            const form = $('.processing-form');
-            const submitBtn = $('#btnProcessar');
-            const btnText = submitBtn.find('.btn-text');
-            const btnIcon = submitBtn.find('i');
-            const originalText = btnText.text();
-            const originalIconClass = btnIcon.attr('class');
+        (function() {
+            console.log('🚀 Inicializando sistema de processamento...');
+
+            const form = document.querySelector('.processing-form');
+            const submitBtn = document.getElementById('btnProcessar');
+
+            if (!form || !submitBtn) {
+                console.error('Formulário ou botão de submit não encontrado');
+                return;
+            }
+
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnIcon = submitBtn.querySelector('i');
+            const originalText = btnText ? btnText.textContent : '';
+            const originalIconClass = btnIcon ? btnIcon.className : '';
+
             const showConfirmation = @(Model.ShowConfirmation ? "true" : "false");
-            const confirmationMessage = '@(Model.ConfirmationMessage ?? "Deseja realmente executar este processamento?")';
+            const confirmationMessage = '@Html.Raw(Model.ConfirmationMessage ?? "Deseja realmente executar este processamento?")';
             const allowMultiple = @(Model.AllowMultipleExecutions ? "true" : "false");
             const redirectUrl = '@(Model.RedirectOnSuccessUrl ?? "")';
+            const controllerName = '@Model.ControllerName';
+            const processingKey = 'processing_' + controllerName;
 
-            form.on('submit', function(e) {
+            console.log('⚙️ Configuração:', { allowMultiple, controllerName, processingKey });
+
+            // Sistema de bloqueio global
+            const ProcessingLock = {
+                isProcessing: function() {
+                    const value = sessionStorage.getItem(processingKey);
+                    console.log('🔒 Verificando lock:', value);
+                    return value === 'true';
+                },
+                lock: function() {
+                    console.log('🔒 Bloqueando processamento para:', processingKey);
+                    sessionStorage.setItem(processingKey, 'true');
+                },
+                unlock: function() {
+                    console.log('🔓 Desbloqueando processamento para:', processingKey);
+                    sessionStorage.removeItem(processingKey);
+                }
+            };
+
+            // Limpar lock se a flag estiver setada (após redirect de processamento)
+            const clearLock = @(ViewBag.ClearProcessingLock != null ? "true" : "false");
+            if (clearLock) {
+                console.log('🔓 Limpando lock anterior...');
+                ProcessingLock.unlock();
+            }
+
+            // Verificar se já há processamento em andamento ao carregar a página
+            if (ProcessingLock.isProcessing() && !allowMultiple) {
+                console.log('⚠️ Processamento já em andamento, desabilitando botão');
+                submitBtn.disabled = true;
+                if (btnText) btnText.textContent = 'Processamento em andamento...';
+                if (btnIcon) btnIcon.className = 'fas fa-spinner fa-spin me-2';
+
+                // Timeout de segurança: desbloquear após 5 minutos se ainda estiver bloqueado
+                setTimeout(function() {
+                    if (ProcessingLock.isProcessing()) {
+                        console.warn('⏰ Lock de processamento expirado após 5 minutos, desbloqueando...');
+                        ProcessingLock.unlock();
+                        submitBtn.disabled = false;
+                        if (btnText) btnText.textContent = originalText;
+                        if (btnIcon) btnIcon.className = originalIconClass;
+                    }
+                }, 300000); // 5 minutos
+            }
+
+            form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                console.log('📝 Formulário submetido');
+
+                // Verificar se já há processamento em andamento
+                if (!allowMultiple && ProcessingLock.isProcessing()) {
+                    console.warn('❌ Tentativa de processamento bloqueada - já existe um em andamento');
+                    showProcessingAlert();
+                    return false;
+                }
 
                 // Confirmação
                 if (showConfirmation) {
+                    console.log('❓ Solicitando confirmação...');
                     if (!confirm(confirmationMessage)) {
-                        return;
+                        console.log('❌ Confirmação cancelada pelo usuário');
+                        return false;
                     }
+                }
+
+                // Marcar como processando
+                if (!allowMultiple) {
+                    ProcessingLock.lock();
                 }
 
                 // Desabilitar botão
-                submitBtn.prop('disabled', true);
-                btnText.text('Processando...');
-                btnIcon.attr('class', 'fas fa-spinner fa-spin me-2');
+                submitBtn.disabled = true;
+                if (btnText) btnText.textContent = 'Processando...';
+                if (btnIcon) btnIcon.className = 'fas fa-spinner fa-spin me-2';
 
-                // Criar FormData
-                const formData = new FormData(this);
+                // Mostrar loading overlay
+                showProcessingOverlay();
 
-                // Enviar requisição
-                $.ajax({
-                    url: form.attr('action'),
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        if (response.success) {
-                            // Sucesso
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Sucesso!',
-                                html: buildResultHtml(response),
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                if (redirectUrl) {
-                                    window.location.href = redirectUrl;
-                                } else if (!allowMultiple) {
-                                    window.location.reload();
-                                } else {
-                                    // Limpar formulário
-                                    form[0].reset();
-                                }
-                            });
-                        } else {
-                            // Erro
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Erro no processamento',
-                                html: buildResultHtml(response),
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Erro',
-                            text: 'Erro ao executar processamento: ' + error,
-                            confirmButtonText: 'OK'
-                        });
-                    },
-                    complete: function() {
-                        // Reabilitar botão
-                        submitBtn.prop('disabled', false);
-                        btnText.text(originalText);
-                        btnIcon.attr('class', originalIconClass);
-                    }
-                });
+                console.log('✅ Submetendo formulário...');
+
+                // Submeter o formulário diretamente (não AJAX, pois o controller faz redirect)
+                form.submit();
             });
 
-            function buildResultHtml(response) {
-                let html = '<div class="text-start">';
-                html += '<p>' + response.message + '</p>';
+            function showProcessingAlert() {
+                console.log('🚨 Exibindo alerta de processamento em andamento');
 
-                if (response.warnings && response.warnings.length > 0) {
-                    html += '<div class="mt-2"><strong>Avisos:</strong><ul>';
-                    response.warnings.forEach(w => html += '<li>' + w + '</li>');
-                    html += '</ul></div>';
+                // Tentar usar o sistema de modal existente
+                if (typeof showWarning === 'function') {
+                    showWarning('Já existe um processamento em andamento. Por favor, aguarde a conclusão antes de iniciar outro.', {
+                        title: 'Processamento em Andamento',
+                        buttonText: 'OK'
+                    });
+                } else if (typeof showError === 'function') {
+                    showError('Já existe um processamento em andamento. Por favor, aguarde a conclusão antes de iniciar outro.', {
+                        title: 'Processamento em Andamento',
+                        buttonText: 'OK'
+                    });
+                } else if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Processamento em Andamento',
+                        text: 'Já existe um processamento em andamento. Por favor, aguarde a conclusão antes de iniciar outro.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#3b82f6'
+                    });
+                } else {
+                    alert('Já existe um processamento em andamento. Por favor, aguarde a conclusão antes de iniciar outro.');
                 }
-
-                if (response.errors && response.errors.length > 0) {
-                    html += '<div class="mt-2"><strong>Erros:</strong><ul>';
-                    response.errors.forEach(e => html += '<li>' + e + '</li>');
-                    html += '</ul></div>';
-                }
-
-                if (response.metadata && Object.keys(response.metadata).length > 0) {
-                    html += '<div class="mt-2"><strong>Informações:</strong><ul>';
-                    for (const [key, value] of Object.entries(response.metadata)) {
-                        html += '<li><strong>' + key + ':</strong> ' + value + '</li>';
-                    }
-                    html += '</ul></div>';
-                }
-
-                html += '</div>';
-                return html;
             }
-        });
+
+            function showProcessingOverlay() {
+                console.log('📊 Exibindo overlay de processamento');
+
+                // Criar overlay se não existir
+                let overlay = document.getElementById('processingOverlay');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'processingOverlay';
+                    overlay.innerHTML = `
+                        <div class="processing-overlay-content">
+                            <div class="processing-spinner">
+                                <i class="fas fa-spinner fa-spin fa-3x"></i>
+                            </div>
+                            <div class="processing-text mt-3">
+                                <h5>Processamento em andamento...</h5>
+                                <p class="text-muted mb-0">Por favor, aguarde. Não feche esta janela.</p>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(overlay);
+                }
+                overlay.style.display = 'flex';
+            }
+
+            console.log('✅ Sistema de processamento inicializado com sucesso');
+        })();
     </script>
+
+    <style>
+        #processingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .processing-overlay-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeInScale 0.3s ease;
+        }
+
+        .processing-spinner i {
+            color: #3b82f6;
+        }
+
+        .processing-text h5 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .processing-text p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        @@keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
 }

@@ -1,4 +1,4 @@
-using AutoGestao;
+using FGT;
 using FGT.Data;
 using FGT.Entidades.Base;
 using FGT.Enumerador;
@@ -28,7 +28,8 @@ CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("pt-BR");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
 
 // Obtem o nome do cliente
-var cliente = builder.Configuration.GetValue<string>("Cliente");
+var cliente = builder.Configuration.GetValue<string>("Cliente").ToLower();
+Globais.Cliente = cliente;
 Globais.CorSistema = (EnumCorSistema)builder.Configuration.GetValue<int>("CorSistema");
 
 // Registrar HttpContextAccessor antes de tudo
@@ -41,7 +42,7 @@ builder.Services.AddScoped<AuditInterceptor>();
 builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
 {
     var auditInterceptor = serviceProvider.GetRequiredService<AuditInterceptor>();
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection").Replace("#cliente#", cliente.ToLower()))
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection").Replace("#cliente#", cliente))
            .AddInterceptors(auditInterceptor); // Adicionar interceptor de auditoria para CREATE, UPDATE, DELETE
 });
 
@@ -162,30 +163,22 @@ using (var scope = app.Services.CreateScope())
     var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
     var empresaService = scope.ServiceProvider.GetRequiredService<IEmpresaService>();
 
-    if (cliente.ToLower().Equals("autogestao"))
-    {
-        await InicializarDadosPadraoAutoGestao(context, usuarioService, empresaService);
-    }
-    else
-    {
-        await InicializarDadosPadraoContabilidade(context, usuarioService, empresaService);
-    }
+    await context.Database.MigrateAsync();
+    await InicializarDadosPadrao(context, usuarioService, empresaService, Globais.EhSistemaNotaFiscal);
 }
 
 app.Run();
 
-static async Task InicializarDadosPadraoAutoGestao(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
+static async Task InicializarDadosPadrao(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService, bool criarUsuarioVisualizador)
 {
-    await context.Database.MigrateAsync();
-
     if (!await context.Usuarios.AnyAsync(u => u.Perfil == EnumPerfilUsuario.Admin))
     {
         var empresa = new Empresa
         {
-            RazaoSocial = "2PLus Consultoria",
+            RazaoSocial = "FGT sistemas e consultoria",
             CEP = "74125200",
             Telefone = "62981483753",
-            Email = "thiago_bteles@hotmail.com",
+            Email = $"empresa@{Globais.Cliente}.com",
             Estado = EnumEstado.Goias,
             Cidade = "Goiânia",
             Endereco = "Rua T46",
@@ -196,12 +189,11 @@ static async Task InicializarDadosPadraoAutoGestao(ApplicationDbContext context,
             Ativo = true
         };
 
-        await empresaService.CriarEmpresaAsync(empresa);
-
+        var retorno = await empresaService.CriarEmpresaAsync(empresa);
         var adminUser = new Usuario
         {
             Nome = "Thiago",
-            Email = "admin@FGT.com",
+            Email = $"admin@{Globais.Cliente}.com",
             Perfil = EnumPerfilUsuario.Admin,
             IdEmpresa = 1,
             Ativo = true
@@ -210,63 +202,33 @@ static async Task InicializarDadosPadraoAutoGestao(ApplicationDbContext context,
         await usuarioService.CriarUsuarioAsync(adminUser, "admin123");
 
         Console.WriteLine("Usuário administrador criado:");
-        Console.WriteLine("Email: admin@FGT.com");
+        Console.WriteLine($"Email: admin@{Globais.Cliente}.com");
         Console.WriteLine("Senha: admin123");
-    }
-}
 
-static async Task InicializarDadosPadraoContabilidade(ApplicationDbContext context, IUsuarioService usuarioService, IEmpresaService empresaService)
-{
-    await context.Database.MigrateAsync();
-
-    if (!await context.Usuarios.AnyAsync(u => u.Perfil == EnumPerfilUsuario.Admin))
-    {
-        var empresa = new Empresa
+        if (criarUsuarioVisualizador)
         {
-            RazaoSocial = "Contabilidade",
-            CEP = "74125200",
-            Telefone = "62981483753",
-            Email = "admin@contabilidade.com",
-            Estado = EnumEstado.Goias,
-            Cidade = "Goiânia",
-            Endereco = "Rua T46",
-            Numero = "305",
-            Bairro = "Setor Oeste",
-            Complemento = "Apartamento 401",
-            Observacoes = "Empresa teste",
-            Ativo = true
-        };
+            var clienteUser = new Usuario
+            {
+                Nome = $"Cliente {Globais.Cliente}",
+                Email = $"cliente@{Globais.Cliente}.com",
+                Perfil = EnumPerfilUsuario.Visualizador,
+                IdEmpresa = retorno.Id,
+                Ativo = true
+            };
 
-        var retorno = await empresaService.CriarEmpresaAsync(empresa);
-        var adminUser = new Usuario
-        {
-            Nome = "Thiago",
-            Email = "admin@contabilidade.com",
-            Perfil = EnumPerfilUsuario.Admin,
-            IdEmpresa = retorno.Id,
-            Ativo = true
-        };
+            await usuarioService.CriarUsuarioAsync(clienteUser, "admin123");
 
-        await usuarioService.CriarUsuarioAsync(adminUser, "admin123");
-
-        var clienteUser = new Usuario
-        {
-            Nome = "Cliente",
-            Email = "cliente@contabilidade.com",
-            Perfil = EnumPerfilUsuario.Visualizador,
-            IdEmpresa = retorno.Id,
-            Ativo = true
-        };
-
-        await usuarioService.CriarUsuarioAsync(clienteUser, "cliente123");
-
-        Console.WriteLine("✓ Usuário administrador criado");
-        Console.WriteLine("  Email: admin@contabilidade.com");
-        Console.WriteLine("  Senha: admin123");
-        Console.WriteLine();
+            Console.WriteLine("Usuário criado");
+            Console.WriteLine($"Email: cliente@{Globais.Cliente}.com");
+            Console.WriteLine("Senha: admin123");
+            Console.WriteLine();
+        }
 
         // Executar scripts de carga inicial de dados
-        await ExecutarScriptsIniciais(context);
+        if (Globais.EhSistemaNotaFiscal)
+        {
+            await ExecutarScriptsIniciais(context);
+        }
     }
 }
 
@@ -275,7 +237,7 @@ static async Task ExecutarScriptsIniciais(ApplicationDbContext context)
     try
     {
         // Verificar se os dados já foram carregados (verifica se existe algum CNAE)
-        if (await context.CNAEs.AnyAsync())
+        if (await context.Empresas.AnyAsync())
         {
             Console.WriteLine("⚠ Dados de demonstração já foram carregados anteriormente.");
             return;

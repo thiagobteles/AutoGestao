@@ -150,7 +150,16 @@
                     if (typeof showSuccess === 'function') {
                         await showSuccess(message);
                     }
-                    window.location.reload();
+
+                    // Atualizar grid sem reload da página
+                    if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                        window.gridInstance.aplicarFiltros();
+                    } else if (typeof window.aplicarFiltros === 'function') {
+                        window.aplicarFiltros();
+                    } else {
+                        // Fallback: reload apenas se não houver outra opção
+                        window.location.reload();
+                    }
                 } else {
                     const errorMessage = result.message || result.mensagem || 'Erro ao executar operação';
                     if (typeof showError === 'function') {

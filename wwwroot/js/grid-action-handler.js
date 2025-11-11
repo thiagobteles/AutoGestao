@@ -257,14 +257,30 @@ async function executePostAction(url, action) {
             }
 
             if (typeof showSuccess === 'function') {
-                // Mostrar mensagem e aguardar fechamento antes de recarregar
+                // Mostrar mensagem e atualizar grid sem reload
                 showSuccess(message).then(() => {
-                    console.log('✅ Modal fechado, recarregando página...');
-                    window.location.reload();
+                    console.log('✅ Modal fechado, atualizando grid...');
+                    // Atualizar grid sem reload da página
+                    if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                        window.gridInstance.aplicarFiltros();
+                    } else if (typeof window.aplicarFiltros === 'function') {
+                        window.aplicarFiltros();
+                    } else {
+                        // Fallback: reload apenas se não houver outra opção
+                        window.location.reload();
+                    }
                 });
             } else {
                 alert(message);
-                window.location.reload();
+                // Atualizar grid sem reload da página
+                if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                    window.gridInstance.aplicarFiltros();
+                } else if (typeof window.aplicarFiltros === 'function') {
+                    window.aplicarFiltros();
+                } else {
+                    // Fallback: reload apenas se não houver outra opção
+                    window.location.reload();
+                }
             }
 
             // Executar script se houver (em vez de reload)
@@ -329,14 +345,22 @@ async function executePutAction(url, action) {
 
         if (result.success || result.sucesso) {
             const message = result.message || result.mensagem || 'Operação realizada com sucesso!';
-            
+
             if (typeof showSuccess === 'function') {
                 await showSuccess(message);
             } else {
                 alert(message);
             }
 
-            window.location.reload();
+            // Atualizar grid sem reload da página
+            if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                window.gridInstance.aplicarFiltros();
+            } else if (typeof window.aplicarFiltros === 'function') {
+                window.aplicarFiltros();
+            } else {
+                // Fallback: reload apenas se não houver outra opção
+                window.location.reload();
+            }
         } else {
             const errorMessage = result.message || result.mensagem || 'Erro ao executar a operação';
             
@@ -415,14 +439,30 @@ async function executeDeleteAction(url, action) {
             }
 
             if (typeof showSuccess === 'function') {
-                // Aguardar fechamento do modal antes de recarregar
+                // Aguardar fechamento do modal e atualizar grid
                 showSuccess(message).then(() => {
-                    console.log('✅ Modal fechado, recarregando página...');
-                    window.location.reload();
+                    console.log('✅ Modal fechado, atualizando grid...');
+                    // Atualizar grid sem reload da página
+                    if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                        window.gridInstance.aplicarFiltros();
+                    } else if (typeof window.aplicarFiltros === 'function') {
+                        window.aplicarFiltros();
+                    } else {
+                        // Fallback: reload apenas se não houver outra opção
+                        window.location.reload();
+                    }
                 });
             } else {
                 alert(message);
-                window.location.reload();
+                // Atualizar grid sem reload da página
+                if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                    window.gridInstance.aplicarFiltros();
+                } else if (typeof window.aplicarFiltros === 'function') {
+                    window.aplicarFiltros();
+                } else {
+                    // Fallback: reload apenas se não houver outra opção
+                    window.location.reload();
+                }
             }
         } else {
             const errorMessage = result.message || result.mensagem || 'Erro ao excluir registro';

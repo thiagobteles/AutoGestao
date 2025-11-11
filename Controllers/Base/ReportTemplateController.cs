@@ -98,13 +98,13 @@ namespace FGT.Controllers.Base
                 .OrderByDescending(t => t.Padrao)
                 .ThenBy(t => t.Nome)
                 .Select(t => new
-                    {
-                        t.Id,
-                        t.Nome,
-                        t.Descricao,
-                        t.Padrao,
-                        t.TemplateJson
-                    })
+                {
+                    t.Id,
+                    t.Nome,
+                    t.Descricao,
+                    t.Padrao,
+                    t.TemplateJson
+                })
                 .ToListAsync();
 
             return Json(templates);

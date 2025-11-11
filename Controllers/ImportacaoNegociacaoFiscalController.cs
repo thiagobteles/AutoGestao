@@ -1,6 +1,6 @@
 using FGT.Controllers.Base;
 using FGT.Data;
-using FGT.Entidades.Processing;
+using FGT.Entidades.Processamento;
 using FGT.Interfaces;
 using FGT.Models;
 using FGT.Services.Interface;

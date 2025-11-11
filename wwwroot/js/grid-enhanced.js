@@ -13,6 +13,11 @@ class StandardGrid {
         this.loadingTimeout = null;
         this.searchTimeouts = new Map();
 
+        // 🔧 IMPORTANTE: Armazenar estado de ordenação na classe
+        // para não perder quando o gridContainer for atualizado via AJAX
+        this.currentOrderBy = 'Nome';
+        this.currentOrderDirection = 'asc';
+
         this.init();
     }
 
@@ -32,7 +37,16 @@ class StandardGrid {
         const overlay = document.querySelector(this.options.loadingSelector);
 
         if (!overlay) {
-            // Loading overlay é opcional - ignorar silenciosamente se não existir
+            // Loading overlay é opcional - usar indicador na própria grid
+            const gridContainer = document.querySelector(this.options.gridContainerSelector);
+            if (gridContainer && show) {
+                // Indicador sutil apenas na grid
+                gridContainer.style.opacity = '0.6';
+                gridContainer.style.pointerEvents = 'none';
+            } else if (gridContainer) {
+                gridContainer.style.opacity = '1';
+                gridContainer.style.pointerEvents = 'auto';
+            }
             return;
         }
 
@@ -43,14 +57,16 @@ class StandardGrid {
 
         if (show) {
             this.isLoading = true;
-            overlay.classList.remove('d-none');
-            overlay.style.display = 'flex';
-            overlay.style.opacity = '1';
-            overlay.style.visibility = 'visible';
+            // Loading mais discreto - não mostrar overlay completo para operações rápidas de grid
+            // overlay.classList.remove('d-none');
+            // overlay.style.display = 'flex';
+            // overlay.style.opacity = '1';
+            // overlay.style.visibility = 'visible';
 
             const table = document.querySelector('.base-grid-table');
             if (table) {
                 table.classList.add('loading');
+                table.style.opacity = '0.6';
             }
 
             // Timeout de segurança
@@ -60,18 +76,19 @@ class StandardGrid {
 
         } else {
             this.isLoading = false;
-            overlay.style.opacity = '0';
+            // overlay.style.opacity = '0';
 
             const table = document.querySelector('.base-grid-table');
             if (table) {
                 table.classList.remove('loading');
+                table.style.opacity = '1';
             }
 
-            setTimeout(() => {
-                overlay.classList.add('d-none');
-                overlay.style.display = 'none';
-                overlay.style.visibility = 'hidden';
-            }, 300);
+            // setTimeout(() => {
+            //     overlay.classList.add('d-none');
+            //     overlay.style.display = 'none';
+            //     overlay.style.visibility = 'hidden';
+            // }, 300);
         }
     }
 
@@ -204,11 +221,14 @@ class StandardGrid {
     // }
 
     aplicarFiltros(page = 1) {
+        // CRÍTICO: Prevenir múltiplas requisições simultâneas
         if (this.isLoading) {
+            console.warn('⚠️ Requisição já em andamento, ignorando nova chamada');
             return;
         }
 
-        this.showLoading(true);
+        console.log('🔍 Aplicando filtros - Página:', page);
+        this.isLoading = true; // Marcar como carregando sem mostrar overlay pesado
 
         // 🔧 FIX: Formulário de filtros é OPCIONAL
         // Se não houver filtros definidos, ainda assim carrega os dados
@@ -218,6 +238,15 @@ class StandardGrid {
         const params = new URLSearchParams();
         params.append('page', page);
         params.append('pageSize', pageSize);
+
+        // 🔧 IMPORTANTE: Adicionar ordenação usando variáveis de instância
+        params.append('OrderBy', this.currentOrderBy);
+        params.append('OrderDirection', this.currentOrderDirection);
+
+        console.log('📤 Parâmetros da requisição:', {
+            OrderBy: this.currentOrderBy,
+            OrderDirection: this.currentOrderDirection
+        });
 
         // Adicionar filtros (se formulário existir)
         if (form) {
@@ -257,31 +286,83 @@ class StandardGrid {
                 return response.text();
             })
             .then(html => {
-                gridContainer.innerHTML = html;
+                console.log('✅ Atualizando apenas gridContainer (não a página inteira)');
 
-                // Forçar reflow para garantir renderização
-                gridContainer.style.display = 'none';
-                gridContainer.offsetHeight; // trigger reflow
-                gridContainer.style.display = '';
+                // 🔧 CRÍTICO: Salvar posição do scroll ANTES de atualizar
+                const scrollY = window.scrollY || window.pageYOffset;
+                const mainContent = document.querySelector('.main-content');
+                const mainContentScrollTop = mainContent ? mainContent.scrollTop : 0;
+
+                console.log('📍 Scroll salvo:', { scrollY, mainContentScrollTop });
+
+                // 🔧 IMPORTANTE: Transição suave para evitar flash visual
+                // 1. Fade out suave
+                gridContainer.style.transition = 'opacity 100ms ease';
+                gridContainer.style.opacity = '0.3';
+                gridContainer.style.pointerEvents = 'none'; // Desabilitar durante transição
+
+                // 2. Aguardar um frame e atualizar conteúdo
+                requestAnimationFrame(() => {
+                    gridContainer.innerHTML = html;
+
+                    // 3. Fade in suave
+                    requestAnimationFrame(() => {
+                        gridContainer.style.opacity = '1';
+                        gridContainer.style.pointerEvents = 'auto'; // 🔧 CRÍTICO: Reabilitar interação
+
+                        // Debug: verificar estado final
+                        console.log('✅ Grid reabilitada:', {
+                            opacity: gridContainer.style.opacity,
+                            pointerEvents: gridContainer.style.pointerEvents,
+                            disabled: gridContainer.disabled
+                        });
+
+                        // 🔧 CRÍTICO: Restaurar posição do scroll
+                        window.scrollTo(0, scrollY);
+                        if (mainContent) {
+                            mainContent.scrollTop = mainContentScrollTop;
+                        }
+                        console.log('📍 Scroll restaurado');
+                    });
+                });
 
                 // 🔧 FIX: URL não será mais atualizada para manter navegação limpa
                 // this.updateUrl(params);
+
+                console.log('🔄 Reinicializando event listeners da grid...');
                 this.reinitializeEvents();
 
-                // 🔧 FIX: Adicionar classe 'loaded' ao data-grid para torná-lo visível
+                // 🔧 FIX: Garantir que a grid seja visível após AJAX
                 const dataGridElements = gridContainer.querySelectorAll('.data-grid');
                 dataGridElements.forEach(grid => {
                     grid.classList.add('loaded');
+                    // Forçar visibilidade
+                    grid.style.opacity = '1';
+                    grid.style.visibility = 'visible';
                 });
+
+                // Garantir que o table-responsive também esteja visível
+                const tableResponsive = gridContainer.querySelector('.table-responsive, .table-responsive-enhanced');
+                if (tableResponsive) {
+                    tableResponsive.style.opacity = '1';
+                    tableResponsive.style.visibility = 'visible';
+                }
             })
             .catch(error => {
                 console.error('Erro ao aplicar filtros via AJAX:', error);
                 this.showErrorMessage('Erro ao aplicar filtros. Por favor, tente novamente.');
+
+                // Restaurar interação em caso de erro
+                gridContainer.style.opacity = '1';
+                gridContainer.style.pointerEvents = 'auto';
             })
             .finally(() => {
+                // 🔧 IMPORTANTE: Apenas resetar flag, não chamar showLoading(false)
+                // O pointerEvents já foi restaurado no fade in (linha 311)
                 setTimeout(() => {
-                    this.showLoading(false);
-                }, 300);
+                    this.isLoading = false;
+                    console.log('✅ Requisição concluída - isLoading = false');
+                }, 150);
             });
     }
 
@@ -322,6 +403,11 @@ class StandardGrid {
             pageSize.value = '50';
         }
 
+        // 🔧 IMPORTANTE: Resetar ordenação ao limpar filtros
+        this.currentOrderBy = 'Nome';
+        this.currentOrderDirection = 'asc';
+        console.log('🔄 Ordenação resetada para Nome ASC');
+
         this.aplicarFiltros(1);
     }
 
@@ -334,35 +420,28 @@ class StandardGrid {
     }
 
     sortColumn(column) {
-        const orderByInput = document.querySelector('#orderBy') || this.createHiddenInput('orderBy', 'Nome');
-        const orderDirectionInput = document.querySelector('#orderDirection') || this.createHiddenInput('orderDirection', 'asc');
+        console.log('🔄 Ordenação:', {
+            colunaClicada: column,
+            ordemAtual: this.currentOrderBy,
+            direcaoAtual: this.currentOrderDirection
+        });
 
-        const currentOrder = orderByInput.value;
-        const currentDirection = orderDirectionInput.value;
-
-        if (currentOrder === column) {
-            orderDirectionInput.value = currentDirection === 'asc' ? 'desc' : 'asc';
+        if (this.currentOrderBy === column) {
+            // Se já está ordenando por essa coluna, inverte a direção
+            this.currentOrderDirection = this.currentOrderDirection === 'asc' ? 'desc' : 'asc';
+            console.log('✅ Invertendo direção para:', this.currentOrderDirection);
         } else {
-            orderByInput.value = column;
-            orderDirectionInput.value = 'asc';
+            // Se é uma nova coluna, ordena ASC
+            this.currentOrderBy = column;
+            this.currentOrderDirection = 'asc';
+            console.log('✅ Nova coluna, ordenando ASC');
         }
 
-        this.aplicarFiltros();
+        this.aplicarFiltros(1);
     }
 
-    createHiddenInput(name, defaultValue) {
-        const form = document.querySelector(this.options.filtersFormSelector);
-        if (!form) return null;
-
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.id = name;
-        input.name = name;
-        input.value = defaultValue;
-        form.appendChild(input);
-
-        return input;
-    }
+    // 🔧 REMOVIDO: createHiddenInput não é mais necessário
+    // A ordenação agora é armazenada em variáveis de instância (this.currentOrderBy, this.currentOrderDirection)
 
     // ===================================================================
     // SISTEMA DE EVENTOS
@@ -383,19 +462,24 @@ class StandardGrid {
 
             // Criar nova função e salvar referência
             this.handleFormSubmit = (e) => {
+                console.log('📝 Formulário submetido - BLOQUEANDO submit padrão');
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation(); // Prevenir outros listeners
 
                 // 🔧 FIX: Prevenir múltiplas chamadas
                 if (this.isLoading) {
-                    return;
+                    console.warn('⚠️ Ignorando submit - já está carregando');
+                    return false;
                 }
 
+                console.log('✅ Aplicando filtros via AJAX');
                 this.aplicarFiltros(1);
+                return false; // Garantir que não propaga
             };
 
-            // Adicionar novo listener
-            form.addEventListener('submit', this.handleFormSubmit);
+            // Adicionar novo listener com capture=true para executar primeiro
+            form.addEventListener('submit', this.handleFormSubmit, true);
 
             // 🔧 FIX: Reinicializar debounce no campo de busca de texto
             const searchInput = form.querySelector('input[name="search"]');
@@ -431,11 +515,16 @@ class StandardGrid {
         // Ordenação das colunas
         const sortableHeaders = document.querySelectorAll('.sortable-header');
         sortableHeaders.forEach(header => {
-            header.removeEventListener('click', this.handleSortClick);
-            header.addEventListener('click', this.handleSortClick.bind(this));
+            // Remover listeners anteriores se existirem
+            if (this.handleSortClick) {
+                header.removeEventListener('click', this.handleSortClick);
+            }
+            if (this.handleSortKeydown) {
+                header.removeEventListener('keydown', this.handleSortKeydown);
+            }
 
-            // Suporte a teclado
-            header.removeEventListener('keydown', this.handleSortKeydown);
+            // Adicionar novos listeners
+            header.addEventListener('click', this.handleSortClick.bind(this));
             header.addEventListener('keydown', this.handleSortKeydown.bind(this));
         });
 
@@ -447,6 +536,34 @@ class StandardGrid {
 
         // Disparar evento customizado
         document.dispatchEvent(new CustomEvent('gridUpdated'));
+
+        // 🔧 GARANTIA: Forçar reabilitação do gridContainer
+        const gridContainer = document.querySelector(this.options.gridContainerSelector);
+        if (gridContainer) {
+            gridContainer.style.pointerEvents = 'auto';
+            gridContainer.style.opacity = '1';
+
+            // Debug: verificar campos dentro do container
+            const inputs = gridContainer.querySelectorAll('input, select, button');
+            const disabledCount = Array.from(inputs).filter(el => el.disabled).length;
+
+            console.log('🔧 Garantia aplicada:', {
+                gridContainerPointerEvents: gridContainer.style.pointerEvents,
+                totalCampos: inputs.length,
+                camposDesabilitados: disabledCount
+            });
+
+            // Se houver campos desabilitados, habilitar todos
+            if (disabledCount > 0) {
+                console.warn('⚠️ Encontrados campos desabilitados! Reabilitando...');
+                inputs.forEach(el => {
+                    if (el.disabled) {
+                        el.disabled = false;
+                        console.log('✅ Reabilitado:', el.name || el.id || el.className);
+                    }
+                });
+            }
+        }
     }
 
     handleRowDoubleClick(e) {
@@ -475,8 +592,13 @@ class StandardGrid {
     }
 
     handleSortClick(e) {
+        e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
+
         const sortKey = e.currentTarget.getAttribute('data-sortable');
+        console.log('🔄 Header clicado:', sortKey);
+
         if (sortKey) {
             this.sortColumn(sortKey);
         }
@@ -1079,25 +1201,26 @@ function addCriticalStyles() {
                 position: absolute !important;
             }
 
-            /* Prevenir flash de conteúdo não estilizado */
-            .data-grid {
+            /* Prevenir flash de conteúdo não estilizado - DESABILITADO */
+            /* Estava causando grid invisível após AJAX */
+            /* .data-grid {
                 opacity: 0;
                 transition: opacity 0.3s ease;
             }
 
             .data-grid.loaded {
                 opacity: 1;
-            }
+            } */
         `;
 
     document.head.appendChild(style);
 
-    // Marcar grids como carregadas após um breve delay
-    setTimeout(() => {
-        document.querySelectorAll('.data-grid').forEach(grid => {
-            grid.classList.add('loaded');
-        });
-    }, 100);
+    // 🔧 REMOVIDO: Não mais necessário pois desabilitamos o CSS de opacity
+    // setTimeout(() => {
+    //     document.querySelectorAll('.data-grid').forEach(grid => {
+    //         grid.classList.add('loaded');
+    //     });
+    // }, 100);
 }
 
 // Executar estilos críticos imediatamente

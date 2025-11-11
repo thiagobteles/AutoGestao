@@ -19,7 +19,7 @@ namespace FGT.Controllers.Base
     public abstract class ProcessingController<T, TResult>(
         ApplicationDbContext context,
         IFileStorageService fileStorageService,
-        ILogger<ProcessingController<T, TResult>>? logger = null) 
+        ILogger<ProcessingController<T, TResult>>? logger = null)
         : Controller where T : class, IProcessingEntity<TResult>, new()
     {
         protected readonly ApplicationDbContext _context = context;
@@ -122,6 +122,10 @@ namespace FGT.Controllers.Base
         {
             var viewModel = BuildViewModel();
             viewModel = CustomizeViewModel(viewModel);
+
+            // Adicionar flag para limpar lock de processamento no cliente
+            ViewBag.ClearProcessingLock = true;
+
             return View("~/Views/Shared/_StandardProcessing.cshtml", viewModel);
         }
 
@@ -179,24 +183,23 @@ namespace FGT.Controllers.Base
                 }
 
                 // 7. Retornar resultado
-                return Json(new
-                {
-                    success = result.Success,
-                    message = result.Message,
-                    errors = result.Errors,
-                    warnings = result.Warnings,
-                    metadata = result.Metadata
-                });
+                //var retorno = Json(new
+                //{
+                //    success = result.Success,
+                //    message = result.Message,
+                //    errors = result.Errors,
+                //    warnings = result.Warnings,
+                //    metadata = result.Metadata
+                //});
+
+                TempData["NotificationScript"] = $"showSuccess('{result.Message}')";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "💥 Erro ao executar processamento: {Message}", ex.Message);
-                return Json(new
-                {
-                    success = false,
-                    message = "Erro ao executar processamento",
-                    errors = new[] { ex.Message }
-                });
+                TempData["NotificationScript"] = $"showError('Erro ao executar processamento: {ex.Message}')";
+                return RedirectToAction(nameof(Index));
             }
         }
 
@@ -224,10 +227,10 @@ namespace FGT.Controllers.Base
                 }
 
                 var sectionName = formFieldAttr.Section ?? "Geral";
-
-                if (!sections.ContainsKey(sectionName))
+                if (!sections.TryGetValue(sectionName, out var value))
                 {
-                    sections[sectionName] = [];
+                    value = [];
+                    sections[sectionName] = value;
                 }
 
                 // 🔒 LÓGICA CENTRALIZADA DE EMPRESA CLIENTE
@@ -269,8 +272,7 @@ namespace FGT.Controllers.Base
                     ReferenceConfig = formFieldAttr.Reference != null ? ReferenceFieldConfig.GetDefault(formFieldAttr.Reference) : new(),
                     ReadOnly = shouldHideField
                 };
-
-                sections[sectionName].Add(fieldViewModel);
+                value.Add(fieldViewModel);
             }
 
             // Criar seções ordenadas

@@ -400,7 +400,16 @@ window.confirmarExclusao = async function(id) {
                         title: 'Exclusão Realizada!',
                         buttonText: 'OK'
                     });
-                    location.reload();
+
+                    // Atualizar grid sem reload da página
+                    if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                        window.gridInstance.aplicarFiltros();
+                    } else if (typeof window.aplicarFiltros === 'function') {
+                        window.aplicarFiltros();
+                    } else {
+                        // Fallback: reload apenas se não houver outra opção
+                        location.reload();
+                    }
                 } else {
                     await showError('Não foi possível excluir o registro. ' + (result.mensagem || ''), {
                         title: 'Erro na Exclusão',

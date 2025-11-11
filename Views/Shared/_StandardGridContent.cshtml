@@ -22,12 +22,12 @@
 </div>
 
 <!-- Grid Container - engloba filtros + grid para atualização AJAX -->
-<div id="gridContainer">
+<div id="gridContainer" style="transition: opacity 100ms ease; position: relative;">
     <!-- Search Filters -->
     @if (Model.Filters?.Any() == true)
     {
         <div class="search-filters">
-        <form method="get" id="filtrosForm">
+        <form id="filtrosForm" onsubmit="event.preventDefault(); return false;">
             <div class="row g-1">
                 @foreach (var filter in Model.Filters)
                 {

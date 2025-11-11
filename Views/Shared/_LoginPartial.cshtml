@@ -130,7 +130,10 @@
     // Função para abrir modal de alterar senha
     function alterarSenha() {
         // Limpar formulário
-        document.getElementById('formAlterarSenha').reset();
+        const form = document.getElementById('formAlterarSenha');
+        if (form) {
+            form.reset();
+        }
 
         // Remover classes de validação
         const inputs = document.querySelectorAll('#formAlterarSenha input');
@@ -138,14 +141,48 @@
             input.classList.remove('is-valid', 'is-invalid');
         });
 
-        // Mostrar modal
-        const modal = new bootstrap.Modal(document.getElementById('modalAlterarSenha'));
-        modal.show();
+        // Mostrar modal - com fallback para diferentes versões do Bootstrap
+        const modalElement = document.getElementById('modalAlterarSenha');
+        if (modalElement) {
+            try {
+                // Tentar usar Bootstrap 5
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+                // Fallback para jQuery Bootstrap (versões antigas)
+                else if (typeof $ !== 'undefined' && $.fn.modal) {
+                    $(modalElement).modal('show');
+                }
+                // Fallback manual
+                else {
+                    modalElement.classList.add('show');
+                    modalElement.style.display = 'block';
+                    modalElement.setAttribute('aria-modal', 'true');
+                    modalElement.setAttribute('role', 'dialog');
+                    document.body.classList.add('modal-open');
 
-        // Focar no primeiro campo
-        setTimeout(() => {
-            document.getElementById('senhaAtual').focus();
-        }, 500);
+                    // Criar backdrop se não existir
+                    let backdrop = document.querySelector('.modal-backdrop');
+                    if (!backdrop) {
+                        backdrop = document.createElement('div');
+                        backdrop.className = 'modal-backdrop fade show';
+                        document.body.appendChild(backdrop);
+                    }
+                }
+
+                // Focar no primeiro campo
+                setTimeout(() => {
+                    const senhaAtual = document.getElementById('senhaAtual');
+                    if (senhaAtual) {
+                        senhaAtual.focus();
+                    }
+                }, 500);
+            } catch (error) {
+                console.error('Erro ao abrir modal:', error);
+                alert('Erro ao abrir modal de alteração de senha. Por favor, recarregue a página.');
+            }
+        }
     }
 
     // Função para salvar nova senha

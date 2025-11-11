@@ -186,7 +186,8 @@ namespace FGT.Controllers.Base
                         Descricao = request.Description,
                         TemplateJson = templateJson,
                         Padrao = request.IsDefault,
-                        Ativo = true
+                        Ativo = true,
+                        IdEmpresa = GetCurrentEmpresaId() // CRÍTICO: Setar empresa_id explicitamente
                     };
 
                     _context.ReportTemplates.Add(newTemplate);
@@ -217,7 +218,8 @@ namespace FGT.Controllers.Base
                 // Buscar um registro de exemplo da entidade
                 object? sampleEntity = request.EntityType switch
                 {
-                    "Cliente" => await _context.Clientes.FirstOrDefaultAsync()
+                    "Cliente" => await _context.Clientes.FirstOrDefaultAsync(),
+                    _ => throw new NotImplementedException()
                 };
 
                 if (sampleEntity == null)
@@ -269,7 +271,7 @@ namespace FGT.Controllers.Base
             // Header
             html.AppendLine("<div class='report-header'>");
             html.AppendLine("<div class='header-left'>");
-            html.AppendLine("<h1>GRIFFE MOTORS SELECT</h1>");
+            html.AppendLine($"<h1>{Globais.NomeApresentacao}</h1>");
             html.AppendLine("</div>");
             html.AppendLine("<div class='header-right'>");
             html.AppendLine($"<h2>{template.Name}</h2>");

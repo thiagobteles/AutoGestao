@@ -144,6 +144,12 @@
                                     </a>
                                 </div>
                                 <div class="menu-item">
+                                    <a href="/ImportacaoNegociacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ImportacaoNegociacaoFiscal" ? "active" : "")">
+                                        <i class="fas fa-file-import"></i>
+                                        <span class="menu-link-text">Importar XLSX</span>
+                                    </a>
+                                </div>
+                                <div class="menu-item">
                                     <a href="/NegociacaoFiscal/Index" class="menu-link submenu-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NegociacaoFiscal" ? "active" : "")">
                                         <i class="fas fa-handshake"></i>
                                         <span class="menu-link-text">Negociações Fiscais</span>
@@ -291,7 +297,35 @@
         </div>
     </div>
 
+    <!-- Loading Overlay Global -->
+    <div id="loadingOverlay" class="d-none" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px);">
+        <div style="text-align: center; background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <div style="margin-top: 1rem; color: #6c757d; font-weight: 500;">Carregando dados...</div>
+        </div>
+    </div>
+
     <!-- Scripts -->
+    <!-- CRÍTICO: Console Polyfill - Garante que console.log funcione mesmo sem F12 aberto -->
+    <script>
+        // Proteção para navegadores sem console (ou com F12 fechado)
+        (function() {
+            if (!window.console) {
+                window.console = {};
+            }
+            const methods = ['log', 'debug', 'info', 'warn', 'error', 'assert', 'dir', 'clear',
+                'profile', 'profileEnd', 'time', 'timeEnd', 'trace', 'group', 'groupEnd', 'groupCollapsed'];
+
+            for (let i = 0; i < methods.length; i++) {
+                const method = methods[i];
+                if (!window.console[method]) {
+                    window.console[method] = function() {};
+                }
+            }
+        })();
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -535,15 +569,25 @@
 
                 // 🔧 FIX: Navegação AJAX para evitar reload da página
                 function setupAjaxNavigation() {
-                    // Interceptar cliques em links do submenu
-                    const submenuLinks = document.querySelectorAll('.submenu-link');
+                    // Interceptar cliques em TODOS os links de navegação interna
+                    // Isso inclui: .menu-link, .submenu-link, .brand-logo, e qualquer <a> dentro do menu
+                    const navigationLinks = document.querySelectorAll('.menu-link[href^="/"], .submenu-link[href^="/"], .brand-logo[href^="/"], .sidebar-menu a[href^="/"]');
 
-                    submenuLinks.forEach(link => {
+                    navigationLinks.forEach(link => {
                         link.addEventListener('click', function(e) {
-                            e.preventDefault();
-
+                            // Ignorar links com javascript: ou #
                             const url = this.getAttribute('href');
-                            if (!url || url === '#' || url === 'javascript:void(0)') return;
+                            if (!url || url === '#' || url === 'javascript:void(0)' || url.startsWith('javascript:')) {
+                                return; // Não prevenir - deixar executar normalmente
+                            }
+
+                            // Ignorar links de logout e ações especiais que DEVEM fazer reload completo
+                            if (url.includes('/Login/Logout') || url.includes('/Usuario/AlterarSenha')) {
+                                return; // Deixar fazer navegação normal
+                            }
+
+                            // Prevenir navegação padrão apenas para links internos de navegação
+                            e.preventDefault();
 
                             // Remover classe active de todos os links
                             document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
@@ -552,10 +596,12 @@
                             // Adicionar classe active no link clicado
                             this.classList.add('active');
 
-                            // Mostrar loading
+                            // Mostrar loading de forma suave
                             const mainContent = document.querySelector('.main-content');
                             if (mainContent) {
-                                mainContent.style.opacity = '0.5';
+                                // Transição suave em vez de opacity abrupta
+                                mainContent.style.transition = 'opacity 150ms ease';
+                                mainContent.style.opacity = '0.7';
                                 mainContent.style.pointerEvents = 'none';
                             }
 
@@ -572,12 +618,17 @@
                                     const newMainContent = tempDiv.querySelector('.main-content');
 
                                     if (mainContent) {
-                                        // Se encontrou .main-content na resposta, usar apenas esse conteúdo
-                                        // Caso contrário, usar todo o HTML (partial view sem layout)
-                                        mainContent.innerHTML = newMainContent ? newMainContent.innerHTML : html;
+                                        // IMPORTANTE: Fade out antes de trocar o conteúdo
+                                        mainContent.style.opacity = '0';
 
-                                        // Atualizar URL sem reload
-                                        window.history.pushState({}, '', url);
+                                        // Aguardar fade out completar antes de trocar conteúdo
+                                        setTimeout(() => {
+                                            // Se encontrou .main-content na resposta, usar apenas esse conteúdo
+                                            // Caso contrário, usar todo o HTML (partial view sem layout)
+                                            mainContent.innerHTML = newMainContent ? newMainContent.innerHTML : html;
+
+                                            // Atualizar URL sem reload
+                                            window.history.pushState({}, '', url);
 
                                         // Aguardar um frame para garantir que o DOM foi atualizado
                                         requestAnimationFrame(() => {
@@ -594,13 +645,10 @@
                                                     console.log('🔄 Reinicializando StandardGrid...');
                                                     window.gridInstance = new StandardGrid();
 
-                                                    // 🔧 FIX: Carregar dados iniciais da grid após reinicialização
-                                                    setTimeout(() => {
-                                                        if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
-                                                            console.log('🔄 Carregando dados iniciais da grid...');
-                                                            window.gridInstance.aplicarFiltros(1);
-                                                        }
-                                                    }, 150);
+                                                    // 🔧 IMPORTANTE: NÃO chamar aplicarFiltros aqui!
+                                                    // O HTML retornado pelo servidor JÁ vem com os dados da grid renderizados
+                                                    // Chamar aplicarFiltros causaria uma requisição duplicada desnecessária
+                                                    // Apenas os event listeners são reinicializados pelo construtor do StandardGrid
                                                 }
                                             }
 
@@ -634,20 +682,27 @@
                                             // 5. Disparar evento customizado para outros scripts
                                             document.dispatchEvent(new CustomEvent('ajaxContentLoaded'));
 
-                                            // Restaurar opacidade
-                                            mainContent.style.opacity = '1';
-                                            mainContent.style.pointerEvents = 'auto';
-
-                                            // Scroll para o topo
+                                            // Scroll para o topo ANTES do fade in
                                             mainContent.scrollTop = 0;
+
+                                            // Fade in suave
+                                            requestAnimationFrame(() => {
+                                                mainContent.style.opacity = '1';
+                                                mainContent.style.pointerEvents = 'auto';
+                                            });
 
                                             console.log('✅ Navegação AJAX concluída com sucesso');
                                         });
+                                        }, 150); // Aguardar fade out completar
                                     }
                                 })
                                 .catch(error => {
                                     console.error('Erro ao carregar página:', error);
-                                    // Em caso de erro, fazer navegação normal
+                                    // Em caso de erro, restaurar estado e fazer navegação normal
+                                    if (mainContent) {
+                                        mainContent.style.opacity = '1';
+                                        mainContent.style.pointerEvents = 'auto';
+                                    }
                                     window.location.href = url;
                                 });
                         });
@@ -658,9 +713,14 @@
                 setupAjaxNavigation();
 
                 // 🔧 FIX: Suporte para botões voltar/avançar do navegador
+                // REMOVIDO: location.reload() - não é necessário recarregar a página inteira
+                // O navegador já restaura o estado correto ao usar voltar/avançar
                 window.addEventListener('popstate', function(event) {
-                    // Recarregar a página quando usar botão voltar/avançar
-                    location.reload();
+                    // Navegação via histórico já é tratada pelo navegador
+                    // Apenas reinicializar componentes se necessário
+                    if (window.gridInstance && typeof window.gridInstance.aplicarFiltros === 'function') {
+                        setTimeout(() => window.gridInstance.aplicarFiltros(), 100);
+                    }
                 });
 
                 // Fechar todos os submenus quando o sidebar for colapsado
@@ -760,7 +820,10 @@
         });
     </script>
 
-    <!-- Sistema de Grid Unificado -->
+    <!-- Sistema de Grid - DESABILITADO: Usando apenas grid-enhanced.js -->
+    <!-- NOTA: O código duplicado abaixo estava causando conflito com grid-enhanced.js
+         Resultado: reload de página inteira + grid invisível após AJAX
+         Solução: Manter apenas grid-enhanced.js ativo
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Variáveis globais para controle da grid
@@ -993,7 +1056,7 @@
                     orderDirection.value = 'asc';
                 }
 
-                aplicarFiltros();
+                aplicarFiltros(1);
             };
 
             // ===================================================================
@@ -1357,6 +1420,7 @@
             setTimeout(setupIntersectionObserver, 500);
         });
     </script>
+    -->
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

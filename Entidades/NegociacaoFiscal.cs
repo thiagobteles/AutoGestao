@@ -1,10 +1,11 @@
 using FGT.Atributes;
 using FGT.Entidades.Base;
 using FGT.Enumerador.Gerais;
+using FGT.Extensions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace FGT.Entidades.Fiscal
+namespace FGT.Entidades
 {
     [FormConfig(Title = "Negociação Fiscal", Subtitle = "Gerencie as negociações fiscais dos optantes", Icon = "fas fa-handshake")]
     public class NegociacaoFiscal : BaseEntidade
@@ -15,18 +16,19 @@ namespace FGT.Entidades.Fiscal
         [MaxLength(7)]
         public string MesAnoRequerimento { get; set; } = string.Empty;
 
-        [GridField("UF", Order = 15, Width = "60px")]
         [FormField(Name = "UF do Optante", Order = 15, Section = "Dados Principais", Icon = "fas fa-map-marker-alt", Type = EnumFieldType.Text, Required = true)]
         [Required]
         [MaxLength(2)]
         public string UFOptante { get; set; } = string.Empty;
 
         [ReferenceSearchable]
-        [GridField("CPF/CNPJ", Order = 20, Width = "150px")]
         [FormField(Name = "CPF/CNPJ do Optante", Order = 20, Section = "Dados Principais", Icon = "fas fa-id-card", Type = EnumFieldType.Text, Required = true)]
         [Required]
         [MaxLength(18)]
         public string CpfCnpjOptante { get; set; } = string.Empty;
+
+        [GridField("Documento")]
+        public string Documento => $"{(CpfCnpjOptante.Length <= 11 ? CpfCnpjOptante.AplicarMascaraCpf() : CpfCnpjOptante.AplicarMascaraCnpj())}";
 
         [ReferenceText]
         [ReferenceSearchable]
@@ -37,28 +39,23 @@ namespace FGT.Entidades.Fiscal
         public string NomeOptante { get; set; } = string.Empty;
 
         [ReferenceSubtitle(Order = 0, Prefix = "Conta: ")]
-        [GridField("Número da Conta", Order = 30, Width = "120px")]
         [FormField(Name = "Número da Conta da Negociação", Order = 30, Section = "Dados da Negociação", Icon = "fas fa-hashtag", Type = EnumFieldType.Text, Required = true)]
         [Required]
         [MaxLength(50)]
         public string NumeroContaNegociacao { get; set; } = string.Empty;
 
-        [GridField("Tipo", Order = 35, Width = "150px")]
         [FormField(Name = "Tipo de Negociação", Order = 35, Section = "Dados da Negociação", Icon = "fas fa-tag", Type = EnumFieldType.Text)]
         [MaxLength(100)]
         public string? TipoNegociacao { get; set; }
 
-        [GridField("Modalidade", Order = 40, Width = "200px")]
         [FormField(Name = "Modalidade da Negociação", Order = 40, Section = "Dados da Negociação", Icon = "fas fa-layer-group", Type = EnumFieldType.TextArea)]
         [MaxLength(500)]
         public string? ModalidadeNegociacao { get; set; }
 
-        [GridField("Situação", Order = 45, Width = "120px")]
         [FormField(Name = "Situação da Negociação", Order = 45, Section = "Dados da Negociação", Icon = "fas fa-info-circle", Type = EnumFieldType.Text)]
         [MaxLength(100)]
         public string? SituacaoNegociacao { get; set; }
 
-        [GridField("Parcelas Concedidas", Order = 50, Width = "100px")]
         [FormField(Name = "Quantidade de Parcelas Concedidas", Order = 50, Section = "Parcelas", Icon = "fas fa-list-ol", Type = EnumFieldType.Number)]
         public int? QtdeParcelasConcedidas { get; set; }
 
@@ -66,7 +63,6 @@ namespace FGT.Entidades.Fiscal
         [FormField(Name = "Quantidade de Parcelas em Atraso", Order = 55, Section = "Parcelas", Icon = "fas fa-exclamation-triangle", Type = EnumFieldType.Number)]
         public int? QtdeParcelasAtraso { get; set; }
 
-        [GridField("Valor Consolidado", Order = 60, Width = "150px", Format = "C")]
         [FormField(Name = "Valor Consolidado", Order = 60, Section = "Valores", Icon = "fas fa-dollar-sign", Type = EnumFieldType.Currency)]
         [Column(TypeName = "decimal(18,2)")]
         public decimal? ValorConsolidado { get; set; }
@@ -86,7 +82,6 @@ namespace FGT.Entidades.Fiscal
         [Column(TypeName = "decimal(18,2)")]
         public decimal? ValorJuros { get; set; }
 
-        [GridField("Encargo Legal", Order = 80, Width = "150px", Format = "C")]
         [FormField(Name = "Valor do Encargo Legal", Order = 80, Section = "Valores", Icon = "fas fa-gavel", Type = EnumFieldType.Currency)]
         [Column(TypeName = "decimal(18,2)")]
         public decimal? ValorEncargoLegal { get; set; }

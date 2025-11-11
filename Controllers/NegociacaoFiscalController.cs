@@ -1,6 +1,6 @@
 using FGT.Controllers.Base;
 using FGT.Data;
-using FGT.Entidades.Fiscal;
+using FGT.Entidades;
 using FGT.Enumerador.Gerais;
 using FGT.Models;
 using FGT.Services.Interface;
